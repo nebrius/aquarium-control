@@ -1,0 +1,16 @@
+{
+	"name": "aquarium-control-timing",
+	"version": "0.1.0",
+	"description": "Handles fetching timing information for aquarium-control",
+	"main": "src/timing.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/bryan-m-hughes/aquarium-control"
+	},
+	"dependencies": {
+		"request": "2.20.x",
+		"xml2js": "0.2.x"
+	},
+	"author": "Bryan Hughes <bryan@theoreticalideations.com>",
+	"license": "GPL v3"
+}
