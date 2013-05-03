@@ -1,46 +1,56 @@
-var request = require('request'),
-	xml2js = require('xml2js'),
-	fs = require('fs'),
-	path = require('path'),
-	date = new Date(),
-	endpoint = 'http://www.earthtools.org/sun/';
+/*
+	Copyright (C) 2013  Bryan Hughes <bryan@theoreticalideations.com>
 
-request(endpoint + '37.546267/-121.971132/' + date.getDate() + '/' + (date.getMonth() + 1) + '/' +
-		(-(new Date()).getTimezoneOffset() / 60) + '/0', function (error, response, body) {
-	if (!error && response.statusCode == 200) {
-		xml2js.parseString(body, function (err, results) {
-			var sunrise = results.sun.morning[0].sunrise[0],
-				sunset = results.sun.evening[0].sunset[0],
-				parseDate;
-			switch (date.getDay()) {
-				case 0: parseDate = 'Sun'; break;
-				case 1: parseDate = 'Mon'; break;
-				case 2: parseDate = 'Tue'; break;
-				case 3: parseDate = 'Wed'; break;
-				case 4: parseDate = 'Thu'; break;
-				case 5: parseDate = 'Fri'; break;
-				case 6: parseDate = 'Sat'; break;
-			}
-			parseDate += ', ' + date.getDate() + ' ';
-			switch (date.getMonth()) {
-				case 0: parseDate += 'Jan'; break;
-				case 1: parseDate += 'Feb'; break;
-				case 2: parseDate += 'Mar'; break;
-				case 3: parseDate += 'Apr'; break;
-				case 4: parseDate += 'May'; break;
-				case 5: parseDate += 'Jun'; break;
-				case 6: parseDate += 'Jul'; break;
-				case 7: parseDate += 'Aug'; break;
-				case 8: parseDate += 'Sep'; break;
-				case 9: parseDate += 'Oct'; break;
-				case 10: parseDate += 'Nov'; break;
-				case 11: parseDate += 'Dec'; break;
-			}
-			parseDate += ' ' + date.getFullYear() + ' ';
-			fs.writeFileSync(path.join(__dirname, '..', '..', 'config', 'timing.json'), JSON.stringify({
-				sunrise: new Date(parseDate + sunrise),
-				sunset: new Date(parseDate + sunset)
-			}, false, '\t'));
-		});
+	This file is part of Aquarium Control.
+
+	Aquarium Control is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Aquarium Control is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+var schedule = require('node-schedule'),
+	times = require('./times');
+
+function scheduleSunrise(time) {
+	schedule.scheduleJob(time, function () {
+	});
+}
+
+function scheduleSunset(time) {
+	schedule.scheduleJob(time, function () {
+		scheduleUpdate();
+	});
+}
+
+function scheduleUpdate() {
+	var currentTime = new Date(),
+		scheduledTime = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDay(), 1);
+	if (currentTime.getHour() > 1) {
+		scheduledTime = new Date(scheduledTime.getTime() + 24 * 60 * 1000);
 	}
-});
+	schedule.scheduleJob(scheduledTime, processTimes);
+}
+
+function processTimes() {
+	times.fetch(function (results) {
+		var currentTime = Date.now();
+		if (results.sunrise.getTime() > currentTime) {
+			scheduleSunrise(results.sunrise);
+		} else if (results.sunset.getTime() > currentTime) {
+			scheduleSunset(results.sunset);
+		} else {
+			scheduleUpdate();
+		}
+	});
+}
+
+processTimes();

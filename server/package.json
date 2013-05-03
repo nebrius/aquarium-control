@@ -1,16 +1,21 @@
 {
-	"name": "aquarium-control-timing",
+	"name": "aquarium-control",
 	"version": "0.1.0",
-	"description": "Handles fetching timing information for aquarium-control",
-	"main": "src/timing.js",
+	"description": "Runs on a Raspberry Pi to control lighting for an aquarium",
+	"main": "src/server.js",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/bryan-m-hughes/aquarium-control"
 	},
 	"dependencies": {
 		"request": "2.20.x",
-		"xml2js": "0.2.x"
+		"xml2js": "0.2.x",
+		"node-schedule": "0.1.x",
+		"wrench": "1.4.x"
 	},
-	"author": "Bryan Hughes <bryan@theoreticalideations.com>",
-	"license": "GPL v3"
+	"author": "Bryan Hughes <bryan@theoreticalideations.com> (http://theoreticalideations.com)",
+	"licenses": [{
+		"type": "GPLv3",
+		"url": "http://www.gnu.org/licenses/gpl.html"
+	}]
 }
