@@ -1,132 +1,144 @@
-# EESchema Netlist Version 1.1 created  Wed 08 May 2013 09:01:41 PM PDT
+# EESchema Netlist Version 1.1 created  Wed 08 May 2013 09:41:58 PM PDT
 (
- ( /5189D8CB $noname  D4 Control_LED {Lib=LED}
-  (    1 +12V )
-  (    2 N-000007 )
+ ( /51889BB6 C1V5 C1 22u
+  ( 1 +12V )
+  ( 2 GND )
  )
- ( /5189D8C7 $noname  D3 Day_LED {Lib=LED}
-  (    1 N-000037 )
-  (    2 N-000010 )
+ ( /51889BAC C1V7 C2 220u
+  ( 1 N-000019 )
+  ( 2 GND )
  )
- ( /5189D8BA $noname  D2 Night_LED {Lib=LED}
-  (    1 N-000038 )
-  (    2 N-000006 )
+ ( /51889BF9 D3 D1 DIODESCH
+  ( 1 GND )
+  ( 2 N-000035 )
  )
- ( /5189D8A9 $noname  RP1 R_PACK4 {Lib=R_PACK4}
-  (    1 GND )
-  (    2 GND )
-  (    3 GND )
-  (    4 ? )
-  (    5 ? )
-  (    6 N-000007 )
-  (    7 N-000010 )
-  (    8 N-000006 )
+ ( /5189D8BA SM2010 D2 Night_LED
+  ( 1 N-000038 )
+  ( 2 N-000006 )
  )
- ( /5189C859 $noname  P4 Power {Lib=CONN_2}
-  (    1 N-000011 )
-  (    2 GND )
+ ( /5189D8C7 SM2010 D3 Day_LED
+  ( 1 N-000037 )
+  ( 2 N-000010 )
  )
- ( /5189C78D $noname  P5 Switch {Lib=CONN_3}
-  (    1 +12V )
-  (    2 N-000012 )
-  (    3 N-000037 )
+ ( /5189D8CB SM2010 D4 Control_LED
+  ( 1 +12V )
+  ( 2 N-000007 )
  )
- ( /5189C531 $noname  F2 FUSE {Lib=FUSE}
-  (    1 N-000011 )
-  (    2 N-000012 )
+ ( /5189C52A R7 F1 FUSE
+  ( 1 N-000036 )
+  ( 2 N-000003 )
  )
- ( /5189C52A $noname  F1 FUSE {Lib=FUSE}
-  (    1 N-000036 )
-  (    2 N-000003 )
+ ( /5189C531 R7 F2 FUSE
+  ( 1 N-000011 )
+  ( 2 N-000012 )
  )
- ( /5189C34F $noname  P1 R.Pi {Lib=CONN_3X2}
-  (    1 N-000036 )
-  (    2 N-000004 )
-  (    3 N-000001 )
-  (    4 N-000030 )
-  (    5 N-000033 )
-  (    6 GND )
+ ( /51889BDF C1V7 L1 INDUCTOR
+  ( 1 N-000035 )
+  ( 2 N-000019 )
  )
- ( /5188A41A $noname  P3 Night {Lib=CONN_2}
-  (    1 N-000038 )
-  (    2 GND )
+ ( /5189C34F pin_array_3x2 P1 R.Pi
+  ( 1 N-000036 )
+  ( 2 N-000004 )
+  ( 3 N-000001 )
+  ( 4 N-000030 )
+  ( 5 N-000033 )
+  ( 6 GND )
  )
- ( /5188A415 $noname  P2 Day {Lib=CONN_2}
-  (    1 N-000037 )
-  (    2 GND )
+ ( /5188A415 PIN_ARRAY_2X1 P2 Day
+  ( 1 N-000037 )
+  ( 2 GND )
  )
- ( /5188A1F2 $noname  U2 CD40109B {Lib=CD40109B}
-  (    1 N-000003 )
-  (    2 N-000003 )
-  (    3 N-000004 )
-  (    4 N-000005 )
-  (    5 N-000029 )
-  (    6 N-000001 )
-  (    7 N-000003 )
-  (    8 GND )
-  (    9 N-000003 )
-  (   10 N-000030 )
-  (   11 N-000031 )
-  (   12 ? )
-  (   13 N-000022 )
-  (   14 N-000033 )
-  (   15 N-000003 )
-  (   16 N-000019 )
+ ( /5188A41A PIN_ARRAY_2X1 P3 Night
+  ( 1 N-000038 )
+  ( 2 GND )
  )
- ( /51889BF9 $noname  D1 DIODESCH {Lib=DIODESCH}
-  (    1 GND )
-  (    2 N-000035 )
+ ( /5189C859 PIN_ARRAY_2X1 P4 Power
+  ( 1 N-000011 )
+  ( 2 GND )
  )
- ( /51889BDF $noname  L1 INDUCTOR {Lib=INDUCTOR}
-  (    1 N-000035 )
-  (    2 N-000019 )
+ ( /5189C78D PIN_ARRAY_3X1 P5 Switch
+  ( 1 +12V )
+  ( 2 N-000012 )
+  ( 3 N-000037 )
  )
- ( /51889BB6 $noname  C1 22u {Lib=CP1}
-  (    1 +12V )
-  (    2 GND )
+ ( /5189D8A9 SSOP8 RP1 R_PACK4
+  ( 1 GND )
+  ( 2 GND )
+  ( 3 GND )
+  ( 4 ? )
+  ( 5 ? )
+  ( 6 N-000007 )
+  ( 7 N-000010 )
+  ( 8 N-000006 )
  )
- ( /51889BAC $noname  C2 220u {Lib=CP1}
-  (    1 N-000019 )
-  (    2 GND )
+ ( /51889B56 DIP-8__300 U1 LM2574N
+  ( 1 N-000019 )
+  ( 2 GND )
+  ( 3 GND )
+  ( 4 GND )
+  ( 5 +12V )
+  ( 6 ? )
+  ( 7 N-000035 )
+  ( 8 ? )
  )
- ( /51889B56 $noname  U1 LM2574N {Lib=LM2574N}
-  (    1 N-000019 )
-  (    2 GND )
-  (    3 GND )
-  (    4 GND )
-  (    5 +12V )
-  (    6 ? )
-  (    7 N-000035 )
-  (    8 ? )
+ ( /5188A1F2 DIP-16__300 U2 CD40109B
+  ( 1 N-000003 )
+  ( 2 N-000003 )
+  ( 3 N-000004 )
+  ( 4 N-000005 )
+  ( 5 N-000029 )
+  ( 6 N-000001 )
+  ( 7 N-000003 )
+  ( 8 GND )
+  ( 9 N-000003 )
+  ( 10 N-000030 )
+  ( 11 N-000031 )
+  ( 12 ? )
+  ( 13 N-000022 )
+  ( 14 N-000033 )
+  ( 15 N-000003 )
+  ( 16 N-000019 )
  )
- ( /518899F6 $noname  U4 D3043 {Lib=D3043}
-  (    1 N-000031 )
-  (    2 N-000038 )
-  (    3 +12V )
-  (    4 ? )
-  (    5 ? )
-  (    6 ? )
-  (    7 ? )
-  (    8 ? )
-  (    9 ? )
-  (   10 N-000022 )
+ ( /518899F2 DIP-10__300 U3 D3043
+  ( 1 N-000005 )
+  ( 2 N-000037 )
+  ( 3 +12V )
+  ( 4 ? )
+  ( 5 ? )
+  ( 6 ? )
+  ( 7 ? )
+  ( 8 ? )
+  ( 9 ? )
+  ( 10 N-000029 )
  )
- ( /518899F2 $noname  U3 D3043 {Lib=D3043}
-  (    1 N-000005 )
-  (    2 N-000037 )
-  (    3 +12V )
-  (    4 ? )
-  (    5 ? )
-  (    6 ? )
-  (    7 ? )
-  (    8 ? )
-  (    9 ? )
-  (   10 N-000029 )
+ ( /518899F6 DIP-10__300 U4 D3043
+  ( 1 N-000031 )
+  ( 2 N-000038 )
+  ( 3 +12V )
+  ( 4 ? )
+  ( 5 ? )
+  ( 6 ? )
+  ( 7 ? )
+  ( 8 ? )
+  ( 9 ? )
+  ( 10 N-000022 )
  )
 )
 *
 { Allowed footprints by component:
-$component D4
+$component C1
+ CP*
+ SM*
+$endlist
+$component C2
+ CP*
+ SM*
+$endlist
+$component D1
+ D?
+ S*
+$endlist
+$component D2
  LED-3MM
  LED-5MM
  LED-10MM
@@ -144,7 +156,7 @@ $component D3
  LED-1206
  LEDV
 $endlist
-$component D2
+$component D4
  LED-3MM
  LED-5MM
  LED-10MM
@@ -153,109 +165,5 @@ $component D2
  LED-1206
  LEDV
 $endlist
-$component D1
- D?
- S*
-$endlist
-$component C1
- CP*
- SM*
-$endlist
-$component C2
- CP*
- SM*
-$endlist
 $endfootprintlist
 }
-{ Pin List by Nets
-Net 1 "" ""
- P1 3
- U2 6
-Net 2 "GND" "GND"
- P4 2
- U1 2
- U1 3
- U1 4
- U2 8
- P1 6
- P3 2
- P2 2
- RP1 3
- C2 2
- C1 2
- D1 1
- RP1 1
- RP1 2
-Net 3 "" ""
- U2 9
- U2 15
- U2 1
- U2 2
- U2 7
- F1 2
-Net 4 "" ""
- P1 2
- U2 3
-Net 5 "" ""
- U3 1
- U2 4
-Net 6 "" ""
- RP1 8
- D2 2
-Net 7 "" ""
- RP1 6
- D4 2
-Net 10 "" ""
- RP1 7
- D3 2
-Net 11 "" ""
- F2 1
- P4 1
-Net 12 "" ""
- F2 2
- P5 2
-Net 19 "" ""
- C2 1
- L1 2
- U2 16
- U1 1
-Net 22 "" ""
- U2 13
- U4 10
-Net 29 "" ""
- U3 10
- U2 5
-Net 30 "" ""
- U2 10
- P1 4
-Net 31 "" ""
- U2 11
- U4 1
-Net 33 "" ""
- P1 5
- U2 14
-Net 34 "+12V" "+12V"
- P5 1
- U3 3
- U4 3
- U1 5
- D4 1
- C1 1
-Net 35 "" ""
- U1 7
- D1 2
- L1 1
-Net 36 "" ""
- P1 1
- F1 1
-Net 37 "" ""
- P2 1
- D3 1
- P5 3
- U3 2
-Net 38 "" ""
- D2 1
- U4 2
- P3 1
-}
-#End
