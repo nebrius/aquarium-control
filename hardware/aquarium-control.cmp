@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2012-apr-16-27)-stable date = Wed 08 May 2013 09:41:58 PM PDT
+Cmp-Mod V01 Genere par PcbNew le Thu 09 May 2013 09:13:11 PM PDT
 
 BeginCmp
 TimeStamp = /51889BB6;
@@ -25,21 +25,21 @@ BeginCmp
 TimeStamp = /5189D8BA;
 Reference = D2;
 ValeurCmp = Night_LED;
-IdModule  = SM2010;
+IdModule  = Night_LED;
 EndCmp
 
 BeginCmp
 TimeStamp = /5189D8C7;
 Reference = D3;
 ValeurCmp = Day_LED;
-IdModule  = SM2010;
+IdModule  = Night_LED;
 EndCmp
 
 BeginCmp
 TimeStamp = /5189D8CB;
 Reference = D4;
 ValeurCmp = Control_LED;
-IdModule  = SM2010;
+IdModule  = Night_LED;
 EndCmp
 
 BeginCmp
