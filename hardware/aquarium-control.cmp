@@ -1,10 +1,10 @@
-Cmp-Mod V01 Created by PcbNew date = Thu 09 May 2013 10:07:22 PM PDT
+Cmp-Mod V01 Created by PcbNew date = Thu 09 May 2013 10:29:15 PM PDT
 
 BeginCmp
 TimeStamp = /51889BB6;
 Reference = C1;
 ValeurCmp = 22u;
-IdModule  = C1V5;
+IdModule  = Cap22;
 EndCmp
 
 BeginCmp
