@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by PcbNew date = Thu 09 May 2013 10:29:15 PM PDT
+Cmp-Mod V01 Created by PcbNew date = Thu 09 May 2013 10:50:03 PM PDT
 
 BeginCmp
 TimeStamp = /51889BB6;
@@ -102,7 +102,7 @@ BeginCmp
 TimeStamp = /5189D8A9;
 Reference = RP1;
 ValeurCmp = R_PACK4;
-IdModule  = r_pack8;
+IdModule  = RPACK;
 EndCmp
 
 BeginCmp

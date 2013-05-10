@@ -1,4 +1,4 @@
-PCBNEW-LibModule-V1  Thu 09 May 2013 10:29:04 PM PDT
+PCBNEW-LibModule-V1  Thu 09 May 2013 10:52:57 PM PDT
 # encoding utf-8
 Units mm
 $INDEX
@@ -6,10 +6,11 @@ Cap22
 Inductor
 LED
 Night_LED
+RPACK
 SM2010
 $EndINDEX
 $MODULE Cap22
-Po 0 0 0 15 518C8595 00000000 ~~
+Po 0 0 0 15 518C879B 00000000 ~~
 Li Cap22
 Cd Condensateur e = 1 pas
 Kw C
@@ -25,14 +26,14 @@ Sh "1" R 1.397 1.397 0 0 0
 Dr 0.8128 0 0
 At STD N 00E0FFFF
 Ne 1 "+12V"
-Po -1 0
+Po -0.9 0
 $EndPAD
 $PAD
 Sh "2" C 1.397 1.397 0 0 0
 Dr 0.8128 0 0
 At STD N 00E0FFFF
 Ne 2 "GND"
-Po 1 0
+Po 0.9 0
 $EndPAD
 $SHAPE3D
 Na "discret/c_vert_c1v5.wrl"
@@ -148,6 +149,82 @@ Of 0 0 0
 Ro 0 0 0
 $EndSHAPE3D
 $EndMODULE Night_LED
+$MODULE RPACK
+Po 0 0 0 15 518C8B31 00000000 ~~
+Li RPACK
+Sc 0
+AR /5189D8A9
+Op 0 0 0
+At SMD
+T0 -2.4 0 1.016 1.016 0 0.1524 N V 21 N "RP1"
+T1 -3.3 2 0.762 0.508 0 0.127 N I 21 N "R_PACK4"
+DS 4.6 1.924 -0.724 1.924 0.1524 21
+DS -0.724 1.9 -0.724 -1.9 0.1524 21
+DS -0.724 -1.924 4.6 -1.924 0.1524 21
+DS 4.624 -1.924 4.624 1.9 0.1524 21
+$PAD
+Sh "1" R 0.65 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 1 "GND"
+Po 0 1
+$EndPAD
+$PAD
+Sh "2" R 0.65 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 1 "GND"
+Po 1.3 1
+$EndPAD
+$PAD
+Sh "3" R 0.65 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 1 "GND"
+Po 2.6 1
+$EndPAD
+$PAD
+Sh "4" R 0.65 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 3.9 1
+$EndPAD
+$PAD
+Sh "5" R 0.65 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 3.9 -1
+$EndPAD
+$PAD
+Sh "6" R 0.65 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 3 "N-000007"
+Po 2.6 -1
+$EndPAD
+$PAD
+Sh "7" R 0.65 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 4 "N-000010"
+Po 1.3 -1
+$EndPAD
+$PAD
+Sh "8" R 0.65 1 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 2 "N-000006"
+Po 0 -1
+$EndPAD
+$SHAPE3D
+Na "smd/cms_so8.wrl"
+Sc 0.25 0.25 0.25
+Of 0 0 0
+Ro 0 0 0
+$EndSHAPE3D
+$EndMODULE RPACK
 $MODULE SM2010
 Po 0 0 0 15 518C719F 518C7145 ~~
 Li SM2010
