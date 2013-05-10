@@ -1,4 +1,4 @@
-Cmp-Mod V01 Genere par PcbNew le Thu 09 May 2013 09:28:37 PM PDT
+Cmp-Mod V01 Created by PcbNew date = Thu 09 May 2013 10:07:22 PM PDT
 
 BeginCmp
 TimeStamp = /51889BB6;
@@ -46,21 +46,21 @@ BeginCmp
 TimeStamp = /5189C52A;
 Reference = F1;
 ValeurCmp = FUSE;
-IdModule  = R3;
+IdModule  = R4;
 EndCmp
 
 BeginCmp
 TimeStamp = /5189C531;
 Reference = F2;
 ValeurCmp = FUSE;
-IdModule  = R3;
+IdModule  = R4;
 EndCmp
 
 BeginCmp
 TimeStamp = /51889BDF;
 Reference = L1;
 ValeurCmp = INDUCTOR;
-IdModule  = C1V7;
+IdModule  = Inductor;
 EndCmp
 
 BeginCmp
