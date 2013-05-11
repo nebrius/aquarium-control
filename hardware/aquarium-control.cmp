@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by PcbNew date = Thu 09 May 2013 10:50:03 PM PDT
+Cmp-Mod V01 Created by CvPcb (2013-mar-13)-testing date = Sat 11 May 2013 03:49:38 PM PDT
 
 BeginCmp
 TimeStamp = /51889BB6;
@@ -24,21 +24,21 @@ EndCmp
 BeginCmp
 TimeStamp = /5189D8BA;
 Reference = D2;
-ValeurCmp = Night_LED;
+ValeurCmp = Night LED;
 IdModule  = Night_LED;
 EndCmp
 
 BeginCmp
 TimeStamp = /5189D8C7;
 Reference = D3;
-ValeurCmp = Day_LED;
+ValeurCmp = Day LED;
 IdModule  = Night_LED;
 EndCmp
 
 BeginCmp
 TimeStamp = /5189D8CB;
 Reference = D4;
-ValeurCmp = Control_LED;
+ValeurCmp = Control LED;
 IdModule  = Night_LED;
 EndCmp
 
@@ -61,6 +61,20 @@ TimeStamp = /51889BDF;
 Reference = L1;
 ValeurCmp = INDUCTOR;
 IdModule  = Inductor;
+EndCmp
+
+BeginCmp
+TimeStamp = /518ECD44;
+Reference = M1;
+ValeurCmp = CONN_1;
+IdModule  = 1pin;
+EndCmp
+
+BeginCmp
+TimeStamp = /518ECD53;
+Reference = M2;
+ValeurCmp = CONN_1;
+IdModule  = 1pin;
 EndCmp
 
 BeginCmp
