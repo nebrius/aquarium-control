@@ -1,4 +1,4 @@
-PCBNEW-BOARD Version 2 date 5/11/2013 6:01:32 PM
+PCBNEW-BOARD Version 2 date 5/11/2013 6:09:46 PM
 
 # Created by Pcbnew(2013-04-19 BZR 4011)-stable
 
@@ -61,7 +61,7 @@ Pad2MaskClearance 0.254
 SolderMaskMinWidth 0
 AuxiliaryAxisOrg 0 0
 VisibleElements 7FFFFFBF
-PcbPlotParams (pcbplotparams (layerselection 3178497) (usegerberextensions true) (excludeedgelayer true) (linewidth 20000) (plotframeref false) (viasonmask false) (mode 1) (useauxorigin false) (hpglpennumber 1) (hpglpenspeed 20) (hpglpendiameter 15) (hpglpenoverlay 0) (psnegative false) (psa4output false) (plotreference true) (plotvalue true) (plotothertext true) (plotinvisibletext false) (padsonsilk false) (subtractmaskfromsilk false) (outputformat 1) (mirror false) (drillshape 1) (scaleselection 1) (outputdirectory ""))
+PcbPlotParams (pcbplotparams (layerselection 300974081) (usegerberextensions true) (excludeedgelayer true) (linewidth 20000) (plotframeref false) (viasonmask false) (mode 1) (useauxorigin false) (hpglpennumber 1) (hpglpenspeed 20) (hpglpendiameter 15) (hpglpenoverlay 0) (psnegative false) (psa4output false) (plotreference true) (plotvalue true) (plotothertext true) (plotinvisibletext false) (padsonsilk false) (subtractmaskfromsilk false) (outputformat 1) (mirror false) (drillshape 0) (scaleselection 1) (outputdirectory ""))
 $EndSETUP
 
 $EQUIPOT
@@ -705,13 +705,13 @@ Ro 0 0 0
 $EndSHAPE3D
 $EndMODULE D3
 $MODULE C1V7
-Po 220.98 100.965 1800 15 518EE741 518B29E4 ~~
+Po 220.98 100.965 1800 15 518EEAA0 518B29E4 ~~
 Li C1V7
 Sc 518B29E4
 AR /51889BAC
 Op 0 0 0
-T0 -3.81 -1.905 1.143 0.889 1800 0.2032 N V 21 N "C2"
-T1 0 -2.54 1.143 0.889 1800 0.2032 N V 21 N "220u"
+T0 0 1.905 1.143 0.889 1800 0.2032 N V 21 N "C2"
+T1 0 -1.905 1.143 0.889 1800 0.2032 N V 21 N "220u"
 T2 -3.81 0 1.143 1.143 1800 0.28702 N V 21 N "+"
 DC 0 0 3.175 0 0.127 21
 $PAD
@@ -927,36 +927,6 @@ Of 0 0 0
 Ro 0 0 0
 $EndSHAPE3D
 $EndMODULE R4
-$MODULE Inductor
-Po 212.725 99.695 2700 15 518C86A8 518B29E2 ~~
-Li Inductor
-Sc 518B29E2
-AR /51889BDF
-Op 0 0 0
-T0 0 1.524 1.143 0.889 2700 0.2032 N V 21 N "L1"
-T1 0 -1.524 1.143 0.889 2700 0.2032 N V 21 N "INDUCTOR"
-DC 0 0 4.2 0 0.127 21
-$PAD
-Sh "1" R 1.524 1.524 0 0 2700
-Dr 0.8128 0 0
-At STD N 00E0FFFF
-Ne 13 "N-000002"
-Po -2.5 0
-$EndPAD
-$PAD
-Sh "2" C 1.524 1.524 0 0 2700
-Dr 0.8128 0 0
-At STD N 00E0FFFF
-Ne 18 "N-000003"
-Po 2.5 0
-$EndPAD
-$SHAPE3D
-Na "discret/c_vert_c1v7.wrl"
-Sc 1 1 1
-Of 0 0 0
-Ro 0 0 0
-$EndSHAPE3D
-$EndMODULE Inductor
 $MODULE Cap22
 Po 220.98 81.915 0 15 518C879B 518B29E5 ~~
 Li Cap22
@@ -1241,6 +1211,36 @@ Of 0 0 0
 Ro 0 0 0
 $EndSHAPE3D
 $EndMODULE DIP-16__300
+$MODULE Inductor
+Po 212.725 99.695 2700 15 518EEA95 518B29E2 ~~
+Li Inductor
+Sc 518B29E2
+AR /51889BDF
+Op 0 0 0
+T0 0 0 1.143 0.889 2700 0.2032 N V 21 N "L1"
+T1 0 -1.524 1.143 0.889 2700 0.2032 N I 21 N "INDUCTOR"
+DC 0 0 4.2 0 0.127 21
+$PAD
+Sh "1" R 1.524 1.524 0 0 2700
+Dr 0.8128 0 0
+At STD N 00E0FFFF
+Ne 13 "N-000002"
+Po -2.5 0
+$EndPAD
+$PAD
+Sh "2" C 1.524 1.524 0 0 2700
+Dr 0.8128 0 0
+At STD N 00E0FFFF
+Ne 18 "N-000003"
+Po 2.5 0
+$EndPAD
+$SHAPE3D
+Na "discret/c_vert_c1v7.wrl"
+Sc 1 1 1
+Of 0 0 0
+Ro 0 0 0
+$EndSHAPE3D
+$EndMODULE Inductor
 $DRAWSEGMENT
 Po 0 208.28 107.95 208.28 106.68 0.381
 De 28 0 900 0 0
@@ -1501,9 +1501,9 @@ De 15 0 18 518EE433 0
 Po 0 213.4 102.87 212.725 102.195 0.75 -1
 De 15 0 18 518EE435 0
 Po 0 257.81 99.06 257.81 101.6 0.75 -1
-De 15 0 19 0 400000
+De 15 0 19 0 0
 Po 0 257.81 101.6 259.08 102.87 0.75 -1
-De 15 0 19 518EE9E0 800000
+De 15 0 19 518EE9E0 0
 Po 0 210.185 74.93 212.09 73.025 0.75 -1
 De 15 0 20 0 0
 Po 0 212.09 73.025 219.075 73.025 0.75 -1
@@ -1511,9 +1511,9 @@ De 15 0 20 518EC558 0
 Po 0 219.075 73.025 220.98 74.93 0.75 -1
 De 15 0 20 518EC55D 0
 Po 0 245.11 92.71 248.92 96.52 0.75 -1
-De 15 0 21 0 400000
+De 15 0 21 0 0
 Po 0 248.92 96.52 248.92 102.87 0.75 -1
-De 15 0 21 518EE9E2 800000
+De 15 0 21 518EE9E2 0
 Po 0 245.11 92.71 245.11 87.63 0.3 -1
 De 15 0 21 0 0
 Po 0 245.11 87.63 247.65 85.09 0.3 -1
