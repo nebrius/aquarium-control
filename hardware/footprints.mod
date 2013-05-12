@@ -1,10 +1,11 @@
-PCBNEW-LibModule-V1  Thu 09 May 2013 10:52:57 PM PDT
+PCBNEW-LibModule-V1  5/11/2013 4:42:46 PM
 # encoding utf-8
 Units mm
 $INDEX
 Cap22
 Inductor
 LED
+MountingHole
 Night_LED
 RPACK
 SM2010
@@ -111,6 +112,25 @@ Of 0 0 0
 Ro 0 0 0
 $EndSHAPE3D
 $EndMODULE LED
+$MODULE MountingHole
+Po 0 0 0 15 518ED773 00000000 ~~
+Li MountingHole
+Cd module 1 pin (ou trou mecanique de percage)
+Kw DEV
+Sc 0
+AR /518ECD44
+Op 0 0 0
+T0 2.54 -1.905 1.016 1.016 0 0.254 N I 21 N "M1"
+T1 0 2.794 1.016 1.016 0 0.254 N I 21 N "CONN_1"
+DC 0 0 0 -2.286 0.381 21
+$PAD
+Sh "1" C 4.064 4.064 0 0 0
+Dr 3.048 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po 0 0
+$EndPAD
+$EndMODULE MountingHole
 $MODULE Night_LED
 Po 0 0 0 15 518C72EB 00000000 ~~
 Li Night_LED
