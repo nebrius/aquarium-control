@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by PcbNew date = 5/11/2013 4:42:58 PM
+Cmp-Mod V01 Created by PcbNew date = Sat 11 May 2013 09:00:28 PM PDT
 
 BeginCmp
 TimeStamp = /51889BB6;
@@ -46,14 +46,14 @@ BeginCmp
 TimeStamp = /5189C52A;
 Reference = F1;
 ValeurCmp = FUSE;
-IdModule  = R4;
+IdModule  = Fuse;
 EndCmp
 
 BeginCmp
 TimeStamp = /5189C531;
 Reference = F2;
 ValeurCmp = FUSE;
-IdModule  = R4;
+IdModule  = Fuse;
 EndCmp
 
 BeginCmp
@@ -81,35 +81,35 @@ BeginCmp
 TimeStamp = /5189C34F;
 Reference = P1;
 ValeurCmp = R.Pi;
-IdModule  = pin_array_3x2;
+IdModule  = 6-Header;
 EndCmp
 
 BeginCmp
 TimeStamp = /5188A415;
 Reference = P2;
 ValeurCmp = Day;
-IdModule  = PIN_ARRAY_2X1;
+IdModule  = 2-Header;
 EndCmp
 
 BeginCmp
 TimeStamp = /5188A41A;
 Reference = P3;
 ValeurCmp = Night;
-IdModule  = PIN_ARRAY_2X1;
+IdModule  = 2-Header;
 EndCmp
 
 BeginCmp
 TimeStamp = /5189C859;
 Reference = P4;
 ValeurCmp = Power;
-IdModule  = PIN_ARRAY_2X1;
+IdModule  = 2-Header;
 EndCmp
 
 BeginCmp
 TimeStamp = /5189C78D;
 Reference = P5;
 ValeurCmp = Switch;
-IdModule  = PIN_ARRAY_3X1;
+IdModule  = 3-Header;
 EndCmp
 
 BeginCmp
@@ -123,28 +123,28 @@ BeginCmp
 TimeStamp = /51889B56;
 Reference = U1;
 ValeurCmp = LM2574N;
-IdModule  = DIP-8__300;
+IdModule  = LM2574N;
 EndCmp
 
 BeginCmp
 TimeStamp = /5188A1F2;
 Reference = U2;
 ValeurCmp = CD40109B;
-IdModule  = DIP-16__300;
+IdModule  = CD40109B;
 EndCmp
 
 BeginCmp
 TimeStamp = /518899F2;
 Reference = U3;
 ValeurCmp = D3043;
-IdModule  = DIP-10__300;
+IdModule  = D3043;
 EndCmp
 
 BeginCmp
 TimeStamp = /518899F6;
 Reference = U4;
 ValeurCmp = D3043;
-IdModule  = DIP-10__300;
+IdModule  = D3043;
 EndCmp
 
 EndListe
