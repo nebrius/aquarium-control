@@ -11,7 +11,7 @@
 		"request": "2.20.x",
 		"xml2js": "0.2.x",
 		"node-schedule": "0.1.x",
-		"wrench": "1.4.x"
+		"transport-logger": "0.1.x"
 	},
 	"author": "Bryan Hughes <bryan@theoreticalideations.com> (http://theoreticalideations.com)",
 	"licenses": [{

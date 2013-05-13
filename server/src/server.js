@@ -17,40 +17,5 @@
 	along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var schedule = require('node-schedule'),
-	times = require('./times');
-
-function scheduleSunrise(time) {
-	schedule.scheduleJob(time, function () {
-	});
-}
-
-function scheduleSunset(time) {
-	schedule.scheduleJob(time, function () {
-		scheduleUpdate();
-	});
-}
-
-function scheduleUpdate() {
-	var currentTime = new Date(),
-		scheduledTime = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDay(), 1);
-	if (currentTime.getHour() > 1) {
-		scheduledTime = new Date(scheduledTime.getTime() + 24 * 60 * 1000);
-	}
-	schedule.scheduleJob(scheduledTime, processTimes);
-}
-
-function processTimes() {
-	times.fetch(function (results) {
-		var currentTime = Date.now();
-		if (results.sunrise.getTime() > currentTime) {
-			scheduleSunrise(results.sunrise);
-		} else if (results.sunset.getTime() > currentTime) {
-			scheduleSunset(results.sunset);
-		} else {
-			scheduleUpdate();
-		}
-	});
-}
-
-processTimes();
+exports.run = function run(appSettings, userSettings, logger) {
+};

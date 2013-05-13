@@ -1,0 +1,24 @@
+{
+	"mode": "auto",
+	"auto": {
+		"sunriseOffset": 0,
+		"sunsetOffset": 0
+	},
+	"manual": [{
+		"time": 0,
+		"daytimeLights": false,
+		"nighttimeLights": false
+	},{
+		"time": 240,
+		"daytimeLights": false,
+		"nighttimeLights": true
+	},{
+		"time": 420,
+		"daytimeLights": true,
+		"nighttimeLights": false
+	},{
+		"time": 1080,
+		"daytimeLights": false,
+		"nighttimeLights": true
+	}]
+}
