@@ -17,27 +17,58 @@
 	along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var fs = require('fs'),
-	path = require('path'),
-	Logger = require('transport-logger'),
-	logger,
-	appSettings,
-	userSettings;
+var cluster = require('cluster');
 
-appSettings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'settings', 'appsettings.json')));
-userSettings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'settings', 'usersettings.json')));
+if (cluster.isMaster) {
+	(function () {
+		var fs = require('fs'),
+			path = require('path'),
+			Logger = require('transport-logger'),
+			logger,
+			appSettings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'settings', 'appsettings.json'))),
+			sources = ['scheduler', 'configuration', 'controller'],
+			i, len,
+			workers = {};
 
-if (!appSettings['log-file']) {
-	throw new Error('"log-file" must be specified in app settings');
+		function processMessage(source, message) {
+			console.log('Recieved message from ' + source + ':');
+			console.log(message);
+			console.log();
+		}
+
+		function loadWorker(source) {
+			logger.info('Starting worker ' + source);
+			workers[source] = cluster.fork({
+				source: source,
+				appSettings: appSettings
+			});
+			workers[source].source = source;
+			workers[source].on('message', function(message) {
+				processMessage(source, message);
+			});
+		}
+
+		if (!appSettings['log-file']) {
+			throw new Error('"log-file" must be specified in app settings');
+		}
+		if (!appSettings['log-min-level']) {
+			throw new Error('"log-min-level" must be specified in app settings');
+		}
+
+		logger = new Logger({
+			file: appSettings['log-file'],
+			minLevel: appSettings['log-min-level']
+		});
+
+		for (i = 0, len = sources.length; i < len; i++) {
+			loadWorker(sources[i]);
+		}
+
+		cluster.on('exit', function(worker, code, signal) {
+			logger.warn('The ' + worker.source + ' worker died. Restarting');
+			loadWorker(worker.source);
+		});
+	})();
+} else if (cluster.isWorker) {
+	require('./' + process.env.source);
 }
-if (!appSettings['log-min-level']) {
-	throw new Error('"log-min-level" must be specified in app settings');
-}
-
-logger = new Logger({
-	file: appSettings['log-file'],
-	minLevel: appSettings['log-min-level']
-});
-
-require('./scheduler').run(appSettings, userSettings, logger);
-require('./server').run(appSettings, userSettings, logger);
