@@ -17,4 +17,9 @@
 	along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-process.send('Controller started');
+process.send({
+	destination: 'master',
+	type: 'log',
+	level: 'info',
+	message: 'Controller started'
+});

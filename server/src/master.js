@@ -17,6 +17,19 @@
 	along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+Message Format incoming
+{
+	destination: <worker name, master, broadcast>
+	data: {<message data>}
+}
+Message Format outgoing
+{
+	source: <worker name, master>
+	data: {<message data>}
+}
+ */
+
 var cluster = require('cluster');
 
 if (cluster.isMaster) {
@@ -31,9 +44,24 @@ if (cluster.isMaster) {
 			workers = {};
 
 		function processMessage(source, message) {
-			console.log('Recieved message from ' + source + ':');
-			console.log(message);
-			console.log();
+			var destination = message.destination,
+				outgoingMessage = {
+					source: source,
+					type: message.type,
+					data: message.data
+				},
+				worker;
+			if (destination === 'master') {
+				if (message.type === 'log') {
+					logger[message.level](message.message);
+				}
+			} else if (destination === 'broadcast') {
+				for (worker in workers) {
+					workers[worker].send(outgoingMessage);
+				}
+			} else {
+				workers[destination].send(outgoingMessage);
+			}
 		}
 
 		function loadWorker(source) {
@@ -56,9 +84,14 @@ if (cluster.isMaster) {
 		}
 
 		logger = new Logger({
-			file: appSettings['log-file'],
-			minLevel: appSettings['log-min-level']
+			destination: appSettings['log-file'],
+			minLevel: appSettings['log-min-level'],
+			timestamp: true,
+			colorize: true,
+			prependLevel: true
 		});
+		logger.info('---------------------');
+		logger.info('System start');
 
 		for (i = 0, len = sources.length; i < len; i++) {
 			loadWorker(sources[i]);

@@ -17,7 +17,12 @@
 	along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-process.send('Scheduler started');
+process.send({
+	destination: 'master',
+	type: 'log',
+	level: 'info',
+	message: 'Scheduler started'
+});
 
 exports.run = function run(appSettings, usersettings, logger) {
 	var schedule = require('node-schedule'),
