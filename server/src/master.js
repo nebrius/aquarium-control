@@ -17,19 +17,6 @@
 	along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
-Message Format incoming
-{
-	destination: <worker name, master, broadcast>
-	data: {<message data>}
-}
-Message Format outgoing
-{
-	source: <worker name, master>
-	data: {<message data>}
-}
- */
-
 var cluster = require('cluster');
 
 if (cluster.isMaster) {
@@ -53,7 +40,7 @@ if (cluster.isMaster) {
 				worker;
 			if (destination === 'master') {
 				if (message.type === 'log') {
-					logger[message.level](message.message);
+					logger[message.data.level](message.data.message);
 				}
 			} else if (destination === 'broadcast') {
 				for (worker in workers) {
@@ -68,7 +55,7 @@ if (cluster.isMaster) {
 			logger.info('Starting worker ' + source);
 			workers[source] = cluster.fork({
 				source: source,
-				appSettings: appSettings
+				appSettings: JSON.stringify(appSettings, false, '\t')
 			});
 			workers[source].source = source;
 			workers[source].on('message', function(message) {
@@ -83,13 +70,16 @@ if (cluster.isMaster) {
 			throw new Error('"log-min-level" must be specified in app settings');
 		}
 
-		logger = new Logger({
-			destination: appSettings['log-file'],
-			minLevel: appSettings['log-min-level'],
-			timestamp: true,
-			colorize: true,
-			prependLevel: true
-		});
+		logger = new Logger([{
+				minLevel: appSettings['log-min-level'],
+				colorize: true,
+				prependLevel: true
+			}, {
+				destination: appSettings['log-file'],
+				minLevel: appSettings['log-min-level'],
+				timestamp: true,
+				prependLevel: true
+			}]);
 		logger.info('---------------------');
 		logger.info('System start');
 
@@ -97,7 +87,7 @@ if (cluster.isMaster) {
 			loadWorker(sources[i]);
 		}
 
-		cluster.on('exit', function(worker, code, signal) {
+		cluster.on('exit', function(worker) {
 			logger.warn('The ' + worker.source + ' worker died. Restarting');
 			loadWorker(worker.source);
 		});

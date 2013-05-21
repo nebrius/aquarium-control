@@ -17,9 +17,20 @@
 	along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+var path = require('path'),
+	fs = require('fs');
+
 process.send({
 	destination: 'master',
 	type: 'log',
-	level: 'info',
-	message: 'Configuration started'
+	data: {
+		level: 'info',
+		message: 'Configuration started'
+	}
+});
+
+process.send({
+	destination: 'broadcast',
+	type: 'configuration.set',
+	data: JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'settings', 'usersettings.json')))
 });

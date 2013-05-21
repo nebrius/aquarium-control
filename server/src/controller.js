@@ -20,6 +20,21 @@
 process.send({
 	destination: 'master',
 	type: 'log',
-	level: 'info',
-	message: 'Controller started'
+	data: {
+		level: 'info',
+		message: 'Controller started'
+	}
+});
+
+process.on('message', function (message) {
+	if (message.type === 'scheduler.changeState') {
+		process.send({
+			destination: 'master',
+			type: 'log',
+			data: {
+				level: 'info',
+				message: 'State change: ' + message.data
+			}
+		});
+	}
 });
