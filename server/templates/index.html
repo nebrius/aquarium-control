@@ -20,28 +20,120 @@
 			<div class="tab-content">
 				<div class="tab-pane active" id="tab1">
 					<form class="form-horizontal">
+						<legend>Sunrise Offset</legend>
 						<div class="control-group">
-							<label class="control-label" for="inputDynamicSunriseOffset">Sunrise Offset</label>
+							<label class="control-label" for="inputDynamicSunriseOffsetHours">Hours</label>
 							<div class="controls">
-								<input type="number" id="inputDynamicSunriseOffset" value="0" />
+								<input type="number" id="inputDynamicSunriseOffsetHours" value="0" min="-6" max="6" />
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="inputDynamicSunriseOffset">Sunset Offset</label>
+							<label class="control-label" for="inputDynamicSunriseOffsetMinutes">Minutes</label>
 							<div class="controls">
-								<input type="number" id="inputDynamicSunriseOffset" value="0" />
+								<input type="number" id="inputDynamicSunriseOffsetMinutes" value="0" min="-59" max="59" />
+							</div>
+						</div>
+						<legend>Sunset Offset</legend>
+						<div class="control-group">
+							<label class="control-label" for="inputDynamicSunsetOffsetHours">Hours</label>
+							<div class="controls">
+								<input type="number" id="inputDynamicSunsetOffsetHours" value="0" min="-6" max="6" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="inputDynamicSunsetOffsetMinutes">Minutes</label>
+							<div class="controls">
+								<input type="number" id="inputDynamicSunsetOffsetMinutes" value="0" min="-59" max="59" />
+							</div>
+						</div>
+						<legend>Night Lighting Duration After Sunset</legend>
+						<div class="control-group">
+							<label class="control-label" for="inputDynamicNightOnAfterSunsetHours">Hours</label>
+							<div class="controls">
+								<input type="number" id="inputDynamicNightOnAfterSunsetHours" value="0" min="0" max="6" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="inputDynamicNightOnAfterSunsetMinutes">Minutes</label>
+							<div class="controls">
+								<input type="number" id="inputDynamicNightOnAfterSunsetMinutes" value="0" min="-0" max="59" />
+							</div>
+						</div>
+						<legend>Night Lighting Duration Before Sunrise</legend>
+						<div class="control-group">
+							<label class="control-label" for="inputDynamicNightOnBeforeSunriseHours">Hours</label>
+							<div class="controls">
+								<input type="number" id="inputDynamicNightOnBeforeSunriseHours" value="0" min="0" max="6" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="inputDynamicNightOnBeforeSunriseMinutes">Minutes</label>
+							<div class="controls">
+								<input type="number" id="inputDynamicNightOnBeforeSunriseMinutes" value="0" min="-0" max="59" />
 							</div>
 						</div>
 					</form>
 				</div>
-				<div class="tab-pane active" id="tab2">
-					<div>Static config</div>
+				<div class="tab-pane" id="tab2">
+					<form class="form-horizontal">
+						<legend>Sunrise</legend>
+						<div class="control-group">
+							<label class="control-label" for="inputManualSunriseHours">Hours</label>
+							<div class="controls">
+								<input type="number" id="inputManualSunriseHours" value="0" min="-6" max="6" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="inputManualSunriseMinutes">Minutes</label>
+							<div class="controls">
+								<input type="number" id="inputManualSunriseHoursMinutes" value="0" min="-59" max="59" />
+							</div>
+						</div>
+						<legend>Sunset</legend>
+						<div class="control-group">
+							<label class="control-label" for="inputManualSunsetHours">Hours</label>
+							<div class="controls">
+								<input type="number" id="inputManualSunsetHours" value="0" min="-6" max="6" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="inputManualSunsetMinutes">Minutes</label>
+							<div class="controls">
+								<input type="number" id="inputManualSunsetMinutes" value="0" min="-59" max="59" />
+							</div>
+						</div>
+						<legend>Night Lighting Duration After Sunset</legend>
+						<div class="control-group">
+							<label class="control-label" for="inputManualNightOnAfterSunsetHours">Hours</label>
+							<div class="controls">
+								<input type="number" id="inputManualNightOnAfterSunsetHours" value="0" min="0" max="6" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="inputManualNightOnAfterSunsetMinutes">Minutes</label>
+							<div class="controls">
+								<input type="number" id="inputManualNightOnAfterSunsetMinutes" value="0" min="-0" max="59" />
+							</div>
+						</div>
+						<legend>Night Lighting Duration Before Sunrise</legend>
+						<div class="control-group">
+							<label class="control-label" for="inputManualNightOnBeforeSunriseHours">Hours</label>
+							<div class="controls">
+								<input type="number" id="inputManualNightOnBeforeSunriseHours" value="0" min="0" max="6" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="inputManualNightOnBeforeSunriseMinutes">Minutes</label>
+							<div class="controls">
+								<input type="number" id="inputManualNightOnBeforeSunriseMinutes" value="0" min="-0" max="59" />
+							</div>
+						</div>
+					</form>
 				</div>
-				<div class="tab-pane active" id="tab3">
-					<div>Manual config</div>
+				<div class="tab-pane" id="tab3">
+					Manual settings
 				</div>
 			</div>
-			<button type="submit" class="btn btn-large" style="position: absolute; bottom: 5px">Save</button>
 		<script src="http://code.jquery.com/jquery.js"></script>
 		<script src="bootstrap/js/bootstrap.min.js"></script>
 	</body>
