@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Aquarium Control Configuration</title>
+		<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+		<style type="text/css">
+		body {
+			margin: 5px
+		}
+		</style>
+	</head>
+	<body>
+		<div class="tabbable"> <!-- Only required for left/right tabs -->
+			<ul class="nav nav-tabs">
+				<li class="active"><a href="#tab1" data-toggle="tab">Dynamic</a></li>
+				<li><a href="#tab2" data-toggle="tab">Static</a></li>
+				<li><a href="#tab3" data-toggle="tab">Manual</a></li>
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane active" id="tab1">
+					<form class="form-horizontal">
+						<div class="control-group">
+							<label class="control-label" for="inputDynamicSunriseOffset">Sunrise Offset</label>
+							<div class="controls">
+								<input type="number" id="inputDynamicSunriseOffset" value="0" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="inputDynamicSunriseOffset">Sunset Offset</label>
+							<div class="controls">
+								<input type="number" id="inputDynamicSunriseOffset" value="0" />
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="tab-pane active" id="tab2">
+					<div>Static config</div>
+				</div>
+				<div class="tab-pane active" id="tab3">
+					<div>Manual config</div>
+				</div>
+			</div>
+			<button type="submit" class="btn btn-large" style="position: absolute; bottom: 5px">Save</button>
+		<script src="http://code.jquery.com/jquery.js"></script>
+		<script src="bootstrap/js/bootstrap.min.js"></script>
+	</body>
+</html>
