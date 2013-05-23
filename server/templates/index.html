@@ -35,21 +35,34 @@
 	</head>
 	<body>
 		<h2>Aquarium Control Configuration</h2>
-		<legend>Mode</legend>
-		<select >
-			<option value="dynamic">Dynamic</option>
-			<option value="static">Static</option>
-			<option value="manual">Manual</option>
-		</select>
-		<legend>Settings</legend>
 		<div class="tabbable"> <!-- Only required for left/right tabs -->
 			<ul class="nav nav-tabs">
-				<li class="active"><a href="#tab1" data-toggle="tab">Dynamic</a></li>
+				<li class="active"><a href="#tab0" data-toggle="tab">System</a></li>
+				<li><a href="#tab1" data-toggle="tab">Dynamic</a></li>
 				<li><a href="#tab2" data-toggle="tab">Static</a></li>
 				<li><a href="#tab3" data-toggle="tab">Manual</a></li>
 			</ul>
 			<div class="tab-content">
-				<div class="tab-pane active" id="tab1">
+				<div class="tab-pane active" id="tab0">
+					<form id="form0">
+						<div class="control-group">
+							<label class="control-label" for="inputMode">Mode</label>
+							<div class="controls">
+								<select id="inputMode">
+									<option value="dynamic">Dynamic</option>
+									<option value="static">Static</option>
+									<option value="manual">Manual</option>
+								</select>
+							</div>
+						</div>
+						<div class="control-group">
+							<div class="controls">
+								<button class="btn btn-primary" onclick="saveSettings();">Apply Settings</button>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="tab-pane" id="tab1">
 					<form id="form1">
 						<legend>Sunrise Twilight Length</legend>
 						<div class="control-group">
@@ -175,7 +188,9 @@
 			</div>
 		</div>
 		<script>
-		document.getElementById("form1").className = document.getElementById("form2").className =
+		document.getElementById("form0").className =
+			document.getElementById("form1").className =
+			document.getElementById("form2").className =
 			(window.innerWidth < 500 ? "form" : "form-horizontal");
 		</script>
 		<script src="http://code.jquery.com/jquery.js"></script>
