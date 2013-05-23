@@ -8,9 +8,40 @@
 		body {
 			margin: 5px
 		}
+		#savingContainer {
+			position: absolute;
+			left: 0px;
+			right: 0px;
+			top: 0px;
+			bottom: 0px;
+			background-color: rgba(0, 0, 0, 0.5);
+			display: none;
+		}
+		.saving {
+			position: absolute;
+			top: 40%;
+			left: 10%;
+			right: 10%;
+		}
 		</style>
+		<script>
+		function saveSettings() {
+			var savingProgressBar = document.getElementById("savingProgressBar"),
+				settings;
+			document.getElementById("savingContainer").style.display = "block";
+			savingProgressBar.style.width = "0%";
+		}
+		</script>
 	</head>
 	<body>
+		<h2>Aquarium Control Configuration</h2>
+		<legend>Mode</legend>
+		<select >
+			<option value="dynamic">Dynamic</option>
+			<option value="static">Static</option>
+			<option value="manual">Manual</option>
+		</select>
+		<legend>Settings</legend>
 		<div class="tabbable"> <!-- Only required for left/right tabs -->
 			<ul class="nav nav-tabs">
 				<li class="active"><a href="#tab1" data-toggle="tab">Dynamic</a></li>
@@ -19,7 +50,20 @@
 			</ul>
 			<div class="tab-content">
 				<div class="tab-pane active" id="tab1">
-					<form class="form-horizontal">
+					<form id="form1">
+						<legend>Sunrise Twilight Length</legend>
+						<div class="control-group">
+							<label class="control-label" for="inputDynamicSunriseTwilightLengthHours">Hours</label>
+							<div class="controls">
+								<input type="number" id="inputDynamicSunriseTwilightLengthHours" value="0" min="0" max="6" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="inputDynamicSunriseTwilightLengthMinutes">Minutes</label>
+							<div class="controls">
+								<input type="number" id="inputDynamicSunriseTwilightLengthMinutes" value="0" min="-0" max="59" />
+							</div>
+						</div>
 						<legend>Sunrise Offset</legend>
 						<div class="control-group">
 							<label class="control-label" for="inputDynamicSunriseOffsetHours">Hours</label>
@@ -46,36 +90,36 @@
 								<input type="number" id="inputDynamicSunsetOffsetMinutes" value="0" min="-59" max="59" />
 							</div>
 						</div>
-						<legend>Night Lighting Duration After Sunset</legend>
+						<legend>Sunset Twilight Length</legend>
 						<div class="control-group">
-							<label class="control-label" for="inputDynamicNightOnAfterSunsetHours">Hours</label>
+							<label class="control-label" for="inputDynamicSunsetTwilightLengthHours">Hours</label>
 							<div class="controls">
-								<input type="number" id="inputDynamicNightOnAfterSunsetHours" value="0" min="0" max="6" />
+								<input type="number" id="inputDynamicSunsetTwilightLengthHours" value="0" min="0" max="6" />
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="inputDynamicNightOnAfterSunsetMinutes">Minutes</label>
+							<label class="control-label" for="inputDynamicSunsetTwilightLengthMinutes">Minutes</label>
 							<div class="controls">
-								<input type="number" id="inputDynamicNightOnAfterSunsetMinutes" value="0" min="-0" max="59" />
-							</div>
-						</div>
-						<legend>Night Lighting Duration Before Sunrise</legend>
-						<div class="control-group">
-							<label class="control-label" for="inputDynamicNightOnBeforeSunriseHours">Hours</label>
-							<div class="controls">
-								<input type="number" id="inputDynamicNightOnBeforeSunriseHours" value="0" min="0" max="6" />
-							</div>
-						</div>
-						<div class="control-group">
-							<label class="control-label" for="inputDynamicNightOnBeforeSunriseMinutes">Minutes</label>
-							<div class="controls">
-								<input type="number" id="inputDynamicNightOnBeforeSunriseMinutes" value="0" min="-0" max="59" />
+								<input type="number" id="inputDynamicSunsetTwilightLengthMinutes" value="0" min="-0" max="59" />
 							</div>
 						</div>
 					</form>
 				</div>
 				<div class="tab-pane" id="tab2">
-					<form class="form-horizontal">
+					<form id="form2">
+						<legend>Sunrise Twilight</legend>
+						<div class="control-group">
+							<label class="control-label" for="inputManualSunriseTwilightHours">Hours</label>
+							<div class="controls">
+								<input type="number" id="inputManualSunriseTwilightHours" value="0" min="0" max="6" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="inputManualSunriseTwilightMinutes">Minutes</label>
+							<div class="controls">
+								<input type="number" id="inputManualSunriseTwilightMinutes" value="0" min="-0" max="59" />
+							</div>
+						</div>
 						<legend>Sunrise</legend>
 						<div class="control-group">
 							<label class="control-label" for="inputManualSunriseHours">Hours</label>
@@ -86,7 +130,7 @@
 						<div class="control-group">
 							<label class="control-label" for="inputManualSunriseMinutes">Minutes</label>
 							<div class="controls">
-								<input type="number" id="inputManualSunriseHoursMinutes" value="0" min="-59" max="59" />
+								<input type="number" id="inputManualSunriseMinutes" value="0" min="-59" max="59" />
 							</div>
 						</div>
 						<legend>Sunset</legend>
@@ -102,30 +146,17 @@
 								<input type="number" id="inputManualSunsetMinutes" value="0" min="-59" max="59" />
 							</div>
 						</div>
-						<legend>Night Lighting Duration After Sunset</legend>
+						<legend>Sunset Twilight</legend>
 						<div class="control-group">
-							<label class="control-label" for="inputManualNightOnAfterSunsetHours">Hours</label>
+							<label class="control-label" for="inputManualSunsetTwilightHours">Hours</label>
 							<div class="controls">
-								<input type="number" id="inputManualNightOnAfterSunsetHours" value="0" min="0" max="6" />
+								<input type="number" id="inputManualSunsetTwilightHours" value="0" min="0" max="6" />
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="inputManualNightOnAfterSunsetMinutes">Minutes</label>
+							<label class="control-label" for="inputManualSunsetTwilightMinutes">Minutes</label>
 							<div class="controls">
-								<input type="number" id="inputManualNightOnAfterSunsetMinutes" value="0" min="-0" max="59" />
-							</div>
-						</div>
-						<legend>Night Lighting Duration Before Sunrise</legend>
-						<div class="control-group">
-							<label class="control-label" for="inputManualNightOnBeforeSunriseHours">Hours</label>
-							<div class="controls">
-								<input type="number" id="inputManualNightOnBeforeSunriseHours" value="0" min="0" max="6" />
-							</div>
-						</div>
-						<div class="control-group">
-							<label class="control-label" for="inputManualNightOnBeforeSunriseMinutes">Minutes</label>
-							<div class="controls">
-								<input type="number" id="inputManualNightOnBeforeSunriseMinutes" value="0" min="-0" max="59" />
+								<input type="number" id="inputManualSunsetTwilightMinutes" value="0" min="-0" max="59" />
 							</div>
 						</div>
 					</form>
@@ -134,6 +165,19 @@
 					Manual settings
 				</div>
 			</div>
+		</div>
+		<div id="savingContainer">
+			<div class="saving hero-unit">
+				<h2>Saving</h2>
+				<div class="progress">
+					<div id="savingProgressBar" class="bar" style="width: 100%;"></div>
+				</div>
+			</div>
+		</div>
+		<script>
+		document.getElementById("form1").className = document.getElementById("form2").className =
+			(window.innerWidth < 500 ? "form" : "form-horizontal");
+		</script>
 		<script src="http://code.jquery.com/jquery.js"></script>
 		<script src="bootstrap/js/bootstrap.min.js"></script>
 	</body>
