@@ -8,32 +8,182 @@
 		body {
 			margin: 5px
 		}
-		#saving {
-			position: absolute;
-			top: 40%;
-			left: 10%;
-			right: 10%;
+		.system-saving {
 			display: none;
+			margin: 10px;
 		}
 		</style>
 		<script>
-		function saveSettings(e) {
-			var saving = document.getElementById("saving"),
-				savingProgressBar = document.getElementById("savingProgressBar"),
-				settings;
-			saving.style.display = "block";
-			savingProgressBar.style.width = "0%";
+
+		function setClass(id, className) {
+			document.getElementById(id).className = className;
 		}
+
+		function setContent(id, text) {
+			document.getElementById(id).innerHTML = text;
+		}
+
+		function updateState() {
+			var changesPresent = false
+			function checkChangedState(lastSaveSettingsNode, currentSettingsNode) {
+				var p,
+					found = false;
+				for (p in lastSaveSettingsNode) {
+					if (typeof lastSaveSettings[p] === 'object') {
+						found = found || checkChangedState(lastSaveSettingsNode[p], currentSettingsNode[p]);
+					} else if (lastSaveSettingsNode[p] !== currentSettingsNode[p]) {
+						found = true;
+					}
+				}
+				return found;
+			}
+			if (checkChangedState(lastSaveSettings.system, currentSettings.system)) {
+				setContent('systemTab', 'System*');
+				changesPresent = true;
+			} else {
+				setContent('systemTab', 'System');
+			}
+			if (checkChangedState(lastSaveSettings.dynamic, currentSettings.dynamic)) {
+				setContent('dynamicTab', 'Dynamic*');
+				changesPresent = true;
+			} else {
+				setContent('dynamicTab', 'Dynamic');
+			}
+			if (checkChangedState(lastSaveSettings.static, currentSettings.static)) {
+				setContent('staticTab', 'Static*');
+				changesPresent = true;
+			} else {
+				setContent('staticTab', 'Static');
+			}
+			if (checkChangedState(lastSaveSettings.manual, currentSettings.manual)) {
+				setContent	('manualTab', 'Manual*');
+				changesPresent = true;
+			} else {
+				setContent('manualTab', 'Manual');
+			}
+			setClass('system.save', changesPresent ? 'btn btn-primary' : 'btn btn-primary disabled');
+		}
+
+		var get = document.getElementById,
+			lastSaveSettings = {
+				system: {
+					mode: 'dynamic'
+				},
+				dynamic: {
+
+				},
+				static: {
+
+				},
+				manual: {
+					setting: 'day'
+				}
+			},
+			currentSettings = {
+				system: {
+					mode: 'dynamic'
+				},
+				dynamic: {
+
+				},
+				static: {
+
+				},
+				manual: {
+					setting: 'day'
+				}
+			},
+			eventHandlers = {
+				system: {
+					mode: {
+						dynamic: function () {
+							setClass('system.mode.dynamic', 'active');
+							setClass('system.mode.static', '');
+							setClass('system.mode.manual', '');
+							currentSettings.system.mode = 'dynamic';
+							updateState();
+						},
+						static: function () {
+							setClass('system.mode.dynamic', '');
+							setClass('system.mode.static', 'active');
+							setClass('system.mode.manual', '');
+							currentSettings.system.mode = 'static';
+							updateState();
+						},
+						manual: function () {
+							setClass('system.mode.dynamic', '');
+							setClass('system.mode.static', '');
+							setClass('system.mode.manual', 'active');
+							currentSettings.system.mode = 'manual';
+							updateState();
+						},
+					},
+					save: function () {
+						var saving = document.getElementById('system.saving'),
+							savingProgressBar = document.getElementById('system.savingProgressBar'),
+							settings;
+						saving.style.display = 'block';
+						savingProgressBar.style.width = '0%';
+
+						function updateLastSaveSettings(lastSaveSettingsNode, currentSettingsNode) {
+							var p;
+							for (p in lastSaveSettingsNode) {
+								if (typeof lastSaveSettings[p] === 'object') {
+									updateLastSaveSettings(lastSaveSettingsNode[p], currentSettingsNode[p]);
+								} else {
+									lastSaveSettingsNode[p] = currentSettingsNode[p]
+								}
+							}
+							updateState();
+						}
+						updateLastSaveSettings(lastSaveSettings.system, currentSettings.system);
+						updateLastSaveSettings(lastSaveSettings.dynamic, currentSettings.dynamic);
+						updateLastSaveSettings(lastSaveSettings.static, currentSettings.static);
+						updateLastSaveSettings(lastSaveSettings.manual, currentSettings.manual);
+					}
+				},
+				dynamic: {
+
+				},
+				static: {
+
+				},
+				manual: {
+					setting: {
+						day: function () {
+							setClass('manual.setting.day', 'active');
+							setClass('manual.setting.night', '');
+							setClass('manual.setting.off', '');
+							currentSettings.manual.setting = 'day';
+							updateState();
+						},
+						night: function () {
+							setClass('manual.setting.day', '');
+							setClass('manual.setting.night', 'active');
+							setClass('manual.setting.off', '');
+							currentSettings.manual.setting = 'night';
+							updateState();
+						},
+						off: function () {
+							setClass('manual.setting.day', '');
+							setClass('manual.setting.night', '');
+							setClass('manual.setting.off', 'active');
+							currentSettings.manual.setting = 'off';
+							updateState();
+						}
+					}
+				}
+			}
 		</script>
 	</head>
 	<body>
 		<h2>Aquarium Control Configuration</h2>
 		<div class="tabbable"> <!-- Only required for left/right tabs -->
 			<ul class="nav nav-tabs">
-				<li class="active"><a href="#tab0" data-toggle="tab">System</a></li>
-				<li><a href="#tab1" data-toggle="tab">Dynamic</a></li>
-				<li><a href="#tab2" data-toggle="tab">Static</a></li>
-				<li><a href="#tab3" data-toggle="tab">Manual</a></li>
+				<li class="active"><a href="#tab0" data-toggle="tab" id="systemTab">System</a></li>
+				<li><a href="#tab1" data-toggle="tab" id="dynamicTab">Dynamic</a></li>
+				<li><a href="#tab2" data-toggle="tab" id="staticTab">Static</a></li>
+				<li><a href="#tab3" data-toggle="tab" id="manualTab">Manual</a></li>
 			</ul>
 			<div class="tab-content">
 				<div class="tab-pane active" id="tab0">
@@ -42,23 +192,23 @@
 							<label class="control-label" for="inputMode">Mode</label>
 							<div class="controls">
 								<ul class="nav nav-pills nav-stacked">
-									<li class="active"><a href="#">Dynamic</a></li>
-									<li><a href="#">Static</a></li>
-									<li><a href="#">Manual</a></li>
+									<li id="system.mode.dynamic" onclick="eventHandlers.system.mode.dynamic();" class="active" ><a href="#">Dynamic</a></li>
+									<li id="system.mode.static" onclick="eventHandlers.system.mode.static();"><a href="#">Static</a></li>
+									<li id="system.mode.manual" onclick="eventHandlers.system.mode.manual();"><a href="#">Manual</a></li>
 								</ul>
 							</div>
 						</div>
 						<div class="control-group">
 							<div class="controls">
-								<a class="btn btn-primary" href="#" onclick="saveSettings();">Apply Settings</a>
+								<a id="system.save" class="btn btn-primary" href="#" onclick="eventHandlers.system.save();">Apply Settings</a>
 							</div>
 						</div>
 					</form>
-					<div id="saving">
+					<div id="system.saving" class="system-saving">
 						<div class="hero-unit">
 							<h2>Saving</h2>
 							<div class="progress">
-								<div id="savingProgressBar" class="bar" style="width: 100%;"></div>
+								<div id="system.savingProgressBar" class="bar" style="width: 100%;"></div>
 							</div>
 						</div>
 					</div>
@@ -177,18 +327,18 @@
 				</div>
 				<div class="tab-pane" id="tab3">
 					<ul class="nav nav-pills nav-stacked">
-						<li class="active"><a href="#">Day</a></li>
-						<li><a href="#">Night</a></li>
-						<li><a href="#">Off</a></li>
+						<li id="manual.setting.day" onclick="eventHandlers.manual.setting.day();" class="active"><a href="#">Day</a></li>
+						<li id="manual.setting.night" onclick="eventHandlers.manual.setting.night();"><a href="#">Night</a></li>
+						<li id="manual.setting.off" onclick="eventHandlers.manual.setting.off();"><a href="#">Off</a></li>
 					</ul>
 				</div>
 			</div>
 		</div>
 		<script>
-		document.getElementById("form0").className =
-			document.getElementById("form1").className =
-			document.getElementById("form2").className =
-			(window.innerWidth < 500 ? "form" : "form-horizontal");
+		var formClass = window.innerWidth < 500 ? "form" : "form-horizontal";
+		setClass('form0', formClass);
+		setClass('form1', formClass);
+		setClass('form2', formClass);
 		</script>
 		<script src="http://code.jquery.com/jquery.js"></script>
 		<script src="bootstrap/js/bootstrap.min.js"></script>
