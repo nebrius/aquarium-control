@@ -326,11 +326,18 @@
 					</form>
 				</div>
 				<div class="tab-pane" id="tab3">
-					<ul class="nav nav-pills nav-stacked">
-						<li id="manual.setting.day" onclick="eventHandlers.manual.setting.day();" class="active"><a href="#">Day</a></li>
-						<li id="manual.setting.night" onclick="eventHandlers.manual.setting.night();"><a href="#">Night</a></li>
-						<li id="manual.setting.off" onclick="eventHandlers.manual.setting.off();"><a href="#">Off</a></li>
-					</ul>
+					<form id="form3">
+						<div class="control-group">
+							<label class="control-label" for="inputMode">Setting</label>
+							<div class="controls">
+								<ul class="nav nav-pills nav-stacked">
+									<li id="manual.setting.day" onclick="eventHandlers.manual.setting.day();" class="active"><a href="#">Day</a></li>
+									<li id="manual.setting.night" onclick="eventHandlers.manual.setting.night();"><a href="#">Night</a></li>
+									<li id="manual.setting.off" onclick="eventHandlers.manual.setting.off();"><a href="#">Off</a></li>
+								</ul>
+							</div>
+						</div>
+					</form>
 				</div>
 			</div>
 		</div>
@@ -339,6 +346,7 @@
 		setClass('form0', formClass);
 		setClass('form1', formClass);
 		setClass('form2', formClass);
+		setClass('form3', formClass);
 		</script>
 		<script src="http://code.jquery.com/jquery.js"></script>
 		<script src="bootstrap/js/bootstrap.min.js"></script>
