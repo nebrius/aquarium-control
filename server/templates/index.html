@@ -8,27 +8,20 @@
 		body {
 			margin: 5px
 		}
-		#savingContainer {
-			position: absolute;
-			left: 0px;
-			right: 0px;
-			top: 0px;
-			bottom: 0px;
-			background-color: rgba(0, 0, 0, 0.5);
-			display: none;
-		}
-		.saving {
+		#saving {
 			position: absolute;
 			top: 40%;
 			left: 10%;
 			right: 10%;
+			display: none;
 		}
 		</style>
 		<script>
-		function saveSettings() {
-			var savingProgressBar = document.getElementById("savingProgressBar"),
+		function saveSettings(e) {
+			var saving = document.getElementById("saving"),
+				savingProgressBar = document.getElementById("savingProgressBar"),
 				settings;
-			document.getElementById("savingContainer").style.display = "block";
+			saving.style.display = "block";
 			savingProgressBar.style.width = "0%";
 		}
 		</script>
@@ -48,19 +41,27 @@
 						<div class="control-group">
 							<label class="control-label" for="inputMode">Mode</label>
 							<div class="controls">
-								<select id="inputMode">
-									<option value="dynamic">Dynamic</option>
-									<option value="static">Static</option>
-									<option value="manual">Manual</option>
-								</select>
+								<ul class="nav nav-pills nav-stacked">
+									<li class="active"><a href="#">Dynamic</a></li>
+									<li><a href="#">Static</a></li>
+									<li><a href="#">Manual</a></li>
+								</ul>
 							</div>
 						</div>
 						<div class="control-group">
 							<div class="controls">
-								<button class="btn btn-primary" onclick="saveSettings();">Apply Settings</button>
+								<a class="btn btn-primary" href="#" onclick="saveSettings();">Apply Settings</a>
 							</div>
 						</div>
 					</form>
+					<div id="saving">
+						<div class="hero-unit">
+							<h2>Saving</h2>
+							<div class="progress">
+								<div id="savingProgressBar" class="bar" style="width: 100%;"></div>
+							</div>
+						</div>
+					</div>
 				</div>
 				<div class="tab-pane" id="tab1">
 					<form id="form1">
@@ -175,15 +176,11 @@
 					</form>
 				</div>
 				<div class="tab-pane" id="tab3">
-					Manual settings
-				</div>
-			</div>
-		</div>
-		<div id="savingContainer">
-			<div class="saving hero-unit">
-				<h2>Saving</h2>
-				<div class="progress">
-					<div id="savingProgressBar" class="bar" style="width: 100%;"></div>
+					<ul class="nav nav-pills nav-stacked">
+						<li class="active"><a href="#">Day</a></li>
+						<li><a href="#">Night</a></li>
+						<li><a href="#">Off</a></li>
+					</ul>
 				</div>
 			</div>
 		</div>
