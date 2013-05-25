@@ -23,11 +23,12 @@
 			document.getElementById(id).innerHTML = text;
 		}
 
-		function updateState() {
-			var changesPresent = false
+		var changes = {};
+		function updateState(category) {
+			var changesPresent = false,
+				p;
 			function checkChangedState(lastSaveSettingsNode, currentSettingsNode) {
-				var p,
-					found = false;
+				var found = false;
 				for (p in lastSaveSettingsNode) {
 					if (typeof lastSaveSettings[p] === 'object') {
 						found = found || checkChangedState(lastSaveSettingsNode[p], currentSettingsNode[p]);
@@ -37,29 +38,24 @@
 				}
 				return found;
 			}
-			if (checkChangedState(lastSaveSettings.system, currentSettings.system)) {
-				setContent('systemTab', 'System*');
-				changesPresent = true;
-			} else {
-				setContent('systemTab', 'System');
+			function updateTabState(tab) {
+				if (checkChangedState(lastSaveSettings[tab], currentSettings[tab])) {
+					setContent(tab + 'Tab', tab[0].toUpperCase() + tab.substring(1) + '*');
+					changes[tab] = true;
+				} else {
+					setContent(tab + 'Tab', tab[0].toUpperCase() + tab.substring(1));
+				}
 			}
-			if (checkChangedState(lastSaveSettings.dynamic, currentSettings.dynamic)) {
-				setContent('dynamicTab', 'Dynamic*');
-				changesPresent = true;
+			if (category) {
+				updateTabState(category);
 			} else {
-				setContent('dynamicTab', 'Dynamic');
+				updateTabState('system');
+				updateTabState('dynamic');
+				updateTabState('static');
+				updateTabState('manual');
 			}
-			if (checkChangedState(lastSaveSettings.static, currentSettings.static)) {
-				setContent('staticTab', 'Static*');
-				changesPresent = true;
-			} else {
-				setContent('staticTab', 'Static');
-			}
-			if (checkChangedState(lastSaveSettings.manual, currentSettings.manual)) {
-				setContent	('manualTab', 'Manual*');
-				changesPresent = true;
-			} else {
-				setContent('manualTab', 'Manual');
+			for (p in changes) {
+				changesPresent = changesPresent || changes[p];
 			}
 			setClass('system.save', changesPresent ? 'btn btn-primary' : 'btn btn-primary disabled');
 		}
@@ -101,21 +97,21 @@
 							setClass('system.mode.static', '');
 							setClass('system.mode.manual', '');
 							currentSettings.system.mode = 'dynamic';
-							updateState();
+							updateState('system');
 						},
 						static: function () {
 							setClass('system.mode.dynamic', '');
 							setClass('system.mode.static', 'active');
 							setClass('system.mode.manual', '');
 							currentSettings.system.mode = 'static';
-							updateState();
+							updateState('system');
 						},
 						manual: function () {
 							setClass('system.mode.dynamic', '');
 							setClass('system.mode.static', '');
 							setClass('system.mode.manual', 'active');
 							currentSettings.system.mode = 'manual';
-							updateState();
+							updateState('system');
 						},
 					},
 					save: function () {
@@ -155,21 +151,21 @@
 							setClass('manual.setting.night', '');
 							setClass('manual.setting.off', '');
 							currentSettings.manual.setting = 'day';
-							updateState();
+							updateState('manual');
 						},
 						night: function () {
 							setClass('manual.setting.day', '');
 							setClass('manual.setting.night', 'active');
 							setClass('manual.setting.off', '');
 							currentSettings.manual.setting = 'night';
-							updateState();
+							updateState('manual');
 						},
 						off: function () {
 							setClass('manual.setting.day', '');
 							setClass('manual.setting.night', '');
 							setClass('manual.setting.off', 'active');
 							currentSettings.manual.setting = 'off';
-							updateState();
+							updateState('manual');
 						}
 					}
 				}
@@ -200,7 +196,7 @@
 						</div>
 						<div class="control-group">
 							<div class="controls">
-								<a id="system.save" class="btn btn-primary" href="#" onclick="eventHandlers.system.save();">Apply Settings</a>
+								<a id="system.save" class="btn btn-primary disabled" href="#" onclick="eventHandlers.system.save();">Apply Settings</a>
 							</div>
 						</div>
 					</form>
