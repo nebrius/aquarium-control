@@ -135,22 +135,31 @@ process.on('message', function (message) {
 	var configuration;
 	if (message.type === 'configuration.set') {
 		configuration = message.data;
-		if (configuration.mode === 'auto') {
+		if (configuration.mode === 'dynamic') {
 			fetch(function (times) {
 				scheduleNextChange({
-					sunrise: times.sunrise + configuration.auto.sunriseOffset,
-					sunset: times.sunset + configuration.auto.sunsetOffset,
-					nightOnAfterSunset: configuration.nightOnAfterSunset * 60000,
-					nightOnBeforeSunrise: configuration.nightOnBeforeSunrise * 60000
+					sunrise: times.sunrise + configuration.dynamic.sunriseOffset,
+					sunset: times.sunset + configuration.dynamic.sunsetOffset,
+					nightOnAfterSunset: configuration.dynamic.nightOnAfterSunset * 60000,
+					nightOnBeforeSunrise: configuration.dynamic.nightOnBeforeSunrise * 60000
 				});
 			});
-		} else if (configuration.mode === 'manual') {
+		} else if (configuration.mode === 'static') {
 			scheduleNextChange({
-				sunrise: getBaseDate() + (configuration.manual.sunrise.hour * 60 + configuration.manual.sunrise.minute) * 60000,
-				sunset: getBaseDate() + (configuration.manual.sunset.hour * 60 + configuration.manual.sunset.minute) * 60000,
-				nightOnAfterSunset: configuration.nightOnAfterSunset * 60000,
-				nightOnBeforeSunrise: configuration.nightOnBeforeSunrise * 60000
+				sunrise: getBaseDate() + (configuration.static.sunrise.hour * 60 + configuration.static.sunrise.minute) * 60000,
+				sunset: getBaseDate() + (configuration.static.sunset.hour * 60 + configuration.static.sunset.minute) * 60000,
+				nightOnAfterSunset: configuration.static.nightOnAfterSunset * 60000,
+				nightOnBeforeSunrise: configuration.static.nightOnBeforeSunrise * 60000
 			});
+		} else if (configuration.mode === 'manual') {
+			if (currentState !== configuration.manual) {
+				process.send({
+					destination: 'broadcast',
+					type: 'lights.set',
+					data: configuration.manual
+				});
+				currentState = configuration.manual;
+			}
 		} else {
 			throw new Error('Invalid mode "' + configuration.mode + '"');
 		}

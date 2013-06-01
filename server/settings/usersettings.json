@@ -1,10 +1,24 @@
 {
 	"mode": "manual",
-	"auto": {
-		"sunriseOffset": 0,
-		"sunsetOffset": 0
+	"dynamic": {
+		"sunriseOffset": {
+			"hour": 0,
+			"minute": 0
+		},
+		"sunsetOffset": {
+			"hour": 0,
+			"minute": 0
+		},
+		"nightOnAfterSunset": {
+			"hour": 2,
+			"minute": 0
+		},
+		"nightOnBeforeSunrise": {
+			"hour": 1,
+			"minute": 0
+		}
 	},
-	"manual": {
+	"static": {
 		"sunrise": {
 			"hour": 6,
 			"minute": 0
@@ -12,8 +26,15 @@
 		"sunset": {
 			"hour": 23,
 			"minute": 58
+		},
+		"nightOnAfterSunset": {
+			"hour": 2,
+			"minute": 0
+		},
+		"nightOnBeforeSunrise": {
+			"hour": 1,
+			"minute": 0
 		}
 	},
-	"nightOnAfterSunset": 1,
-	"nightOnBeforeSunrise": 1
+	"manual": "off"
 }

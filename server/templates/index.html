@@ -72,34 +72,8 @@
 		}
 
 		var get = document.getElementById,
-			lastSaveSettings = {
-				mode: {
-					mode: 'dynamic'
-				},
-				dynamic: {
-
-				},
-				static: {
-
-				},
-				manual: {
-					setting: 'day'
-				}
-			},
-			currentSettings = {
-				mode: {
-					mode: 'dynamic'
-				},
-				dynamic: {
-
-				},
-				static: {
-
-				},
-				manual: {
-					setting: 'day'
-				}
-			},
+			lastSaveSettings = {{{settings}}},
+			currentSettings = {{{settings}}},
 			eventHandlers = {
 				global: {
 					save: function () {
@@ -129,28 +103,26 @@
 					}
 				},
 				mode: {
-					mode: {
-						dynamic: function () {
-							setClass('mode.mode.dynamic', 'active');
-							setClass('mode.mode.static', '');
-							setClass('mode.mode.manual', '');
-							currentSettings.mode.mode = 'dynamic';
-							updateState('mode');
-						},
-						static: function () {
-							setClass('mode.mode.dynamic', '');
-							setClass('mode.mode.static', 'active');
-							setClass('mode.mode.manual', '');
-							currentSettings.mode.mode = 'static';
-							updateState('mode');
-						},
-						manual: function () {
-							setClass('mode.mode.dynamic', '');
-							setClass('mode.mode.static', '');
-							setClass('mode.mode.manual', 'active');
-							currentSettings.mode.mode = 'manual';
-							updateState('mode');
-						},
+					dynamic: function () {
+						setClass('mode.dynamic', 'active');
+						setClass('mode.static', '');
+						setClass('mode.manual', '');
+						currentSettings.mode = 'dynamic';
+						updateState('mode');
+					},
+					static: function () {
+						setClass('mode.dynamic', '');
+						setClass('mode.static', 'active');
+						setClass('mode.manual', '');
+						currentSettings.mode = 'static';
+						updateState('mode');
+					},
+					manual: function () {
+						setClass('mode.dynamic', '');
+						setClass('mode.static', '');
+						setClass('mode.manual', 'active');
+						currentSettings.mode = 'manual';
+						updateState('mode');
 					}
 				},
 				dynamic: {
@@ -160,34 +132,71 @@
 
 				},
 				manual: {
-					setting: {
-						day: function () {
-							setClass('manual.setting.day', 'active');
-							setClass('manual.setting.night', '');
-							setClass('manual.setting.off', '');
-							currentSettings.manual.setting = 'day';
-							updateState('manual');
-						},
-						night: function () {
-							setClass('manual.setting.day', '');
-							setClass('manual.setting.night', 'active');
-							setClass('manual.setting.off', '');
-							currentSettings.manual.setting = 'night';
-							updateState('manual');
-						},
-						off: function () {
-							setClass('manual.setting.day', '');
-							setClass('manual.setting.night', '');
-							setClass('manual.setting.off', 'active');
-							currentSettings.manual.setting = 'off';
-							updateState('manual');
-						}
+					day: function () {
+						setClass('manual.day', 'active');
+						setClass('manual.night', '');
+						setClass('manual.off', '');
+						currentSettings.manual = 'day';
+						updateState('manual');
+					},
+					night: function () {
+						setClass('manual.day', '');
+						setClass('manual.night', 'active');
+						setClass('manual.off', '');
+						currentSettings.manual = 'night';
+						updateState('manual');
+					},
+					off: function () {
+						setClass('manual.day', '');
+						setClass('manual.night', '');
+						setClass('manual.off', 'active');
+						currentSettings.manual = 'off';
+						updateState('manual');
 					}
+				}
+			}
+
+			function onload() {
+				switch(currentSettings.mode) {
+					case 'dynamic':
+						setClass('mode.dynamic', 'active');
+						setClass('mode.static', '');
+						setClass('mode.manual', '');
+						break;
+					case 'static':
+						setClass('mode.dynamic', '');
+						setClass('mode.static', 'active');
+						setClass('mode.manual', '');
+						break;
+					case 'manual':
+						setClass('mode.dynamic', '');
+						setClass('mode.static', '');
+						setClass('mode.manual', 'active');
+						break;
+				}
+
+
+				switch(currentSettings.manual) {
+					case 'day':
+						setClass('manual.day', 'active');
+						setClass('manual.night', '');
+						setClass('manual.off', '');
+						break;
+					case 'night':
+						setClass('manual.day', '');
+						setClass('manual.night', 'active');
+						setClass('manual.off', '');
+						break;
+					case 'off':
+						setClass('manual.day', '');
+						setClass('manual.night', '');
+						setClass('manual.off', 'active');
+						break;
 				}
 			}
 		</script>
 	</head>
-	<body>
+	<body onload="onload();">
 		<h2>Aquarium Control Configuration</h2>
 		<div class="tabbable"> <!-- Only required for left/right tabs -->
 			<ul class="nav nav-tabs">
@@ -200,9 +209,9 @@
 				<div class="tab-pane active" id="tab0">
 					<div class="controls">
 						<ul class="nav nav-pills nav-stacked">
-							<li id="mode.mode.dynamic" onclick="eventHandlers.mode.mode.dynamic();" class="active" ><a href="#">Dynamic</a></li>
-							<li id="mode.mode.static" onclick="eventHandlers.mode.mode.static();"><a href="#">Static</a></li>
-							<li id="mode.mode.manual" onclick="eventHandlers.mode.mode.manual();"><a href="#">Manual</a></li>
+							<li id="mode.dynamic" onclick="eventHandlers.mode.dynamic();"><a href="#">Dynamic</a></li>
+							<li id="mode.static" onclick="eventHandlers.mode.static();"><a href="#">Static</a></li>
+							<li id="mode.manual" onclick="eventHandlers.mode.manual();"><a href="#">Manual</a></li>
 						</ul>
 					</div>
 				</div>
@@ -324,9 +333,9 @@
 							<label class="control-label" for="inputMode">Setting</label>
 							<div class="controls">
 								<ul class="nav nav-pills nav-stacked">
-									<li id="manual.setting.day" onclick="eventHandlers.manual.setting.day();" class="active"><a href="#">Day</a></li>
-									<li id="manual.setting.night" onclick="eventHandlers.manual.setting.night();"><a href="#">Night</a></li>
-									<li id="manual.setting.off" onclick="eventHandlers.manual.setting.off();"><a href="#">Off</a></li>
+									<li id="manual.day" onclick="eventHandlers.manual.day();"><a href="#">Day</a></li>
+									<li id="manual.night" onclick="eventHandlers.manual.night();"><a href="#">Night</a></li>
+									<li id="manual.off" onclick="eventHandlers.manual.off();"><a href="#">Off</a></li>
 								</ul>
 							</div>
 						</div>

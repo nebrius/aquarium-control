@@ -22,9 +22,59 @@ var path = require('path'),
 	http = require('http'),
 	url = require('url'),
 
-	logger = require('./logger');
+	mu = require('mu2'),
+
+	logger = require('./logger'),
+
+	configuration;
 
 logger.info('Configuration started');
+
+try {
+	configuration = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'settings', 'usersettings.json')));
+} catch(e) {
+	logger.warn('Configuration file is invalid, using defaults: ' + e);
+	configuration = {
+		'mode': 'manual',
+		'dynamic': {
+			'sunriseOffset': {
+				'hour': 0,
+				'minute': 0
+			},
+			'sunsetOffset': {
+				'hour': 0,
+				'minute': 0
+			},
+			'nightOnAfterSunset': {
+				'hour': 2,
+				'minute': 0
+			},
+			'nightOnBeforeSunrise': {
+				'hour': 1,
+				'minute': 0
+			}
+		},
+		'static': {
+			'sunrise': {
+				'hour': 6,
+				'minute': 0
+			},
+			'sunset': {
+				'hour': 23,
+				'minute': 58
+			},
+			'nightOnAfterSunset': {
+				'hour': 2,
+				'minute': 0
+			},
+			'nightOnBeforeSunrise': {
+				'hour': 1,
+				'minute': 0
+			}
+		},
+		'manual': 'off'
+	};
+}
 
 process.send({
 	destination: 'broadcast',
@@ -34,30 +84,51 @@ process.send({
 
 http.createServer(function(request, response) {
 	var uri = url.parse(request.url),
-		pathname = uri.pathname;
+		pathname = uri.pathname,
+		renderStream,
+		compiledData = '',
+		mimeType;
+
+	function write(code, mimeType, body) {
+		response.writeHead(code, {
+			'content-type': mimeType
+		});
+		response.write(body);
+		response.end();
+	}
+
 	if (request.method === 'GET') {
 		if (['/', '/index.html'].indexOf(pathname) !== -1) {
-			logger.info('Serving configuration page');
-			response.writeHead(200, {
-				type: 'text/html'
+			pathname = path.join(__dirname, '..', 'templates');
+			logger.info('Serving generated file "' + path.join(pathname, 'index.html') + '"');
+
+			mu.root = pathname;
+			renderStream = mu.compileAndRender('index.html', {
+				settings: JSON.stringify(configuration, false, '\t')
 			});
-			response.write(fs.readFileSync(path.join('..', 'templates', 'index.html')));
-			response.end();
+			renderStream.on('data', function (data) {
+				compiledData += data.toString();
+			});
+			renderStream.on('end', function() {
+				write(200, 'text/html', compiledData);
+			});
+
 		} else {
-			pathname = path.resolve(path.join('..', 'templates', pathname));
+			pathname = path.resolve(path.join(__dirname, '..', 'templates', pathname));
 			if (fs.existsSync(pathname)) {
+				if (/\.js$/.test(pathname)) {
+					mimeType = 'application/javascript';
+				} else if (/\.css$/.test(pathname)) {
+					mimeType = 'text/css';
+				} else if (/\.html$/.test(pathname)) {
+					mimeType = 'text/html';
+				} else {
+					mimeType = 'text/plain';
+				}
 				logger.info('Serving file "' + pathname + '"');
-				response.writeHead(200, {
-					type: 'text/html'
-				});
-				response.write(fs.readFileSync(pathname));
-				response.end();
+				write(200, mimeType, fs.readFileSync(pathname));
 			} else {
-				response.writeHead(404, {
-					type: 'text/html'
-				});
-				response.write('Page not found');
-				response.end();
+				write(404, 'text/plain', 'Page not found');
 			}
 		}
 	} else if (request.method === 'POST') {
