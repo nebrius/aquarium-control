@@ -17,19 +17,31 @@
 	along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var logger = require('./logger');
+function log(level, message) {
+	process.send({
+		destination: 'master',
+		type: 'log',
+		data: {
+			level: level,
+			message: message
+		}
+	});
+}
 
-logger.info('Controller started');
-
-process.on('message', function (message) {
-	if (message.type === 'lights.set') {
-		process.send({
-			destination: 'master',
-			type: 'log',
-			data: {
-				level: 'info',
-				message: 'State change: ' + message.data
-			}
-		});
+module.exports = {
+	trace: function (message) {
+		log('info', message);
+	},
+	debug: function (message) {
+		log('info', message);
+	},
+	info: function (message) {
+		log('info', message);
+	},
+	warn: function (message) {
+		log('info', message);
+	},
+	error: function (message) {
+		log('info', message);
 	}
-});
+};

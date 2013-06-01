@@ -21,6 +21,8 @@ var request = require('request'),
 	xml2js = require('xml2js'),
 	schedule = require('node-schedule'),
 
+	logger = require('./logger'),
+
 	currentState = STATE_OFF,
 
 	STATE_OFF = 'off',
@@ -113,7 +115,7 @@ function scheduleNextChange(configuration) {
 	if (newState !== currentState) {
 		process.send({
 			destination: 'broadcast',
-			type: 'scheduler.changeState',
+			type: 'lights.set',
 			data: newState
 		});
 		currentState = newState;
@@ -127,14 +129,7 @@ function scheduleNextChange(configuration) {
 	});
 }
 
-process.send({
-	destination: 'master',
-	type: 'log',
-	data: {
-		level: 'info',
-		message: 'Scheduler started'
-	}
-});
+logger.info('Scheduler started');
 
 process.on('message', function (message) {
 	var configuration;

@@ -8,9 +8,18 @@
 		body {
 			margin: 5px
 		}
-		.system-saving {
+		.global-saving-container {
 			display: none;
-			margin: 10px;
+			position: absolute;
+			z-index: 1;
+			left: 0;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			background-color: rgba(0,0,0,0.5);
+		}
+		.global-saving {
+			margin: 10%;
 		}
 		</style>
 		<script>
@@ -23,10 +32,10 @@
 			document.getElementById(id).innerHTML = text;
 		}
 
-		var changes = {};
+		var changes = {},
+			changesPresent = false;
 		function updateState(category) {
-			var changesPresent = false,
-				p;
+			var p;
 			function checkChangedState(lastSaveSettingsNode, currentSettingsNode) {
 				var found = false;
 				for (p in lastSaveSettingsNode) {
@@ -44,25 +53,27 @@
 					changes[tab] = true;
 				} else {
 					setContent(tab + 'Tab', tab[0].toUpperCase() + tab.substring(1));
+					changes[tab] = false;
 				}
 			}
 			if (category) {
 				updateTabState(category);
 			} else {
-				updateTabState('system');
+				updateTabState('mode');
 				updateTabState('dynamic');
 				updateTabState('static');
 				updateTabState('manual');
 			}
+			changesPresent = false;
 			for (p in changes) {
 				changesPresent = changesPresent || changes[p];
 			}
-			setClass('system.save', changesPresent ? 'btn btn-primary' : 'btn btn-primary disabled');
+			setClass('global.save', changesPresent ? 'btn btn-primary' : 'btn btn-primary disabled');
 		}
 
 		var get = document.getElementById,
 			lastSaveSettings = {
-				system: {
+				mode: {
 					mode: 'dynamic'
 				},
 				dynamic: {
@@ -76,7 +87,7 @@
 				}
 			},
 			currentSettings = {
-				system: {
+				mode: {
 					mode: 'dynamic'
 				},
 				dynamic: {
@@ -90,52 +101,56 @@
 				}
 			},
 			eventHandlers = {
-				system: {
+				global: {
+					save: function () {
+						if (changesPresent) {
+							var saving = document.getElementById('global.saving'),
+								savingProgressBar = document.getElementById('global.savingProgressBar'),
+								settings;
+							saving.style.display = 'block';
+							savingProgressBar.style.width = '0%';
+
+							function updateLastSaveSettings(lastSaveSettingsNode, currentSettingsNode) {
+								var p;
+								for (p in lastSaveSettingsNode) {
+									if (typeof lastSaveSettings[p] === 'object') {
+										updateLastSaveSettings(lastSaveSettingsNode[p], currentSettingsNode[p]);
+									} else {
+										lastSaveSettingsNode[p] = currentSettingsNode[p]
+									}
+								}
+								updateState();
+							}
+							updateLastSaveSettings(lastSaveSettings.mode, currentSettings.mode);
+							updateLastSaveSettings(lastSaveSettings.dynamic, currentSettings.dynamic);
+							updateLastSaveSettings(lastSaveSettings.static, currentSettings.static);
+							updateLastSaveSettings(lastSaveSettings.manual, currentSettings.manual);
+						}
+					}
+				},
+				mode: {
 					mode: {
 						dynamic: function () {
-							setClass('system.mode.dynamic', 'active');
-							setClass('system.mode.static', '');
-							setClass('system.mode.manual', '');
-							currentSettings.system.mode = 'dynamic';
-							updateState('system');
+							setClass('mode.mode.dynamic', 'active');
+							setClass('mode.mode.static', '');
+							setClass('mode.mode.manual', '');
+							currentSettings.mode.mode = 'dynamic';
+							updateState('mode');
 						},
 						static: function () {
-							setClass('system.mode.dynamic', '');
-							setClass('system.mode.static', 'active');
-							setClass('system.mode.manual', '');
-							currentSettings.system.mode = 'static';
-							updateState('system');
+							setClass('mode.mode.dynamic', '');
+							setClass('mode.mode.static', 'active');
+							setClass('mode.mode.manual', '');
+							currentSettings.mode.mode = 'static';
+							updateState('mode');
 						},
 						manual: function () {
-							setClass('system.mode.dynamic', '');
-							setClass('system.mode.static', '');
-							setClass('system.mode.manual', 'active');
-							currentSettings.system.mode = 'manual';
-							updateState('system');
+							setClass('mode.mode.dynamic', '');
+							setClass('mode.mode.static', '');
+							setClass('mode.mode.manual', 'active');
+							currentSettings.mode.mode = 'manual';
+							updateState('mode');
 						},
-					},
-					save: function () {
-						var saving = document.getElementById('system.saving'),
-							savingProgressBar = document.getElementById('system.savingProgressBar'),
-							settings;
-						saving.style.display = 'block';
-						savingProgressBar.style.width = '0%';
-
-						function updateLastSaveSettings(lastSaveSettingsNode, currentSettingsNode) {
-							var p;
-							for (p in lastSaveSettingsNode) {
-								if (typeof lastSaveSettings[p] === 'object') {
-									updateLastSaveSettings(lastSaveSettingsNode[p], currentSettingsNode[p]);
-								} else {
-									lastSaveSettingsNode[p] = currentSettingsNode[p]
-								}
-							}
-							updateState();
-						}
-						updateLastSaveSettings(lastSaveSettings.system, currentSettings.system);
-						updateLastSaveSettings(lastSaveSettings.dynamic, currentSettings.dynamic);
-						updateLastSaveSettings(lastSaveSettings.static, currentSettings.static);
-						updateLastSaveSettings(lastSaveSettings.manual, currentSettings.manual);
 					}
 				},
 				dynamic: {
@@ -176,37 +191,19 @@
 		<h2>Aquarium Control Configuration</h2>
 		<div class="tabbable"> <!-- Only required for left/right tabs -->
 			<ul class="nav nav-tabs">
-				<li class="active"><a href="#tab0" data-toggle="tab" id="systemTab">System</a></li>
+				<li class="active"><a href="#tab0" data-toggle="tab" id="modeTab">Mode</a></li>
 				<li><a href="#tab1" data-toggle="tab" id="dynamicTab">Dynamic</a></li>
 				<li><a href="#tab2" data-toggle="tab" id="staticTab">Static</a></li>
 				<li><a href="#tab3" data-toggle="tab" id="manualTab">Manual</a></li>
 			</ul>
 			<div class="tab-content">
 				<div class="tab-pane active" id="tab0">
-					<form id="form0">
-						<div class="control-group">
-							<label class="control-label" for="inputMode">Mode</label>
-							<div class="controls">
-								<ul class="nav nav-pills nav-stacked">
-									<li id="system.mode.dynamic" onclick="eventHandlers.system.mode.dynamic();" class="active" ><a href="#">Dynamic</a></li>
-									<li id="system.mode.static" onclick="eventHandlers.system.mode.static();"><a href="#">Static</a></li>
-									<li id="system.mode.manual" onclick="eventHandlers.system.mode.manual();"><a href="#">Manual</a></li>
-								</ul>
-							</div>
-						</div>
-						<div class="control-group">
-							<div class="controls">
-								<a id="system.save" class="btn btn-primary disabled" href="#" onclick="eventHandlers.system.save();">Apply Settings</a>
-							</div>
-						</div>
-					</form>
-					<div id="system.saving" class="system-saving">
-						<div class="hero-unit">
-							<h2>Saving</h2>
-							<div class="progress">
-								<div id="system.savingProgressBar" class="bar" style="width: 100%;"></div>
-							</div>
-						</div>
+					<div class="controls">
+						<ul class="nav nav-pills nav-stacked">
+							<li id="mode.mode.dynamic" onclick="eventHandlers.mode.mode.dynamic();" class="active" ><a href="#">Dynamic</a></li>
+							<li id="mode.mode.static" onclick="eventHandlers.mode.mode.static();"><a href="#">Static</a></li>
+							<li id="mode.mode.manual" onclick="eventHandlers.mode.mode.manual();"><a href="#">Manual</a></li>
+						</ul>
 					</div>
 				</div>
 				<div class="tab-pane" id="tab1">
@@ -337,6 +334,25 @@
 				</div>
 			</div>
 		</div>
+		<div>
+			<form id="form0">
+				<div class="control-group">
+					<div class="controls">
+						<a id="global.save" class="btn btn-primary disabled" href="#" onclick="eventHandlers.global.save();">Apply Settings</a>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div id="global.saving" class="global-saving-container">
+			<div class="global-saving">
+				<div class="hero-unit">
+					<h2>Saving</h2>
+					<div class="progress">
+						<div id="global.savingProgressBar" class="bar" style="width: 100%;"></div>
+					</div>
+				</div>
+			</div>
+		</div>
 		<script>
 		var formClass = window.innerWidth < 400 ? "form" : "form-horizontal";
 		setClass('form0', formClass);
@@ -344,7 +360,7 @@
 		setClass('form2', formClass);
 		setClass('form3', formClass);
 		</script>
-		<script src="http://code.jquery.com/jquery.js"></script>
+		<script src="jquery-1.7.1.js"></script>
 		<script src="bootstrap/js/bootstrap.min.js"></script>
 	</body>
 </html>
