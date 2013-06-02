@@ -35,44 +35,44 @@ try {
 } catch(e) {
 	logger.warn('Configuration file is invalid, using defaults: ' + e);
 	configuration = {
-		'mode': 'manual',
-		'dynamic': {
-			'sunriseOffset': {
-				'hour': 0,
-				'minute': 0
+		mode: 'manual',
+		dynamic: {
+			sunriseOffset: {
+				hour: 0,
+				minute: 0
 			},
-			'sunsetOffset': {
-				'hour': 0,
-				'minute': 0
+			sunsetOffset: {
+				hour: 0,
+				minute: 0
 			},
-			'nightOnAfterSunset': {
-				'hour': 2,
-				'minute': 0
+			nightOnAfterSunset: {
+				hour: 2,
+				minute: 0
 			},
-			'nightOnBeforeSunrise': {
-				'hour': 1,
-				'minute': 0
+			nightOnBeforeSunrise: {
+				hour: 1,
+				minute: 0
 			}
 		},
-		'static': {
-			'sunrise': {
-				'hour': 6,
-				'minute': 0
+		static: {
+			sunrise: {
+				hour: 6,
+				minute: 0
 			},
-			'sunset': {
-				'hour': 23,
-				'minute': 58
+			sunset: {
+				hour: 23,
+				minute: 58
 			},
-			'nightOnAfterSunset': {
-				'hour': 2,
-				'minute': 0
+			nightOnAfterSunset: {
+				hour: 2,
+				minute: 0
 			},
-			'nightOnBeforeSunrise': {
-				'hour': 1,
-				'minute': 0
+			nightOnBeforeSunrise: {
+				hour: 1,
+				minute: 0
 			}
 		},
-		'manual': 'off'
+		manual: 'off'
 	};
 }
 

@@ -32,6 +32,10 @@
 			document.getElementById(id).innerHTML = text;
 		}
 
+		function setValue(id, value) {
+			document.getElementById(id).value = value;
+		}
+
 		var changes = {},
 			changesPresent = false;
 		function updateState(category) {
@@ -39,7 +43,7 @@
 			function checkChangedState(lastSaveSettingsNode, currentSettingsNode) {
 				var found = false;
 				for (p in lastSaveSettingsNode) {
-					if (typeof lastSaveSettings[p] === 'object') {
+					if (typeof lastSaveSettingsNode[p] === 'object') {
 						found = found || checkChangedState(lastSaveSettingsNode[p], currentSettingsNode[p]);
 					} else if (lastSaveSettingsNode[p] !== currentSettingsNode[p]) {
 						found = true;
@@ -126,10 +130,88 @@
 					}
 				},
 				dynamic: {
-
+					sunriseOffset: {
+						hour: function (value) {
+							currentSettings.dynamic.sunriseOffset.hour = +value;
+							updateState('dynamic');
+						},
+						minute: function (value) {
+							currentSettings.dynamic.sunriseOffset.minute = +value;
+							updateState('dynamic');
+						}
+					},
+					sunsetOffset: {
+						hour: function (value) {
+							currentSettings.dynamic.sunsetOffset.hour = +value;
+							updateState('dynamic');
+						},
+						minute: function (value) {
+							currentSettings.dynamic.sunsetOffset.minute = +value;
+							updateState('dynamic');
+						}
+					},
+					nightOnAfterSunset: {
+						hour: function (value) {
+							currentSettings.dynamic.nightOnAfterSunset.hour = +value;
+							updateState('dynamic');
+						},
+						minute: function (value) {
+							currentSettings.dynamic.nightOnAfterSunset.minute = +value;
+							updateState('dynamic');
+						}
+					},
+					nightOnBeforeSunrise: {
+						hour: function (value) {
+							currentSettings.dynamic.nightOnBeforeSunrise.hour = +value;
+							updateState('dynamic');
+						},
+						minute: function (value) {
+							currentSettings.dynamic.nightOnBeforeSunrise.minute = +value;
+							updateState('dynamic');
+						}
+					}
 				},
 				static: {
-
+					sunrise: {
+						hour: function (value) {
+							currentSettings.static.sunrise.hour = +value;
+							updateState('static');
+						},
+						minute: function (value) {
+							currentSettings.static.sunrise.minute = +value;
+							updateState('static');
+						}
+					},
+					sunset: {
+						hour: function (value) {
+							currentSettings.static.sunset.hour = +value;
+							updateState('static');
+						},
+						minute: function (value) {
+							currentSettings.static.sunset.minute = +value;
+							updateState('static');
+						}
+					},
+					nightOnAfterSunset: {
+						hour: function (value) {
+							currentSettings.static.nightOnAfterSunset.hour = +value;
+							updateState('static');
+						},
+						minute: function (value) {
+							currentSettings.static.nightOnAfterSunset.minute = +value;
+							updateState('static');
+						}
+					},
+					nightOnBeforeSunrise: {
+						hour: function (value) {
+							currentSettings.static.nightOnBeforeSunrise.hour = +value;
+							updateState('static');
+						},
+						minute: function (value) {
+							currentSettings.static.nightOnBeforeSunrise.minute = +value;
+							updateState('static');
+						}
+					}
 				},
 				manual: {
 					day: function () {
@@ -157,6 +239,17 @@
 			}
 
 			function onload() {
+
+				function loadTimes(basename) {
+					var p;
+					for (p in currentSettings[basename]) {
+						setValue([basename, p, 'hour'].join('.'), currentSettings[basename][p].hour);
+						setValue([basename, p, 'minute'].join('.'), currentSettings[basename][p].minute);
+					}
+				}
+				loadTimes('dynamic');
+				loadTimes('static');
+
 				switch(currentSettings.mode) {
 					case 'dynamic':
 						setClass('mode.dynamic', 'active');
@@ -174,7 +267,6 @@
 						setClass('mode.manual', 'active');
 						break;
 				}
-
 
 				switch(currentSettings.manual) {
 					case 'day':
@@ -219,110 +311,142 @@
 					<form id="form1">
 						<legend>Sunrise Twilight Length</legend>
 						<div class="control-group">
-							<label class="control-label" for="inputDynamicSunriseTwilightLengthHours">Hours</label>
+							<label class="control-label" for="dynamic.nightOnBeforeSunrise.hour">Hours</label>
 							<div class="controls">
-								<input type="number" id="inputDynamicSunriseTwilightLengthHours" value="0" min="0" max="6" />
+								<input type="number" id="dynamic.nightOnBeforeSunrise.hour"
+									onchange="eventHandlers.dynamic.nightOnBeforeSunrise.hour(this.value);"
+									value="0" min="0" max="6" />
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="inputDynamicSunriseTwilightLengthMinutes">Minutes</label>
+							<label class="control-label" for="dynamic.nightOnBeforeSunrise.minute">Minutes</label>
 							<div class="controls">
-								<input type="number" id="inputDynamicSunriseTwilightLengthMinutes" value="0" min="-0" max="59" />
+								<input type="number" id="dynamic.nightOnBeforeSunrise.minute"
+									onchange="eventHandlers.dynamic.nightOnBeforeSunrise.minute(this.value);"
+									value="0" min="-0" max="59" />
 							</div>
 						</div>
 						<legend>Sunrise Offset</legend>
 						<div class="control-group">
-							<label class="control-label" for="inputDynamicSunriseOffsetHours">Hours</label>
+							<label class="control-label" for="dynamic.sunriseOffset.hour">Hours</label>
 							<div class="controls">
-								<input type="number" id="inputDynamicSunriseOffsetHours" value="0" min="-6" max="6" />
+								<input type="number" id="dynamic.sunriseOffset.hour"
+									onchange="eventHandlers.dynamic.sunriseOffset.hour(this.value);"
+									value="0" min="-1" max="1" />
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="inputDynamicSunriseOffsetMinutes">Minutes</label>
+							<label class="control-label" for="dynamic.sunriseOffset.minute">Minutes</label>
 							<div class="controls">
-								<input type="number" id="inputDynamicSunriseOffsetMinutes" value="0" min="-59" max="59" />
+								<input type="number" id="dynamic.sunriseOffset.minute"
+									onchange="eventHandlers.dynamic.sunriseOffset.minute(this.value);"
+									value="0" min="-59" max="59" />
 							</div>
 						</div>
 						<legend>Sunset Offset</legend>
 						<div class="control-group">
-							<label class="control-label" for="inputDynamicSunsetOffsetHours">Hours</label>
+							<label class="control-label" for="dynamic.sunsetOffset.hour">Hours</label>
 							<div class="controls">
-								<input type="number" id="inputDynamicSunsetOffsetHours" value="0" min="-6" max="6" />
+								<input type="number" id="dynamic.sunsetOffset.hour"
+									onchange="eventHandlers.dynamic.sunsetOffset.hour(this.value);"
+									value="0" min="-1" max="1" />
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="inputDynamicSunsetOffsetMinutes">Minutes</label>
+							<label class="control-label" for="dynamic.sunsetOffset.minute">Minutes</label>
 							<div class="controls">
-								<input type="number" id="inputDynamicSunsetOffsetMinutes" value="0" min="-59" max="59" />
+								<input type="number" id="dynamic.sunsetOffset.minute"
+									onchange="eventHandlers.dynamic.sunsetOffset.minute(this.value);"
+									value="0" min="-59" max="59" />
 							</div>
 						</div>
 						<legend>Sunset Twilight Length</legend>
 						<div class="control-group">
-							<label class="control-label" for="inputDynamicSunsetTwilightLengthHours">Hours</label>
+							<label class="control-label" for="dynamic.nightOnAfterSunset.hour">Hours</label>
 							<div class="controls">
-								<input type="number" id="inputDynamicSunsetTwilightLengthHours" value="0" min="0" max="6" />
+								<input type="number" id="dynamic.nightOnAfterSunset.hour"
+									onchange="eventHandlers.dynamic.nightOnAfterSunset.hour(this.value);"
+									value="0" min="0" max="6" />
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="inputDynamicSunsetTwilightLengthMinutes">Minutes</label>
+							<label class="control-label" for="dynamic.nightOnAfterSunset.minute">Minutes</label>
 							<div class="controls">
-								<input type="number" id="inputDynamicSunsetTwilightLengthMinutes" value="0" min="-0" max="59" />
+								<input type="number" id="dynamic.nightOnAfterSunset.minute"
+									onchange="eventHandlers.dynamic.nightOnAfterSunset.minute(this.value);"
+									value="0" min="-0" max="59" />
 							</div>
 						</div>
 					</form>
 				</div>
 				<div class="tab-pane" id="tab2">
 					<form id="form2">
-						<legend>Sunrise Twilight</legend>
+						<legend>Sunrise Twilight Length</legend>
 						<div class="control-group">
-							<label class="control-label" for="inputManualSunriseTwilightHours">Hours</label>
+							<label class="control-label" for="static.nightOnBeforeSunrise.hour">Hours</label>
 							<div class="controls">
-								<input type="number" id="inputManualSunriseTwilightHours" value="0" min="0" max="6" />
+								<input type="number" id="static.nightOnBeforeSunrise.hour"
+									onchange="eventHandlers.static.nightOnBeforeSunrise.hour(this.value);"
+									value="0" min="0" max="6" />
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="inputManualSunriseTwilightMinutes">Minutes</label>
+							<label class="control-label" for="static.nightOnBeforeSunrise.minute">Minutes</label>
 							<div class="controls">
-								<input type="number" id="inputManualSunriseTwilightMinutes" value="0" min="-0" max="59" />
+								<input type="number" id="static.nightOnBeforeSunrise.minute"
+									onchange="eventHandlers.static.nightOnBeforeSunrise.minute(this.value);"
+									value="0" min="-0" max="59" />
 							</div>
 						</div>
 						<legend>Sunrise</legend>
 						<div class="control-group">
-							<label class="control-label" for="inputManualSunriseHours">Hours</label>
+							<label class="control-label" for="static.sunrise.hour">Hours</label>
 							<div class="controls">
-								<input type="number" id="inputManualSunriseHours" value="0" min="-6" max="6" />
+								<input type="number" id="static.sunrise.hour"
+									onchange="eventHandlers.static.sunrise.hour(this.value);"
+									value="0" min="0" max="11" />
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="inputManualSunriseMinutes">Minutes</label>
+							<label class="control-label" for="static.sunrise.minute">Minutes</label>
 							<div class="controls">
-								<input type="number" id="inputManualSunriseMinutes" value="0" min="-59" max="59" />
+								<input type="number" id="static.sunrise.minute"
+									onchange="eventHandlers.static.sunrise.minute(this.value);"
+									value="0" min="0" max="59" />
 							</div>
 						</div>
 						<legend>Sunset</legend>
 						<div class="control-group">
-							<label class="control-label" for="inputManualSunsetHours">Hours</label>
+							<label class="control-label" for="static.sunset.hour">Hours</label>
 							<div class="controls">
-								<input type="number" id="inputManualSunsetHours" value="0" min="-6" max="6" />
+								<input type="number" id="static.sunset.hour"
+									onchange="eventHandlers.static.sunset.hour(this.value);"
+									value="0" min="12" max="23" />
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="inputManualSunsetMinutes">Minutes</label>
+							<label class="control-label" for="static.sunset.minute">Minutes</label>
 							<div class="controls">
-								<input type="number" id="inputManualSunsetMinutes" value="0" min="-59" max="59" />
+								<input type="number" id="static.sunset.minute"
+									onchange="eventHandlers.static.sunset.minute(this.value);"
+									value="0" min="0" max="59" />
 							</div>
 						</div>
-						<legend>Sunset Twilight</legend>
+						<legend>Sunset Twilight Length</legend>
 						<div class="control-group">
-							<label class="control-label" for="inputManualSunsetTwilightHours">Hours</label>
+							<label class="control-label" for="static.nightOnAfterSunset.hour">Hours</label>
 							<div class="controls">
-								<input type="number" id="inputManualSunsetTwilightHours" value="0" min="0" max="6" />
+								<input type="number" id="static.nightOnAfterSunset.hour"
+									onchange="eventHandlers.static.nightOnAfterSunset.hour(this.value);"
+									value="0" min="0" max="6" />
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="inputManualSunsetTwilightMinutes">Minutes</label>
+							<label class="control-label" for="static.nightOnAfterSunset.minute">Minutes</label>
 							<div class="controls">
-								<input type="number" id="inputManualSunsetTwilightMinutes" value="0" min="-0" max="59" />
+								<input type="number" id="static.nightOnAfterSunset.minute"
+									onchange="eventHandlers.static.nightOnAfterSunset.minute(this.value);"
+									value="0" min="0" max="59" />
 							</div>
 						</div>
 					</form>
