@@ -83,26 +83,54 @@
 					save: function () {
 						if (changesPresent) {
 							var saving = document.getElementById('global.saving'),
-								savingProgressBar = document.getElementById('global.savingProgressBar'),
-								settings;
+								settings,
+								xhr,
+								startTime = Date.now(),
+								endTime;
 							saving.style.display = 'block';
-							savingProgressBar.style.width = '0%';
 
 							function updateLastSaveSettings(lastSaveSettingsNode, currentSettingsNode) {
 								var p;
 								for (p in lastSaveSettingsNode) {
-									if (typeof lastSaveSettings[p] === 'object') {
+									if (typeof lastSaveSettingsNode[p] === 'object') {
 										updateLastSaveSettings(lastSaveSettingsNode[p], currentSettingsNode[p]);
 									} else {
-										lastSaveSettingsNode[p] = currentSettingsNode[p]
+										lastSaveSettingsNode[p] = currentSettingsNode[p];
 									}
 								}
-								updateState();
 							}
-							updateLastSaveSettings(lastSaveSettings.mode, currentSettings.mode);
-							updateLastSaveSettings(lastSaveSettings.dynamic, currentSettings.dynamic);
-							updateLastSaveSettings(lastSaveSettings.static, currentSettings.static);
-							updateLastSaveSettings(lastSaveSettings.manual, currentSettings.manual);
+							xhr = new XMLHttpRequest();
+							xhr.open('POST', document.location.origin + '/save', true);
+							xhr.setRequestHeader('Content-Type', 'application/json');
+							xhr.send(JSON.stringify(currentSettings, false, '\t'));
+							xhr.onreadystatechange = function () {
+								if (xhr.readyState === 4) {
+									endTime = Date.now();
+									function finalize() {
+										if (xhr.status === 200) {
+											lastSaveSettings.mode = currentSettings.mode;
+											lastSaveSettings.manual = currentSettings.manual;
+											updateLastSaveSettings(lastSaveSettings.dynamic, currentSettings.dynamic);
+											updateLastSaveSettings(lastSaveSettings.static, currentSettings.static);
+										} else {
+											if (xhr.responseText) {
+												alert('Error saving settings to the aquarium:\n' + xhr.responseText);
+											} else {
+												alert('Error saving settings to the aquarium: code ' + xhr.status);
+											}
+										}
+										saving.style.display = 'none';
+										updateState();
+									}
+									if (endTime - startTime < 500) {
+										setTimeout(function () {
+											finalize();
+										}, 500 - endTime + startTime);
+									} else {
+										finalize();
+									}
+								}
+							}
 						}
 					}
 				},
@@ -480,9 +508,6 @@
 			<div class="global-saving">
 				<div class="hero-unit">
 					<h2>Saving</h2>
-					<div class="progress">
-						<div id="global.savingProgressBar" class="bar" style="width: 100%;"></div>
-					</div>
 				</div>
 			</div>
 		</div>

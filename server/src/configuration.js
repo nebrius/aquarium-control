@@ -79,7 +79,7 @@ try {
 process.send({
 	destination: 'broadcast',
 	type: 'configuration.set',
-	data: JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'settings', 'usersettings.json')))
+	data: configuration
 });
 
 http.createServer(function(request, response) {
@@ -87,7 +87,8 @@ http.createServer(function(request, response) {
 		pathname = uri.pathname,
 		renderStream,
 		compiledData = '',
-		mimeType;
+		mimeType,
+		data;
 
 	function write(code, mimeType, body) {
 		response.writeHead(code, {
@@ -132,6 +133,23 @@ http.createServer(function(request, response) {
 			}
 		}
 	} else if (request.method === 'POST') {
-
+		data = '';
+		request.on('data', function (chunk) {
+			data += chunk.toString();
+		});
+		request.on('end', function () {
+			try {
+				configuration = JSON.parse(data);
+				write(200, 'text/plain', 'OK');
+			} catch(e) {
+				write(400, 'Invalid configuration data: ' + e);
+			}
+			fs.writeFileSync(path.join(__dirname, '..', 'settings', 'usersettings.json'), data);
+			process.send({
+				destination: 'broadcast',
+				type: 'configuration.set',
+				data: configuration
+			});
+		});
 	}
 }).listen(8080);
