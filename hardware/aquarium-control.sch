@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Sat 08 Jun 2013 07:04:43 PM PDT
+EESchema Schematic File Version 2  date 6/8/2013 9:46:08 PM
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -31,13 +31,13 @@ LIBS:contrib
 LIBS:valves
 LIBS:aquarium-control-cache
 LIBS:aquarium-control-cache
-EELAYER 24 0
+EELAYER 27 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title ""
-Date "8 jun 2013"
+Date "9 jun 2013"
 Rev ""
 Comp ""
 Comment1 ""
@@ -132,17 +132,6 @@ F 2 "" H 9650 3000 60  0001 C CNN
 F 3 "" H 9650 3000 60  0001 C CNN
 	1    9650 3000
 	1    0    0    -1  
-$EndComp
-$Comp
-L FUSE F2
-U 1 1 5189C531
-P 9000 2550
-F 0 "F2" H 9100 2600 40  0000 C CNN
-F 1 "FUSE" H 8900 2500 40  0000 C CNN
-F 2 "" H 9000 2550 60  0001 C CNN
-F 3 "" H 9000 2550 60  0001 C CNN
-	1    9000 2550
-	0    1    1    0   
 $EndComp
 $Comp
 L CONN_2 P3
@@ -297,7 +286,6 @@ NoConn ~ 7900 1700
 NoConn ~ 7900 3200
 NoConn ~ 6700 1450
 NoConn ~ 6700 1300
-NoConn ~ 5650 3400
 NoConn ~ 5650 3000
 $Comp
 L CONN_2X2 P1
@@ -384,13 +372,11 @@ Wire Wire Line
 Wire Wire Line
 	9200 2300 9300 2300
 Wire Wire Line
-	9300 3000 9000 3000
+	9000 3000 9300 3000
 Wire Wire Line
-	9000 3000 9000 2800
+	9000 2100 9000 3000
 Wire Wire Line
 	9300 2100 9000 2100
-Wire Wire Line
-	9000 2100 9000 2300
 Wire Wire Line
 	5450 3500 5450 3400
 Wire Wire Line
@@ -483,12 +469,6 @@ Wire Wire Line
 Wire Wire Line
 	5900 1800 5900 2400
 Connection ~ 4100 1800
-Wire Wire Line
-	2800 2800 2800 3100
-Wire Wire Line
-	2800 3100 4100 3100
-Wire Wire Line
-	4100 3100 4100 3000
 Wire Wire Line
 	2700 2000 2700 1600
 Wire Wire Line
@@ -656,4 +636,13 @@ Wire Wire Line
 	3500 1900 3500 1800
 Wire Wire Line
 	3500 2300 3500 2400
+Wire Wire Line
+	5650 3400 5650 3500
+Connection ~ 5650 3500
+Wire Wire Line
+	4100 3000 4100 3050
+Wire Wire Line
+	4100 3050 2800 3050
+Wire Wire Line
+	2800 3050 2800 2800
 $EndSCHEMATC
