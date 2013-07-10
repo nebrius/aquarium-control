@@ -1,6 +1,6 @@
-update=Sat 08 Jun 2013 05:06:09 PM PDT
+update=6/24/2013 9:21:20 PM
 version=1
-last_client=cvpcb
+last_client=eeschema
 [general]
 version=1
 [pcbnew]
@@ -34,6 +34,11 @@ LibName10=pga_sockets
 LibName11=valves
 LibName12=footprints
 LibDir=
+[cvpcb]
+version=1
+NetIExt=net
+[cvpcb/libraries]
+EquName1=devcms
 [eeschema]
 version=1
 LibDir=
@@ -74,8 +79,3 @@ LibName28=atmel
 LibName29=contrib
 LibName30=valves
 LibName31=aquarium-control-cache
-[cvpcb]
-version=1
-NetIExt=net
-[cvpcb/libraries]
-EquName1=devcms
