@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2013-04-19 BZR 4011)-stable date = 6/8/2013 9:16:19 PM
+Cmp-Mod V01 Created by CvPcb (2013-04-19 BZR 4011)-stable date = 7/15/2013 9:10:50 PM
 
 BeginCmp
 TimeStamp = /51A406CD;
@@ -11,6 +11,20 @@ BeginCmp
 TimeStamp = /51A40382;
 Reference = C2;
 ValeurCmp = 0.1u;
+IdModule  = SM0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /51DD00F3;
+Reference = C3;
+ValeurCmp = 10u;
+IdModule  = SM0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /51DD0102;
+Reference = C4;
+ValeurCmp = 10u;
 IdModule  = SM0805;
 EndCmp
 
@@ -36,10 +50,24 @@ IdModule  = Night_LED;
 EndCmp
 
 BeginCmp
+TimeStamp = /51DCF9E2;
+Reference = D4;
+ValeurCmp = DIODESCH;
+IdModule  = SM0805;
+EndCmp
+
+BeginCmp
 TimeStamp = /51A3F0A2;
 Reference = F1;
 ValeurCmp = FUSE;
 IdModule  = Fuse;
+EndCmp
+
+BeginCmp
+TimeStamp = /51DCF8E4;
+Reference = L1;
+ValeurCmp = INDUCTOR;
+IdModule  = SM0805;
 EndCmp
 
 BeginCmp
@@ -171,15 +199,22 @@ EndCmp
 BeginCmp
 TimeStamp = /51A3E8D5;
 Reference = U3;
-ValeurCmp = IM06GR;
+ValeurCmp = IM03GR;
 IdModule  = IM06GR;
 EndCmp
 
 BeginCmp
 TimeStamp = /51A3E8E4;
 Reference = U4;
-ValeurCmp = IM06GR;
+ValeurCmp = IM03GR;
 IdModule  = IM06GR;
+EndCmp
+
+BeginCmp
+TimeStamp = /51DCF4E8;
+Reference = U5;
+ValeurCmp = AP1509;
+IdModule  = AP1509;
 EndCmp
 
 EndListe

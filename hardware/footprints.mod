@@ -1,4 +1,4 @@
-PCBNEW-LibModule-V1  6/8/2013 9:16:01 PM
+PCBNEW-LibModule-V1  7/15/2013 11:24:14 PM
 # encoding utf-8
 Units mm
 $INDEX
@@ -6,6 +6,7 @@ $INDEX
 2-Header
 3-Header
 6-Header
+AP1509
 CD40109B
 Cap22
 D3043
@@ -287,6 +288,76 @@ Of 0 0 0
 Ro 0 0 0
 $EndSHAPE3D
 $EndMODULE 6-Header
+$MODULE AP1509
+Po 0 0 0 15 51E4E70A 00000000 ~~
+Li AP1509
+Sc 0
+AR 
+Op 0 0 0
+T0 2.54 -2.54 1 1 0 0.2 N V 21 N "AP1509"
+T1 2.54 2.54 1.524 1.524 0 0.3048 N I 21 N "VAL**"
+DS -1.27 -1.5 5.08 -1.5 0.381 21
+DS -1.27 -4 5.08 -4 0.381 21
+DS 5.08 -4 5.08 -1.5 0.381 21
+DS -1.27 -1.5 -1.27 -4 0.381 21
+DS 0 -4 0 -1.5 0.381 21
+$PAD
+Sh "1" R 0.6 1.55 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 0 0
+$EndPAD
+$PAD
+Sh "2" R 0.6 1.55 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 1.32 0
+$EndPAD
+$PAD
+Sh "3" R 0.6 1.55 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 2.64 0
+$EndPAD
+$PAD
+Sh "4" R 0.6 1.55 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 3.96 0
+$EndPAD
+$PAD
+Sh "5" R 0.6 1.55 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 3.96 -5.6
+$EndPAD
+$PAD
+Sh "6" R 0.6 1.55 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 2.64 -5.6
+$EndPAD
+$PAD
+Sh "7" R 0.6 1.55 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 1.32 -5.6
+$EndPAD
+$PAD
+Sh "8" R 0.6 1.55 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 0 -5.6
+$EndPAD
+$EndMODULE AP1509
 $MODULE CD40109B
 Po 0 0 0 15 518F10F6 00000000 ~~
 Li CD40109B

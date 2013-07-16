@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 7/9/2013 11:11:05 PM
+EESchema Schematic File Version 2  date 7/9/2013 11:29:03 PM
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -494,7 +494,7 @@ L INDUCTOR L1
 U 1 1 51DCF8E4
 P 8200 1200
 F 0 "L1" V 8150 1200 40  0000 C CNN
-F 1 "INDUCTOR" V 8300 1200 40  0000 C CNN
+F 1 "47u" V 8300 1200 40  0000 C CNN
 F 2 "~" H 8200 1200 60  0000 C CNN
 F 3 "~" H 8200 1200 60  0000 C CNN
 	1    8200 1200
