@@ -24,16 +24,27 @@ var path = require('path'),
 
 	mu = require('mu2'),
 
-	logger = require('./logger'),
+	DEFAULT_PORT = 8080,
 
-	configuration;
+	configuration,
+	appConfiguration;
 
-logger.info('Configuration started');
+function log(level, message) {
+	process.send({
+	    destination: 'master',
+    	type: 'log',
+    	data: {
+        	level: level,
+        	message: message
+    	}
+	});
+}
 
 try {
 	configuration = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'settings', 'usersettings.json')));
+	appConfiguration = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'settings', 'appsettings.json')));
 } catch(e) {
-	logger.warn('Configuration file is invalid, using defaults: ' + e);
+	log('warn', 'Configuration file is invalid, using defaults: ' + e);
 	configuration = {
 		mode: 'manual',
 		dynamic: {
@@ -101,7 +112,7 @@ http.createServer(function(request, response) {
 	if (request.method === 'GET') {
 		if (['/', '/index.html'].indexOf(pathname) !== -1) {
 			pathname = path.join(__dirname, '..', 'templates');
-			logger.info('Serving generated file "' + path.join(pathname, 'index.html') + '"');
+			log('info', 'Serving generated file "' + path.join(pathname, 'index.html') + '"');
 
 			mu.root = pathname;
 			renderStream = mu.compileAndRender('index.html', {
@@ -126,7 +137,7 @@ http.createServer(function(request, response) {
 				} else {
 					mimeType = 'text/plain';
 				}
-				logger.info('Serving file "' + pathname + '"');
+				log('info', 'Serving file "' + pathname + '"');
 				write(200, mimeType, fs.readFileSync(pathname));
 			} else {
 				write(404, 'text/plain', 'Page not found');
@@ -152,4 +163,13 @@ http.createServer(function(request, response) {
 			});
 		});
 	}
-}).listen(8080);
+}).listen(appConfiguration.port || DEFAULT_PORT);
+
+process.send({
+    destination: 'master',
+    type: 'log',
+    data: {
+	    level: 'info',
+        message: 'Configuration started on port ' + appConfiguration.port || DEFAULT_PORT
+    }
+});

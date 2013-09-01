@@ -2,7 +2,6 @@
 	"name": "aquarium-control",
 	"version": "0.1.0",
 	"description": "Runs on a Raspberry Pi to control lighting for an aquarium",
-	"main": "src/server.js",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/bryan-m-hughes/aquarium-control"
@@ -14,6 +13,7 @@
 		"transport-logger": "0.1.x",
 		"mu2": "0.5.x"
 	},
+	"bin": "./bin/aquarium-controller",
 	"author": "Bryan Hughes <bryan@theoreticalideations.com> (http://theoreticalideations.com)",
 	"licenses": [{
 		"type": "GPLv3",

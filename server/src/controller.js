@@ -17,9 +17,29 @@
 	along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var logger = require('./logger');
+var path = require('path'),
+	exec = require('child_process').exec,
 
-logger.info('Controller started');
+	STATE_OFF = 'off',
+	STATE_DAY = 'day',
+	STATE_NIGHT = 'night',
+
+	driverPath = path.join(__dirname, '..', '..', 'driver', 'driver.py');
+
+function log(level, message) {
+    process.send({
+        destination: 'master',
+        type: 'log',
+        data: {
+            level: level,
+            message: message
+        }
+    });
+}
+
+exec(driverPath + ' off');
+
+log('info', 'Controller started');
 
 process.on('message', function (message) {
 	if (message.type === 'lights.set') {
@@ -31,5 +51,16 @@ process.on('message', function (message) {
 				message: 'State change: ' + message.data
 			}
 		});
+		switch(message.data) {
+			case STATE_OFF:
+				exec(driverPath + ' off');
+				break;
+			case STATE_DAY:
+				exec(driverPath + ' day');
+				break;
+			case STATE_NIGHT:
+				exec(driverPath + ' night');
+				break;
+		}
 	}
 });

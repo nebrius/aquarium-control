@@ -21,13 +21,23 @@ var request = require('request'),
 	xml2js = require('xml2js'),
 	schedule = require('node-schedule'),
 
-	logger = require('./logger'),
 
 	currentState = STATE_OFF,
 
 	STATE_OFF = 'off',
 	STATE_DAY = 'day',
 	STATE_NIGHT = 'night';
+
+function log(level, message) {
+    process.send({
+        destination: 'master',
+        type: 'log',
+        data: {
+            level: level,
+            message: message
+        }
+    });
+}
 
 function getBaseDate() {
 	var currentTime = new Date();
@@ -129,7 +139,7 @@ function scheduleNextChange(configuration) {
 	});
 }
 
-logger.info('Scheduler started');
+log('info', 'Scheduler started');
 
 process.on('message', function (message) {
 	var configuration;
