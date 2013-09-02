@@ -35,16 +35,16 @@ except RuntimeError:
     exit(1)
 GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
-GPIO.setup(19, GPIO.OUT)
-GPIO.setup(21, GPIO.OUT)
+GPIO.setup(3, GPIO.OUT)
+GPIO.setup(5, GPIO.OUT)
 
 # Set the output pins according to the state
 if state == "day":
-    GPIO.output(19, GPIO.HIGH)
+    GPIO.output(5, GPIO.LOW)
 else:
-    GPIO.output(19, GPIO.LOW)
+    GPIO.output(5, GPIO.HIGH)
 
 if state == "night":
-    GPIO.output(21, GPIO.HIGH)
+    GPIO.output(3, GPIO.LOW)
 else:
-    GPIO.output(21, GPIO.LOW)
+    GPIO.output(3, GPIO.HIGH)
