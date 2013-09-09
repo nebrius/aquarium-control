@@ -27,14 +27,14 @@ var path = require('path'),
 	driverPath = path.join(__dirname, '..', '..', 'driver', 'driver.py');
 
 function log(level, message) {
-    process.send({
-        destination: 'master',
-        type: 'log',
-        data: {
-            level: level,
-            message: message
-        }
-    });
+	process.send({
+		destination: 'master',
+		type: 'log',
+		data: {
+			level: level,
+			message: message
+		}
+	});
 }
 
 exec(driverPath + ' off');

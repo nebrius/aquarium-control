@@ -28,50 +28,25 @@
 			document.getElementById(id).className = className;
 		}
 
-		function setContent(id, text) {
-			document.getElementById(id).innerHTML = text;
-		}
-
-		function setValue(id, value) {
-			document.getElementById(id).value = value;
+		function setVisibility(id, visible) {
+			document.getElementById(id).style.display = visible ? 'inherit' : 'none';
 		}
 
 		var changes = {},
 			changesPresent = false;
-		function updateState(category) {
+		function updateState() {
 			var p;
 			function checkChangedState(lastSaveSettingsNode, currentSettingsNode) {
-				var found = false;
 				for (p in lastSaveSettingsNode) {
 					if (typeof lastSaveSettingsNode[p] === 'object') {
-						found = found || checkChangedState(lastSaveSettingsNode[p], currentSettingsNode[p]);
+						checkChangedState(lastSaveSettingsNode[p], currentSettingsNode[p]);
 					} else if (lastSaveSettingsNode[p] !== currentSettingsNode[p]) {
-						found = true;
+						changesPresent = true;
 					}
 				}
-				return found;
-			}
-			function updateTabState(tab) {
-				if (checkChangedState(lastSaveSettings[tab], currentSettings[tab])) {
-					setContent(tab + 'Tab', tab[0].toUpperCase() + tab.substring(1) + '*');
-					changes[tab] = true;
-				} else {
-					setContent(tab + 'Tab', tab[0].toUpperCase() + tab.substring(1));
-					changes[tab] = false;
-				}
-			}
-			if (category) {
-				updateTabState(category);
-			} else {
-				updateTabState('mode');
-				updateTabState('dynamic');
-				updateTabState('static');
-				updateTabState('manual');
 			}
 			changesPresent = false;
-			for (p in changes) {
-				changesPresent = changesPresent || changes[p];
-			}
+			checkChangedState(lastSaveSettings, currentSettings);
 			setClass('global.save', changesPresent ? 'btn btn-primary' : 'btn btn-primary disabled');
 		}
 
@@ -135,110 +110,19 @@
 					}
 				},
 				mode: {
-					dynamic: function () {
-						setClass('mode.dynamic', 'active');
-						setClass('mode.static', '');
+					automatic: function () {
+						setClass('mode.automatic', 'active');
 						setClass('mode.manual', '');
-						currentSettings.mode = 'dynamic';
-						updateState('mode');
-					},
-					static: function () {
-						setClass('mode.dynamic', '');
-						setClass('mode.static', 'active');
-						setClass('mode.manual', '');
-						currentSettings.mode = 'static';
-						updateState('mode');
+						setVisibility('manual', false);
+						currentSettings.mode = 'automatic';
+						updateState();
 					},
 					manual: function () {
-						setClass('mode.dynamic', '');
-						setClass('mode.static', '');
+						setClass('mode.automatic', '');
 						setClass('mode.manual', 'active');
+						setVisibility('manual', true);
 						currentSettings.mode = 'manual';
-						updateState('mode');
-					}
-				},
-				dynamic: {
-					sunriseOffset: {
-						hour: function (value) {
-							currentSettings.dynamic.sunriseOffset.hour = +value;
-							updateState('dynamic');
-						},
-						minute: function (value) {
-							currentSettings.dynamic.sunriseOffset.minute = +value;
-							updateState('dynamic');
-						}
-					},
-					sunsetOffset: {
-						hour: function (value) {
-							currentSettings.dynamic.sunsetOffset.hour = +value;
-							updateState('dynamic');
-						},
-						minute: function (value) {
-							currentSettings.dynamic.sunsetOffset.minute = +value;
-							updateState('dynamic');
-						}
-					},
-					nightOnAfterSunset: {
-						hour: function (value) {
-							currentSettings.dynamic.nightOnAfterSunset.hour = +value;
-							updateState('dynamic');
-						},
-						minute: function (value) {
-							currentSettings.dynamic.nightOnAfterSunset.minute = +value;
-							updateState('dynamic');
-						}
-					},
-					nightOnBeforeSunrise: {
-						hour: function (value) {
-							currentSettings.dynamic.nightOnBeforeSunrise.hour = +value;
-							updateState('dynamic');
-						},
-						minute: function (value) {
-							currentSettings.dynamic.nightOnBeforeSunrise.minute = +value;
-							updateState('dynamic');
-						}
-					}
-				},
-				static: {
-					sunrise: {
-						hour: function (value) {
-							currentSettings.static.sunrise.hour = +value;
-							updateState('static');
-						},
-						minute: function (value) {
-							currentSettings.static.sunrise.minute = +value;
-							updateState('static');
-						}
-					},
-					sunset: {
-						hour: function (value) {
-							currentSettings.static.sunset.hour = +value;
-							updateState('static');
-						},
-						minute: function (value) {
-							currentSettings.static.sunset.minute = +value;
-							updateState('static');
-						}
-					},
-					nightOnAfterSunset: {
-						hour: function (value) {
-							currentSettings.static.nightOnAfterSunset.hour = +value;
-							updateState('static');
-						},
-						minute: function (value) {
-							currentSettings.static.nightOnAfterSunset.minute = +value;
-							updateState('static');
-						}
-					},
-					nightOnBeforeSunrise: {
-						hour: function (value) {
-							currentSettings.static.nightOnBeforeSunrise.hour = +value;
-							updateState('static');
-						},
-						minute: function (value) {
-							currentSettings.static.nightOnBeforeSunrise.minute = +value;
-							updateState('static');
-						}
+						updateState();
 					}
 				},
 				manual: {
@@ -247,52 +131,37 @@
 						setClass('manual.night', '');
 						setClass('manual.off', '');
 						currentSettings.manual = 'day';
-						updateState('manual');
+						updateState();
 					},
 					night: function () {
 						setClass('manual.day', '');
 						setClass('manual.night', 'active');
 						setClass('manual.off', '');
 						currentSettings.manual = 'night';
-						updateState('manual');
+						updateState();
 					},
 					off: function () {
 						setClass('manual.day', '');
 						setClass('manual.night', '');
 						setClass('manual.off', 'active');
 						currentSettings.manual = 'off';
-						updateState('manual');
+						updateState();
 					}
 				}
 			}
 
 			function onload() {
 
-				function loadTimes(basename) {
-					var p;
-					for (p in currentSettings[basename]) {
-						setValue([basename, p, 'hour'].join('.'), currentSettings[basename][p].hour);
-						setValue([basename, p, 'minute'].join('.'), currentSettings[basename][p].minute);
-					}
-				}
-				loadTimes('dynamic');
-				loadTimes('static');
-
 				switch(currentSettings.mode) {
-					case 'dynamic':
-						setClass('mode.dynamic', 'active');
-						setClass('mode.static', '');
+					case 'automatic':
+						setClass('mode.automatic', 'active');
 						setClass('mode.manual', '');
-						break;
-					case 'static':
-						setClass('mode.dynamic', '');
-						setClass('mode.static', 'active');
-						setClass('mode.manual', '');
+						setVisibility('manual', false);
 						break;
 					case 'manual':
-						setClass('mode.dynamic', '');
-						setClass('mode.static', '');
+						setClass('mode.automatic', '');
 						setClass('mode.manual', 'active');
+						setVisibility('manual', true);
 						break;
 				}
 
@@ -317,185 +186,7 @@
 		</script>
 	</head>
 	<body onload="onload();">
-		<h2>Aquarium Control Configuration</h2>
-		<div class="tabbable"> <!-- Only required for left/right tabs -->
-			<ul class="nav nav-tabs">
-				<li class="active"><a href="#tab0" data-toggle="tab" id="modeTab">Mode</a></li>
-				<li><a href="#tab1" data-toggle="tab" id="dynamicTab">Dynamic</a></li>
-				<li><a href="#tab2" data-toggle="tab" id="staticTab">Static</a></li>
-				<li><a href="#tab3" data-toggle="tab" id="manualTab">Manual</a></li>
-			</ul>
-			<div class="tab-content">
-				<div class="tab-pane active" id="tab0">
-					<div class="controls">
-						<ul class="nav nav-pills nav-stacked">
-							<li id="mode.dynamic" onclick="eventHandlers.mode.dynamic();"><a href="#">Dynamic</a></li>
-							<li id="mode.static" onclick="eventHandlers.mode.static();"><a href="#">Static</a></li>
-							<li id="mode.manual" onclick="eventHandlers.mode.manual();"><a href="#">Manual</a></li>
-						</ul>
-					</div>
-				</div>
-				<div class="tab-pane" id="tab1">
-					<form id="form1">
-						<legend>Sunrise Twilight Length</legend>
-						<div class="control-group">
-							<label class="control-label" for="dynamic.nightOnBeforeSunrise.hour">Hours</label>
-							<div class="controls">
-								<input type="number" id="dynamic.nightOnBeforeSunrise.hour"
-									onchange="eventHandlers.dynamic.nightOnBeforeSunrise.hour(this.value);"
-									value="0" min="0" max="6" />
-							</div>
-						</div>
-						<div class="control-group">
-							<label class="control-label" for="dynamic.nightOnBeforeSunrise.minute">Minutes</label>
-							<div class="controls">
-								<input type="number" id="dynamic.nightOnBeforeSunrise.minute"
-									onchange="eventHandlers.dynamic.nightOnBeforeSunrise.minute(this.value);"
-									value="0" min="-0" max="59" />
-							</div>
-						</div>
-						<legend>Sunrise Offset</legend>
-						<div class="control-group">
-							<label class="control-label" for="dynamic.sunriseOffset.hour">Hours</label>
-							<div class="controls">
-								<input type="number" id="dynamic.sunriseOffset.hour"
-									onchange="eventHandlers.dynamic.sunriseOffset.hour(this.value);"
-									value="0" min="-1" max="1" />
-							</div>
-						</div>
-						<div class="control-group">
-							<label class="control-label" for="dynamic.sunriseOffset.minute">Minutes</label>
-							<div class="controls">
-								<input type="number" id="dynamic.sunriseOffset.minute"
-									onchange="eventHandlers.dynamic.sunriseOffset.minute(this.value);"
-									value="0" min="-59" max="59" />
-							</div>
-						</div>
-						<legend>Sunset Offset</legend>
-						<div class="control-group">
-							<label class="control-label" for="dynamic.sunsetOffset.hour">Hours</label>
-							<div class="controls">
-								<input type="number" id="dynamic.sunsetOffset.hour"
-									onchange="eventHandlers.dynamic.sunsetOffset.hour(this.value);"
-									value="0" min="-1" max="1" />
-							</div>
-						</div>
-						<div class="control-group">
-							<label class="control-label" for="dynamic.sunsetOffset.minute">Minutes</label>
-							<div class="controls">
-								<input type="number" id="dynamic.sunsetOffset.minute"
-									onchange="eventHandlers.dynamic.sunsetOffset.minute(this.value);"
-									value="0" min="-59" max="59" />
-							</div>
-						</div>
-						<legend>Sunset Twilight Length</legend>
-						<div class="control-group">
-							<label class="control-label" for="dynamic.nightOnAfterSunset.hour">Hours</label>
-							<div class="controls">
-								<input type="number" id="dynamic.nightOnAfterSunset.hour"
-									onchange="eventHandlers.dynamic.nightOnAfterSunset.hour(this.value);"
-									value="0" min="0" max="6" />
-							</div>
-						</div>
-						<div class="control-group">
-							<label class="control-label" for="dynamic.nightOnAfterSunset.minute">Minutes</label>
-							<div class="controls">
-								<input type="number" id="dynamic.nightOnAfterSunset.minute"
-									onchange="eventHandlers.dynamic.nightOnAfterSunset.minute(this.value);"
-									value="0" min="-0" max="59" />
-							</div>
-						</div>
-					</form>
-				</div>
-				<div class="tab-pane" id="tab2">
-					<form id="form2">
-						<legend>Sunrise Twilight Length</legend>
-						<div class="control-group">
-							<label class="control-label" for="static.nightOnBeforeSunrise.hour">Hours</label>
-							<div class="controls">
-								<input type="number" id="static.nightOnBeforeSunrise.hour"
-									onchange="eventHandlers.static.nightOnBeforeSunrise.hour(this.value);"
-									value="0" min="0" max="6" />
-							</div>
-						</div>
-						<div class="control-group">
-							<label class="control-label" for="static.nightOnBeforeSunrise.minute">Minutes</label>
-							<div class="controls">
-								<input type="number" id="static.nightOnBeforeSunrise.minute"
-									onchange="eventHandlers.static.nightOnBeforeSunrise.minute(this.value);"
-									value="0" min="-0" max="59" />
-							</div>
-						</div>
-						<legend>Sunrise</legend>
-						<div class="control-group">
-							<label class="control-label" for="static.sunrise.hour">Hours</label>
-							<div class="controls">
-								<input type="number" id="static.sunrise.hour"
-									onchange="eventHandlers.static.sunrise.hour(this.value);"
-									value="0" min="0" max="11" />
-							</div>
-						</div>
-						<div class="control-group">
-							<label class="control-label" for="static.sunrise.minute">Minutes</label>
-							<div class="controls">
-								<input type="number" id="static.sunrise.minute"
-									onchange="eventHandlers.static.sunrise.minute(this.value);"
-									value="0" min="0" max="59" />
-							</div>
-						</div>
-						<legend>Sunset</legend>
-						<div class="control-group">
-							<label class="control-label" for="static.sunset.hour">Hours</label>
-							<div class="controls">
-								<input type="number" id="static.sunset.hour"
-									onchange="eventHandlers.static.sunset.hour(this.value);"
-									value="0" min="12" max="23" />
-							</div>
-						</div>
-						<div class="control-group">
-							<label class="control-label" for="static.sunset.minute">Minutes</label>
-							<div class="controls">
-								<input type="number" id="static.sunset.minute"
-									onchange="eventHandlers.static.sunset.minute(this.value);"
-									value="0" min="0" max="59" />
-							</div>
-						</div>
-						<legend>Sunset Twilight Length</legend>
-						<div class="control-group">
-							<label class="control-label" for="static.nightOnAfterSunset.hour">Hours</label>
-							<div class="controls">
-								<input type="number" id="static.nightOnAfterSunset.hour"
-									onchange="eventHandlers.static.nightOnAfterSunset.hour(this.value);"
-									value="0" min="0" max="6" />
-							</div>
-						</div>
-						<div class="control-group">
-							<label class="control-label" for="static.nightOnAfterSunset.minute">Minutes</label>
-							<div class="controls">
-								<input type="number" id="static.nightOnAfterSunset.minute"
-									onchange="eventHandlers.static.nightOnAfterSunset.minute(this.value);"
-									value="0" min="0" max="59" />
-							</div>
-						</div>
-					</form>
-				</div>
-				<div class="tab-pane" id="tab3">
-					<form id="form3">
-						<div class="control-group">
-							<label class="control-label" for="inputMode">Setting</label>
-							<div class="controls">
-								<ul class="nav nav-pills nav-stacked">
-									<li id="manual.day" onclick="eventHandlers.manual.day();"><a href="#">Day</a></li>
-									<li id="manual.night" onclick="eventHandlers.manual.night();"><a href="#">Night</a></li>
-									<li id="manual.off" onclick="eventHandlers.manual.off();"><a href="#">Off</a></li>
-								</ul>
-							</div>
-						</div>
-					</form>
-				</div>
-			</div>
-		</div>
-		<div>
+		<h2>Aquarium Control Configuration</h2><div>
 			<form id="form0">
 				<div class="control-group">
 					<div class="controls">
@@ -504,6 +195,22 @@
 				</div>
 			</form>
 		</div>
+		<div class="controls">
+			<label class="control-label">Mode</label>
+			<ul class="nav nav-pills nav-stacked">
+				<li id="mode.automatic" onclick="eventHandlers.mode.automatic();"><a href="#">Automatic</a></li>
+				<li id="mode.manual" onclick="eventHandlers.mode.manual();"><a href="#">Manual</a></li>
+			</ul>
+		</div>
+		<div class="controls" id="manual">
+			<label class="control-label">State</label>
+			<ul class="nav nav-pills nav-stacked">
+				<li id="manual.day" onclick="eventHandlers.manual.day();"><a href="#">Day</a></li>
+				<li id="manual.night" onclick="eventHandlers.manual.night();"><a href="#">Night</a></li>
+				<li id="manual.off" onclick="eventHandlers.manual.off();"><a href="#">Off</a></li>
+			</ul>
+		</div>
+
 		<div id="global.saving" class="global-saving-container">
 			<div class="global-saving">
 				<div class="hero-unit">
@@ -511,13 +218,6 @@
 				</div>
 			</div>
 		</div>
-		<script>
-		var formClass = window.innerWidth < 400 ? "form" : "form-horizontal";
-		setClass('form0', formClass);
-		setClass('form1', formClass);
-		setClass('form2', formClass);
-		setClass('form3', formClass);
-		</script>
 		<script src="jquery-1.7.1.js"></script>
 		<script src="bootstrap/js/bootstrap.min.js"></script>
 	</body>

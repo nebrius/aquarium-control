@@ -31,12 +31,21 @@ var path = require('path'),
 
 function log(level, message) {
 	process.send({
-	    destination: 'master',
-    	type: 'log',
-    	data: {
-        	level: level,
-        	message: message
-    	}
+		destination: 'master',
+		type: 'log',
+		data: {
+			level: level,
+			message: message
+		}
+	});
+}
+
+function setConfiguration(configuration) {
+	log('info', 'Setting configuration: ' + JSON.stringify(configuration));
+	process.send({
+		destination: 'broadcast',
+		type: 'configuration.set',
+		data: configuration
 	});
 }
 
@@ -47,51 +56,9 @@ try {
 	log('warn', 'Configuration file is invalid, using defaults: ' + e);
 	configuration = {
 		mode: 'manual',
-		dynamic: {
-			sunriseOffset: {
-				hour: 0,
-				minute: 0
-			},
-			sunsetOffset: {
-				hour: 0,
-				minute: 0
-			},
-			nightOnAfterSunset: {
-				hour: 2,
-				minute: 0
-			},
-			nightOnBeforeSunrise: {
-				hour: 1,
-				minute: 0
-			}
-		},
-		static: {
-			sunrise: {
-				hour: 6,
-				minute: 0
-			},
-			sunset: {
-				hour: 23,
-				minute: 58
-			},
-			nightOnAfterSunset: {
-				hour: 2,
-				minute: 0
-			},
-			nightOnBeforeSunrise: {
-				hour: 1,
-				minute: 0
-			}
-		},
 		manual: 'off'
 	};
 }
-
-process.send({
-	destination: 'broadcast',
-	type: 'configuration.set',
-	data: configuration
-});
 
 http.createServer(function(request, response) {
 	var uri = url.parse(request.url),
@@ -156,20 +123,10 @@ http.createServer(function(request, response) {
 				write(400, 'Invalid configuration data: ' + e);
 			}
 			fs.writeFileSync(path.join(__dirname, '..', 'settings', 'usersettings.json'), data);
-			process.send({
-				destination: 'broadcast',
-				type: 'configuration.set',
-				data: configuration
-			});
+			setConfiguration(configuration);
 		});
 	}
 }).listen(appConfiguration.port || DEFAULT_PORT);
 
-process.send({
-    destination: 'master',
-    type: 'log',
-    data: {
-	    level: 'info',
-        message: 'Configuration started on port ' + appConfiguration.port || DEFAULT_PORT
-    }
-});
+log('info', 'Configuration started on port ' + appConfiguration.port || DEFAULT_PORT);
+setConfiguration(configuration);
