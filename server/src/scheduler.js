@@ -92,6 +92,13 @@ function fetch(callback) {
 }
 
 function refreshSchedule() {
+
+	// if we are in manual mode, short circuit the refresh
+	if (mode == 'manual') {
+		return;
+	}
+
+	// Fetch the sunrise/sunset times
 	fetch(function (times) {
 
 		var stateToSet,
@@ -162,6 +169,7 @@ function scheduleNextChange() {
 	if (nextStateChange) {
 
 		// Schedule the next state change
+		log('debug', 'Scheduling next state change to ' + nextStateChange.state + ' at ' + new Date(nextStateChange.time));
 		schedule.scheduleJob(new Date(nextStateChange.time), function () {
 
 			// if we are in manual mode, short circuit the scheduler
@@ -180,11 +188,13 @@ function scheduleNextChange() {
 			}, 1000);
 		});
 	} else {
-		schedule.scheduleJob(new Date((new Date(
-			currentTime.getFullYear(),
-			currentTime.getMonth(),
-			currentTime.getDate()
-			)).getTime() + 1000 * 60 * 60 * 24), refreshSchedule);
+		nextStateChange = new Date((new Date(
+            currentTime.getFullYear(),
+            currentTime.getMonth(),
+            currentTime.getDate()
+            )).getTime() + 1000 * 60 * 60 * 24);
+		log('debug', 'Scheduling fetch at ' + nextStateChange);
+		schedule.scheduleJob(nextStateChange , refreshSchedule);
 	}
 }
 
