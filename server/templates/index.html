@@ -3,222 +3,62 @@
 	<head>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Aquarium Control Configuration</title>
-		<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
-		<style type="text/css">
-		body {
-			margin: 5px
-		}
-		.global-saving-container {
-			display: none;
-			position: absolute;
-			z-index: 1;
-			left: 0;
-			top: 0;
-			right: 0;
-			bottom: 0;
-			background-color: rgba(0,0,0,0.5);
-		}
-		.global-saving {
-			margin: 10%;
-		}
-		</style>
-		<script>
-
-		function setClass(id, className) {
-			document.getElementById(id).className = className;
-		}
-
-		function setVisibility(id, visible) {
-			document.getElementById(id).style.display = visible ? 'inherit' : 'none';
-		}
-
-		var changes = {},
-			changesPresent = false;
-		function updateState() {
-			var p;
-			function checkChangedState(lastSaveSettingsNode, currentSettingsNode) {
-				for (p in lastSaveSettingsNode) {
-					if (typeof lastSaveSettingsNode[p] === 'object') {
-						checkChangedState(lastSaveSettingsNode[p], currentSettingsNode[p]);
-					} else if (lastSaveSettingsNode[p] !== currentSettingsNode[p]) {
-						changesPresent = true;
-					}
-				}
-			}
-			changesPresent = false;
-			checkChangedState(lastSaveSettings, currentSettings);
-			setClass('global.save', changesPresent ? 'btn btn-primary' : 'btn btn-primary disabled');
-		}
-
-		var get = document.getElementById,
-			lastSaveSettings = {{{settings}}},
-			currentSettings = {{{settings}}},
-			eventHandlers = {
-				global: {
-					save: function () {
-						if (changesPresent) {
-							var saving = document.getElementById('global.saving'),
-								settings,
-								xhr,
-								startTime = Date.now(),
-								endTime;
-							saving.style.display = 'block';
-
-							function updateLastSaveSettings(lastSaveSettingsNode, currentSettingsNode) {
-								var p;
-								for (p in lastSaveSettingsNode) {
-									if (typeof lastSaveSettingsNode[p] === 'object') {
-										updateLastSaveSettings(lastSaveSettingsNode[p], currentSettingsNode[p]);
-									} else {
-										lastSaveSettingsNode[p] = currentSettingsNode[p];
-									}
-								}
-							}
-							xhr = new XMLHttpRequest();
-							xhr.open('POST', document.location.origin + '/save', true);
-							xhr.setRequestHeader('Content-Type', 'application/json');
-							xhr.send(JSON.stringify(currentSettings, false, '\t'));
-							xhr.onreadystatechange = function () {
-								if (xhr.readyState === 4) {
-									endTime = Date.now();
-									function finalize() {
-										if (xhr.status === 200) {
-											lastSaveSettings.mode = currentSettings.mode;
-											lastSaveSettings.manual = currentSettings.manual;
-											updateLastSaveSettings(lastSaveSettings.dynamic, currentSettings.dynamic);
-											updateLastSaveSettings(lastSaveSettings.static, currentSettings.static);
-										} else {
-											if (xhr.responseText) {
-												alert('Error saving settings to the aquarium:\n' + xhr.responseText);
-											} else {
-												alert('Error saving settings to the aquarium: code ' + xhr.status);
-											}
-										}
-										saving.style.display = 'none';
-										updateState();
-									}
-									if (endTime - startTime < 500) {
-										setTimeout(function () {
-											finalize();
-										}, 500 - endTime + startTime);
-									} else {
-										finalize();
-									}
-								}
-							}
-						}
-					}
-				},
-				mode: {
-					automatic: function () {
-						setClass('mode.automatic', 'active');
-						setClass('mode.manual', '');
-						setVisibility('manual', false);
-						currentSettings.mode = 'automatic';
-						updateState();
-					},
-					manual: function () {
-						setClass('mode.automatic', '');
-						setClass('mode.manual', 'active');
-						setVisibility('manual', true);
-						currentSettings.mode = 'manual';
-						updateState();
-					}
-				},
-				manual: {
-					day: function () {
-						setClass('manual.day', 'active');
-						setClass('manual.night', '');
-						setClass('manual.off', '');
-						currentSettings.manual = 'day';
-						updateState();
-					},
-					night: function () {
-						setClass('manual.day', '');
-						setClass('manual.night', 'active');
-						setClass('manual.off', '');
-						currentSettings.manual = 'night';
-						updateState();
-					},
-					off: function () {
-						setClass('manual.day', '');
-						setClass('manual.night', '');
-						setClass('manual.off', 'active');
-						currentSettings.manual = 'off';
-						updateState();
-					}
-				}
-			}
-
-			function onload() {
-
-				switch(currentSettings.mode) {
-					case 'automatic':
-						setClass('mode.automatic', 'active');
-						setClass('mode.manual', '');
-						setVisibility('manual', false);
-						break;
-					case 'manual':
-						setClass('mode.automatic', '');
-						setClass('mode.manual', 'active');
-						setVisibility('manual', true);
-						break;
-				}
-
-				switch(currentSettings.manual) {
-					case 'day':
-						setClass('manual.day', 'active');
-						setClass('manual.night', '');
-						setClass('manual.off', '');
-						break;
-					case 'night':
-						setClass('manual.day', '');
-						setClass('manual.night', 'active');
-						setClass('manual.off', '');
-						break;
-					case 'off':
-						setClass('manual.day', '');
-						setClass('manual.night', '');
-						setClass('manual.off', 'active');
-						break;
-				}
-			}
-		</script>
+		<link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+		<link href="index.css" rel="stylesheet">
 	</head>
-	<body onload="onload();">
-		<h2>Aquarium Control Configuration</h2><div>
-			<form id="form0">
-				<div class="control-group">
-					<div class="controls">
-						<a id="global.save" class="btn btn-primary disabled" href="#" onclick="eventHandlers.global.save();">Apply Settings</a>
-					</div>
-				</div>
-			</form>
-		</div>
-		<div class="controls">
-			<label class="control-label">Mode</label>
-			<ul class="nav nav-pills nav-stacked">
-				<li id="mode.automatic" onclick="eventHandlers.mode.automatic();"><a href="#">Automatic</a></li>
-				<li id="mode.manual" onclick="eventHandlers.mode.manual();"><a href="#">Manual</a></li>
-			</ul>
-		</div>
-		<div class="controls" id="manual">
-			<label class="control-label">State</label>
-			<ul class="nav nav-pills nav-stacked">
-				<li id="manual.day" onclick="eventHandlers.manual.day();"><a href="#">Day</a></li>
-				<li id="manual.night" onclick="eventHandlers.manual.night();"><a href="#">Night</a></li>
-				<li id="manual.off" onclick="eventHandlers.manual.off();"><a href="#">Off</a></li>
-			</ul>
-		</div>
+	<body>
 
-		<div id="global.saving" class="global-saving-container">
-			<div class="global-saving">
-				<div class="hero-unit">
-					<h2>Saving</h2>
+		<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+			<div class="container">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand disabled" href="#">Aquarium Control Configuration</a>
+				</div>
+				<div class="collapse navbar-collapse">
+					<ul class="nav navbar-nav">
+						<li class="active"><a href="#">Status</a></li>
+						<li><a href="#about">Setup</a></li>
+					</ul>
 				</div>
 			</div>
 		</div>
-		<script src="jquery-1.7.1.js"></script>
-		<script src="bootstrap/js/bootstrap.min.js"></script>
+
+		<div class="container">
+			<div class="starter-template">
+				<h1>Bootstrap starter template</h1>
+				<p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text and a mostly barebones HTML document.</p>
+			</div>
+			<ul id="status_entries"></ul>
+		</div>
+
+		<script type="text/template" id="schedule_entry_status_template">
+			<div><%= title %></div>
+			<div><%= type%></div>
+			<div><%= source.set %></div>
+			<div><%= source.event %></div>
+			<div><%= time.hour %></div>
+			<div><%= time.minute %></div>
+		</script>
+
+		<script src="lib/jquery.min.js"></script>
+		<script src="lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src="lib/underscore.min.js"></script>
+		<script src="lib/backbone.min.js"></script>
+
+		<script src="js/models/schedule_entry_model.js"></script>
+		<script src="js/views/schedule_entry_status_view.js"></script>
+
+		<script>
+			var m = new ScheduleEntryModel(),
+				v = new ScheduleEntryStatusView({
+					model: m
+				});
+			$('#status_entries').append(v.render().el);
+		</script>
 	</body>
 </html>

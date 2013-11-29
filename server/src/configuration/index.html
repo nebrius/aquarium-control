@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Ember.js • TodoMVC</title>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<script type="text/x-handlebars" data-template-name="todos">
+			<section id="todoapp">
+				<header id="header">
+					<h1>todos</h1>
+					{{input type="text" id="new-todo" placeholder="What needs to be done?"
+						value=newTitle action="createTodo"}}
+				</header>
+
+				<section id="main">
+					<ul id="todo-list">
+						{{#each itemController="todo"}}
+							<li {{bind-attr class="isCompleted:completed isEditing:editing"}}>
+								{{#if isEditing}}
+									{{edit-todo class="edit" value=title focus-out="acceptChanges"
+										insert-newline="acceptChanges"}}
+								{{else}}
+									{{input type="checkbox" checked=isCompleted class="toggle"}}
+									<label {{action "editTodo" on="doubleClick"}}>{{title}}</label><button class="destroy"></button>
+								{{/if}}
+							</li>
+						{{/each}}
+					</ul>
+
+					<input type="checkbox" id="toggle-all">
+				</section>
+
+				<footer id="footer">
+					<span id="todo-count">
+						<strong>{{remaining}}</strong> {{inflection}} left
+					</span>
+					<ul id="filters">
+						<li>
+							<a href="all" class="selected">All</a>
+						</li>
+						<li>
+							<a href="active">Active</a>
+						</li>
+						<li>
+							<a href="completed">Completed</a>
+						</li>
+					</ul>
+
+					<button id="clear-completed">
+						Clear completed (1)
+					</button>
+				</footer>
+			</section>
+
+			<footer id="info">
+				<p>Double-click to edit a todo</p>
+			</footer>
+			</script>
+
+		<script src="js/lib/jquery.min.js"></script>
+		<script src="js/lib/handlebars.js"></script>
+		<script src="js/lib/ember.js"></script>
+		<script src="js/lib/ember-data.js"></script>
+
+		<script src="js/application.js"></script>
+		<script src="js/router.js"></script>
+		<script src="js/models/todo.js"></script>
+		<script src="js/controllers/todos_controller.js"></script>
+		<script src="js/controllers/todo_controller.js"></script>
+		<script src="js/views/edit_todo_view.js"></script>
+	</body>
+</html>
