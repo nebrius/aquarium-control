@@ -42,13 +42,65 @@ function log(level, message) {
 }
 
 function saveConfiguration() {
-	log('info', 'Setting configuration: ' + JSON.stringify(configuration, false, '\t'));
 	fs.writeFileSync(configurationPath, JSON.stringify(configuration, false, '\t'));
 	process.send({
 		destination: 'broadcast',
 		type: 'configuration.set',
 		data: configuration
 	});
+}
+
+function validateScheduleEntry(request, response) {
+	var attributes = request.params;
+	if (typeof attributes.title != 'string') {
+		response.send(400, 'ScheduleEntryModel validation error: title must be a string');
+		return false;
+	}
+
+	// Validate the type
+	if (attributes.type != 'automatic' && attributes.type != 'manual') {
+		response.send(400, 'ScheduleEntryModel validation error: type must be "automatic" or "manual"');
+		return false;
+	}
+
+	// Validate the source
+	if (typeof attributes.source != 'object') {
+		response.send(400, 'ScheduleEntryModel validation error: source must be an object');
+		return false;
+	}
+	if (attributes.source.set != 'morning' && attributes.source.set != 'evening') {
+		response.send(400, 'ScheduleEntryModel validation error: source.set must be "morning" or "evening"');
+		return false;
+	}
+	if (attributes.type == 'automatic' &&
+			attributes.source.event != 'civil' &&
+			attributes.source.event != 'nautical' &&
+			attributes.source.event != 'astronomical' &&
+			(attributes.source.set != 'morning' || attributes.source.event != 'sunrise') &&
+			(attributes.source.set != 'evening' || attributes.source.event != 'sunset')) {
+		response.send(400, 'ScheduleEntryModel validation error: invalid source.event value ' +
+			attributes.source.event);
+		return false;
+	}
+
+	// Validate the time
+	if (typeof attributes.time != 'object') {
+		response.send(400, 'ScheduleEntryModel validation error: time must be an object');
+		return false;
+	}
+	if (typeof attributes.time.hour != 'number' ||
+			attributes.time.hour < 0 ||
+			attributes.time.hour > 23) {
+		response.send(400, 'ScheduleEntryModel validation error: time.hour must be a number between 0 and 23');
+		return false;
+	}
+	if (typeof attributes.time.minute != 'number' ||
+			attributes.time.minute < 0 ||
+			attributes.time.minute > 59) {
+		response.send(400, 'ScheduleEntryModel validation error: time.minute must be a number between 0 and 59');
+		return false;
+	}
+	return true;
 }
 
 // **** Initialize the server ****
@@ -77,6 +129,7 @@ app.use(express.static(path.join(__dirname, '..', 'templates')));
 
 // Get the status summary
 app.get('/api/status', function (request, response) {
+	log('info', 'Serving the status summary');
 	response.send({
 		time: new Date().toString(),
 		state: lightState
@@ -85,6 +138,7 @@ app.get('/api/status', function (request, response) {
 
 // Get the list of schedule entries
 app.get('/api/schedule_entries', function (request, response) {
+	log('info', 'Serving the list of scheduled entries');
 	response.send(configuration.scheduleEntries);
 });
 
@@ -95,65 +149,17 @@ app.get('/api/schedule_entries/:id', function (request, response) {
 		log('error', 'Invalid request, schedule entry id "' + requestId + '" was not found');
 		response.send(400, 'Invalid request');
 	} else {
+		log('info', 'Serving the scheduled entry with id "' + requestId + '"');
 		response.send(configuration.scheduleEntries[requestId]);
 	}
 });
 
-function validateScheduleEntry(request, response) {
-	var attributes = request.params;
-	if (typeof attributes.title != 'string') {
-		response.send(400, 'ScheduleEntryModel validation error: title must be a string');
-		return;
-	}
-
-	// Validate the type
-	if (attributes.type != 'automatic' && attributes.type != 'manual') {
-		response.send(400, 'ScheduleEntryModel validation error: type must be "automatic" or "manual"');
-		return;
-	}
-
-	// Validate the source
-	if (typeof attributes.source != 'object') {
-		response.send(400, 'ScheduleEntryModel validation error: source must be an object');
-		return;
-	}
-	if (attributes.source.set != 'morning' && attributes.source.set != 'evening') {
-		response.send(400, 'ScheduleEntryModel validation error: source.set must be "morning" or "evening"');
-		return;
-	}
-	if (attributes.type == 'automatic' &&
-			attributes.source.event != 'civil' &&
-			attributes.source.event != 'nautical' &&
-			attributes.source.event != 'astronomical' &&
-			(attributes.source.set != 'morning' || attributes.source.event != 'sunrise') &&
-			(attributes.source.set != 'evening' || attributes.source.event != 'sunset')) {
-		response.send(400, 'ScheduleEntryModel validation error: invalid source.event value ' +
-			attributes.source.event);
-		return;
-	}
-
-	// Validate the time
-	if (typeof attributes.time != 'object') {
-		response.send(400, 'ScheduleEntryModel validation error: time must be an object');
-		return;
-	}
-	if (typeof attributes.time.hour != 'number' ||
-			attributes.time.hour < 0 ||
-			attributes.time.hour > 23) {
-		response.send(400, 'ScheduleEntryModel validation error: time.hour must be a number between 0 and 23');
-		return;
-	}
-	if (typeof attributes.time.minute != 'number' ||
-			attributes.time.minute < 0 ||
-			attributes.time.minute > 59) {
-		response.send(400, 'ScheduleEntryModel validation error: time.minute must be a number between 0 and 59');
-		return;
-	}
-}
-
 // Add a new schedule entry
 app.post('/api/scedule_entries', function (request, response) {
-	validateScheduleEntry(request, response);
+	if (!validateScheduleEntry(request, response)) {
+		return;
+	}
+	log('info', 'Creating new schedule entry: ' + JSON.stringify(request.params, false, '\t'));
 	configuration.scheduleEntries.push(request.params);
 	saveConfiguration();
 	response.send(200, 'OK');
@@ -166,8 +172,11 @@ app.post('/api/scedule_entries/:id', function (request, response) {
 		log('error', 'Invalid request, schedule entry id "' + requestId + '" was not found');
 		response.send(400, 'Invalid request');
 	}
-	validateScheduleEntry(request, response);
+	if (!validateScheduleEntry(request, response)) {
+		return;
+	}
 	delete request.params.id;
+	log('info', 'Updating existing schedule entry: ' + JSON.stringify(request.params, false, '\t'));
 	configuration.scheduleEntries[requestId] = request.params;
 	saveConfiguration();
 	response.send(200, 'OK');
@@ -180,6 +189,7 @@ app.delete('/api/schedule_entries/:id', function (request, response) {
 		log('error', 'Invalid request, schedule entry id "' + requestId + '" was not found');
 		response.send(400, 'Invalid request');
 	}
+	log('info', 'Deleting the scheduled entry with id "' + requestId + '"');
 	configuration.scheduleEntries.splice(requestId, 1);
 	saveConfiguration();
 	response.send(200, 'OK');

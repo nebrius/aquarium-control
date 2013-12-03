@@ -1,51 +1,56 @@
 {
-	"scheduleEntries": [{
-		"title": "first",
-		"type": "automatic",
-		"source": {
-			"set": "morning",
-			"event": "astronomical"
+	"scheduleEntries": [
+		{
+			"title": "first",
+			"type": "automatic",
+			"source": {
+				"set": "morning",
+				"event": "astronomical"
+			},
+			"time": {
+				"hour": 0,
+				"minute": 0
+			},
+			"state": "night"
 		},
-		"time": {
-			"hour": 0,
-			"minute": 0
+		{
+			"title": "second",
+			"type": "automatic",
+			"source": {
+				"set": "morning",
+				"event": "sunrise"
+			},
+			"time": {
+				"hour": 0,
+				"minute": 0
+			},
+			"state": "day"
 		},
-		"state": "night"
-	}, {
-		"title": "second",
-		"type": "automatic",
-		"source": {
-			"set": "morning",
-			"event": "sunrise"
+		{
+			"title": "third",
+			"type": "automatic",
+			"source": {
+				"set": "evening",
+				"event": "sunset"
+			},
+			"time": {
+				"hour": 0,
+				"minute": 0
+			},
+			"state": "night"
 		},
-		"time": {
-			"hour": 0,
-			"minute": 0
-		},
-		"state": "day"
-	}, {
-		"title": "third",
-		"type": "automatic",
-		"source": {
-			"set": "evening",
-			"event": "sunset"
-		},
-		"time": {
-			"hour": 0,
-			"minute": 0
-		},
-		"state": "night"
-	}, {
-		"title": "fourth",
-		"type": "automatic",
-		"source": {
-			"set": "evening",
-			"event": "astronomical"
-		},
-		"time": {
-			"hour": 0,
-			"minute": 0
-		},
-		"state": "off"
-	}]
+		{
+			"title": "fourth",
+			"type": "automatic",
+			"source": {
+				"set": "evening",
+				"event": "astronomical"
+			},
+			"time": {
+				"hour": 0,
+				"minute": 0
+			},
+			"state": "off"
+		}
+	]
 }
