@@ -39,6 +39,8 @@
 
 		<script type="text/template" id="setup_template">
 			<h1>Setup</h1>
+			<button type="button" class="btn btn-primary">Add new</button>
+			<ul class="list-group" id="scheduled_entries_list"></ul>
 		</script>
 
 		<script type="text/template" id="schedule_entry_status_template">
@@ -47,7 +49,20 @@
 				<div><em>type:</em> <%= type%></div>
 				<div><em>automatic:</em> <%= source.set %>, <%= source.event %></div>
 				<div><em>manual:</em> <%= (time.hour < 10 ? '0' : '') + time.hour %>:<%= (time.minute < 10 ? '0' : '') + time.minute %></div>
-			</li>
+			</div>
+		</script>
+
+		<script type="text/template" id="schedule_entry_setup_template">
+			<div class="list-group-item">
+				<h4 class="list-group-item-heading"><%= title %></h4>
+				<div><em>type:</em> <%= type%></div>
+				<div><em>automatic:</em> <%= source.set %>, <%= source.event %></div>
+				<div><em>manual:</em> <%= (time.hour < 10 ? '0' : '') + time.hour %>:<%= (time.minute < 10 ? '0' : '') + time.minute %></div>
+				<div>
+					<button type="button" class="btn btn-primary">Edit</button>
+					<button type="button" class="btn btn-danger">Delete</button>
+				</div>
+			</div>
 		</script>
 
 		<script src="lib/jquery.min.js"></script>
@@ -57,15 +72,14 @@
 
 		<script src="js/router.js"></script>
 
+		<script src="js/views/setup_view.js"></script>
 		<script src="js/views/status_view.js"></script>
 		<script src="js/models/status_model.js"></script>
-
-		<script src="js/views/setup_view.js"></script>
-		<script src="js/models/setup_model.js"></script>
 
 		<script src="js/models/schedule_entry_model.js"></script>
 		<script src="js/collections/schedule_entry_collection.js"></script>
 		<script src="js/views/schedule_entry_status_view.js"></script>
+		<script src="js/views/schedule_entry_setup_view.js"></script>
 
 		<script>
 			var router = new Router();
