@@ -48,6 +48,8 @@ var Router = Backbone.Router.extend({
 			});
 		}
 		this.state = 'status';
+		$('#status_nav_link').addClass('active');
+		$('#setup_nav_link').removeClass('active');
 		this.container.append(this.statusView.render().el);
 	},
 
@@ -66,6 +68,8 @@ var Router = Backbone.Router.extend({
 			});
 		}
 		this.state = 'setup';
+		$('#status_nav_link').removeClass('active');
+		$('#setup_nav_link').addClass('active');
 		this.container.append(this.setupView.render().el);
 	}
 });
