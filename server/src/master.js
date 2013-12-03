@@ -26,7 +26,8 @@ if (cluster.isMaster) {
 			Logger = require('transport-logger'),
 			logger,
 			appSettings = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'settings', 'appsettings.json'))),
-			sources = ['scheduler', 'configuration', 'controller'],
+			//sources = ['scheduler', 'configuration', 'controller'],
+			sources = [ 'configuration' ],
 			i, len,
 			workers = {};
 

@@ -11,7 +11,8 @@
 		"xml2js": "0.2.x",
 		"node-schedule": "0.1.x",
 		"transport-logger": "0.1.x",
-		"mu2": "0.5.x"
+		"mu2": "0.5.x",
+		"express": "3.4.x"
 	},
 	"bin": "./bin/aquarium-controller",
 	"author": "Bryan Hughes <bryan@theoreticalideations.com> (http://theoreticalideations.com)",

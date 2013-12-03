@@ -19,15 +19,15 @@
 
 var path = require('path'),
 	fs = require('fs'),
-	http = require('http'),
-	url = require('url'),
-
-	mu = require('mu2'),
+	express = require('express'),
 
 	DEFAULT_PORT = 8080,
 
 	configuration,
-	appConfiguration;
+	appConfiguration,
+
+	app,
+	lightState = 'off';
 
 function log(level, message) {
 	process.send({
@@ -41,7 +41,7 @@ function log(level, message) {
 }
 
 function setConfiguration(configuration) {
-	log('info', 'Setting configuration: ' + JSON.stringify(configuration));
+	log('info', 'Setting configuration: ' + JSON.stringify(configuration, false, '\t'));
 	process.send({
 		destination: 'broadcast',
 		type: 'configuration.set',
@@ -49,84 +49,145 @@ function setConfiguration(configuration) {
 	});
 }
 
+// **** Initialize the server ****
+
+// Listen for light messages for updating the status page
+process.on('message', function (message) {
+	if (message.type === 'lights.set') {
+		lightState = message.data;
+	}
+});
+
+// Load the configuration
 try {
 	configuration = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'settings', 'usersettings.json')));
 	appConfiguration = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'settings', 'appsettings.json')));
 } catch(e) {
-	log('warn', 'Configuration file is invalid, using defaults: ' + e);
-	configuration = {
-		mode: 'manual',
-		manual: 'off'
-	};
+	log('error', 'Configuration file is invalid');
+	process.exit(1);
 }
 
-http.createServer(function(request, response) {
-	var uri = url.parse(request.url),
-		pathname = uri.pathname,
-		renderStream,
-		compiledData = '',
-		mimeType,
-		data;
+// Create the static site
+app = express();
+app.use(express.static(path.join(__dirname, '..', 'templates')));
 
-	function write(code, mimeType, body) {
-		response.writeHead(code, {
-			'content-type': mimeType
-		});
-		response.write(body);
-		response.end();
+// **** Create the API endpoints ****
+
+// Get the status summary
+app.get('/api/status', function (request, response) {
+	response.send({
+		time: new Date().toString(),
+		state: lightState
+	});
+});
+
+// Get the list of schedule entries
+app.get('/api/schedule_entries', function (request, response) {
+	response.send(configuration.scheduleEntries);
+});
+
+// Get a single schedule entry
+app.get('/api/schedule_entries/:id', function (request, response) {
+	var requestId = request.params.id;
+	if (!configuration.scheduleEntries[requestId]) {
+		log('error', 'Invalid request, schedule entry id "' + requestId + '" was not found');
+		response.send(400, 'Invalid request');
+	} else {
+		response.send(configuration.scheduleEntries[requestId]);
+	}
+});
+
+function validateScheduleEntry(request, response) {
+	var attributes = request.params;
+	if (typeof attributes.title != 'string') {
+		response.send(400, 'ScheduleEntryModel validation error: title must be a string');
+		return;
 	}
 
-	if (request.method === 'GET') {
-		if (['/', '/index.html'].indexOf(pathname) !== -1) {
-			pathname = path.join(__dirname, '..', 'templates');
-			log('info', 'Serving generated file "' + path.join(pathname, 'index.html') + '"');
-
-			mu.root = pathname;
-			renderStream = mu.compileAndRender('index.html', {
-				settings: JSON.stringify(configuration, false, '\t')
-			});
-			renderStream.on('data', function (data) {
-				compiledData += data.toString();
-			});
-			renderStream.on('end', function() {
-				write(200, 'text/html', compiledData);
-			});
-
-		} else {
-			pathname = path.resolve(path.join(__dirname, '..', 'templates', pathname));
-			if (fs.existsSync(pathname)) {
-				if (/\.js$/.test(pathname)) {
-					mimeType = 'application/javascript';
-				} else if (/\.css$/.test(pathname)) {
-					mimeType = 'text/css';
-				} else if (/\.html$/.test(pathname)) {
-					mimeType = 'text/html';
-				} else {
-					mimeType = 'text/plain';
-				}
-				log('info', 'Serving file "' + pathname + '"');
-				write(200, mimeType, fs.readFileSync(pathname));
-			} else {
-				write(404, 'text/plain', 'Page not found');
-			}
-		}
-	} else if (request.method === 'POST') {
-		data = '';
-		request.on('data', function (chunk) {
-			data += chunk.toString();
-		});
-		request.on('end', function () {
-			try {
-				configuration = JSON.parse(data);
-				write(200, 'text/plain', 'OK');
-			} catch(e) {
-				write(400, 'Invalid configuration data: ' + e);
-			}
-			fs.writeFileSync(path.join(__dirname, '..', 'settings', 'usersettings.json'), data);
-			setConfiguration(configuration);
-		});
+	// Validate the type
+	if (attributes.type != 'automatic' && attributes.type != 'manual') {
+		response.send(400, 'ScheduleEntryModel validation error: type must be "automatic" or "manual"');
+		return;
 	}
-}).listen(appConfiguration.port || DEFAULT_PORT);
 
+	// Validate the source
+	if (typeof attributes.source != 'object') {
+		response.send(400, 'ScheduleEntryModel validation error: source must be an object');
+		return;
+	}
+	if (attributes.source.set != 'morning' && attributes.source.set != 'evening') {
+		response.send(400, 'ScheduleEntryModel validation error: source.set must be "morning" or "evening"');
+		return;
+	}
+	if (attributes.type == 'automatic' &&
+			attributes.source.event != 'civil' &&
+			attributes.source.event != 'nautical' &&
+			attributes.source.event != 'astronomical' &&
+			(attributes.source.set != 'morning' || attributes.source.event != 'sunrise') &&
+			(attributes.source.set != 'evening' || attributes.source.event != 'sunset')) {
+		response.send(400, 'ScheduleEntryModel validation error: invalid source.event value ' +
+			attributes.source.event);
+		return;
+	}
+
+	// Validate the time
+	if (typeof attributes.time != 'object') {
+		response.send(400, 'ScheduleEntryModel validation error: time must be an object');
+		return;
+	}
+	if (typeof attributes.time.hour != 'number' ||
+			attributes.time.hour < 0 ||
+			attributes.time.hour > 23) {
+		response.send(400, 'ScheduleEntryModel validation error: time.hour must be a number between 0 and 23');
+		return;
+	}
+	if (typeof attributes.time.minute != 'number' ||
+			attributes.time.minute < 0 ||
+			attributes.time.minute > 59) {
+		response.send(400, 'ScheduleEntryModel validation error: time.minute must be a number between 0 and 59');
+		return;
+	}
+}
+
+// Add a new schedule entry
+app.post('/api/scedule_entries', function (request, response) {
+	validateScheduleEntry(request, response);
+	configuration.scheduleEntries.push(request.params);
+	setConfiguration(configuration);
+	response.send(200, 'OK');
+});
+
+// Update a schedule entry
+app.post('/api/scedule_entries/:id', function (request, response) {
+	var requestId = request.params.id;
+	if (!configuration.scheduleEntries[requestId]) {
+		log('error', 'Invalid request, schedule entry id "' + requestId + '" was not found');
+		response.send(400, 'Invalid request');
+	}
+	validateScheduleEntry(request, response);
+	delete request.params.id;
+	configuration.scheduleEntries[requestId] = request.params;
+	setConfiguration(configuration);
+	response.send(200, 'OK');
+});
+
+// Delete a schedule entry
+app.delete('/api/schedule_entries/:id', function (request, response) {
+	var requestId = request.params.id;
+	if (!configuration.scheduleEntries[requestId]) {
+		log('error', 'Invalid request, schedule entry id "' + requestId + '" was not found');
+		response.send(400, 'Invalid request');
+	}
+	delete configuration.scheduleEntries[requestId];
+	setConfiguration(configuration);
+	response.send(200, 'OK');
+});
+
+// **** Start the server ****
+
+// Start the server
+app.listen(appConfiguration.port || DEFAULT_PORT);
 log('info', 'Configuration started on port ' + appConfiguration.port || DEFAULT_PORT);
+
+// Save the configuration
 setConfiguration(configuration);
