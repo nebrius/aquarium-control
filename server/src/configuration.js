@@ -24,6 +24,7 @@ var path = require('path'),
 	DEFAULT_PORT = 8080,
 
 	configuration,
+	configurationPath = path.join(__dirname, '..', 'settings', 'usersettings.json'),
 	appConfiguration,
 
 	app,
@@ -40,8 +41,9 @@ function log(level, message) {
 	});
 }
 
-function setConfiguration(configuration) {
+function saveConfiguration() {
 	log('info', 'Setting configuration: ' + JSON.stringify(configuration, false, '\t'));
+	fs.writeFileSync(configurationPath, JSON.stringify(configuration, false, '\t'));
 	process.send({
 		destination: 'broadcast',
 		type: 'configuration.set',
@@ -60,7 +62,7 @@ process.on('message', function (message) {
 
 // Load the configuration
 try {
-	configuration = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'settings', 'usersettings.json')));
+	configuration = JSON.parse(fs.readFileSync(configurationPath));
 	appConfiguration = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'settings', 'appsettings.json')));
 } catch(e) {
 	log('error', 'Configuration file is invalid');
@@ -153,7 +155,7 @@ function validateScheduleEntry(request, response) {
 app.post('/api/scedule_entries', function (request, response) {
 	validateScheduleEntry(request, response);
 	configuration.scheduleEntries.push(request.params);
-	setConfiguration(configuration);
+	saveConfiguration();
 	response.send(200, 'OK');
 });
 
@@ -167,7 +169,7 @@ app.post('/api/scedule_entries/:id', function (request, response) {
 	validateScheduleEntry(request, response);
 	delete request.params.id;
 	configuration.scheduleEntries[requestId] = request.params;
-	setConfiguration(configuration);
+	saveConfiguration();
 	response.send(200, 'OK');
 });
 
@@ -178,8 +180,8 @@ app.delete('/api/schedule_entries/:id', function (request, response) {
 		log('error', 'Invalid request, schedule entry id "' + requestId + '" was not found');
 		response.send(400, 'Invalid request');
 	}
-	delete configuration.scheduleEntries[requestId];
-	setConfiguration(configuration);
+	configuration.scheduleEntries.splice(requestId, 1);
+	saveConfiguration();
 	response.send(200, 'OK');
 });
 
@@ -190,4 +192,4 @@ app.listen(appConfiguration.port || DEFAULT_PORT);
 log('info', 'Configuration started on port ' + appConfiguration.port || DEFAULT_PORT);
 
 // Save the configuration
-setConfiguration(configuration);
+saveConfiguration();
