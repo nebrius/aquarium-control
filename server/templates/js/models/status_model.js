@@ -16,14 +16,19 @@
 	You should have received a copy of the GNU General Public License
 	along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*global _, $, Backbone*/
+/*global window, Backbone*/
 
-var ScheduleEntryStatusView = Backbone.View.extend({
+var StatusModel = Backbone.Model.extend({
 
-	template: _.template($('#schedule_entry_status_template').html()),
+	defaults: {
 
-	render: function () {
-		this.$el.html(this.template(this.model.toJSON()));
-		return this;
-	}
+		// This is the time as reported by the Raspberry Pi, which is UTC
+		time: 'not set',
+
+		// This is the current state of the lighting, one of <day|night|off>
+		state: 'off'
+	},
+
+	url: window.location.protocol + '//' + window.location.host + '/api/status'
+
 });

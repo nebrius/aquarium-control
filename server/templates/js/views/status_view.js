@@ -16,14 +16,27 @@
 	You should have received a copy of the GNU General Public License
 	along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*global _, $, Backbone*/
+/*global _, $, Backbone, ScheduleEntryStatusView*/
 
-var ScheduleEntryStatusView = Backbone.View.extend({
+var StatusView = Backbone.View.extend({
 
-	template: _.template($('#schedule_entry_status_template').html()),
+	el: '#container',
+
+	template: _.template($('#status_template').html()),
+
+	initialize: function() {
+		var boundRender = this.render.bind(this);
+		this.model.on('change', boundRender);
+		this.collection.on('add', boundRender);
+		this.collection.on('reset', boundRender);
+	},
 
 	render: function () {
 		this.$el.html(this.template(this.model.toJSON()));
+		this.collection.each(function (model) {
+			$('#scheduled_entries_list').append(new ScheduleEntryStatusView({ model: model }).render().el);
+		});
 		return this;
 	}
+
 });

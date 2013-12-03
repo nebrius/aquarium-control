@@ -16,14 +16,9 @@
 	You should have received a copy of the GNU General Public License
 	along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*global _, $, Backbone*/
+/*global window, Backbone, ScheduleEntryModel*/
 
-var ScheduleEntryStatusView = Backbone.View.extend({
-
-	template: _.template($('#schedule_entry_status_template').html()),
-
-	render: function () {
-		this.$el.html(this.template(this.model.toJSON()));
-		return this;
-	}
+var ScheduleEntryCollection = Backbone.Collection.extend({
+	model: ScheduleEntryModel,
+	url: window.location.protocol + '//' + window.location.host + '/api/schedule_entries'
 });

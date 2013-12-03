@@ -41,7 +41,10 @@ var ScheduleEntryModel = Backbone.Model.extend({
 		time: {
 			hour: 0,
 			minute: 0
-		}
+		},
+
+		// The lighting state, on of <day|night|off>
+		state: 'off'
 	},
 
 	validate: function (attributes) {
