@@ -18,7 +18,7 @@
  */
 /*global window, Backbone*/
 
-window.StatusModel = Backbone.Model.extend({
+window.AppModel = Backbone.Model.extend({
 
   defaults: {
 

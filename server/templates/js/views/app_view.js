@@ -22,7 +22,7 @@ window.AppView = Backbone.View.extend({
 
   el: '#container',
 
-  template: _.template($('#setup_template').html()),
+  template: _.template($('#app_template').html()),
 
   initialize: function() {
     var boundRender = this.render.bind(this);
@@ -33,8 +33,11 @@ window.AppView = Backbone.View.extend({
 
   render: function () {
     this.$el.html(this.template(this.model.toJSON()));
+    var listContainer = this.$el.children('#scheduled_list');
     this.collection.each(function (model) {
-      $('#scheduled_entries_list').append(new ScheduleView({ model: model }).render().el);
+      var scheduleView = new ScheduleView({ model: model }).render().el;
+      $(scheduleView).addClass('list-group-item');
+      listContainer.append(scheduleView);
     });
     return this;
   }

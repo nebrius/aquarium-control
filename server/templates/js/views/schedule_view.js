@@ -20,6 +20,8 @@
 
 window.ScheduleView = Backbone.View.extend({
 
+  tagName: 'li',
+
   template: _.template($('#schedule_template').html()),
 
   render: function () {

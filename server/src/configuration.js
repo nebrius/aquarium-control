@@ -128,8 +128,8 @@ app.use(express.static(path.join(__dirname, '..', 'templates')));
 // **** Create the API endpoints ****
 
 // Get the status summary
-app.get('/api/status', function (request, response) {
-	log('info', 'Serving the status summary');
+app.get('/api/app', function (request, response) {
+	log('info', 'Serving the app summary');
 	response.send({
 		time: new Date().toString(),
 		state: lightState
@@ -137,13 +137,13 @@ app.get('/api/status', function (request, response) {
 });
 
 // Get the list of schedule entries
-app.get('/api/schedule_entries', function (request, response) {
+app.get('/api/schedule', function (request, response) {
 	log('info', 'Serving the list of scheduled entries');
 	response.send(configuration.scheduleEntries);
 });
 
 // Get a single schedule entry
-app.get('/api/schedule_entries/:id', function (request, response) {
+app.get('/api/schedule/:id', function (request, response) {
 	var requestId = request.params.id;
 	if (!configuration.scheduleEntries[requestId]) {
 		log('error', 'Invalid request, schedule entry id "' + requestId + '" was not found');
@@ -155,7 +155,7 @@ app.get('/api/schedule_entries/:id', function (request, response) {
 });
 
 // Add a new schedule entry
-app.post('/api/scedule_entries', function (request, response) {
+app.post('/api/scedule', function (request, response) {
 	if (!validateScheduleEntry(request, response)) {
 		return;
 	}
@@ -166,7 +166,7 @@ app.post('/api/scedule_entries', function (request, response) {
 });
 
 // Update a schedule entry
-app.post('/api/scedule_entries/:id', function (request, response) {
+app.post('/api/scedule/:id', function (request, response) {
 	var requestId = request.params.id;
 	if (!configuration.scheduleEntries[requestId]) {
 		log('error', 'Invalid request, schedule entry id "' + requestId + '" was not found');
@@ -183,7 +183,7 @@ app.post('/api/scedule_entries/:id', function (request, response) {
 });
 
 // Delete a schedule entry
-app.delete('/api/schedule_entries/:id', function (request, response) {
+app.delete('/api/schedule/:id', function (request, response) {
 	var requestId = request.params.id;
 	if (!configuration.scheduleEntries[requestId]) {
 		log('error', 'Invalid request, schedule entry id "' + requestId + '" was not found');

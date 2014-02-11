@@ -18,29 +18,21 @@
 
     <div id="container"></div>
 
-    <script type="text/template" id="status_template">
+    <script type="text/template" id="app_template">
       <h1>Status</h1>
       <p class="lead">Aquarium time: <%= time %><br/>
       Current lighting state: <%= state %></p>
-      <ul class="list-group" id="scheduled_entries_list"></ul>
-    </script>
-
-    <script type="text/template" id="setup_template">
-      <h1>Setup</h1>
-      <button type="button" class="btn btn-primary">Add new</button>
-      <ul class="list-group" id="scheduled_entries_list"></ul>
+      <ul class="list-group" id="scheduled_list"></ul>
     </script>
 
     <script type="text/template" id="schedule_template">
-      <div class="list-group-item">
-        <h4 class="list-group-item-heading"><%= title %></h4>
-        <div><em>type:</em> <%= type%></div>
-        <div><em>automatic:</em> <%= source.set %>, <%= source.event %></div>
-        <div><em>manual:</em> <%= (time.hour < 10 ? '0' : '') + time.hour %>:<%= (time.minute < 10 ? '0' : '') + time.minute %></div>
-        <div>
-          <button type="button" class="btn btn-primary">Edit</button>
-          <button type="button" class="btn btn-danger">Delete</button>
-        </div>
+      <h4 class="list-group-item-heading"><%= title %></h4>
+      <div><em>type:</em> <%= type%></div>
+      <div><em>automatic:</em> <%= source.set %>, <%= source.event %></div>
+      <div><em>manual:</em> <%= (time.hour < 10 ? '0' : '') + time.hour %>:<%= (time.minute < 10 ? '0' : '') + time.minute %></div>
+      <div>
+        <button type="button" class="btn btn-primary">Edit</button>
+        <button type="button" class="btn btn-danger">Delete</button>
       </div>
     </script>
 
@@ -53,34 +45,23 @@
     <script src="js/collections/schedule_collection.js"></script>
     <script src="js/views/schedule_view.js"></script>
 
+    <script src="js/models/app_model.js"></script>
     <script src="js/views/app_view.js"></script>
 
     <script>
-      /*
-      this.container = $('#container');
-      this.statusModel = new StatusModel();
-      this.statusModel.fetch();
-      this.ScheduleEntryCollection = new ScheduleEntryCollection();
-      this.ScheduleEntryCollection.fetch();
-      */
-      /*
-      if (this.state == 'setup') {
-        return;
-      }
-      if (this.state == 'status') {
-        this.container.empty();
-      }
-      if (!this.setupView) {
-        this.setupView = new SetupView({
-          model: this.statusModel,
-          collection: this.ScheduleEntryCollection
+
+      // Create the models
+      $.when(
+        (window.appModel = new AppModel()).fetch(),
+        (window.scheduleCollection = new ScheduleCollection()).fetch()
+      ).done(function () {
+        // Create the views
+        window.appView = new AppView({
+          model: window.appModel,
+          collection: window.scheduleCollection
         });
-      }
-      this.state = 'setup';
-      $('#status_nav_link').removeClass('active');
-      $('#setup_nav_link').addClass('active');
-      this.container.append(this.setupView.render().el);
-      */
+        appView.render();
+      });
     </script>
   </body>
 </html>
