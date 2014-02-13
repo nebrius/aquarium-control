@@ -1,55 +1,36 @@
 {
 	"scheduleEntries": [
 		{
-			"title": "first",
-			"type": "automatic",
-			"source": {
-				"set": "morning",
-				"event": "astronomical"
-			},
-			"time": {
-				"hour": 0,
-				"minute": 0
-			},
-			"state": "night"
-		},
-		{
-			"title": "second",
-			"type": "automatic",
+			"id": 1,
+			"name": "Sunrise",
+			"type": "dynamic",
 			"source": {
 				"set": "morning",
 				"event": "sunrise"
 			},
-			"time": {
-				"hour": 0,
-				"minute": 0
-			},
+			"time": "0000T16:00+08:00",
 			"state": "day"
 		},
 		{
-			"title": "third",
-			"type": "automatic",
+			"id": 2,
+			"name": "Sunset",
+			"type": "dynamic",
 			"source": {
 				"set": "evening",
 				"event": "sunset"
 			},
-			"time": {
-				"hour": 0,
-				"minute": 0
-			},
+			"time": "0000T16:00+08:00",
 			"state": "night"
 		},
 		{
-			"title": "fourth",
-			"type": "automatic",
+			"id": 3,
+			"name": "Night",
+			"type": "manual",
 			"source": {
 				"set": "evening",
 				"event": "astronomical"
 			},
-			"time": {
-				"hour": 0,
-				"minute": 0
-			},
+			"time": "0000T07:00Z",
 			"state": "off"
 		}
 	]

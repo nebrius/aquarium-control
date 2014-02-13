@@ -16,7 +16,8 @@
   You should have received a copy of the GNU General Public License
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*global window, Backbone*/
+/*jshint browser: true*/
+/*global Backbone*/
 
 window.AppModel = Backbone.Model.extend({
 

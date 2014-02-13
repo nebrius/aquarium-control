@@ -5,3 +5,26 @@ body {
 #container {
   margin: 15px;
 }
+
+.edit_popup {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.edit_form {
+  background-color: #fff;
+  position: absolute;
+  top: 20%;
+  left: 20%;
+  right: 20%;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.btn {
+  width: 100px;
+}

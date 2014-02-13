@@ -16,6 +16,7 @@
   You should have received a copy of the GNU General Public License
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
+/*jshint browser: true*/
 /*global Backbone*/
 
 window.ScheduleModel = Backbone.Model.extend({
@@ -23,11 +24,11 @@ window.ScheduleModel = Backbone.Model.extend({
   defaults: {
 
     // Descriptive name for this model
-    title: '',
+    name: '',
 
-    // The type of schedule entry, either "automatic" (based on sunrise/sunset)
+    // The type of schedule entry, either "dynamic" (based on sunrise/sunset)
     // or "manual" (a specific time)
-    type: 'automatic',
+    type: 'dynamic',
 
     // The soure of the time (used for automatic), in the form
     // "<morning|evening>.<sunrise|sunset|civil|nautical|astronomical>".
@@ -38,10 +39,7 @@ window.ScheduleModel = Backbone.Model.extend({
     },
 
     // The time of the entry (used for manual), in 24 hour time
-    time: {
-      hour: 0,
-      minute: 0
-    },
+    time: '0000T00:00Z',
 
     // The lighting state, on of <day|night|off>
     state: 'off'
@@ -49,14 +47,14 @@ window.ScheduleModel = Backbone.Model.extend({
 
   validate: function (attributes) {
 
-    // Validate the title
-    if (typeof attributes.title != 'string') {
-      throw new Error('ScheduleEntryModel validation error: title must be a string');
+    // Validate the name
+    if (typeof attributes.name != 'string') {
+      throw new Error('ScheduleEntryModel validation error: name must be a string');
     }
 
     // Validate the type
-    if (attributes.type != 'automatic' && attributes.type != 'manual') {
-      throw new Error('ScheduleEntryModel validation error: type must be "automatic" or "manual"');
+    if (attributes.type != 'dynamic' && attributes.type != 'manual') {
+      throw new Error('ScheduleEntryModel validation error: type must be "dynamic" or "manual"');
     }
 
     // Validate the source
@@ -77,18 +75,11 @@ window.ScheduleModel = Backbone.Model.extend({
     }
 
     // Validate the time
-    if (typeof attributes.time != 'object') {
-      throw new Error('ScheduleEntryModel validation error: time must be an object');
+    if (typeof attributes.time != 'string') {
+      throw new Error('ScheduleEntryModel validation error: time must be a string');
     }
-    if (typeof attributes.time.hour != 'number' ||
-        attributes.time.hour < 0 ||
-        attributes.time.hour > 23) {
-      throw new Error('ScheduleEntryModel validation error: time.hour must be a number between 0 and 23');
-    }
-    if (typeof attributes.time.minute != 'number' ||
-        attributes.time.minute < 0 ||
-        attributes.time.minute > 59) {
-      throw new Error('ScheduleEntryModel validation error: time.minute must be a number between 0 and 59');
+    if (isNaN(Date.parse(attributes.time))) {
+      throw new Error('ScheduleEntryModel validation error: time is not a valid datetime string');
     }
   }
 

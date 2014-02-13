@@ -16,7 +16,8 @@
   You should have received a copy of the GNU General Public License
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*global _, $, Backbone, ScheduleView*/
+/*jshint browser: true*/
+/*global _, $, Backbone, ScheduleView, ScheduleModel*/
 
 window.AppView = Backbone.View.extend({
 
@@ -24,11 +25,16 @@ window.AppView = Backbone.View.extend({
 
   template: _.template($('#app_template').html()),
 
+  events: {
+    'click #add_button': 'onClickAdd'
+  },
+
   initialize: function() {
     var boundRender = this.render.bind(this);
     this.model.on('change', boundRender);
     this.collection.on('add', boundRender);
     this.collection.on('reset', boundRender);
+    this.collection.on('remove', boundRender);
   },
 
   render: function () {
@@ -40,6 +46,19 @@ window.AppView = Backbone.View.extend({
       listContainer.append(scheduleView);
     });
     return this;
+  },
+
+  onClickAdd: function () {
+    var models = this.collection.models,
+        requestId = 1;
+    for (var i = 0; i < models.length; i++) {
+      if (requestId <= models[i].id) {
+        requestId = models[i].id + 1;
+      }
+    }
+    var newModel = new ScheduleModel({ id: requestId });
+    this.collection.add(newModel);
+    newModel.save();
   }
 
 });

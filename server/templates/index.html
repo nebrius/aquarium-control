@@ -22,18 +22,189 @@
       <h1>Status</h1>
       <p class="lead">Aquarium time: <%= time %><br/>
       Current lighting state: <%= state %></p>
+      <p><button id="add_button" type="button" class="btn btn-primary">Create New</button></p>
       <ul class="list-group" id="scheduled_list"></ul>
     </script>
 
     <script type="text/template" id="schedule_template">
-      <h4 class="list-group-item-heading"><%= title %></h4>
-      <div><em>type:</em> <%= type%></div>
-      <div><em>automatic:</em> <%= source.set %>, <%= source.event %></div>
-      <div><em>manual:</em> <%= (time.hour < 10 ? '0' : '') + time.hour %>:<%= (time.minute < 10 ? '0' : '') + time.minute %></div>
+      <h2 class="list-group-item-heading"><%= name %></h2>
+      <div><p class="lead">
+        <em><%= state %><br/></em>
+        <%= type%>:
+        <% if (type == 'dynamic') { %>
+        <%= source.set %>, <%= source.event %>
+        <% } else { %>
+        <%
+          var d = new Date(Date.parse(time));
+          var hours = d.getHours();
+          var minutes = d.getMinutes();
+          var am = hours < 12 || hours == 24;
+          if (hours == 0) {
+            hours = 12;
+          } else if (hours > 12) {
+            hours -= 12;
+          }
+          print(hours + ':' + (minutes < 10 ? '0' : '') + minutes + (am ? ' AM' : ' PM'));
+        %>
+        <% } %>
+      </p></div>
       <div>
-        <button type="button" class="btn btn-primary">Edit</button>
-        <button type="button" class="btn btn-danger">Delete</button>
+        <button type="button" class="btn btn-primary edit_button">Edit</button>
+        <button type="button" class="btn btn-danger delete_button">Delete</button>
       </div>
+    </script>
+
+    <script type="text/template" id="edit_template">
+      <form class="form-horizontal edit_form" role="form">
+        <h2 class="text-center">Schedule Configuration</h2>
+        <hr />
+        <div class="form-group">
+          <label for="editName" class="col-sm-2 control-label">Name</label>
+          <div class="col-sm-10">
+            <input
+              type="text"
+              class="form-control"
+              name="editName"
+              id="editName"
+              placeholder="My Schedule Entry"
+              value="<%= name %>">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editStateRadios" class="col-sm-2 control-label">State</label>
+          <div class="col-sm-10">
+            <div class="radio">
+              <label>
+                <input
+                  type="radio"
+                  name="editStateRadios"
+                  id="editStateRadiosOff"
+                  value="off"
+                  <%= state == 'off' ? 'checked' : '' %> />
+                Off
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input
+                  type="radio"
+                  name="editStateRadios"
+                  id="editStateRadiosDay"
+                  value="day"
+                  <%= state == 'day' ? 'checked' : '' %> />
+                Day
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input
+                  type="radio"
+                  name="editStateRadios"
+                  id="editStateRadiosNight"
+                  value="night"
+                  <%= state == 'night' ? 'checked' : '' %> />
+                Night
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editTypeRadios" class="col-sm-2 control-label">Type</label>
+          <div class="col-sm-10">
+            <div class="radio">
+              <label>
+                <input
+                  type="radio"
+                  name="editTypeRadios"
+                  id="editTypeRadiosDynamic"
+                  value="dynamic"
+                  <%= type == 'dynamic' ? 'checked' : '' %> />
+                Dynamic - The time is based on the cycle of the sun
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input
+                  type="radio"
+                  name="editTypeRadios"
+                  id="editTypeRadiosManual"
+                  value="manual"
+                  <%= type == 'manual' ? 'checked' : '' %> />
+                Manual - An explicit time is specified
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editDynamicEvent" class="col-sm-2 control-label">Dynamic</label>
+          <div class="col-sm-10">
+            <select name="editDynamicEvent" id="editDynamicEvent" class="form-control">
+              <option
+                value="morningastronomical"
+                <%= source.set == 'morning' && source.event == 'astronomical' ? 'selected' : '' %>>
+                Morning - Astronomical Twilight
+              </option>
+              <option
+                value="morningnautical"
+                <%= source.set == 'morning' && source.event == 'nautical' ? 'selected' : '' %>>
+                Morning - Nautical Twilight
+              </option>
+              <option
+                value="morningcivil"
+                <%= source.set == 'morning' && source.event == 'civil' ? 'selected' : '' %>>
+                Morning - Civil Twilight
+              </option>
+              <option
+                value="morningsunrise"
+                <%= source.set == 'morning' && source.event == 'sunrise' ? 'selected' : '' %>>
+                Morning - Sunrise
+              </option>
+              <option
+                value="eveningsunset"
+                <%= source.set == 'evening' && source.event == 'sunset' ? 'selected' : '' %>>
+                Evening - Sunset
+              </option>
+              <option
+                value="eveningcivil"
+                <%= source.set == 'evening' && source.event == 'civil' ? 'selected' : '' %>>
+                Evening - Civil Twilight
+              </option>
+              <option
+                value="eveningnautical"
+                <%= source.set == 'evening' && source.event == 'nautical' ? 'selected' : '' %>>
+                Evening - Nautical Twilight
+              </option>
+              <option
+                value="eveningastronomical"
+                <%= source.set == 'evening' && source.event == 'astronomical' ? 'selected' : '' %>>
+                Evening - Astronomical Twilight
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editTime" class="col-sm-2 control-label">Manual</label>
+          <div class="col-sm-10">
+            <input
+              type="time"
+              class="form-control"
+              name="editTime"
+              id="editTime"
+              value=<%
+                var d = new Date(Date.parse(time));
+                var hours = d.getHours();
+                var minutes = d.getMinutes();
+                print((hours < 10 ? '0' : '') + hours + ':' + (minutes < 10 ? '0' : '') + minutes);
+              %> />
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-2 col-sm-10">
+            <button id="save_button" type="submit" class="btn btn-primary btn-default">Save</button>
+            <button id="cancel_button" type="submit" class="btn">Cancel</button>
+          </div>
+        </div>
+      </form>
     </script>
 
     <script src="lib/jquery.min.js"></script>
@@ -44,6 +215,7 @@
     <script src="js/models/schedule_model.js"></script>
     <script src="js/collections/schedule_collection.js"></script>
     <script src="js/views/schedule_view.js"></script>
+    <script src="js/views/edit_view.js"></script>
 
     <script src="js/models/app_model.js"></script>
     <script src="js/views/app_view.js"></script>

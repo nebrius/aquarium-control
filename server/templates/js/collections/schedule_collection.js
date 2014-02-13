@@ -16,7 +16,8 @@
   You should have received a copy of the GNU General Public License
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*global window, Backbone, ScheduleModel*/
+/*jshint browser: true*/
+/*global Backbone, ScheduleModel*/
 
 window.ScheduleCollection = Backbone.Collection.extend({
   model: ScheduleModel,

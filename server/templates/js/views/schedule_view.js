@@ -16,6 +16,7 @@
   You should have received a copy of the GNU General Public License
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
+/*jshint browser: true*/
 /*global _, $, Backbone*/
 
 window.ScheduleView = Backbone.View.extend({
@@ -24,8 +25,27 @@ window.ScheduleView = Backbone.View.extend({
 
   template: _.template($('#schedule_template').html()),
 
+  events: {
+    'click .edit_button': 'onClickEdit',
+    'click .delete_button': 'onClickDelete'
+  },
+
+  initialize: function () {
+    this.listenTo(this.model, 'change', this.render);
+  },
+
   render: function () {
     this.$el.html(this.template(this.model.toJSON()));
     return this;
+  },
+
+  onClickEdit: function () {
+    $('body').append(new window.EditView({
+      model: this.model
+    }).render().el);
+  },
+
+  onClickDelete: function () {
+    this.model.destroy();
   }
 });
