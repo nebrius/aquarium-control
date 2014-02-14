@@ -35,6 +35,7 @@ window.AppView = Backbone.View.extend({
     this.collection.on('add', boundRender);
     this.collection.on('reset', boundRender);
     this.collection.on('remove', boundRender);
+    this.collection.on('sort', boundRender);
   },
 
   render: function () {

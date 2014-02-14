@@ -26,8 +26,10 @@ window.ScheduleView = Backbone.View.extend({
   template: _.template($('#schedule_template').html()),
 
   events: {
-    'click .edit_button': 'onClickEdit',
-    'click .delete_button': 'onClickDelete'
+    'click #edit_button': 'onClickEdit',
+    'click #delete_button': 'onClickDelete',
+    'click .move_up_button': 'onClickMoveUp',
+    'click .move_down_button': 'onClickMoveDown'
   },
 
   initialize: function () {
@@ -47,5 +49,35 @@ window.ScheduleView = Backbone.View.extend({
 
   onClickDelete: function () {
     this.model.destroy();
+  },
+
+  onClickMoveUp: function () {
+    var collection = window.scheduleCollection,
+        index = collection.models.indexOf(this.model),
+        model = this.model,
+        neighbor = collection.models[index - 1];
+    if (index < 1) {
+      return;
+    }
+    model.set('id', model.get('id') - 1);
+    neighbor.set('id', neighbor.get('id') + 1);
+    collection.sort();
+    model.save();
+    neighbor.save();
+  },
+
+  onClickMoveDown: function () {
+    var collection = window.scheduleCollection,
+        index = collection.models.indexOf(this.model),
+        model = this.model,
+        neighbor = collection.models[index + 1];
+    if (index == -1 || index == collection.models.length - 1) {
+      return;
+    }
+    model.set('id', model.get('id') + 1);
+    neighbor.set('id', neighbor.get('id') - 1);
+    collection.sort();
+    model.save();
+    neighbor.save();
   }
 });

@@ -22,35 +22,41 @@
       <h1>Status</h1>
       <p class="lead">Aquarium time: <%= time %><br/>
       Current lighting state: <%= state %></p>
-      <p><button id="add_button" type="button" class="btn btn-primary">Create New</button></p>
+      <p><button id="add_button" type="button" class="btn btn-primary create_button">Create New</button></p>
       <ul class="list-group" id="scheduled_list"></ul>
     </script>
 
     <script type="text/template" id="schedule_template">
-      <h2 class="list-group-item-heading"><%= name %></h2>
-      <div><p class="lead">
-        <em><%= state %><br/></em>
-        <%= type%>:
-        <% if (type == 'dynamic') { %>
-        <%= source.set %>, <%= source.event %>
-        <% } else { %>
-        <%
-          var d = new Date(Date.parse(time));
-          var hours = d.getHours();
-          var minutes = d.getMinutes();
-          var am = hours < 12 || hours == 24;
-          if (hours == 0) {
-            hours = 12;
-          } else if (hours > 12) {
-            hours -= 12;
-          }
-          print(hours + ':' + (minutes < 10 ? '0' : '') + minutes + (am ? ' AM' : ' PM'));
-        %>
-        <% } %>
-      </p></div>
-      <div>
-        <button type="button" class="btn btn-primary edit_button">Edit</button>
-        <button type="button" class="btn btn-danger delete_button">Delete</button>
+      <div class="arrange_container">
+        <button type="button" class="btn btn-default move_up_button">&uArr;</button>
+        <button type="button" class="btn btn-default move_down_button">&dArr;</button>
+      </div>
+      <div class="schedule_container">
+        <h2 class="list-group-item-heading"><%= name %></h2>
+        <div><p class="lead">
+          <em><%= state %><br/></em>
+          <%= type%>:
+          <% if (type == 'dynamic') { %>
+          <%= source.set %>, <%= source.event %>
+          <% } else { %>
+          <%
+            var d = new Date(Date.parse(time));
+            var hours = d.getHours();
+            var minutes = d.getMinutes();
+            var am = hours < 12 || hours == 24;
+            if (hours == 0) {
+              hours = 12;
+            } else if (hours > 12) {
+              hours -= 12;
+            }
+            print(hours + ':' + (minutes < 10 ? '0' : '') + minutes + (am ? ' AM' : ' PM'));
+          %>
+          <% } %>
+        </p></div>
+        <div>
+          <button id="edit_button" type="button" class="btn btn-primary">Edit</button>
+          <button id="delete_button" type="button" class="btn btn-danger">Delete</button>
+        </div>
       </div>
     </script>
 
@@ -227,6 +233,11 @@
         (window.appModel = new AppModel()).fetch(),
         (window.scheduleCollection = new ScheduleCollection()).fetch()
       ).done(function () {
+
+        // Sort the schedules
+        window.scheduleCollection.comparator = 'id';
+        window.scheduleCollection.sort();
+
         // Create the views
         window.appView = new AppView({
           model: window.appModel,

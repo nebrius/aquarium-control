@@ -26,5 +26,33 @@ body {
 }
 
 .btn {
-  width: 100px;
+  width: 75px;
+}
+
+.create_button {
+  width: 125px;
+}
+
+.move_up_button, .move_down_button {
+  width: 60px;
+  height: 60px;
+  display: block;
+  position: absolute;
+  right: 10px;
+}
+
+.move_up_button {
+  top: 10px;
+}
+
+.move_down_button {
+  bottom: 10px;
+}
+
+.schedule_container {
+  margin-right: 70px;
+}
+
+.arrange_container {
+  float: right;
 }
