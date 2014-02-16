@@ -19,11 +19,52 @@
     <div id="container"></div>
 
     <script type="text/template" id="app_template">
-      <h1>Status</h1>
-      <p class="lead">Aquarium time: <%= time %><br/>
-      Current lighting state: <%= state %></p>
-      <p><button id="add_button" type="button" class="btn btn-primary create_button">Create New</button></p>
-      <ul class="list-group" id="scheduled_list"></ul>
+      <% if (mode != 'override') { %>
+        <h1>Status</h1>
+        <p class="lead">Aquarium time: <%= time %><br/>
+        Current lighting state: <%= state %></p>
+        <p><button id="add_button" type="button" class="btn btn-primary create_button">Create New</button></p>
+        <ul class="list-group" id="scheduled_list"></ul>
+        <button type="button" class="btn btn-default override_button">Override</button>
+      <% } else { %>
+        <label for="manualStateRadios" class="col-sm-2 control-label">State</label>
+        <div class="col-sm-10">
+          <div class="radio">
+            <label>
+              <input
+                type="radio"
+                name="manualStateRadios"
+                id="manualStateRadiosOff"
+                value="off"
+                <%= overrideState == 'off' ? 'checked' : '' %> />
+              Off
+            </label>
+          </div>
+          <div class="radio">
+            <label>
+              <input
+                type="radio"
+                name="manualStateRadios"
+                id="manualStateRadiosDay"
+                value="day"
+                <%= overrideState == 'day' ? 'checked' : '' %> />
+              Day
+            </label>
+          </div>
+          <div class="radio">
+            <label>
+              <input
+                type="radio"
+                name="manualStateRadios"
+                id="manualStateRadiosNight"
+                value="night"
+                <%= overrideState == 'night' ? 'checked' : '' %> />
+              Night
+            </label>
+          </div>
+        </div>
+        <button type="button" class="btn btn-default program_button">Program</button>
+      <% } %>
     </script>
 
     <script type="text/template" id="schedule_template">

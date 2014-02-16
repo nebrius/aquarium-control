@@ -6,6 +6,12 @@ body {
   margin: 15px;
 }
 
+.override_button, .program_button {
+  position: absolute;
+  top: 60px;
+  right: 10px;
+}
+
 .edit_popup {
   position: absolute;
   width: 100%;

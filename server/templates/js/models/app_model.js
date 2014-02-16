@@ -27,7 +27,13 @@ window.AppModel = Backbone.Model.extend({
     time: 'not set',
 
     // This is the current state of the lighting, one of <day|night|off>
-    state: 'off'
+    state: 'off',
+
+    // This is the current lighting mode, one of <program|override>
+    mode: 'program',
+
+    // The state of the lighting when in override mode
+    overrideState: 'off'
   },
 
   url: window.location.protocol + '//' + window.location.host + '/api/app'

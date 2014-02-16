@@ -134,7 +134,7 @@ try {
   configuration = JSON.parse(fs.readFileSync(configurationPath));
   appConfiguration = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'settings', 'appsettings.json')));
 } catch(e) {
-  log('error', 'Configuration file is invalid');
+  log('error', 'Configuration file is invalid: ' + e);
   process.exit(1);
 }
 
@@ -150,8 +150,27 @@ app.get('/api/app', function (request, response) {
   log('info', 'Serving the app summary');
   response.send({
     time: new Date().toString(),
-    state: lightState
+    state: lightState,
+    mode: configuration.mode,
+    overrideState: configuration.overrideState
   });
+});
+
+app.post('/api/app', function (request, response) {
+  log('info', 'Setting the mode');
+  var attributes = request.body;
+  if (attributes.mode != 'program' && attributes.mode != 'override') {
+    response.send(400, 'ScheduleEntryModel validation error: program must be either "program" or "override"');
+    return;
+  }
+  if (['day', 'night', 'off'].indexOf(attributes.overrideState) == -1) {
+    response.send(400, 'ScheduleEntryModel validation error: overrideState must be either "day", "night", or "off');
+    return;
+  }
+  configuration.mode = attributes.mode;
+  configuration.overrideState = attributes.overrideState;
+  saveConfiguration();
+  response.send(200, 'OK');
 });
 
 // Get the list of schedule entries
@@ -162,7 +181,7 @@ app.get('/api/schedule', function (request, response) {
 
 // Get a single schedule entry
 app.get('/api/schedule/:id', function (request, response) {
-  var requestId = parseInt(request.params.id),
+  var requestId = parseInt(request.params.id, 10),
       entry = lookupScheduleEntry(requestId);
   if (!entry) {
     log('error', 'Invalid request, schedule entry id "' + requestId + '" was not found');
@@ -172,30 +191,6 @@ app.get('/api/schedule/:id', function (request, response) {
     response.send(entry);
   }
 });
-
-// Add a new schedule entry
-/*app.post('/api/schedule', function (request, response) {
-  var requestId = request.body.id;
-  if (typeof requestId == 'undefined') {
-    requestId = 1;
-    for (var i = 0; i < configuration.scheduleEntries.length; i++) {
-      if (requestId <= configuration.scheduleEntries[i].id) {
-        requestId = configuration.scheduleEntries[i].id + 1;
-      }
-    }
-    request.body.id = requestId;
-  } else if (!isNaN(lookupScheduleEntryLocation(requestId))) {
-    log('error', 'Invalid request, schedule entry id "' + requestId + '" already exists');
-    response.send(400, 'Invalid request');
-  }
-  if (!validateScheduleEntry(request, response)) {
-    return;
-  }
-  log('info', 'Creating new schedule entry with id "' + requestId + '": ' + JSON.stringify(request.body, false, '\t'));
-  configuration.scheduleEntries.push(request.body);
-  saveConfiguration();
-  response.send(200, 'OK');
-});*/
 
 // Update a schedule entry
 app.put('/api/schedule/:id', function (request, response) {
@@ -217,7 +212,7 @@ app.put('/api/schedule/:id', function (request, response) {
 
 // Delete a schedule entry
 app.delete('/api/schedule/:id', function (request, response) {
-  var requestId = parseInt(request.params.id),
+  var requestId = parseInt(request.params.id, 10),
       entryIdx = lookupScheduleEntryLocation(requestId);
   if (isNaN(entryIdx)) {
     log('error', 'Invalid request, schedule entry id "' + requestId + '" was not found');

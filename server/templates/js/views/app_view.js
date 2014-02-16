@@ -26,7 +26,10 @@ window.AppView = Backbone.View.extend({
   template: _.template($('#app_template').html()),
 
   events: {
-    'click #add_button': 'onClickAdd'
+    'click #add_button': 'onClickAdd',
+    'click .program_button': 'onClickProgram',
+    'click .override_button': 'onClickOverride',
+    'change input[name="manualStateRadios"]': 'onStateChange'
   },
 
   initialize: function() {
@@ -60,6 +63,21 @@ window.AppView = Backbone.View.extend({
     var newModel = new ScheduleModel({ id: requestId });
     this.collection.add(newModel);
     newModel.save();
+  },
+
+  onClickProgram: function () {
+    this.model.set('mode', 'program');
+    this.model.save();
+  },
+
+  onClickOverride: function () {
+    this.model.set('mode', 'override');
+    this.model.save();
+  },
+
+  onStateChange: function () {
+    this.model.set('overrideState', $('input[name="manualStateRadios"]:checked').val());
+    this.model.save();
   }
 
 });

@@ -1,4 +1,6 @@
 {
+	"mode": "override",
+	"overrideState": "night",
 	"scheduleEntries": [
 		{
 			"id": 1,
