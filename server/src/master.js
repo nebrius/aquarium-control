@@ -78,7 +78,8 @@ if (cluster.isMaster) {
         destination: appSettings['log-file'],
         minLevel: appSettings['log-min-level'],
         timestamp: true,
-        prependLevel: true
+        prependLevel: true,
+        maxLines: 1000
       }]);
     logger.info('---------------------');
     logger.info('System start');
