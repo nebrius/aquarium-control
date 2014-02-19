@@ -1,5 +1,5 @@
 {
-	"mode": "override",
+	"mode": "program",
 	"overrideState": "night",
 	"scheduleEntries": [
 		{
