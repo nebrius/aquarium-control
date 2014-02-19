@@ -21,14 +21,29 @@ body {
   background-color: rgba(0, 0, 0, 0.3);
 }
 
-.edit_form {
-  background-color: #fff;
-  position: absolute;
-  top: 20%;
-  left: 20%;
-  right: 20%;
-  padding: 20px;
-  border-radius: 5px;
+
+@media screen and (min-device-width : 480px) {
+  .edit_form {
+    background-color: #fff;
+    position: absolute;
+    top: 20%;
+    left: 20%;
+    right: 20%;
+    padding: 20px;
+    border-radius: 5px;
+  }
+}
+
+@media screen and (max-device-width : 480px) {
+  .edit_form {
+    background-color: #fff;
+    position: absolute;
+    top: 55px;
+    left: 5px;
+    right: 5px;
+    padding: 20px;
+    border-radius: 5px;
+  }
 }
 
 .btn {
