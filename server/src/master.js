@@ -55,7 +55,7 @@ if (cluster.isMaster) {
       logger.info('Starting worker ' + source);
       workers[source] = cluster.fork({
         source: source,
-        appSettings: JSON.stringify(appSettings, false, '\t')
+        appSettings: JSON.stringify(appSettings, null, '  ')
       });
       workers[source].source = source;
       workers[source].on('message', function(message) {

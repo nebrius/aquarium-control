@@ -1,39 +1,39 @@
 {
-	"mode": "program",
-	"overrideState": "night",
-	"scheduleEntries": [
-		{
-			"id": 1,
-			"name": "Sunrise",
-			"type": "dynamic",
-			"source": {
-				"set": "morning",
-				"event": "sunrise"
-			},
-			"time": "0000T16:00+08:00",
-			"state": "day"
-		},
-		{
-			"id": 2,
-			"name": "Sunset",
-			"type": "dynamic",
-			"source": {
-				"set": "evening",
-				"event": "sunset"
-			},
-			"time": "0000T16:00+08:00",
-			"state": "night"
-		},
-		{
-			"id": 3,
-			"name": "Night",
-			"type": "manual",
-			"source": {
-				"set": "evening",
-				"event": "astronomical"
-			},
-			"time": "0000T07:00Z",
-			"state": "off"
-		}
-	]
+  "mode": "program",
+  "overrideState": "night",
+  "scheduleEntries": [
+    {
+      "id": 1,
+      "name": "Sunrise",
+      "type": "dynamic",
+      "source": {
+        "set": "morning",
+        "event": "sunrise"
+      },
+      "time": "0000T16:00+08:00",
+      "state": "day"
+    },
+    {
+      "id": 2,
+      "name": "Sunset",
+      "type": "dynamic",
+      "source": {
+        "set": "evening",
+        "event": "sunset"
+      },
+      "time": "0000T16:00+08:00",
+      "state": "night"
+    },
+    {
+      "id": 3,
+      "name": "Night",
+      "type": "manual",
+      "source": {
+        "set": "evening",
+        "event": "astronomical"
+      },
+      "time": "0000T07:00Z",
+      "state": "off"
+    }
+  ]
 }

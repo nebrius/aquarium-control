@@ -104,8 +104,8 @@ function fetch(callback) {
 refreshSchedule();
 function refreshSchedule() {
   fetch(function (times) {
-    // If we haven't recieved the configuration yet, short circuit
-    if (!configuration) {
+    // If we haven't recieved the configuration yet or were switched to override mode while fetching, short circuit
+    if (!configuration || mode == 'override') {
       return;
     }
 

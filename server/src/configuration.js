@@ -42,7 +42,7 @@ function log(level, message) {
 }
 
 function saveConfiguration() {
-  fs.writeFileSync(configurationPath, JSON.stringify(configuration, false, '\t'));
+  fs.writeFileSync(configurationPath, JSON.stringify(configuration, null, '  '));
   process.send({
     destination: 'broadcast',
     type: 'configuration.set',
@@ -200,10 +200,10 @@ app.put('/api/schedule/:id', function (request, response) {
     return;
   }
   if (!isNaN(oldEntryIdx)) {
-    log('info', 'Updating existing schedule entry with id "' + requestId + '": ' + JSON.stringify(request.body, false, '\t'));
+    log('info', 'Updating existing schedule entry with id "' + requestId + '": ' + JSON.stringify(request.body, null, '  '));
     configuration.scheduleEntries[oldEntryIdx] = request.body;
   } else {
-    log('info', 'Creating new schedule entry with id "' + requestId + '": ' + JSON.stringify(request.body, false, '\t'));
+    log('info', 'Creating new schedule entry with id "' + requestId + '": ' + JSON.stringify(request.body, null, '  '));
     configuration.scheduleEntries.push(request.body);
   }
   saveConfiguration();
