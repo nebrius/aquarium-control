@@ -71,7 +71,7 @@ window.EditView = Backbone.View.extend({
 
     // Parse the manual field
     var timezoneOffset = (new Date()).getTimezoneOffset();
-    timezoneOffset = '+' + zeroPad(timezoneOffset / 60) + ':' + zeroPad(timezoneOffset % 60);
+    timezoneOffset = '-' + zeroPad(timezoneOffset / 60) + ':' + zeroPad(timezoneOffset % 60);
     this.model.set('time', '0000T' + $('#editTime').val() + timezoneOffset);
 
     // Save the model to the server
