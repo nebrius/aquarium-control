@@ -75,11 +75,11 @@ window.ScheduleModel = Backbone.Model.extend({
     }
 
     // Validate the time
-    if (typeof attributes.time != 'string') {
-      throw new Error('ScheduleEntryModel validation error: time must be a string');
+    if (typeof attributes.time != 'object') {
+      throw new Error('ScheduleEntryModel validation error: time must be an object');
     }
-    if (isNaN(Date.parse(attributes.time))) {
-      throw new Error('ScheduleEntryModel validation error: time is not a valid datetime string');
+    if (isNaN(attributes.time.hours) || attributes.time.hours < 0 || attributes.time.hours > 23) {
+      throw new Error('ScheduleEntryModel validation error: time.hours must be a number between 0 and 23');
     }
   }
 

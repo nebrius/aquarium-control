@@ -69,10 +69,15 @@ window.EditView = Backbone.View.extend({
       });
     }
 
-    // Parse the manual field
-    var timezoneOffset = (new Date()).getTimezoneOffset();
-    timezoneOffset = '-' + zeroPad(timezoneOffset / 60) + ':' + zeroPad(timezoneOffset % 60);
-    this.model.set('time', '0000T' + $('#editTime').val() + timezoneOffset);
+    // Parse the manual time field
+    var date = new Date(),
+        time = $('#editTime').val().split(':');
+    date.setHours(time[0]);
+    date.setMinutes(time[1]);
+    this.model.set('time', {
+      hours: date.getUTCHours(),
+      minutes: date.getUTCMinutes()
+    });
 
     // Save the model to the server
     this.model.save();

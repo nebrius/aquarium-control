@@ -10,7 +10,10 @@
         "set": "morning",
         "event": "sunrise"
       },
-      "time": "0000T16:00+08:00",
+      "time": {
+        "hours": 0,
+        "minutes": 0
+      },
       "state": "day"
     },
     {
@@ -21,7 +24,10 @@
         "set": "evening",
         "event": "sunset"
       },
-      "time": "0000T16:00+08:00",
+      "time": {
+        "hours": 0,
+        "minutes": 0
+      },
       "state": "night"
     },
     {
@@ -32,7 +38,10 @@
         "set": "evening",
         "event": "astronomical"
       },
-      "time": "0000T07:00Z",
+      "time": {
+        "hours": 6,
+        "minutes": 0
+      },
       "state": "off"
     }
   ]
