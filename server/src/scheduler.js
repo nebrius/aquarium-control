@@ -44,12 +44,18 @@ function log(level, message) {
   });
 }
 
+var currentRequest;
 function fetch(callback) {
   log('info', 'Fetching sunrise/sunset information');
+  if (currentRequest) {
+    currentRequest.callback = null;
+    currentRequest.end();
+  }
   var date = new Date(),
       config = JSON.parse(process.env.appSettings).timing;
-  request([config.endpoint, config.latitude, config.longitude, date.getDate(), (date.getMonth() + 1),
+  currentRequest = request([config.endpoint, config.latitude, config.longitude, date.getDate(), (date.getMonth() + 1),
       (-(new Date()).getTimezoneOffset() / 60), '0'].join('/'), function (error, response, body) {
+    currentRequest = null;
     if (!error && response.statusCode == 200) {
       xml2js.parseString(body, function (err, results) {
         var sunriseTwilight = results.sun.morning[0].twilight[0],
@@ -135,7 +141,7 @@ function refreshSchedule() {
       } else {
         time = new Date();
         temp = new Date(entry.time);
-        time.setHours(temp.getHours(), temp.getMinutes(), 0, 0);
+        time.setHours(temp.getUTCHours(), temp.getUTCMinutes(), 0, 0);
         time = time.getTime();
       }
 
