@@ -69,7 +69,7 @@ window.EditView = Backbone.View.extend({
       });
     }
 
-    // Parse the manual time field
+    // Parse the manual time field and convert from local time to UTC
     var date = new Date(),
         time = $('#editTime').val().split(':');
     date.setHours(time[0]);

@@ -16,21 +16,16 @@
   You should have received a copy of the GNU General Public License
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
+/*global process*/
 
 var request = require('request'),
     xml2js = require('xml2js'),
     schedule = require('node-schedule'),
 
     mode = 'override',
+    currentState = 'off',
 
     dailySchedule,
-
-    STATE_OFF = 'off',
-    STATE_DAY = 'day',
-    STATE_NIGHT = 'night',
-
-    currentState = STATE_OFF,
-
     configuration;
 
 function log(level, message) {
@@ -58,6 +53,9 @@ function fetch(callback) {
     currentRequest = null;
     if (!error && response.statusCode == 200) {
       xml2js.parseString(body, function (err, results) {
+        if (err) {
+          return;
+        }
         var sunriseTwilight = results.sun.morning[0].twilight[0],
             sunrise = results.sun.morning[0].sunrise[0],
             sunset = results.sun.evening[0].sunset[0],
@@ -93,13 +91,13 @@ function fetch(callback) {
             astronomical: new Date(parseDate + sunriseTwilight.astronomical[0]).getTime(),
             nautical: new Date(parseDate + sunriseTwilight.nautical[0]).getTime(),
             civil: new Date(parseDate + sunriseTwilight.civil[0]).getTime(),
-            sunrise: new Date(parseDate + sunrise).getTime(),
+            sunrise: new Date(parseDate + sunrise).getTime()
           },
           evening: {
             astronomical: new Date(parseDate + sunsetTwilight.astronomical[0]).getTime(),
             nautical: new Date(parseDate + sunsetTwilight.nautical[0]).getTime(),
             civil: new Date(parseDate + sunsetTwilight.civil[0]).getTime(),
-            sunset: new Date(parseDate + sunset).getTime(),
+            sunset: new Date(parseDate + sunset).getTime()
           }
         });
       });
@@ -110,7 +108,7 @@ function fetch(callback) {
 refreshSchedule();
 function refreshSchedule() {
   fetch(function (times) {
-    // If we haven't recieved the configuration yet or were switched to override mode while fetching, short circuit
+    // If we haven't received the configuration yet or were switched to override mode while fetching, short circuit
     if (!configuration || mode == 'override') {
       return;
     }
@@ -128,10 +126,9 @@ function refreshSchedule() {
         return 1;
       }
     }).map(function (entry) {
-      var time,
-          temp;
 
       // Get the timestamp
+      var time;
       if (entry.type == 'dynamic') {
         if (entry.source.set == 'morning') {
           time = times.morning[entry.source.event];
@@ -140,12 +137,13 @@ function refreshSchedule() {
         }
       } else {
         time = new Date();
-        temp = new Date(entry.time);
-        time.setHours(temp.getUTCHours(), temp.getUTCMinutes(), 0, 0);
+        time.setUTCHours(entry.time.hours);
+        time.setUTCMinutes(entry.time.minutes);
+        time.setUTCSeconds(0);
         time = time.getTime();
       }
 
-      // Compensate for this time technically occuring tomorrow by adding 24 hours to it, if need be
+      // Compensate for this time technically occurring tomorrow by adding 24 hours to it, if need be
       if (time < currentTime) {
         time += 24 * 60 * 60 * 1000;
       }
@@ -153,7 +151,7 @@ function refreshSchedule() {
       return {
         state: entry.state,
         time: time
-      }
+      };
     });
 
     for (i = 1; i < dailySchedule.length; i++) {
@@ -179,7 +177,7 @@ function scheduleNextChange() {
   // Break the recursion chain so that the stack doesn't keep growing and growing
   setTimeout(function () {
 
-    // if we are in override mode or haven't recieved the configuration yet, short circuit the scheduler
+    // if we are in override mode or haven't received the configuration yet, short circuit the scheduler
     if (mode == 'override' || !configuration) {
       return;
     }
@@ -189,19 +187,17 @@ function scheduleNextChange() {
       return;
     }
 
-    var nextStateChange = dailySchedule.shift();
-
     // Schedule the next state change
+    var nextStateChange = dailySchedule.shift();
     schedule.scheduleJob(new Date(nextStateChange.time), function () {
-
-    process.send({
-      destination: 'broadcast',
-      type: 'lights.set',
-      data: nextStateChange.state
+      process.send({
+        destination: 'broadcast',
+        type: 'lights.set',
+        data: nextStateChange.state
+      });
+      scheduleNextChange();
     });
-    scheduleNextChange();
   }, 1);
-});
 }
 
 log('info', 'Scheduler started');
