@@ -4,7 +4,7 @@
 	"description": "Runs on a Raspberry Pi to control lighting for an aquarium",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/bryan-m-hughes/aquarium-control"
+		"url": "https://gitlab.theoreticalideations.com/nebrius/aquarium-control"
 	},
 	"dependencies": {
 		"request": "2.20.x",

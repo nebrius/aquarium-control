@@ -17,14 +17,23 @@
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var path = require('path'),
-    exec = require('child_process').exec,
+var fs = require('fs').exec,
 
-    STATE_OFF = 'off',
     STATE_DAY = 'day',
     STATE_NIGHT = 'night',
 
-    driverPath = path.join(__dirname, '..', '..', 'driver', 'driver.py');
+    DAY_GPIO = 10,
+    NIGHT_GPIO = 9,
+
+    RELAY_DELAY = 500,
+
+    TRANSITION_STATE_READY = 1,
+    TRANSITION_STATE_TRANSITIONING = 2,
+
+    transitionState = TRANSITION_STATE_READY,
+    newState,
+
+    GPIO_PATH_PREFIX = '/sys/class/gpio';
 
 function log(level, message) {
   process.send({
@@ -37,23 +46,48 @@ function log(level, message) {
   });
 }
 
-exec(driverPath + ' off');
+function turnDayOn() {
+  fs.writeFileSync(GPIO_PATH_PREFIX + '/gpio' + DAY_GPIO + '/direction', '1');
+}
+
+function turnDayOff() {
+  fs.writeFileSync(GPIO_PATH_PREFIX + '/gpio' + DAY_GPIO + '/direction', '0');
+}
+
+function turnNightOn() {
+  fs.writeFileSync(GPIO_PATH_PREFIX + '/gpio' + NIGHT_GPIO + '/direction', '1');
+}
+
+function turnNightOff() {
+  fs.writeFileSync(GPIO_PATH_PREFIX + '/gpio' + NIGHT_GPIO + '/direction', '0');
+}
+
+// Initialize pins 19/GPIO10 (day) and 21/GPIO9 (night) as outputs
+fs.writeFileSync(GPIO_PATH_PREFIX + '/export', DAY_GPIO);
+fs.writeFileSync(GPIO_PATH_PREFIX + '/export', NIGHT_GPIO);
+fs.writeFileSync(GPIO_PATH_PREFIX + '/gpio' + DAY_GPIO + '/direction', 'out');
+fs.writeFileSync(GPIO_PATH_PREFIX + '/gpio' + NIGHT_GPIO + '/direction', 'out');
+turnDayOff();
+turnNightOff();
 
 log('info', 'Controller started');
 
 process.on('message', function (message) {
-  if (message.type === 'lights.set') {
-    log('info', 'State change: ' + message.data);
-    switch(message.data) {
-      case STATE_OFF:
-        exec(driverPath + ' off');
-        break;
-      case STATE_DAY:
-        exec(driverPath + ' day');
-        break;
-      case STATE_NIGHT:
-        exec(driverPath + ' night');
-        break;
-    }
+  turnDayOff();
+  turnNightOff();
+  newState = message.data;
+  if (transitionState == TRANSITION_STATE_READY) {
+    transitionState = TRANSITION_STATE_TRANSITIONING;
+    setTimeout(function () {
+      switch(newState) {
+        case STATE_DAY:
+          turnDayOn();
+          break;
+        case STATE_NIGHT:
+          turnNightOn();
+          break;
+      }
+      transitionState = TRANSITION_STATE_READY;
+    }, RELAY_DELAY);
   }
 });
