@@ -17,18 +17,18 @@
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var path = require('path'),
-    fs = require('fs'),
-    express = require('express'),
+var path = require('path');
+var fs = require('fs');
+var express = require('express');
 
-    DEFAULT_PORT = 8080,
+var DEFAULT_PORT = 8080;
 
-    configuration,
-    configurationPath = path.join(__dirname, '..', 'settings', 'usersettings.json'),
-    appConfiguration,
+var configuration;
+var configurationPath = path.join(__dirname, '..', 'settings', 'usersettings.json');
+var appConfiguration;
 
-    app,
-    lightState = 'off';
+var app;
+var lightState = 'off';
 
 function log(level, message) {
   process.send({

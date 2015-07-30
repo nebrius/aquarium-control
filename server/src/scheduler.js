@@ -16,17 +16,14 @@
   You should have received a copy of the GNU General Public License
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*global process*/
 
-var request = require('request'),
-    xml2js = require('xml2js'),
-    schedule = require('node-schedule'),
+var schedule = require('node-schedule');
 
-    mode = 'override',
-    currentState = 'off',
+var mode = 'override';
+var currentState = 'off';
 
-    dailySchedule,
-    configuration;
+var dailySchedule;
+var configuration;
 
 function log(level, message) {
   process.send({
@@ -39,143 +36,58 @@ function log(level, message) {
   });
 }
 
-var currentRequest;
-function fetch(callback) {
-  log('info', 'Fetching sunrise/sunset information');
-  if (currentRequest) {
-    currentRequest.callback = null;
-    currentRequest.end();
-  }
-  var date = new Date(),
-      config = JSON.parse(process.env.appSettings).timing;
-  currentRequest = request([config.endpoint, config.latitude, config.longitude, date.getDate(), (date.getMonth() + 1),
-      (-(new Date()).getTimezoneOffset() / 60), '0'].join('/'), function (error, response, body) {
-    currentRequest = null;
-    if (!error && response.statusCode == 200) {
-      xml2js.parseString(body, function (err, results) {
-        if (err) {
-          return;
-        }
-        var sunriseTwilight = results.sun.morning[0].twilight[0],
-            sunrise = results.sun.morning[0].sunrise[0],
-            sunset = results.sun.evening[0].sunset[0],
-            sunsetTwilight = results.sun.evening[0].twilight[0],
-            parseDate;
-        switch (date.getDay()) {
-          case 0: parseDate = 'Sun'; break;
-          case 1: parseDate = 'Mon'; break;
-          case 2: parseDate = 'Tue'; break;
-          case 3: parseDate = 'Wed'; break;
-          case 4: parseDate = 'Thu'; break;
-          case 5: parseDate = 'Fri'; break;
-          case 6: parseDate = 'Sat'; break;
-        }
-        parseDate += ', ' + date.getDate() + ' ';
-        switch (date.getMonth()) {
-          case 0: parseDate += 'Jan'; break;
-          case 1: parseDate += 'Feb'; break;
-          case 2: parseDate += 'Mar'; break;
-          case 3: parseDate += 'Apr'; break;
-          case 4: parseDate += 'May'; break;
-          case 5: parseDate += 'Jun'; break;
-          case 6: parseDate += 'Jul'; break;
-          case 7: parseDate += 'Aug'; break;
-          case 8: parseDate += 'Sep'; break;
-          case 9: parseDate += 'Oct'; break;
-          case 10: parseDate += 'Nov'; break;
-          case 11: parseDate += 'Dec'; break;
-        }
-        parseDate += ' ' + date.getFullYear() + ' ';
-        callback({
-          morning: {
-            astronomical: new Date(parseDate + sunriseTwilight.astronomical[0]).getTime(),
-            nautical: new Date(parseDate + sunriseTwilight.nautical[0]).getTime(),
-            civil: new Date(parseDate + sunriseTwilight.civil[0]).getTime(),
-            sunrise: new Date(parseDate + sunrise).getTime()
-          },
-          evening: {
-            astronomical: new Date(parseDate + sunsetTwilight.astronomical[0]).getTime(),
-            nautical: new Date(parseDate + sunsetTwilight.nautical[0]).getTime(),
-            civil: new Date(parseDate + sunsetTwilight.civil[0]).getTime(),
-            sunset: new Date(parseDate + sunset).getTime()
-          }
-        });
-      });
-    }
-  });
-}
-
-refreshSchedule();
 function refreshSchedule() {
-  fetch(function (times) {
-    // If we haven't received the configuration yet or were switched to override mode while fetching, short circuit
-    if (!configuration || mode == 'override') {
-      return;
+
+  // Create the daily schedule
+  dailySchedule = configuration.scheduleEntries.sort(function (x, y) {
+    if (x.id < y.id) {
+      return -1;
+    } else if (x.id == y.id) {
+      return 0;
+    } else {
+      return 1;
+    }
+  }).map(function (entry) {
+
+    // Get the timestamp
+    var time = new Date();
+    time.setUTCHours(entry.time.hours);
+    time.setUTCMinutes(entry.time.minutes);
+    time.setUTCSeconds(0);
+    time = time.getTime();
+
+    // Compensate for this time technically occurring tomorrow by adding 24 hours to it, if need be
+    if (time < Date.now()) {
+      time += 24 * 60 * 60 * 1000;
     }
 
-    var currentTime = Date.now(),
-        i;
-
-    // Create the daily schedule
-    dailySchedule = configuration.scheduleEntries.sort(function (x, y) {
-      if (x.id < y.id) {
-        return -1;
-      } else if (x.id == y.id) {
-        return 0;
-      } else {
-        return 1;
-      }
-    }).map(function (entry) {
-
-      // Get the timestamp
-      var time;
-      if (entry.type == 'dynamic') {
-        if (entry.source.set == 'morning') {
-          time = times.morning[entry.source.event];
-        } else {
-          time = times.evening[entry.source.event];
-        }
-      } else {
-        time = new Date();
-        time.setUTCHours(entry.time.hours);
-        time.setUTCMinutes(entry.time.minutes);
-        time.setUTCSeconds(0);
-        time = time.getTime();
-      }
-
-      // Compensate for this time technically occurring tomorrow by adding 24 hours to it, if need be
-      if (time < currentTime) {
-        time += 24 * 60 * 60 * 1000;
-      }
-
-      return {
-        state: entry.state,
-        time: time
-      };
-    });
-
-    for (i = 1; i < dailySchedule.length; i++) {
-      if (dailySchedule[i].time < dailySchedule[i - 1].time) {
-        dailySchedule = dailySchedule.slice(i).concat(dailySchedule.slice(0, i));
-        break;
-      }
-    }
-
-    process.send({
-      destination: 'broadcast',
-      type: 'lights.set',
-      data: dailySchedule[dailySchedule.length - 1].state
-    });
-
-    // Pump the scheduler
-    scheduleNextChange();
+    return {
+      state: entry.state,
+      time: time
+    };
   });
+
+  for (var i = 1; i < dailySchedule.length; i++) {
+    if (dailySchedule[i].time < dailySchedule[i - 1].time) {
+      dailySchedule = dailySchedule.slice(i).concat(dailySchedule.slice(0, i));
+      break;
+    }
+  }
+
+  process.send({
+    destination: 'broadcast',
+    type: 'lights.set',
+    data: dailySchedule[dailySchedule.length - 1].state
+  });
+
+  // Pump the scheduler
+  scheduleNextChange();
 }
 
 function scheduleNextChange() {
 
   // Break the recursion chain so that the stack doesn't keep growing and growing
-  setTimeout(function () {
+  process.nextTick(function () {
 
     // if we are in override mode or haven't received the configuration yet, short circuit the scheduler
     if (mode == 'override' || !configuration) {
@@ -197,7 +109,7 @@ function scheduleNextChange() {
       });
       scheduleNextChange();
     });
-  }, 1);
+  });
 }
 
 log('info', 'Scheduler started');

@@ -17,23 +17,23 @@
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var fs = require('fs').exec,
+var raspi = require('raspi');
+var gpio = require('raspi-gpio');
 
-    STATE_DAY = 'day',
-    STATE_NIGHT = 'night',
+var STATE_DAY = 'day';
+var STATE_NIGHT = 'night';
+var DAY_GPIO = 'P1-11';
+var NIGHT_GPIO = 'P1-13';
+var RELAY_DELAY = 500;
+var TRANSITION_STATE_READY = 1;
+var TRANSITION_STATE_TRANSITIONING = 2;
 
-    DAY_GPIO = 10,
-    NIGHT_GPIO = 9,
-
-    RELAY_DELAY = 500,
-
-    TRANSITION_STATE_READY = 1,
-    TRANSITION_STATE_TRANSITIONING = 2,
-
-    transitionState = TRANSITION_STATE_READY,
-    newState,
-
-    GPIO_PATH_PREFIX = '/sys/class/gpio';
+var transitionState = TRANSITION_STATE_READY;
+var newState;
+var dayLight;
+var nightLight;
+var initialized = false;
+var initialState = 'off';
 
 function log(level, message) {
   process.send({
@@ -47,35 +47,24 @@ function log(level, message) {
 }
 
 function turnDayOn() {
-  fs.writeFileSync(GPIO_PATH_PREFIX + '/gpio' + DAY_GPIO + '/direction', '1');
+  dayLight.write(gpio.HIGH);
 }
 
 function turnDayOff() {
-  fs.writeFileSync(GPIO_PATH_PREFIX + '/gpio' + DAY_GPIO + '/direction', '0');
+  dayLight.write(gpio.LOW);
 }
 
 function turnNightOn() {
-  fs.writeFileSync(GPIO_PATH_PREFIX + '/gpio' + NIGHT_GPIO + '/direction', '1');
+  nightLight.write(gpio.HIGH);
 }
 
 function turnNightOff() {
-  fs.writeFileSync(GPIO_PATH_PREFIX + '/gpio' + NIGHT_GPIO + '/direction', '0');
+  nightLight.write(gpio.LOW);
 }
 
-// Initialize pins 19/GPIO10 (day) and 21/GPIO9 (night) as outputs
-fs.writeFileSync(GPIO_PATH_PREFIX + '/export', DAY_GPIO);
-fs.writeFileSync(GPIO_PATH_PREFIX + '/export', NIGHT_GPIO);
-fs.writeFileSync(GPIO_PATH_PREFIX + '/gpio' + DAY_GPIO + '/direction', 'out');
-fs.writeFileSync(GPIO_PATH_PREFIX + '/gpio' + NIGHT_GPIO + '/direction', 'out');
-turnDayOff();
-turnNightOff();
-
-log('info', 'Controller started');
-
-process.on('message', function (message) {
+function setState(newState) {
   turnDayOff();
   turnNightOff();
-  newState = message.data;
   if (transitionState == TRANSITION_STATE_READY) {
     transitionState = TRANSITION_STATE_TRANSITIONING;
     setTimeout(function () {
@@ -90,4 +79,23 @@ process.on('message', function (message) {
       transitionState = TRANSITION_STATE_READY;
     }, RELAY_DELAY);
   }
+}
+
+process.on('message', function (message) {
+  if (message.type == 'lights.set') {
+    newState = message.data;
+    if (!initialized) {
+      initialState = newState;
+    } else {
+      setState(newState);
+    }
+  }
+});
+
+raspi.init(function() {
+  log('info', 'Controller started');
+  initialized = true;
+  dayLight = new gpio.DigitalOutput(DAY_GPIO);
+  nightLight = new gpio.DigitalOutput(NIGHT_GPIO);
+  setState(initialState);
 });
