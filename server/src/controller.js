@@ -22,8 +22,8 @@ var gpio = require('raspi-gpio');
 
 var STATE_DAY = 'day';
 var STATE_NIGHT = 'night';
-var DAY_GPIO = 'GPIO2';
-var NIGHT_GPIO = 'GPIO3';
+var DAY_GPIO = 'GPIO3';
+var NIGHT_GPIO = 'GPIO2';
 var RELAY_DELAY = 500;
 var TRANSITION_STATE_READY = 1;
 var TRANSITION_STATE_TRANSITIONING = 2;
@@ -47,19 +47,19 @@ function log(level, message) {
 }
 
 function turnDayOn() {
-  dayLight.write(gpio.HIGH);
-}
-
-function turnDayOff() {
   dayLight.write(gpio.LOW);
 }
 
+function turnDayOff() {
+  dayLight.write(gpio.HIGH);
+}
+
 function turnNightOn() {
-  nightLight.write(gpio.HIGH);
+  nightLight.write(gpio.LOW);
 }
 
 function turnNightOff() {
-  nightLight.write(gpio.LOW);
+  nightLight.write(gpio.HIGH);
 }
 
 function setState(newState) {
