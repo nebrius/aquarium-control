@@ -38,6 +38,8 @@ function log(level, message) {
 
 function refreshSchedule() {
 
+  log('info', 'Refreshing the schedule');
+
   // Create the daily schedule
   dailySchedule = configuration.scheduleEntries.sort(function (x, y) {
     if (x.id < y.id) {
@@ -95,12 +97,14 @@ function scheduleNextChange() {
     }
 
     if (!dailySchedule.length) {
+      log('Refreshing the schedule before scheduling next change due to empy daily schedule');
       refreshSchedule();
       return;
     }
 
     // Schedule the next state change
     var nextStateChange = dailySchedule.shift();
+    log('info', 'Scheduling the next change for ' + nextStateChange.time);
     schedule.scheduleJob(new Date(nextStateChange.time), function () {
       process.send({
         destination: 'broadcast',

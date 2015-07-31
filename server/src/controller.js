@@ -29,6 +29,7 @@ var TRANSITION_STATE_READY = 1;
 var TRANSITION_STATE_TRANSITIONING = 2;
 
 var transitionState = TRANSITION_STATE_READY;
+var currentState = 'off';
 var newState;
 var dayLight;
 var nightLight;
@@ -63,6 +64,11 @@ function turnNightOff() {
 }
 
 function setState(newState) {
+  if (currentState == newState) {
+    return;
+  }
+  currentState = newState;
+  log('info', 'Setting the lights to ' + currentState);
   turnDayOff();
   turnNightOff();
   if (transitionState == TRANSITION_STATE_READY) {

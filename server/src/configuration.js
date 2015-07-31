@@ -155,7 +155,6 @@ app.get('/api/app', function (request, response) {
 });
 
 app.post('/api/app', function (request, response) {
-  log('info', 'Setting the mode');
   var attributes = request.body;
   if (attributes.mode != 'program' && attributes.mode != 'override') {
     response.send(400, 'ScheduleEntryModel validation error: program must be either "program" or "override"');
@@ -167,6 +166,7 @@ app.post('/api/app', function (request, response) {
   }
   configuration.mode = attributes.mode;
   configuration.overrideState = attributes.overrideState;
+  log('info', 'Setting the mode to ' + configuration.mode + ' with override ' + configuration.overrideState);
   saveConfiguration();
   response.send(200, 'OK');
 });
