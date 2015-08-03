@@ -106,6 +106,7 @@ function scheduleNextChange() {
     var nextStateChange = dailySchedule.shift();
     log('info', 'Scheduling the next change for ' + nextStateChange.time);
     schedule.scheduleJob(new Date(nextStateChange.time), function () {
+      log('info', 'Scheduled change callback');
       process.send({
         destination: 'broadcast',
         type: 'lights.set',
