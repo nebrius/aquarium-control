@@ -48,18 +48,22 @@ function log(level, message) {
 }
 
 function turnDayOn() {
+  log('info', 'Turning day lights on');
   dayLight.write(gpio.LOW);
 }
 
 function turnDayOff() {
+  log('info', 'Turning day lights off');
   dayLight.write(gpio.HIGH);
 }
 
 function turnNightOn() {
+  log('info', 'Turning night lights on');
   nightLight.write(gpio.LOW);
 }
 
 function turnNightOff() {
+  log('info', 'Turning night lights off');
   nightLight.write(gpio.HIGH);
 }
 
