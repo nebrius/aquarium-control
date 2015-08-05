@@ -17,10 +17,7 @@
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var schedule = require('node-schedule');
-
 var mode = 'override';
-var currentState = 'off';
 
 var dailySchedule;
 var configuration;
@@ -105,14 +102,15 @@ function scheduleNextChange() {
     // Schedule the next state change
     var nextStateChange = dailySchedule.shift();
     log('info', 'Scheduling the next change for ' + nextStateChange.time);
-    schedule.scheduleJob(new Date(nextStateChange.time), function () {
+    setTimeout(function() {
+      log('info', 'Setting lights for next scheduled change');
       process.send({
         destination: 'broadcast',
         type: 'lights.set',
         data: nextStateChange.state
       });
       scheduleNextChange();
-    });
+    }, nextStateChange.time - Date.now());
   });
 }
 
@@ -125,11 +123,10 @@ process.on('message', function (message) {
     if (mode === 'program') {
       refreshSchedule();
     } else if (mode === 'override') {
-      currentState = configuration.overrideState;
       process.send({
         destination: 'broadcast',
         type: 'lights.set',
-        data: currentState
+        data: configuration.overrideState
       });
     } else {
       throw new Error('Invalid mode "' + configuration.mode + '"');

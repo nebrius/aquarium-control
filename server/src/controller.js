@@ -103,5 +103,7 @@ raspi.init(function() {
   initialized = true;
   dayLight = new gpio.DigitalOutput(DAY_GPIO);
   nightLight = new gpio.DigitalOutput(NIGHT_GPIO);
+  turnDayOff();
+  turnNightOff();
   setState(initialState);
 });
