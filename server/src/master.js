@@ -38,7 +38,11 @@ if (cluster.isMaster) {
         worker;
     if (destination === 'master') {
       if (message.type === 'log') {
-        logger[message.data.level](message.data.message);
+        if (!logger[message.data.level]) {
+          logger.info(message.data.message);
+        } else {
+          logger[message.data.level](message.data.message);
+        }
       }
     } else if (destination === 'broadcast') {
       for (worker in workers) {
