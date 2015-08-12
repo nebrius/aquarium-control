@@ -22,8 +22,8 @@ var gpio = require('raspi-gpio');
 
 var STATE_DAY = 'day';
 var STATE_NIGHT = 'night';
-var DAY_GPIO = 'GPIO17';
-var NIGHT_GPIO = 'GPIO27';
+var DAY_GPIO = 'GPIO27';
+var NIGHT_GPIO = 'GPIO17';
 var RELAY_DELAY = 50;
 var TRANSITION_STATE_READY = 1;
 var TRANSITION_STATE_TRANSITIONING = 2;
