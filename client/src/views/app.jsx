@@ -23,8 +23,33 @@ import Program from 'views/program';
 export default React.createClass({
   render() {
     return (
-      <div className='app_header'>
-        <h2>Aquarium Control</h2>
+      <div>
+        <div className='app_header'>
+          <h2>Aquarium Control</h2>
+        </div>
+        <div className='panel panel-default app_section'>
+          <div className='panel-heading'>
+            <div className='panel-title'>Status</div>
+          </div>
+          <div className='panel-body'>
+            Status
+          </div>
+        </div>
+        <div className='panel panel-default app_section'>
+          <div className='panel-heading'>
+            <div className='panel-title'>Configuration</div>
+          </div>
+          <div className='panel-body'>
+            <div className='btn-group' role='group'>
+              <button type='button'
+                      className={classname('btn', 'btn-default', 'btn-lg', this.props.schedule.mode == 'program' ? 'active' : undefined)}>
+                Program</button>
+              <button type='button'
+                      className={classname('btn', 'btn-default', 'btn-lg', this.props.schedule.mode == 'override' ? 'active' : undefined)}>
+                Override</button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
