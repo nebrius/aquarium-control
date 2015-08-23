@@ -21,8 +21,28 @@ import { getSchedule, getStatus, saveSchedule } from 'api';
 import { createScheduleUpdatedAction } from 'actions/schedule_updated';
 import { createStatusUpdatedAction } from 'actions/status_updated';
 import App from 'views/app';
-import 'stores/schedule';
-import 'stores/status';
+import {
+  registerCallback as registerScheduleCallback,
+  getData as getScheduleData
+} from 'stores/schedule';
+import {
+  registerCallback as registerStatusCallback,
+  getData as getStatusData
+} from 'stores/status';
 
 setInterval(() => getStatus(createStatusUpdatedAction), 1000);
 getSchedule(createScheduleUpdatedAction);
+
+function render() {
+  const props = {
+    schedule: getScheduleData(),
+    status: getStatusData()
+  };
+  React.render(
+    <App {...props} />,
+    document.getElementById('content')
+  );
+}
+
+registerScheduleCallback(render);
+registerStatusCallback(render);

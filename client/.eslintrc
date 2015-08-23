@@ -6,6 +6,9 @@
   "ecmaFeatures": {
     "modules": true
   },
+  "plugins": [
+    "react"
+  ],
   "rules": {
     "eqeqeq": 0,
     "no-var": 2,
@@ -49,12 +52,9 @@
     "no-unreachable": 2,
     "no-unexpected-multiline": 2,
     "no-else-return": 2,
-    "no-throw-literal": 2,
     "constructor-super": 2,
     "no-this-before-super": 2,
     "object-shorthand": [2, "always"],
-    "no-loop-func": 0,
-    "no-param-reassign": 0,
-    "no-empty": 0
+    "no-loop-func": 0
   }
 }

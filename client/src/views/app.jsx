@@ -22,6 +22,10 @@ import Program from 'views/program';
 
 export default React.createClass({
   render() {
-    return (<div>Hi</div>);
+    return (
+      <div className='app_header'>
+        <h2>Aquarium Control</h2>
+      </div>
+    );
   }
 });

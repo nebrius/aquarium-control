@@ -21,15 +21,21 @@ import dispatcher from 'dispatcher';
 import actions from 'actions';
 
 let schedule = {};
+const callbacks = [];
 
-export default function registerCallback(cb) {
-  debugger;
+export function registerCallback(cb) {
+  callbacks.push(cb);
+}
+
+export function getData() {
+  return schedule;
 }
 
 dispatcher.register((payload) => {
   switch (payload.actionType) {
     case actions.SCHEDULE_UPDATED:
       schedule = payload.schedule;
+      callbacks.forEach((cb) => cb());
       break;
     default:
       break;

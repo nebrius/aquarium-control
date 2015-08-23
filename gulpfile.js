@@ -25,11 +25,18 @@ var watch = require('gulp-watch');
 var del = require('del');
 var spawn = require('child_process').spawn;
 
-gulp.task('default', ['clean', 'lint', 'js', 'html', 'libs']);
+gulp.task('default', ['clean', 'lint', 'js', 'css', 'html', 'libs']);
 
 gulp.task('html', ['clean', 'lint'], function() {
   return gulp.src('client/index.html')
     .pipe(gulp.dest('client-dist/'));
+});
+
+gulp.task('css', ['clean', 'lint'], function() {
+  return gulp.src('client/css/**/*')
+    .pipe(watch('client/css/**/*'))
+    .pipe(plumber())
+    .pipe(gulp.dest('client-dist/css'));
 });
 
 gulp.task('js', ['clean', 'lint'], function() {

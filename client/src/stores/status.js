@@ -16,3 +16,28 @@
   You should have received a copy of the GNU General Public License
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import dispatcher from 'dispatcher';
+import actions from 'actions';
+
+let status = {};
+const callbacks = [];
+
+export function registerCallback(cb) {
+  callbacks.push(cb);
+}
+
+export function getData() {
+  return status;
+}
+
+dispatcher.register((payload) => {
+  switch (payload.actionType) {
+    case actions.STATUS_UPDATED:
+      status = payload.status;
+      callbacks.forEach((cb) => cb());
+      break;
+    default:
+      break;
+  }
+});
