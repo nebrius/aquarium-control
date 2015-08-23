@@ -1,44 +1,38 @@
 {
   "mode": "program",
   "overrideState": "night",
-  "scheduleEntries": [
+  "schedule": [
     {
-      "id": 1,
       "name": "Sunrise",
       "type": "dynamic",
-      "source": {
-        "set": "morning",
+      "dynamic": {
         "event": "sunrise"
       },
-      "time": {
+      "manual": {
         "hours": 0,
         "minutes": 0
       },
       "state": "day"
     },
     {
-      "id": 2,
       "name": "Sunset",
       "type": "dynamic",
-      "source": {
-        "set": "evening",
-        "event": "sunset"
+      "dynamic": {
+        "set": "evening"
       },
-      "time": {
+      "manual": {
         "hours": 0,
         "minutes": 0
       },
       "state": "night"
     },
     {
-      "id": 3,
       "name": "Night",
       "type": "manual",
-      "source": {
-        "set": "evening",
-        "event": "astronomical"
+      "dynamic": {
+        "set": "evening"
       },
-      "time": {
+      "manual": {
         "hours": 6,
         "minutes": 0
       },
