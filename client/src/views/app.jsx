@@ -19,6 +19,7 @@
 
 import Override from 'views/override';
 import Program from 'views/program';
+import Status from 'views/status';
 
 export default React.createClass({
   render() {
@@ -32,7 +33,7 @@ export default React.createClass({
             <div className='panel-title'>Status</div>
           </div>
           <div className='panel-body'>
-            Status
+            <Status {...this.props.status} />
           </div>
         </div>
         <div className='panel panel-default app_section'>

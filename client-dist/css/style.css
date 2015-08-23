@@ -11,7 +11,16 @@
   margin: 0;
 }
 
-
 .app_section {
   margin: 10px;
+}
+
+.status_container {
+  display: flex;
+  margin: 5px 0px;
+}
+
+.status_label {
+  width: 160px;
+  font-weight: bold;
 }

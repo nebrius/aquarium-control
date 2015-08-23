@@ -37,7 +37,13 @@ exports.setSchedule = function setSchedule(newSchedule) {
 };
 
 exports.getStatus = function getStatus() {
-  return status;
+  var fullStatus = {};
+  for (var p in status) {
+    if (status.hasOwnProperty(p)) {}
+    fullStatus[p] = status[p];
+  }
+  fullStatus.time = Date.now();
+  return fullStatus;
 };
 
 exports.setStatus = function setStatus(newStatus) {
