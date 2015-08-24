@@ -40,7 +40,7 @@ export default React.createClass({
         </div>
         <div className='panel panel-default app_section'>
           <div className='panel-heading'>
-            <div className='panel-title'>Status</div>
+            <div className='panel-title'><h3>Status</h3></div>
           </div>
           <div className='panel-body'>
             <Status {...this.props.status} />
@@ -48,7 +48,7 @@ export default React.createClass({
         </div>
         <div className='panel panel-default app_section'>
           <div className='panel-heading'>
-            <div className='panel-title'>Configuration</div>
+            <div className='panel-title'><h3>Configuration</h3></div>
           </div>
           <div className='panel-body'>
             <div className='btn-group' role='group'>

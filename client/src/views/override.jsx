@@ -32,7 +32,7 @@ export default React.createClass({
     const classNames = ['override_button', 'btn', 'btn-default', 'btn-lg', 'active'];
     return (
       <div className='override_container'>
-        <div className='btn-group' role='group'>
+        <div className='btn-group-vertical override_button_group' role='group'>
           <button
               type='button'
               className={classname(classNames, { active: state == 'day' })}

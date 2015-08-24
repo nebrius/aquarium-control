@@ -33,10 +33,33 @@
   margin-top: 40px;
 }
 
+.override_button_group {
+  width: 200px;
+}
+
 .override_button {
-  width: 125px;
+  height: 75px;
 }
 
 .program_container {
   margin-top: 20px;
+}
+
+.schedule_entry_button {
+  width: 100px;
+}
+
+.schedule_entry_button_container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.schedule_entry_group {
+  display: flex;
+  margin: 5px 0px;
+}
+
+.schedule_entry_label {
+  width: 100px;
+  font-weight: bold;
 }

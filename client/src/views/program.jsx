@@ -28,7 +28,7 @@ export default React.createClass({
           {entries}
         </div>
         <div>
-          <button className='btn btn-default'>+</button>
+          <button className='btn btn-default'>Add New</button>
         </div>
       </div>
     );

@@ -19,8 +19,48 @@
 
 export default React.createClass({
   render() {
+    let entry;
+    if (this.props.type == 'dynamic') {
+      entry = (
+        <div className='schedule_entry_group'>
+          <div className='schedule_entry_label'>Event:</div>
+          <div>{this.props.dynamicEvent}</div>
+        </div>
+      );
+    } else {
+      let hour = this.props.manualTime.hour.toString();
+      let minute = this.props.manualTime.minute.toString();
+      if (minute.length == 1) {
+        minute = '0' + minute;
+      }
+      entry = (
+        <div className='schedule_entry_group'>
+          <div className='schedule_entry_label'>Time:</div>
+          <div>{hour + ':' + minute}</div>
+        </div>
+      );
+    }
     return (
-      <div>{JSON.stringify(this.props)}</div>
+      <div className='panel panel-default app_section'>
+        <div className='panel-heading'>
+          <div className='panel-title'><h4>{this.props.name}</h4></div>
+        </div>
+        <div className='panel-body'>
+          <div className='schedule_entry_group'>
+            <div className='schedule_entry_label'>State:</div>
+            <div>{this.props.state}</div>
+          </div>
+          <div className='schedule_entry_group'>
+            <div className='schedule_entry_label'>Type:</div>
+            <div>{this.props.type}</div>
+          </div>
+          {entry}
+          <div className='schedule_entry_button_container'>
+            <button className='btn btn-primary schedule_entry_button'>Edit</button>
+            <button className='btn btn-danger schedule_entry_button'>Delete</button>
+          </div>
+        </div>
+      </div>
     );
   }
-})
+});

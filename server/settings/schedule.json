@@ -1,40 +1,34 @@
 {
   "mode": "program",
-  "overrideState": "day",
+  "overrideState": "off",
   "schedule": [
     {
       "name": "Sunrise",
       "type": "dynamic",
-      "dynamic": {
-        "event": "sunrise"
-      },
-      "manual": {
-        "hours": 0,
-        "minutes": 0
+      "dynamicEvent": "sunrise",
+      "manualTime": {
+        "hour": 0,
+        "minute": 0
       },
       "state": "day"
     },
     {
       "name": "Sunset",
       "type": "dynamic",
-      "dynamic": {
-        "set": "evening"
-      },
-      "manual": {
-        "hours": 0,
-        "minutes": 0
+      "dynamicEvent": "evening",
+      "manualTime": {
+        "hour": 0,
+        "minute": 0
       },
       "state": "night"
     },
     {
       "name": "Night",
       "type": "manual",
-      "dynamic": {
-        "set": "evening"
-      },
-      "manual": {
-        "hours": 6,
-        "minutes": 0
+      "dynamicEvent": "evening",
+      "manualTime": {
+        "hour": 18,
+        "minute": 0
       },
       "state": "off"
     }
