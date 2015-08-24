@@ -30,6 +30,7 @@ export default React.createClass({
     }
   },
   render() {
+    debugger;
     const mode = this.props.schedule.mode;
     const ConfView = mode == 'program' ? Program : Override;
     const classNames = ['btn', 'btn-default', 'btn-lg', 'active', 'app_mode_button'];

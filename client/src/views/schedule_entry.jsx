@@ -17,7 +17,15 @@
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { createRequestDeleteAction, createRequestEditAction } from 'actions/entry_state';
+
 export default React.createClass({
+  onEditClicked() {
+    createRequestDeleteAction(this.props.entryId);
+  },
+  onDeleteClicked() {
+    createRequestEditAction(this.props.entryId);
+  },
   render() {
     let entry;
     if (this.props.type == 'dynamic') {
@@ -56,8 +64,8 @@ export default React.createClass({
           </div>
           {entry}
           <div className='schedule_entry_button_container'>
-            <button className='btn btn-primary schedule_entry_button'>Edit</button>
-            <button className='btn btn-danger schedule_entry_button'>Delete</button>
+            <button className='btn btn-primary schedule_entry_button' onClick={this.onEditClicked}>Edit</button>
+            <button className='btn btn-danger schedule_entry_button' onClick={this.onDeleteClicked}>Delete</button>
           </div>
         </div>
       </div>

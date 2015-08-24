@@ -17,11 +17,19 @@
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export default Object.freeze({
-  SCHEDULE_UPDATED: 'SCHEDULE_UPDATED',
-  OVERRIDE_STATE_CHANGED: 'OVERRIDE_STATE_CHANGED',
-  MODE_CHANGED: 'MODE_CHANGED',
-  REQUEST_DELETE: 'REQUEST_DELETE',
-  REQUEST_EDIT: 'REQUEST_EDIT',
-  STATUS_UPDATED: 'STATUS_UPDATED'
-});
+import dispatcher from 'dispatcher';
+import actions from 'actions';
+
+export function createRequestDeleteAction(entryId) {
+  dispatcher.dispatch({
+    actionType: actions.REQUEST_DELETE,
+    entryId
+  });
+}
+
+export function createRequestEditAction(entryId) {
+  dispatcher.dispatch({
+    actionType: actions.REQUEST_EDIT,
+    entryId
+  });
+}

@@ -17,11 +17,37 @@
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export default Object.freeze({
-  SCHEDULE_UPDATED: 'SCHEDULE_UPDATED',
-  OVERRIDE_STATE_CHANGED: 'OVERRIDE_STATE_CHANGED',
-  MODE_CHANGED: 'MODE_CHANGED',
-  REQUEST_DELETE: 'REQUEST_DELETE',
-  REQUEST_EDIT: 'REQUEST_EDIT',
-  STATUS_UPDATED: 'STATUS_UPDATED'
+import dispatcher from 'dispatcher';
+import actions from 'actions';
+
+const callbacks = [];
+const state = {
+  showingEdit: false,
+  showingDeleteConfirm: false
+};
+
+export function registerCallback(cb) {
+  callbacks.push(cb);
+}
+
+export function getData() {
+  return state;
+}
+
+dispatcher.register((payload) => {
+  function trigger() {
+    callbacks.forEach((cb) => cb());
+  }
+  switch (payload.actionType) {
+    case actions.REQUEST_DELETE:
+      state.showingEdit = true;
+      trigger();
+      break;
+    case actions.REQUEST_EDIT:
+      state.showingDeleteConfirm = true;
+      trigger();
+      break;
+    default:
+      break;
+  }
 });
