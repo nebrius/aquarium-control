@@ -17,20 +17,10 @@
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ScheduleEntry from 'views/schedule_entry';
-
 export default React.createClass({
   render() {
-    const entries = this.props.schedule.map((entry, i) => <ScheduleEntry {...entry} key={i} />);
     return (
-      <div className='program_container'>
-        <div>
-          {entries}
-        </div>
-        <div>
-          <button className='btn btn-default'>+</button>
-        </div>
-      </div>
+      <div>{JSON.stringify(this.props)}</div>
     );
   }
-});
+})
