@@ -15,6 +15,10 @@
   margin: 10px;
 }
 
+.app_mode_button {
+  width: 125px;
+}
+
 .status_container {
   display: flex;
   margin: 5px 0px;
@@ -23,4 +27,12 @@
 .status_label {
   width: 160px;
   font-weight: bold;
+}
+
+.override_container {
+  margin-top: 40px;
+}
+
+.override_button {
+  width: 125px;
 }

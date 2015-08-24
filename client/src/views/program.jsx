@@ -16,3 +16,11 @@
   You should have received a copy of the GNU General Public License
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+export default React.createClass({
+  render() {
+    return (
+      <div>Program</div>
+    );
+  }
+});

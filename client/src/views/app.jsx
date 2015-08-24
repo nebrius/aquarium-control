@@ -23,6 +23,9 @@ import Status from 'views/status';
 
 export default React.createClass({
   render() {
+    const mode = this.props.schedule.mode;
+    const ConfView = mode == 'program' ? Program : Override;
+    const classNames = ['btn', 'btn-default', 'btn-lg', 'active', 'app_mode_button'];
     return (
       <div>
         <div className='app_header'>
@@ -42,13 +45,14 @@ export default React.createClass({
           </div>
           <div className='panel-body'>
             <div className='btn-group' role='group'>
-              <button type='button'
-                      className={classname('btn', 'btn-default', 'btn-lg', this.props.schedule.mode == 'program' ? 'active' : undefined)}>
-                Program</button>
-              <button type='button'
-                      className={classname('btn', 'btn-default', 'btn-lg', this.props.schedule.mode == 'override' ? 'active' : undefined)}>
-                Override</button>
+              <button type='button' className={classname(classNames, { active: mode == 'program' })}>
+                Program
+              </button>
+              <button type='button' className={classname(classNames, { active: mode == 'override' })}>
+                Override
+              </button>
             </div>
+            <ConfView {...this.props.schedule} />
           </div>
         </div>
       </div>

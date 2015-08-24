@@ -24,14 +24,14 @@ var bodyParser = require('body-parser');
 var app = express();
 
 app.use(express.static(path.join(__dirname, '..', '..', 'client-dist')));
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 app.get('/api/schedule', function (req, res) {
   res.send(schedule.getSchedule());
 });
 
 app.post('/api/schedule', function(req, res) {
-  debugger;
+  schedule.setSchedule(req.body);
   res.send('ok');
 });
 

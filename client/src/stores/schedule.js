@@ -19,6 +19,7 @@
 
 import dispatcher from 'dispatcher';
 import actions from 'actions';
+import { saveSchedule } from 'api';
 
 let schedule = {};
 const callbacks = [];
@@ -32,10 +33,19 @@ export function getData() {
 }
 
 dispatcher.register((payload) => {
+  function save() {
+    callbacks.forEach((cb) => cb());
+    saveSchedule(schedule, () => {
+      callbacks.forEach((cb) => cb());
+    });
+  }
   switch (payload.actionType) {
     case actions.SCHEDULE_UPDATED:
       schedule = payload.schedule;
-      callbacks.forEach((cb) => cb());
+      break;
+    case actions.OVERRIDE_STATE_CHANGED:
+      schedule.overrideState = payload.state;
+      save();
       break;
     default:
       break;

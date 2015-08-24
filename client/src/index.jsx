@@ -18,7 +18,7 @@
  */
 
 import { getSchedule, getStatus, saveSchedule } from 'api';
-import { createScheduleUpdatedAction } from 'actions/schedule_updated';
+import { createScheduleUpdatedAction } from 'actions/schedule';
 import { createStatusUpdatedAction } from 'actions/status_updated';
 import App from 'views/app';
 import {

@@ -26,3 +26,10 @@ export function createScheduleUpdatedAction(schedule) {
     schedule
   });
 }
+
+export function createOverrideStateChangedAction(state) {
+  dispatcher.dispatch({
+    actionType: actions.OVERRIDE_STATE_CHANGED,
+    state
+  });
+}

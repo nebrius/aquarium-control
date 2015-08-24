@@ -1,6 +1,6 @@
 {
   "mode": "override",
-  "overrideState": "night",
+  "overrideState": "day",
   "schedule": [
     {
       "name": "Sunrise",
