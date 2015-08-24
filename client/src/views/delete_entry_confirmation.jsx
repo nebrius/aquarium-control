@@ -17,13 +17,24 @@
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export default Object.freeze({
-  SCHEDULE_UPDATED: 'SCHEDULE_UPDATED',
-  OVERRIDE_STATE_CHANGED: 'OVERRIDE_STATE_CHANGED',
-  MODE_CHANGED: 'MODE_CHANGED',
-  REQUEST_DELETE: 'REQUEST_DELETE',
-  CANCEL_DELETE: 'CANCEL_DELETE',
-  CONFIRM_DELETE: 'CONFIRM_DELETE',
-  REQUEST_EDIT: 'REQUEST_EDIT',
-  STATUS_UPDATED: 'STATUS_UPDATED'
+import { createDeleteCancelledAction, createDeleteConfirmedAction } from 'actions/entry_state';
+
+export default React.createClass({
+  onYesClicked() {
+    createDeleteConfirmedAction();
+  },
+  onCancelClicked() {
+    createDeleteCancelledAction();
+  },
+  render() {
+    return (
+      <div className='overlay'>
+        <div className='popup_container'>
+          <h2 className='popup_header'>Are you sure?</h2>
+          <button className='btn btn-danger popup_button' onClick={this.onYesClicked}>Yes</button>
+          <button className='btn btn-default popup_button' onClick={this.onCancelClicked}>Cancel</button>
+        </div>
+      </div>
+    );
+  }
 });

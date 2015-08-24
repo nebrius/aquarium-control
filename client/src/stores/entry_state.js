@@ -43,6 +43,14 @@ dispatcher.register((payload) => {
       state.showingEdit = true;
       trigger();
       break;
+    case actions.CANCEL_DELETE:
+      state.showingDeleteConfirm = false;
+      trigger();
+      break;
+    case actions.CONFIRM_DELETE:
+      state.showingDeleteConfirm = false;
+      trigger();
+      break;
     case actions.REQUEST_EDIT:
       state.showingDeleteConfirm = true;
       trigger();

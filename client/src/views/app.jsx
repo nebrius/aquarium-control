@@ -20,6 +20,8 @@
 import Override from 'views/override';
 import Program from 'views/program';
 import Status from 'views/status';
+import EditScheduleEntry from 'views/edit_schedule_entry';
+import DeleteEntryConfirmation from 'views/delete_entry_confirmation';
 import { createModeChangedAction } from 'actions/schedule';
 
 export default React.createClass({
@@ -30,10 +32,15 @@ export default React.createClass({
     }
   },
   render() {
-    debugger;
     const mode = this.props.schedule.mode;
     const ConfView = mode == 'program' ? Program : Override;
     const classNames = ['btn', 'btn-default', 'btn-lg', 'active', 'app_mode_button'];
+    let overlay;
+    if (this.props.entryState.showingEdit) {
+      overlay = <EditScheduleEntry />;
+    } else if (this.props.entryState.showingDeleteConfirm) {
+      overlay = <DeleteEntryConfirmation />;
+    }
     return (
       <div>
         <div className='app_header'>
@@ -69,6 +76,7 @@ export default React.createClass({
             <ConfView {...this.props.schedule} />
           </div>
         </div>
+        {overlay}
       </div>
     );
   }

@@ -17,13 +17,14 @@
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export default Object.freeze({
-  SCHEDULE_UPDATED: 'SCHEDULE_UPDATED',
-  OVERRIDE_STATE_CHANGED: 'OVERRIDE_STATE_CHANGED',
-  MODE_CHANGED: 'MODE_CHANGED',
-  REQUEST_DELETE: 'REQUEST_DELETE',
-  CANCEL_DELETE: 'CANCEL_DELETE',
-  CONFIRM_DELETE: 'CONFIRM_DELETE',
-  REQUEST_EDIT: 'REQUEST_EDIT',
-  STATUS_UPDATED: 'STATUS_UPDATED'
+export default React.createClass({
+  render() {
+    return (
+      <div className='overlay'>
+        <div className='popup_container'>
+          <h2 className='popup_header'>Edit Schedule</h2>
+        </div>
+      </div>
+    );
+  }
 });

@@ -27,6 +27,18 @@ export function createRequestDeleteAction(entryId) {
   });
 }
 
+export function createDeleteCancelledAction() {
+  dispatcher.dispatch({
+    actionType: actions.CANCEL_DELETE
+  });
+}
+
+export function createDeleteConfirmedAction() {
+  dispatcher.dispatch({
+    actionType: actions.CONFIRM_DELETE
+  });
+}
+
 export function createRequestEditAction(entryId) {
   dispatcher.dispatch({
     actionType: actions.REQUEST_EDIT,

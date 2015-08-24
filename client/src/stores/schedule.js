@@ -47,6 +47,10 @@ dispatcher.register((payload) => {
       schedule.overrideState = payload.state;
       save();
       break;
+    case actions.CONFIRM_DELETE:
+      schedule.schedule.splice(payload.entryId, 1);
+      save();
+      break;
     case actions.MODE_CHANGED:
       schedule.mode = payload.mode;
       save();
