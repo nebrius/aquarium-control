@@ -47,6 +47,10 @@ dispatcher.register((payload) => {
       schedule.overrideState = payload.state;
       save();
       break;
+    case actions.MODE_CHANGED:
+      schedule.mode = payload.mode;
+      save();
+      break;
     default:
       break;
   }

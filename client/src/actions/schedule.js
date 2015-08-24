@@ -33,3 +33,10 @@ export function createOverrideStateChangedAction(state) {
     state
   });
 }
+
+export function createModeChangedAction(mode) {
+  dispatcher.dispatch({
+    actionType: actions.MODE_CHANGED,
+    mode
+  });
+}

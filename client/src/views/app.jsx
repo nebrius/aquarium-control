@@ -20,8 +20,15 @@
 import Override from 'views/override';
 import Program from 'views/program';
 import Status from 'views/status';
+import { createModeChangedAction } from 'actions/schedule';
 
 export default React.createClass({
+  onModeClicked(e) {
+    const mode = e.target.innerText.toLowerCase();
+    if (mode != this.props.schedule.mode) {
+      createModeChangedAction(mode);
+    }
+  },
   render() {
     const mode = this.props.schedule.mode;
     const ConfView = mode == 'program' ? Program : Override;
@@ -45,10 +52,16 @@ export default React.createClass({
           </div>
           <div className='panel-body'>
             <div className='btn-group' role='group'>
-              <button type='button' className={classname(classNames, { active: mode == 'program' })}>
+              <button
+                  type='button'
+                  className={classname(classNames, { active: mode == 'program' })}
+                  onClick={this.onModeClicked}>
                 Program
               </button>
-              <button type='button' className={classname(classNames, { active: mode == 'override' })}>
+              <button
+                  type='button'
+                  className={classname(classNames, { active: mode == 'override' })}
+                  onClick={this.onModeClicked}>
                 Override
               </button>
             </div>
