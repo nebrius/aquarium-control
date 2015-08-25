@@ -63,10 +63,6 @@ export default React.createClass({
             <div>{this.props.type}</div>
           </div>
           {entry}
-          <div className='schedule_entry_button_container'>
-            <button className='btn btn-primary schedule_entry_button' onClick={this.onEditClicked}>Edit</button>
-            <button className='btn btn-danger schedule_entry_button' onClick={this.onDeleteClicked}>Delete</button>
-          </div>
         </div>
       </div>
     );
