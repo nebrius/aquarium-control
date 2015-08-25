@@ -27,6 +27,13 @@ export function createScheduleUpdatedAction(schedule) {
   });
 }
 
+export function createModeChangedAction(mode) {
+  dispatcher.dispatch({
+    actionType: actions.MODE_CHANGED,
+    mode
+  });
+}
+
 export function createOverrideStateChangedAction(state) {
   dispatcher.dispatch({
     actionType: actions.OVERRIDE_STATE_CHANGED,
@@ -34,7 +41,7 @@ export function createOverrideStateChangedAction(state) {
   });
 }
 
-export function createModeChangedAction(mode) {
+export function createEntryStateChangedAction(state, entryId) {
   dispatcher.dispatch({
     actionType: actions.MODE_CHANGED,
     mode

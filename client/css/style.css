@@ -78,7 +78,6 @@
   position: absolute;
   top: 40px;
   right: 40px;
-  bottom: 40px;
   left: 40px;
   background-color: white;
   border-radius: 5px;
@@ -94,5 +93,13 @@
 
 .popup_button {
   width: 100px;
-  margin: 20px 0 0 20px;
+}
+
+.popup_body {
+  padding: 20px;
+}
+
+.dialog_buttons {
+  display: flex;
+  justify-content: center;
 }

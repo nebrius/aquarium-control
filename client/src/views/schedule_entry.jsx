@@ -21,10 +21,10 @@ import { createRequestDeleteAction, createRequestEditAction } from 'actions/entr
 
 export default React.createClass({
   onEditClicked() {
-    createRequestDeleteAction(this.props.entryId);
+    createRequestEditAction(this.props.entryId);
   },
   onDeleteClicked() {
-    createRequestEditAction(this.props.entryId);
+    createRequestDeleteAction(this.props.entryId);
   },
   render() {
     let entry;

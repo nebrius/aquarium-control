@@ -31,8 +31,12 @@ export default React.createClass({
       <div className='overlay'>
         <div className='popup_container'>
           <h2 className='popup_header'>Are you sure?</h2>
-          <button className='btn btn-danger popup_button' onClick={this.onYesClicked}>Yes</button>
-          <button className='btn btn-default popup_button' onClick={this.onCancelClicked}>Cancel</button>
+          <div className='popup_body'>
+            <div className='dialog_buttons'>
+              <button style={{ marginRight: 20 }} className='btn btn-danger popup_button' onClick={this.onYesClicked}>Yes</button>
+              <button className='btn btn-default popup_button' onClick={this.onCancelClicked}>Cancel</button>
+            </div>
+          </div>
         </div>
       </div>
     );

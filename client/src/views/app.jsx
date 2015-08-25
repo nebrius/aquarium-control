@@ -37,7 +37,7 @@ export default React.createClass({
     const classNames = ['btn', 'btn-default', 'btn-lg', 'active', 'app_mode_button'];
     let overlay;
     if (this.props.entryState.showingEdit) {
-      overlay = <EditScheduleEntry />;
+      overlay = <EditScheduleEntry {...this.props.schedule.schedule[this.props.entryState.editEntryId]}/>;
     } else if (this.props.entryState.showingDeleteConfirm) {
       overlay = <DeleteEntryConfirmation />;
     }
