@@ -17,30 +17,30 @@
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var path = require('path');
-var schedule = require('./schedule.js');
-var express = require('express');
-var bodyParser = require('body-parser');
-var app = express();
+module.exports.setState = function setState(state) {
+  switch(state) {
+    case 'day':
+      setDay();
+      break;
+    case 'night':
+      setDay();
+      break;
+    case 'off':
+      setDay();
+      break;
+    default:
+      throw new Error('Invalid state "' + state + '"');
+  }
+};
 
-app.use(express.static(path.join(__dirname, '..', '..', 'client-dist')));
-app.use(bodyParser.json());
+function setDay() {
+  console.log('setting lights to day');
+}
 
-app.get('/api/schedule', function (req, res) {
-  res.send(schedule.getSchedule());
-});
+function setNight() {
+  console.log('setting lights to night');
+}
 
-app.post('/api/schedule', function(req, res) {
-  schedule.setSchedule(req.body);
-  res.send('ok');
-});
-
-app.get('/api/status', function(req, res) {
-  res.send(schedule.getStatus());
-});
-
-var server = app.listen(3000, function () {
-  var host = server.address().address;
-  var port = server.address().port;
-  console.log('Aquarium control server listening at http://%s:%s', host, port);
-});
+function setOff() {
+  console.log('setting lights to off');
+}

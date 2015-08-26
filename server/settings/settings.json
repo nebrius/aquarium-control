@@ -1,8 +1,7 @@
 {
   "log-min-level": "debug",
   "log-file": "/var/log/aquarium-control/log",
-  "timing": {
-    "endpoint": "http://www.earthtools.org/sun",
+  "location": {
     "latitude": 37.546267,
     "longitude": -121.971132
   },

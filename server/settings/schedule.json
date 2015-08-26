@@ -15,7 +15,7 @@
     {
       "name": "Sunset",
       "type": "dynamic",
-      "dynamicEvent": "evening",
+      "dynamicEvent": "sunset",
       "manualTime": {
         "hour": 0,
         "minute": 0
@@ -27,7 +27,7 @@
       "type": "manual",
       "dynamicEvent": "evening",
       "manualTime": {
-        "hour": 18,
+        "hour": 23,
         "minute": 0
       },
       "state": "off"
