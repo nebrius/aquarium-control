@@ -56,6 +56,8 @@ function scheduleNextTransition() {
 }
 
 function setSchedule() {
+  logger.info('Creating the daily schedule');
+
   var currentSchedule = schedule.getSchedule();
 
   // Cancel the previous schedule, if it was running
@@ -66,6 +68,7 @@ function setSchedule() {
 
   // If we're in override mode, set that mode and exit early
   if (currentSchedule.mode == 'override') {
+    logger.info('Not creating a daily schedule because we are in override mode');
     lights.setState(schedule.overrideState);
     return;
   }
@@ -77,7 +80,8 @@ function setSchedule() {
     if (entry.type == 'manual') {
       return {
         date: createDate(entry.manualTime.hour, entry.manualTime.minute, 0),
-        state: entry.state
+        state: entry.state,
+        name: entry.name
       };
     }
 
@@ -90,18 +94,29 @@ function setSchedule() {
     }
     return {
       date: date,
-      state: entry.state
+      state: entry.state,
+      name: entry.name
     };
   });
 
   // Remove any events that occur after the next event, e.g. sunset is late enough that
   // it would occur after a manual time event due to time of year
-  // TODO
+  entries = entries.filter(function (entry, i) {
+    if (i == entries.length - 1) {
+      return true;
+    }
+    var isValid = entry.date.getTime() < entries[i + 1].date.getTime();
+    if (!isValid) {
+      logger.warn('Entry ' + entry.name + ' occurs after the next entry and will be ignored');
+    }
+    return isValid;
+  });
 
   // Add an entry at the beginning of the day, e.g. 00:00:00, to kickstart the lights
   entries.unshift({
     date: createDate(0, 0, 0),
-    state: entries[entries.length - 1].state
+    state: entries[entries.length - 1].state,
+    name: 'Initial state'
   });
 
   // Find the most recent schedule in the past to set the current lighting state
@@ -122,6 +137,10 @@ function setSchedule() {
 
   // Store the entries to the global state for use by scheduleNextTransition
   dailySchedule = entries;
+  logger.info('The daily schedule is as follows: ');
+  entries.forEach(function (entry) {
+    logger.info('  ' + entry.state + ': ' + entry.date);
+  });
 
   // If there are no entries left, we are done with the schedule for today and just
   // need to wait until tomorrow to do it again
@@ -130,8 +149,6 @@ function setSchedule() {
   } else {
     scheduleNextTransition();
   }
-
-  // TODO: Add lots of logging using transport-logger
 }
 
 schedule.onScheduleChanged(setSchedule);
