@@ -19,6 +19,7 @@
 
 var path = require('path');
 var schedule = require('./schedule.js');
+var logger = require('./logger.js');
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
@@ -27,10 +28,12 @@ app.use(express.static(path.join(__dirname, '..', '..', 'client-dist')));
 app.use(bodyParser.json());
 
 app.get('/api/schedule', function (req, res) {
+  logger.info('Serving the schedule to the web client');
   res.send(schedule.getSchedule());
 });
 
 app.post('/api/schedule', function(req, res) {
+  logger.info('Updating the schedule from the web client');
   schedule.setSchedule(req.body);
   res.send('ok');
 });
@@ -40,7 +43,6 @@ app.get('/api/status', function(req, res) {
 });
 
 var server = app.listen(3000, function () {
-  var host = server.address().address;
   var port = server.address().port;
-  console.log('Aquarium control server listening at http://%s:%s', host, port);
+  logger.info('Aquarium control server listening on port ' + port);
 });
