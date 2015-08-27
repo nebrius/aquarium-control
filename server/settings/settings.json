@@ -1,5 +1,4 @@
 {
-  "logFile": "/var/log/aquarium-control/log",
   "location": {
     "latitude": 37.546267,
     "longitude": -121.971132

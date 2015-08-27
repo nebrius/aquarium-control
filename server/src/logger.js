@@ -18,17 +18,26 @@
  */
 
 var Logger = require('transport-logger');
-var settings = require('../settings.json');
+var logFile = require('../settings/settings.json').logFile;
 
-module.exports = new Logger([{
-  destination: settings.logFile,
-  minLevel: 'info',
-  timestamp: true,
-  prependLevel: true,
-  colorize: false
-}, {
-  minLevel: 'trace',
-  timestamp: true,
-  prependLevel: true,
-  colorize: true
-}]);
+if (logFile) {
+  module.exports = new Logger([{
+    destination: settings.logFile,
+    minLevel: 'info',
+    timestamp: true,
+    prependLevel: true,
+    colorize: false
+  }, {
+    minLevel: 'trace',
+    timestamp: true,
+    prependLevel: true,
+    colorize: true
+  }]);
+} else {
+  module.exports = new Logger({
+    minLevel: 'trace',
+    timestamp: true,
+    prependLevel: true,
+    colorize: true
+  });
+}

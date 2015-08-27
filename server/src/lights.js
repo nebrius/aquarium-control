@@ -17,30 +17,37 @@
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+var logger = require('./logger.js');
+var schedule = require('./schedule.js');
+
 module.exports.setState = function setState(state) {
   switch(state) {
     case 'day':
       setDay();
       break;
     case 'night':
-      setDay();
+      setNight();
       break;
     case 'off':
-      setDay();
+      setOff();
       break;
     default:
-      throw new Error('Invalid state "' + state + '"');
+      logger.error('A light change was requested for an invalid state "' + state +
+        '". Must be one of "day", "night", or "off"');
   }
 };
 
 function setDay() {
-  console.log('setting lights to day');
+  logger.info('Setting the lighting state to day');
+  schedule.getStatus().state = 'day';
 }
 
 function setNight() {
-  console.log('setting lights to night');
+  logger.info('Setting the lighting state to night');
+  schedule.getStatus().state = 'night';
 }
 
 function setOff() {
-  console.log('setting lights to off');
+  logger.info('Setting the lighting state to off');
+  schedule.getStatus().state = 'off';
 }

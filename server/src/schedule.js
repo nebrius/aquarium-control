@@ -21,7 +21,9 @@ var fs = require('fs');
 var path = require('path');
 var schedulePath = path.join(__dirname, '..', 'settings', 'schedule.json');
 var schedule = require(schedulePath);
-var status = {};
+var status = {
+  state: 'off'
+};
 var callbacks = [];
 
 exports.getSchedule = function getSchedule() {
@@ -37,17 +39,7 @@ exports.setSchedule = function setSchedule(newSchedule) {
 };
 
 exports.getStatus = function getStatus() {
-  var fullStatus = {};
-  for (var p in status) {
-    if (status.hasOwnProperty(p)) {}
-    fullStatus[p] = status[p];
-  }
-  fullStatus.time = Date.now();
-  return fullStatus;
-};
-
-exports.setStatus = function setStatus(newStatus) {
-  status = newStatus;
+  return status;
 };
 
 exports.onScheduleChanged = function onScheduleChanged(cb) {

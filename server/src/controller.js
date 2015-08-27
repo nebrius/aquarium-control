@@ -20,21 +20,39 @@
 var sunCalc = require('suncalc');
 var schedule = require('./schedule.js');
 var lights = require('./lights.js');
+var logger = require('./logger.js');
 var settings = require('../settings/settings.json');
 
 var scheduleTimeout = null;
 var dailySchedule;
 
-function setLightsToDay() {
-  console.log('setting lights to day');
+function createDate(hours, minutes, seconds) {
+  var date = new Date();
+  date.setHours(hours);
+  date.setMinutes(minutes);
+  date.setSeconds(seconds);
+  return date;
 }
 
-function setLightsToNight() {
-  console.log('setting lights to night');
+function scheduleMidnightReset() {
+  var midnightDate = new Date(createDate(0, 0, 0).getTime() + 24 * 60 * 60 * 1000);
+  logger.info('Scheduling the daily schedule preparation for ' + midnightDate);
+  scheduleTimeout = setTimeout(setSchedule, midnightDate.getTime() - Date.now());
 }
 
-function setLightsToOff() {
-  console.log('setting lights to off');
+function scheduleNextTransition() {
+  var nextScheduleEntry = dailySchedule.shift();
+  var currentStatus = schedule.getStatus();
+  logger.info('Scheduling the next transition from ' + currentStatus.state +
+    ' to ' + nextScheduleEntry.state + ' for ' + nextScheduleEntry.date);
+  setTimeout(function() {
+    lights.setState(nextScheduleEntry.state);
+    if (dailySchedule.length) {
+      scheduleNextTransition();
+    } else {
+      scheduleMidnightReset();
+    }
+  }, nextScheduleEntry.date.getTime() - Date.now());
 }
 
 function setSchedule() {
@@ -52,16 +70,7 @@ function setSchedule() {
     return;
   }
 
-  function createDate(hours, minutes, seconds) {
-    var date = new Date();
-    date.setHours(hours);
-    date.setMinutes(minutes);
-    date.setSeconds(seconds);
-    return date;
-  }
-
   // Calculate the daily schedule
-  dailySchedule = [];
   var entries = currentSchedule.schedule.map(function(entry) {
 
     // If we're manual, calculate the time for today and return it
@@ -85,6 +94,10 @@ function setSchedule() {
     };
   });
 
+  // Remove any events that occur after the next event, e.g. sunset is late enough that
+  // it would occur after a manual time event due to time of year
+  // TODO
+
   // Add an entry at the beginning of the day, e.g. 00:00:00, to kickstart the lights
   entries.unshift({
     date: createDate(0, 0, 0),
@@ -107,8 +120,15 @@ function setSchedule() {
     return entry.date.getTime() > currentTime + 1000;
   });
 
+  // Store the entries to the global state for use by scheduleNextTransition
+  dailySchedule = entries;
+
+  // If there are no entries left, we are done with the schedule for today and just
+  // need to wait until tomorrow to do it again
   if (!entries.length) {
-    // TODO
+    scheduleMidnightReset();
+  } else {
+    scheduleNextTransition();
   }
 
   // TODO: Add lots of logging using transport-logger
