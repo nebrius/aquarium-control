@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015  Bryan Hughes <bryan@theoreticalideations.com>
+  Copyright (C) 2013-2015  Bryan Hughes <bryan@theoreticalideations.com>
 
   This file is part of Aquarium Control.
 

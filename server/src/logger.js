@@ -17,4 +17,18 @@
   along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export default new Flux.Dispatcher();
+var Logger = require('transport-logger');
+var settings = require('../settings.json');
+
+module.exports = new Logger([{
+  destination: settings.logFile,
+  minLevel: 'info',
+  timestamp: true,
+  prependLevel: true,
+  colorize: false
+}, {
+  minLevel: 'trace',
+  timestamp: true,
+  prependLevel: true,
+  colorize: true
+}]);

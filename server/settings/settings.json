@@ -1,6 +1,5 @@
 {
-  "log-min-level": "debug",
-  "log-file": "/var/log/aquarium-control/log",
+  "logFile": "/var/log/aquarium-control/log",
   "location": {
     "latitude": 37.546267,
     "longitude": -121.971132
