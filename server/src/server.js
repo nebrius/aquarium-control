@@ -33,6 +33,7 @@ app.get('/api/schedule', function (req, res) {
 });
 
 app.post('/api/schedule', function(req, res) {
+  debugger;
   logger.info('Updating the schedule from the web client');
   schedule.setSchedule(req.body);
   res.send('ok');

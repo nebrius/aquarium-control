@@ -56,7 +56,6 @@ function scheduleNextTransition() {
 }
 
 function setSchedule() {
-  logger.info('Creating the daily schedule');
 
   var currentSchedule = schedule.getSchedule();
 
@@ -68,10 +67,11 @@ function setSchedule() {
 
   // If we're in override mode, set that mode and exit early
   if (currentSchedule.mode == 'override') {
-    logger.info('Not creating a daily schedule because we are in override mode');
-    lights.setState(schedule.overrideState);
+    logger.info('Setting the override mode and skipping daily schedule creation');
+    lights.setState(currentSchedule.overrideState);
     return;
   }
+  logger.info('Creating the daily schedule');
 
   // Calculate the daily schedule
   var entries = currentSchedule.schedule.map(function(entry) {

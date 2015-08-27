@@ -1,5 +1,5 @@
 {
-  "mode": "program",
+  "mode": "override",
   "overrideState": "off",
   "schedule": [
     {
