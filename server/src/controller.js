@@ -92,7 +92,7 @@ function setSchedule() {
     }
 
     // If we're dynamic, use suncalc to figure out the time
-    var times = sunCalc.getTimes(new Date(), settings.location.latitude, settings.location.longitude);
+    var times = sunCalc.getTimes(createDate(12, 0, 0), settings.location.latitude, settings.location.longitude);
     var date = times[entry.dynamicEvent];
     if (!date) {
       throw new Error('Invalid dynamic event "' + entry.dynamicEvent + '". Must be one of ' +
