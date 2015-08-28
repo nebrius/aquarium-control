@@ -19,8 +19,25 @@
 
 var logger = require('./logger.js');
 var schedule = require('./schedule.js');
+var raspi = require('raspi');
+var gpio = require('raspi-gpio');
+var settings = require('../settings/settings.json');
 
-module.exports.setState = function setState(state) {
+var setStateAfterInit = null;
+var initialized = false;
+var dayPin = null;
+var nightPin = null;
+
+raspi.init(function(){
+  dayPin = new gpio.DigitalOutput(settings.pins.day);
+  nightPin = new gpio.DigitalOutput(settings.pins.night);
+  initialized = true;
+  if (setStateAfterInit) {
+    exports.setState(setStateAfterInit);
+  }
+});
+
+exports.setState = function setState(state) {
   switch(state) {
     case 'day':
       setDay();
@@ -38,16 +55,34 @@ module.exports.setState = function setState(state) {
 };
 
 function setDay() {
+  if (!initialized) {
+    setStateAfterInit = 'day';
+    return;
+  }
   logger.info('Setting the lighting state to day');
   schedule.getStatus().state = 'day';
+  dayPin.write(gpio.HIGH);
+  nightPin.write(gpio.LOW);
 }
 
 function setNight() {
+  if (!initialized) {
+    setStateAfterInit = 'night';
+    return;
+  }
   logger.info('Setting the lighting state to night');
   schedule.getStatus().state = 'night';
+  dayPin.write(gpio.LOW);
+  nightPin.write(gpio.HIGH);
 }
 
 function setOff() {
+  if (!initialized) {
+    setStateAfterInit = 'off';
+    return;
+  }
   logger.info('Setting the lighting state to off');
   schedule.getStatus().state = 'off';
+  dayPin.write(gpio.LOW);
+  nightPin.write(gpio.LOW);
 }

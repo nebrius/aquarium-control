@@ -3,5 +3,9 @@
     "latitude": 37.546267,
     "longitude": -121.971132
   },
-  "port": 80
+  "port": 80,
+  "pins": {
+    "day": "GPIO17",
+    "night": "GPIO5"
+  }
 }
