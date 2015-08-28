@@ -36,6 +36,9 @@ function createDate(hours, minutes, seconds) {
 
 function scheduleMidnightReset() {
   var midnightDate = new Date(createDate(0, 0, 0).getTime() + 24 * 60 * 60 * 1000);
+  var status = schedule.getStatus();
+  status.nextTransitionTime = midnightDate.getTime();
+  status.nextTransitionState = 'midnight reschedule';
   logger.info('Scheduling the daily schedule preparation for ' + midnightDate);
   scheduleTimeout = setTimeout(setSchedule, midnightDate.getTime() - Date.now());
 }
@@ -45,6 +48,9 @@ function scheduleNextTransition() {
   var currentStatus = schedule.getStatus();
   logger.info('Scheduling the next transition from ' + currentStatus.state +
     ' to ' + nextScheduleEntry.state + ' for ' + nextScheduleEntry.date);
+  var status = schedule.getStatus();
+  status.nextTransitionTime = nextScheduleEntry.date.getTime();
+  status.nextTransitionState = nextScheduleEntry.state;
   setTimeout(function() {
     lights.setState(nextScheduleEntry.state);
     if (dailySchedule.length) {

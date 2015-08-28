@@ -33,14 +33,21 @@ app.get('/api/schedule', function (req, res) {
 });
 
 app.post('/api/schedule', function(req, res) {
-  debugger;
   logger.info('Updating the schedule from the web client');
   schedule.setSchedule(req.body);
   res.send('ok');
 });
 
 app.get('/api/status', function(req, res) {
-  res.send(schedule.getStatus());
+  var status = schedule.getStatus();
+  var clonedStatus = {};
+  for (var p in status) {
+    if (status.hasOwnProperty(p)) {
+      clonedStatus[p] = status[p];
+    }
+  }
+  clonedStatus.time = Date.now();
+  res.send(clonedStatus);
 });
 
 var server = app.listen(3000, function () {
