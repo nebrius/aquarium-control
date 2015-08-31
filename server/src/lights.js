@@ -19,23 +19,23 @@
 
 var logger = require('./logger.js');
 var schedule = require('./schedule.js');
-var raspi = require('raspi');
-var gpio = require('raspi-gpio');
-var settings = require('../settings/settings.json');
+//var raspi = require('raspi');
+//var gpio = require('raspi-gpio');
+var config = schedule.getConfig();
 
 var setStateAfterInit = null;
 var initialized = false;
 var dayPin = null;
 var nightPin = null;
 
-raspi.init(function(){
-  dayPin = new gpio.DigitalOutput(settings.pins.day);
-  nightPin = new gpio.DigitalOutput(settings.pins.night);
-  initialized = true;
-  if (setStateAfterInit) {
-    exports.setState(setStateAfterInit);
-  }
-});
+//raspi.init(function(){
+//  dayPin = new gpio.DigitalOutput(config.pins.day);
+//  nightPin = new gpio.DigitalOutput(config.pins.night);
+//  initialized = true;
+//  if (setStateAfterInit) {
+//    exports.setState(setStateAfterInit);
+//  }
+//});
 
 exports.setState = function setState(state) {
   switch(state) {

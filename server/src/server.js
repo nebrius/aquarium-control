@@ -23,6 +23,7 @@ var logger = require('./logger.js');
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
+var config = schedule.getConfig();
 
 app.use(express.static(path.join(__dirname, '..', '..', 'client-dist')));
 app.use(bodyParser.json());
@@ -50,7 +51,7 @@ app.get('/api/status', function(req, res) {
   res.send(clonedStatus);
 });
 
-var server = app.listen(3000, function () {
+var server = app.listen(config.port || 80, function () {
   var port = server.address().port;
   logger.info('Aquarium control server listening on port ' + port);
 });

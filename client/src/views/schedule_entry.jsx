@@ -32,12 +32,12 @@ export default React.createClass({
       entry = (
         <div className='schedule_entry_group'>
           <div className='schedule_entry_label'>Event:</div>
-          <div>{this.props.dynamicEvent}</div>
+          <div>{this.props.event}</div>
         </div>
       );
     } else {
-      let hour = this.props.manualTime.hour.toString();
-      let minute = this.props.manualTime.minute.toString();
+      let hour = this.props.time.hour.toString();
+      let minute = this.props.time.minute.toString();
       if (minute.length == 1) {
         minute = '0' + minute;
       }

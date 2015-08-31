@@ -1,32 +1,23 @@
 {
   "mode": "program",
-  "overrideState": "off",
+  "overrideState": "day",
   "schedule": [
     {
       "name": "Sunrise",
       "type": "dynamic",
-      "dynamicEvent": "sunrise",
-      "manualTime": {
-        "hour": 0,
-        "minute": 0
-      },
+      "event": "sunrise",
       "state": "day"
     },
     {
       "name": "Sunset",
       "type": "dynamic",
-      "dynamicEvent": "sunset",
-      "manualTime": {
-        "hour": 0,
-        "minute": 0
-      },
+      "event": "sunset",
       "state": "night"
     },
     {
       "name": "Night",
       "type": "manual",
-      "dynamicEvent": "evening",
-      "manualTime": {
+      "time": {
         "hour": 23,
         "minute": 0
       },

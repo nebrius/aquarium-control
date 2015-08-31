@@ -21,7 +21,7 @@ var sunCalc = require('suncalc');
 var schedule = require('./schedule.js');
 var lights = require('./lights.js');
 var logger = require('./logger.js');
-var settings = require('../settings/settings.json');
+var config = schedule.getConfig();
 
 var scheduleTimeout = null;
 var dailySchedule;
@@ -85,17 +85,17 @@ function setSchedule() {
     // If we're manual, calculate the time for today and return it
     if (entry.type == 'manual') {
       return {
-        date: createDate(entry.manualTime.hour, entry.manualTime.minute, 0),
+        date: createDate(entry.time.hour, entry.time.minute, 0),
         state: entry.state,
         name: entry.name
       };
     }
 
     // If we're dynamic, use suncalc to figure out the time
-    var times = sunCalc.getTimes(createDate(12, 0, 0), settings.location.latitude, settings.location.longitude);
-    var date = times[entry.dynamicEvent];
+    var times = sunCalc.getTimes(createDate(12, 0, 0), config.location.latitude, config.location.longitude);
+    var date = times[entry.event];
     if (!date) {
-      throw new Error('Invalid dynamic event "' + entry.dynamicEvent + '". Must be one of ' +
+      throw new Error('Invalid dynamic event "' + entry.event + '". Must be one of ' +
         Object.keys(times).join(', '));
     }
     return {

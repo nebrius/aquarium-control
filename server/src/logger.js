@@ -18,15 +18,21 @@
  */
 
 var Logger = require('transport-logger');
-var logFile = require('../settings/settings.json').logFile;
+var config = require('./schedule.js').getConfig();
+var path = require('path');
+var logFile = config.logFile || '/var/log/aquarium-control/log';
+if (!path.isAbsolute(logFile)) {
+  logFile = path.join(path.dirname(config.configPath), logFile);
+}
 
 if (logFile) {
   module.exports = new Logger([{
-    destination: settings.logFile,
+    destination: logFile,
     minLevel: 'info',
     timestamp: true,
     prependLevel: true,
-    colorize: false
+    colorize: false,
+    maxLines: 200
   }, {
     minLevel: 'trace',
     timestamp: true,

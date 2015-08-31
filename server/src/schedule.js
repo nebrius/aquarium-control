@@ -19,12 +19,29 @@
 
 var fs = require('fs');
 var path = require('path');
-var schedulePath = path.join(__dirname, '..', 'settings', 'schedule.json');
-var schedule = require(schedulePath);
+var schedulePath;
+var schedule;
 var status = {
   state: 'off'
 };
-var callbacks = [];
+
+var config;
+exports.getConfig = function getConfig() {
+  return config;
+};
+
+exports.setConfig = function setConfig(contents) {
+  config = contents;
+  schedulePath = path.resolve(path.dirname(config.configPath), config.schedule);
+  if (!path.isAbsolute(schedulePath)) {
+    schedulePath = path.join(path.dirname(config.configPath), schedulePath);
+  }
+  if (!fs.existsSync(schedulePath)) {
+    throw new Error('Could not find a schedule file at "' + schedulePath + '"');
+  }
+  schedule = fs.readFileSync(schedulePath);
+  schedule = JSON.parse(schedule);
+};
 
 exports.getSchedule = function getSchedule() {
   return schedule;
@@ -42,6 +59,7 @@ exports.getStatus = function getStatus() {
   return status;
 };
 
+var callbacks = [];
 exports.onScheduleChanged = function onScheduleChanged(cb) {
   callbacks.push(cb);
 };

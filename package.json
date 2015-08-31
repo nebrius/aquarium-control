@@ -5,6 +5,7 @@
   "main": "gulpfile.js",
   "dependencies": {
     "body-parser": "^1.13.3",
+    "commander": "^2.8.1",
     "express": "^4.13.3",
     "raspi": "^1.3.2",
     "raspi-gpio": "^1.4.0",
