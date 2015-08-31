@@ -21,7 +21,7 @@ import { createOverrideStateChangedAction } from 'actions/schedule';
 
 export default React.createClass({
   onClicked(e) {
-    const state = e.target.innerText.toLowerCase();
+    const state = e.target.innerHTML.toLowerCase();
     if (state != this.props.overrideState) {
       createOverrideStateChangedAction(state);
     }

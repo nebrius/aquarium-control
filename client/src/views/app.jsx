@@ -26,7 +26,7 @@ import { createModeChangedAction } from 'actions/schedule';
 
 export default React.createClass({
   onModeClicked(e) {
-    const mode = e.target.innerText.toLowerCase();
+    const mode = e.target.innerHTML.toLowerCase();
     if (mode != this.props.schedule.mode) {
       createModeChangedAction(mode);
     }
