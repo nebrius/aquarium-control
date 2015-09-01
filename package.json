@@ -1,6 +1,6 @@
 {
   "name": "aquarium-control",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Runs on a Raspberry Pi to control lighting for an aquarium",
   "main": "gulpfile.js",
   "dependencies": {
@@ -20,7 +20,7 @@
     "gulp-sourcemaps": "^1.5.2",
     "gulp-watch": "^4.3.5"
   },
-  "bin": "./server/bin/aquarium-control.js",
+  "bin": "server/bin/aquarium-control.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
