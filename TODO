@@ -1,0 +1,14 @@
+Create following subfolders:
+
+- client
+  - TypeScript + React + Flux + Webpack build system
+  - React Hello World
+- device
+  - TypeScript build system
+  - Node.js Hello World
+- ingestion
+  - TypeScript build system
+  - Node.js Hello World
+- api
+  - TypeScript build system
+  - Node.js Hello World
