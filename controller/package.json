@@ -1,0 +1,28 @@
+{
+  "name": "aquarium-control-controller",
+  "version": "3.0.0",
+  "description": "The controller firmware for controlling an aquarium, part of the aquarium control system",
+  "bin": "./bin/controller.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prebuild": "tslint src/**/*.ts",
+    "build": "tsc",
+    "postbuild": "echo done",
+    "start": "./bin/controller.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/nebrius/aquarium-control.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nebrius/aquarium-control/issues"
+  },
+  "homepage": "https://github.com/nebrius/aquarium-control#readme",
+  "author": "Bryan Hughes <bryan@nebri.us>",
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "@types/node": "^8.0.28",
+    "tslint": "^5.7.0",
+    "typescript": "^2.5.2"
+  }
+}

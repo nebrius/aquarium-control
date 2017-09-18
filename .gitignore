@@ -35,3 +35,6 @@ node_modules
 
 # Output of 'npm pack'
 *.tgz
+
+# OS X files
+.DS_Store
