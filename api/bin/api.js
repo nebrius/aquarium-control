@@ -1,4 +1,5 @@
-<!--
+#!/usr/bin/env node
+/*
 Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
 
 Aquarium Control is free software: you can redistribute it and/or modify
@@ -13,14 +14,6 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
--->
-<!DOCTYPE html>
-<html>
-<head>
-  <link rel="stylesheet" type="text/css" href="style.css">
-</head>
-<body>
-  <div id="root"></div>
-  <script src="bundle.js"></script>
-</body>
-</html>
+*/
+
+require('../dist/index').run();
