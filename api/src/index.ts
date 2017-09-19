@@ -15,6 +15,29 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export function run() {
-  console.log('Hello World!');
+import { json } from 'body-parser';
+import * as express from 'express';
+import { IConfig } from './common/IConfig';
+
+export function run(): void {
+  const app = express();
+
+  app.use(json);
+
+  app.get('/api/state', (req, res) => {
+    // TODO
+  });
+
+  app.get('/api/config', (req, res) => {
+    // TODO
+  });
+
+  app.post('/api/config', (req, res) => {
+    const body: IConfig = req.body;
+    console.log(body);
+  });
+
+  app.listen(3000, () => {
+    console.log('Example app listening on port 3000!');
+  });
 }

@@ -12,6 +12,14 @@
       "outFiles": [
         "${workspaceRoot}/controller/dist/**/*.js"
       ]
+    }, {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch API",
+      "program": "${workspaceRoot}/api/bin/api.js",
+      "outFiles": [
+        "${workspaceRoot}/api/dist/**/*.js"
+      ]
     }
   ]
 }

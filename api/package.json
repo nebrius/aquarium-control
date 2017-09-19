@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prebuild": "tslint src/**/*.ts",
-    "build": "tsc",
+    "build": "rimraf dist && tsc",
     "postbuild": "echo done",
     "start": "./bin/api.js"
   },
@@ -20,8 +20,15 @@
   },
   "homepage": "https://github.com/nebrius/aquarium-control#readme",
   "devDependencies": {
+    "@types/body-parser": "^1.16.5",
+    "@types/express": "^4.0.37",
     "@types/node": "^8.0.28",
+    "rimraf": "^2.6.2",
     "tslint": "^5.7.0",
     "typescript": "^2.5.2"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.1",
+    "express": "^4.15.4"
   }
 }

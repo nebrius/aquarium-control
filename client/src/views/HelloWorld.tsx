@@ -17,10 +17,17 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import * as React from 'react';
 
-export class HelloWorld extends React.Component<{}, {}> {
+interface IHelloWorldProps {
+  foo: number;
+}
+
+interface IHelloWorldState {
+}
+
+export class HelloWorld extends React.Component<IHelloWorldProps, IHelloWorldState> {
   public render() {
     return (
-      <h1>Hello World!</h1>
+      <h1>Hello World! {this.props.foo}</h1>
     );
   }
 }

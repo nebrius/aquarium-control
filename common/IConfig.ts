@@ -1,4 +1,3 @@
-"use strict";
 /*
 Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
 
@@ -15,25 +14,25 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
-Object.defineProperty(exports, "__esModule", { value: true });
-const body_parser_1 = require("body-parser");
-const express = require("express");
-function run() {
-    const app = express();
-    app.use(body_parser_1.json);
-    app.get('/api/state', (req, res) => {
-        // TODO
-    });
-    app.get('/api/config', (req, res) => {
-        // TODO
-    });
-    app.post('/api/config', (req, res) => {
-        const body = req.body;
-        console.log(body);
-    });
-    app.listen(3000, () => {
-        console.log('Example app listening on port 3000!');
-    });
+
+export interface IScheduleEntry {
+  name: string;
+  type: 'dynamic' | 'manual';
+  state: 'day' | 'night' | 'off';
+  details: IDynamicScheduleEntry | IManualScheduleEntry;
 }
-exports.run = run;
-//# sourceMappingURL=index.js.map
+
+export interface IDynamicScheduleEntry {
+  event: 'sunrise' | 'sunset';
+}
+
+export interface IManualScheduleEntry {
+  hour: number;
+  minute: number;
+}
+
+export interface IConfig {
+  mode: 'program' | 'override';
+  overrideState: 'day' | 'night' | 'off';
+  schedule: Array<IDynamicScheduleEntry | IManualScheduleEntry>;
+}

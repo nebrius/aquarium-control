@@ -9,7 +9,8 @@
     "no-console": false,
     "quotemark": [ true, "single" ],
     "semicolon": "always",
-    "trailing-comma": "never"
+    "trailing-comma": "never",
+    "ordered-imports": false
   },
   "rulesDirectory": []
 }
