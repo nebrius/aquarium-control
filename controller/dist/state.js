@@ -17,6 +17,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
+const TEMPERATURE_SAMPLE_SIZE = 60;
 class State extends events_1.EventEmitter {
     constructor() {
         super(...arguments);
@@ -29,9 +30,20 @@ class State extends events_1.EventEmitter {
             nextTransitionTime: (new Date()).toString(),
             nextTransitionState: 'off'
         };
+        this._temperatureSamples = [];
     }
     getState() {
         return this._state;
+    }
+    setCurrentTemperature(newTemperature) {
+        this._temperatureSamples.push(newTemperature);
+        if (this._temperatureSamples.length === TEMPERATURE_SAMPLE_SIZE) {
+            // Take the median temperature and throw the rest away.
+            this._temperatureSamples.sort();
+            this._state.currentTemperature = this._temperatureSamples[Math.floor(TEMPERATURE_SAMPLE_SIZE / 2)];
+            this._temperatureSamples = [];
+            this.emit('change', this._state);
+        }
     }
     setCurrentState(newState) {
         this._state.currentState = newState;

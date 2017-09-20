@@ -15,21 +15,3 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { init as initMessaging } from './messaging';
-import { init as initDevice } from './device';
-
-export function run() {
-  initDevice((err) => {
-    if (err) {
-      console.error(err.message || err);
-      process.exit(-1);
-    }
-    initMessaging((err) => {
-      if (err) {
-        console.error(err.message || err);
-        process.exit(-1);
-      }
-      console.log('Controller running');
-    });
-  });
-}

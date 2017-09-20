@@ -21,6 +21,7 @@
   "author": "Bryan Hughes <bryan@nebri.us>",
   "license": "GPL-3.0",
   "devDependencies": {
+    "@types/make-dir": "^1.0.1",
     "@types/mqtt": "0.0.34",
     "@types/node": "^8.0.28",
     "rimraf": "^2.6.2",
@@ -29,6 +30,10 @@
   },
   "dependencies": {
     "azure-iot-device": "^1.1.17",
-    "azure-iot-device-mqtt": "^1.1.17"
+    "azure-iot-device-mqtt": "^1.1.17",
+    "make-dir": "^1.0.0",
+    "raspi": "^5.0.1",
+    "raspi-gpio": "^5.0.0",
+    "raspi-onewire": "^1.0.1"
   }
 }

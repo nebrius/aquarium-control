@@ -16,7 +16,76 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
-function init() {
+const raspi_1 = require("raspi");
+const raspi_gpio_1 = require("raspi-gpio");
+const raspi_onewire_1 = require("raspi-onewire");
+const state_1 = require("./state");
+const DAY_PIN = 'GPIO23';
+const NIGHT_PIN = 'GPIO24';
+const TEMPERATURE_UPDATE_RATE = 1000;
+const TEMPERATURE_REGEX = /t=([0-9]*)/;
+function init(cb) {
+    raspi_1.init(() => {
+        const oneWire = new raspi_onewire_1.OneWire();
+        oneWire.searchForDevices((err, devices) => {
+            if (err || !devices) {
+                if (typeof err === 'string') {
+                    err = new Error(err);
+                }
+                cb(err);
+                return;
+            }
+            if (devices.length === 0) {
+                cb(new Error('No 1-Wire sensors found'));
+                return;
+            }
+            if (devices.length > 1) {
+                cb(new Error('Multiple 1-Wire sensors found, did you connect more than one accidentally?'));
+                return;
+            }
+            if (devices[0][0] !== 40) {
+                cb(new Error('The connected 1-Wire device does not appear to be a DS18B20 temperature sensor'));
+                return;
+            }
+            const temperatureSensorId = devices[0];
+            setInterval(() => {
+                oneWire.readAllAvailable(temperatureSensorId, (err, data) => {
+                    if (err || !data) {
+                        console.error(err);
+                        return;
+                    }
+                    const match = TEMPERATURE_REGEX.exec(data.toString());
+                    if (!match) {
+                        console.error(`Invalid data received from sensor: ${data.toString()}`);
+                        return;
+                    }
+                    state_1.state.setCurrentTemperature(parseInt(match[1]) / 1000);
+                });
+            }, TEMPERATURE_UPDATE_RATE);
+            const dayLed = new raspi_gpio_1.DigitalOutput(DAY_PIN);
+            const nightLed = new raspi_gpio_1.DigitalOutput(NIGHT_PIN);
+            state_1.state.on('change', (state) => {
+                switch (state.currentState) {
+                    case 'day':
+                        console.log('Setting the state to "day"');
+                        dayLed.write(raspi_gpio_1.HIGH);
+                        nightLed.write(raspi_gpio_1.LOW);
+                        break;
+                    case 'night':
+                        console.log('Setting the state to "night"');
+                        dayLed.write(raspi_gpio_1.LOW);
+                        nightLed.write(raspi_gpio_1.HIGH);
+                        break;
+                    case 'off':
+                        dayLed.write(raspi_gpio_1.LOW);
+                        console.log('Setting the state to "off"');
+                        nightLed.write(raspi_gpio_1.LOW);
+                        break;
+                }
+            });
+            cb(undefined);
+        });
+    });
 }
 exports.init = init;
 //# sourceMappingURL=device.js.map

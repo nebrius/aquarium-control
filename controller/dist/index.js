@@ -20,11 +20,22 @@ const messaging_1 = require("./messaging");
 const device_1 = require("./device");
 const state_1 = require("./state");
 function run() {
-    messaging_1.init();
-    device_1.init();
-    setTimeout(() => {
-        state_1.state.setNextTransitionState('day');
-    }, 1000);
+    device_1.init((err) => {
+        if (err) {
+            console.error(err.message || err);
+            process.exit(-1);
+        }
+        messaging_1.init((err) => {
+            if (err) {
+                console.error(err.message || err);
+                process.exit(-1);
+            }
+            console.log('Controller running');
+            setTimeout(() => {
+                state_1.state.setCurrentState('night');
+            }, 1000);
+        });
+    });
 }
 exports.run = run;
 //# sourceMappingURL=index.js.map
