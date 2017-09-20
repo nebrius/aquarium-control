@@ -1,4 +1,3 @@
-"use strict";
 /*
 Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
 
@@ -15,16 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
-Object.defineProperty(exports, "__esModule", { value: true });
-const messaging_1 = require("./messaging");
-const device_1 = require("./device");
-const state_1 = require("./state");
-function run() {
-    messaging_1.init();
-    device_1.init();
-    setTimeout(() => {
-        state_1.state.setNextTransitionState('day');
-    }, 1000);
+
+export function init() {
+
 }
-exports.run = run;
-//# sourceMappingURL=index.js.map

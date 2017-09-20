@@ -15,6 +15,14 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { init as initMessaging } from './messaging';
+import { init as initDevice } from './device';
+import { state } from './state';
+
 export function run() {
-  console.log('Hello World!');
+  initMessaging();
+  initDevice();
+  setTimeout(() => {
+    state.setNextTransitionState('day');
+  }, 1000);
 }
