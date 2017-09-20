@@ -34,6 +34,8 @@ class State extends EventEmitter {
 
   private _temperatureSamples: number[] = [];
 
+  private _hasRecordedTemperature = false;
+
   public getState(): IState {
     return this._state;
   }
@@ -45,23 +47,30 @@ class State extends EventEmitter {
       this._temperatureSamples.sort();
       this._state.currentTemperature = this._temperatureSamples[Math.floor(TEMPERATURE_SAMPLE_SIZE / 2)];
       this._temperatureSamples = [];
+      this._hasRecordedTemperature = true;
       this.emit('change', this._state);
     }
   }
 
   public setCurrentState(newState: 'day' | 'night' | 'off'): void {
     this._state.currentState = newState;
-    this.emit('change', this._state);
+    if (this._hasRecordedTemperature) {
+      this.emit('change', this._state);
+    }
   }
 
   public setNextTransitionTime(date: Date): void {
     this._state.nextTransitionTime = date.toString();
-    this.emit('change', this._state);
+    if (this._hasRecordedTemperature) {
+      this.emit('change', this._state);
+    }
   }
 
   public setNextTransitionState(newTransitionState: 'day' | 'night' | 'off'): void {
     this._state.nextTransitionState = newTransitionState;
-    this.emit('change', this._state);
+    if (this._hasRecordedTemperature) {
+      this.emit('change', this._state);
+    }
   }
 }
 

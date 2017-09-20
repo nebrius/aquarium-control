@@ -59,7 +59,10 @@ function connect(cb: (err: Error | undefined) => void): void {
     cb(undefined);
 
     state.on('change', (newState: IState) => {
-      const message = new Message(JSON.stringify(newState));
+      const message = new Message(JSON.stringify({
+        type: 'state-updated',
+        data: newState
+      }));
       console.log('Sending message: ' + message.getData());
       client.sendEvent(message, (err, res) => {
         if (err) {
