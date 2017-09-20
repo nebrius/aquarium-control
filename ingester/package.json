@@ -20,8 +20,13 @@
   },
   "homepage": "https://github.com/nebrius/aquarium-control#readme",
   "devDependencies": {
+    "@types/bluebird": "^3.5.11",
     "@types/node": "^8.0.28",
+    "rimraf": "^2.6.2",
     "tslint": "^5.7.0",
     "typescript": "^2.5.2"
+  },
+  "dependencies": {
+    "azure-event-hubs": "0.0.8"
   }
 }
