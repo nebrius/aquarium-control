@@ -7,18 +7,29 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Controller",
-      "program": "${workspaceRoot}/controller/bin/controller.js",
-      "outFiles": [
-        "${workspaceRoot}/controller/dist/**/*.js"
-      ]
-    }, {
-      "type": "node",
-      "request": "launch",
       "name": "Launch API",
       "program": "${workspaceRoot}/api/bin/api.js",
       "outFiles": [
         "${workspaceRoot}/api/dist/**/*.js"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Ingester",
+      "program": "${workspaceRoot}/ingester/bin/ingester.js",
+      "outFiles": [
+        "${workspaceRoot}/ingester/dist/**/*.js"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Debug Controller",
+      "address": "192.168.2.4",
+      "port": 9229,
+      "outFiles": [
+        "${workspaceRoot}/controller/dist/**/*.js"
       ]
     }
   ]
