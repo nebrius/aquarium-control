@@ -27,9 +27,8 @@ export function run() {
   client.open()
     .then(client.getPartitionIds.bind(client))
     .then((partitionIds: Client.PartitionId[]) =>
-      partitionIds.map((partitionId: Client.PartitionId) =>
-        client.createReceiver('$Default', partitionId, { 'startAfterTime' : Date.now()})
-          .then((receiver: Receiver) => {
+      partitionIds.map((partitionId: Client.PartitionId) => {
+        client.createReceiver('$Default', partitionId, {}).then((receiver: Receiver) => {
           console.log(`Created partition receiver: ${partitionId}`)
           receiver.on('errorReceived', (err) => console.error(err));
           receiver.on('message', (message: Message) => {
@@ -38,8 +37,11 @@ export function run() {
             // message.annotations['iothub-connection-device-id']
             // message.body
           });
-        })
-      )
+        });
+        client.createSender(partitionId).then((sender) => {
+          console.log(`Created partition sender: ${partitionId}`)
+        });
+      })
     )
     .catch((err) => console.error(err));
 }

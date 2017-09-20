@@ -26,17 +26,21 @@ function run() {
     const client = azure_event_hubs_1.Client.fromConnectionString(IOT_HUB_CONNECTION_STRING);
     client.open()
         .then(client.getPartitionIds.bind(client))
-        .then((partitionIds) => partitionIds.map((partitionId) => client.createReceiver('$Default', partitionId, { 'startAfterTime': Date.now() })
-        .then((receiver) => {
-        console.log(`Created partition receiver: ${partitionId}`);
-        receiver.on('errorReceived', (err) => console.error(err));
-        receiver.on('message', (message) => {
-            console.log('Message received: ');
-            console.log(message.body);
-            // message.annotations['iothub-connection-device-id']
-            // message.body
+        .then((partitionIds) => partitionIds.map((partitionId) => {
+        client.createReceiver('$Default', partitionId, {}).then((receiver) => {
+            console.log(`Created partition receiver: ${partitionId}`);
+            receiver.on('errorReceived', (err) => console.error(err));
+            receiver.on('message', (message) => {
+                console.log('Message received: ');
+                console.log(message.body);
+                // message.annotations['iothub-connection-device-id']
+                // message.body
+            });
         });
-    })))
+        client.createSender(partitionId).then((sender) => {
+            console.log(`Created partition sender: ${partitionId}`);
+        });
+    }))
         .catch((err) => console.error(err));
 }
 exports.run = run;
