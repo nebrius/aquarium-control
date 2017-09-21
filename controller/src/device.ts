@@ -20,10 +20,8 @@ import { DigitalOutput, LOW, HIGH } from 'raspi-gpio';
 import { OneWire } from 'raspi-onewire';
 import { state } from './state';
 import { IState } from './common/IState';
+import { DAY_PIN, NIGHT_PIN, TEMPERATURE_UPDATE_RATE } from './config';
 
-const DAY_PIN = 'GPIO23';
-const NIGHT_PIN = 'GPIO24';
-const TEMPERATURE_UPDATE_RATE = 1000;
 const TEMPERATURE_REGEX = /t=([0-9]*)/;
 
 export function init(cb: (err: Error | undefined) => void) {

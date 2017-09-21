@@ -17,11 +17,12 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
-const TEMPERATURE_SAMPLE_SIZE = 60;
+const config_1 = require("./config");
 class State extends events_1.EventEmitter {
     constructor() {
         super(...arguments);
         this._state = {
+            deviceId: 'nebrius-rpi',
             get currentTime() {
                 return (new Date()).toString();
             },
@@ -31,37 +32,42 @@ class State extends events_1.EventEmitter {
             nextTransitionState: 'off'
         };
         this._temperatureSamples = [];
-        this._hasRecordedTemperature = false;
+        this._hasReportedFirstTemperature = false;
     }
     getState() {
         return this._state;
     }
     setCurrentTemperature(newTemperature) {
         this._temperatureSamples.push(newTemperature);
-        if (this._temperatureSamples.length === TEMPERATURE_SAMPLE_SIZE) {
+        if (!this._hasReportedFirstTemperature) {
+            this._state.currentTemperature = newTemperature;
+            this._hasReportedFirstTemperature = true;
+            this.emit('change', this._state);
+            return;
+        }
+        if (this._temperatureSamples.length === config_1.TEMPERATURE_SAMPLE_SIZE) {
             // Take the median temperature and throw the rest away.
             this._temperatureSamples.sort();
-            this._state.currentTemperature = this._temperatureSamples[Math.floor(TEMPERATURE_SAMPLE_SIZE / 2)];
+            this._state.currentTemperature = this._temperatureSamples[Math.floor(config_1.TEMPERATURE_SAMPLE_SIZE / 2)];
             this._temperatureSamples = [];
-            this._hasRecordedTemperature = true;
             this.emit('change', this._state);
         }
     }
     setCurrentState(newState) {
         this._state.currentState = newState;
-        if (this._hasRecordedTemperature) {
+        if (this._hasReportedFirstTemperature) {
             this.emit('change', this._state);
         }
     }
     setNextTransitionTime(date) {
         this._state.nextTransitionTime = date.toString();
-        if (this._hasRecordedTemperature) {
+        if (this._hasReportedFirstTemperature) {
             this.emit('change', this._state);
         }
     }
     setNextTransitionState(newTransitionState) {
         this._state.nextTransitionState = newTransitionState;
-        if (this._hasRecordedTemperature) {
+        if (this._hasReportedFirstTemperature) {
             this.emit('change', this._state);
         }
     }

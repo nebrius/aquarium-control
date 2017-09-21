@@ -23,6 +23,7 @@ import * as makeDir from 'make-dir';
 import { IConfig } from './common/IConfig';
 import { IState } from './common/IState';
 import { state } from './state';
+import { CONFIG_FILE_PATH } from './config';
 
 let client: Client;
 let config: IConfig = {
@@ -30,8 +31,6 @@ let config: IConfig = {
   overrideState: 'off',
   schedule: []
 };
-
-const CONFIG_FILE_PATH = '/var/local/aquarium-control/config.json';
 
 export function getCurrentConfig(): IConfig {
   return config;
@@ -64,10 +63,7 @@ function connect(cb: (err: Error | undefined) => void): void {
     cb(undefined);
 
     state.on('change', (newState: IState) => {
-      const message = new Message(JSON.stringify({
-        type: 'state-updated',
-        data: newState
-      }));
+      const message = new Message(JSON.stringify(newState));
       console.log('Sending message: ' + message.getData());
       client.sendEvent(message, (err, res) => {
         if (err) {

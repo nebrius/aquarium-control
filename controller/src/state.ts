@@ -15,14 +15,14 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { IState } from './common/IState';
 import { EventEmitter } from 'events';
-
-const TEMPERATURE_SAMPLE_SIZE = 60;
+import { IState } from './common/IState';
+import { TEMPERATURE_SAMPLE_SIZE } from './config';
 
 class State extends EventEmitter {
 
   private _state: IState = {
+    deviceId: 'nebrius-rpi', // TODO: get from connection string/env variable
     get currentTime() {
       return (new Date()).toString();
     },
@@ -34,7 +34,7 @@ class State extends EventEmitter {
 
   private _temperatureSamples: number[] = [];
 
-  private _hasRecordedTemperature = false;
+  private _hasReportedFirstTemperature = false;
 
   public getState(): IState {
     return this._state;
@@ -42,33 +42,38 @@ class State extends EventEmitter {
 
   public setCurrentTemperature(newTemperature: number) {
     this._temperatureSamples.push(newTemperature);
+    if (!this._hasReportedFirstTemperature) {
+      this._state.currentTemperature = newTemperature;
+      this._hasReportedFirstTemperature = true;
+      this.emit('change', this._state);
+      return;
+    }
     if (this._temperatureSamples.length === TEMPERATURE_SAMPLE_SIZE) {
       // Take the median temperature and throw the rest away.
       this._temperatureSamples.sort();
       this._state.currentTemperature = this._temperatureSamples[Math.floor(TEMPERATURE_SAMPLE_SIZE / 2)];
       this._temperatureSamples = [];
-      this._hasRecordedTemperature = true;
       this.emit('change', this._state);
     }
   }
 
   public setCurrentState(newState: 'day' | 'night' | 'off'): void {
     this._state.currentState = newState;
-    if (this._hasRecordedTemperature) {
+    if (this._hasReportedFirstTemperature) {
       this.emit('change', this._state);
     }
   }
 
   public setNextTransitionTime(date: Date): void {
     this._state.nextTransitionTime = date.toString();
-    if (this._hasRecordedTemperature) {
+    if (this._hasReportedFirstTemperature) {
       this.emit('change', this._state);
     }
   }
 
   public setNextTransitionState(newTransitionState: 'day' | 'night' | 'off'): void {
     this._state.nextTransitionState = newTransitionState;
-    if (this._hasRecordedTemperature) {
+    if (this._hasReportedFirstTemperature) {
       this.emit('change', this._state);
     }
   }

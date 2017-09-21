@@ -20,9 +20,7 @@ const raspi_1 = require("raspi");
 const raspi_gpio_1 = require("raspi-gpio");
 const raspi_onewire_1 = require("raspi-onewire");
 const state_1 = require("./state");
-const DAY_PIN = 'GPIO23';
-const NIGHT_PIN = 'GPIO24';
-const TEMPERATURE_UPDATE_RATE = 1000;
+const config_1 = require("./config");
 const TEMPERATURE_REGEX = /t=([0-9]*)/;
 function init(cb) {
     raspi_1.init(() => {
@@ -61,9 +59,9 @@ function init(cb) {
                     }
                     state_1.state.setCurrentTemperature(parseInt(match[1]) / 1000);
                 });
-            }, TEMPERATURE_UPDATE_RATE);
-            const dayLed = new raspi_gpio_1.DigitalOutput(DAY_PIN);
-            const nightLed = new raspi_gpio_1.DigitalOutput(NIGHT_PIN);
+            }, config_1.TEMPERATURE_UPDATE_RATE);
+            const dayLed = new raspi_gpio_1.DigitalOutput(config_1.DAY_PIN);
+            const nightLed = new raspi_gpio_1.DigitalOutput(config_1.NIGHT_PIN);
             state_1.state.on('change', (state) => {
                 switch (state.currentState) {
                     case 'day':

@@ -22,19 +22,19 @@ const azure_iot_device_1 = require("azure-iot-device");
 const azure_iot_device_mqtt_1 = require("azure-iot-device-mqtt");
 const makeDir = require("make-dir");
 const state_1 = require("./state");
+const config_1 = require("./config");
 let client;
 let config = {
     mode: 'override',
     overrideState: 'off',
     schedule: []
 };
-const CONFIG_FILE_PATH = '/var/local/aquarium-control/config.json';
 function getCurrentConfig() {
     return config;
 }
 exports.getCurrentConfig = getCurrentConfig;
 function saveConfig(cb) {
-    fs_1.writeFile(CONFIG_FILE_PATH, JSON.stringify(config, null, '  '), cb);
+    fs_1.writeFile(config_1.CONFIG_FILE_PATH, JSON.stringify(config, null, '  '), cb);
 }
 function connect(cb) {
     const IOT_HUB_DEVICE_CONNECTION_STRING = process.env.IOT_HUB_DEVICE_CONNECTION_STRING;
@@ -58,10 +58,7 @@ function connect(cb) {
         console.log('Connected to IoT Hub');
         cb(undefined);
         state_1.state.on('change', (newState) => {
-            const message = new azure_iot_device_1.Message(JSON.stringify({
-                type: 'state-updated',
-                data: newState
-            }));
+            const message = new azure_iot_device_1.Message(JSON.stringify(newState));
             console.log('Sending message: ' + message.getData());
             client.sendEvent(message, (err, res) => {
                 if (err) {
@@ -75,12 +72,12 @@ function connect(cb) {
     });
 }
 function init(cb) {
-    fs_1.exists(CONFIG_FILE_PATH, (exists) => {
+    fs_1.exists(config_1.CONFIG_FILE_PATH, (exists) => {
         if (exists) {
             connect(cb);
             return;
         }
-        makeDir(path_1.dirname(CONFIG_FILE_PATH)).then(() => {
+        makeDir(path_1.dirname(config_1.CONFIG_FILE_PATH)).then(() => {
             saveConfig((err) => {
                 if (err) {
                     cb(err);
