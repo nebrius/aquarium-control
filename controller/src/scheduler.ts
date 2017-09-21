@@ -17,7 +17,6 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import { getTimes } from 'suncalc';
 import { state } from './state';
-import { getCurrentConfig } from './messaging';
 import { LATITUDE, LONGITUDE } from './config';
 import { IDynamicScheduleEntry, IManualScheduleEntry } from './common/IConfig';
 
@@ -29,11 +28,6 @@ interface IScheduleEntry {
 
 let scheduleTimeout: NodeJS.Timer | null = null;
 let dailySchedule: IScheduleEntry[] = [];
-
-export function init(cb: (err: Error | undefined) => void): void {
-  setSchedule();
-  setImmediate(cb);
-}
 
 function createDate(hours: number, minutes: number, seconds: number): Date {
   const date = new Date();
@@ -48,7 +42,7 @@ function scheduleMidnightReset() {
   console.log(`Scheduling the daily schedule preparation for ${midnightDate}`);
   state.setNextTransitionTime(midnightDate);
   state.setNextTransitionState('off');
-  scheduleTimeout = setTimeout(setSchedule, midnightDate.getTime() - Date.now());
+  scheduleTimeout = setTimeout(updateSchedule, midnightDate.getTime() - Date.now());
 }
 
 function scheduleNextTransition() {
@@ -73,9 +67,15 @@ function scheduleNextTransition() {
   }, nextScheduleEntry.date.getTime() - Date.now());
 }
 
-function setSchedule() {
+export function init(cb: (err: Error | undefined) => void): void {
+  updateSchedule();
+  state.on('change-config', updateSchedule);
+  setImmediate(cb);
+}
 
-  const currentSchedule = getCurrentConfig();
+export function updateSchedule() {
+
+  const currentSchedule = state.getConfig();
 
   // Cancel the previous schedule, if it was running
   if (scheduleTimeout) {

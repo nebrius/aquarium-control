@@ -45,18 +45,41 @@ function run() {
       });
     });
 
+    // const message = new Message(JSON.stringify({
+    //   mode: 'override',
+    //   overrideState: 'off',
+    //   schedule: []
+    // }));
+
     const message = new Message(JSON.stringify({
-      foo: 'bar',
-      baz: 'blarg'
+      mode: 'program',
+      overrideState: 'off',
+      schedule: [
+        {
+          name: 'Sunrise',
+          type: 'dynamic',
+          state: 'day',
+          details: {
+            event: 'sunrise'
+          }
+        },
+        {
+          name: 'Sunset',
+          type: 'manual',
+          state: 'night',
+          details: {
+            hour: 16,
+            minute: 11
+          }
+        }
+      ]
     }));
+
     message.ack = 'full';
     client.send('nebrius-rpi', message, (err, res) => {
       if (err) console.log('send error: ' + err.toString());
       if (res) console.log('send status: ' + res.constructor.name);
-    });
-
-    client.on('message', (msg) => {
-      console.log(msg);
+      client.close();
     });
   });
 }

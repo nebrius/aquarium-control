@@ -67,7 +67,7 @@ export function init(cb: (err: Error | undefined) => void) {
 
       const dayLed = new DigitalOutput(DAY_PIN);
       const nightLed = new DigitalOutput(NIGHT_PIN);
-      state.on('change', (state: IState) => {
+      state.on('change-state', (state: IState) => {
         switch (state.currentState) {
           case 'day':
             console.log('Setting the state to "day"');

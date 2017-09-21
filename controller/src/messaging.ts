@@ -26,18 +26,9 @@ import { state } from './state';
 import { CONFIG_FILE_PATH } from './config';
 
 let client: Client;
-let config: IConfig = {
-  mode: 'override',
-  overrideState: 'off',
-  schedule: []
-};
-
-export function getCurrentConfig(): IConfig {
-  return config;
-}
 
 function saveConfig(cb: (err: Error | undefined) => void): void {
-  writeFile(CONFIG_FILE_PATH, JSON.stringify(config, null, '  '), cb);
+  writeFile(CONFIG_FILE_PATH, JSON.stringify(state.getConfig(), null, '  '), cb);
 }
 
 function connect(cb: (err: Error | undefined) => void): void {
@@ -55,14 +46,19 @@ function connect(cb: (err: Error | undefined) => void): void {
     client.on('error', (err) => console.error(err));
     client.on('disconnect', () => client.removeAllListeners());
     client.on('message', (msg: Message) => {
-      console.log(JSON.parse(msg.getData().toString()));
-      client.complete(msg, () => {
-      });
+      try {
+        const newConfig: IConfig = JSON.parse(msg.getData().toString());
+        client.complete(msg, () => {
+          state.setConfig(newConfig);
+        });
+      } catch(e) {
+        client.reject(msg, e);
+      }
     });
     console.log('Connected to IoT Hub');
     cb(undefined);
 
-    state.on('change', (newState: IState) => {
+    state.on('change-state', (newState: IState) => {
       const message = new Message(JSON.stringify(newState));
       console.log('Sending message: ' + message.getData());
       client.sendEvent(message, (err, res) => {
@@ -85,7 +81,7 @@ export function init(cb: (err: Error | undefined) => void): void {
           return;
         }
         try {
-          config = JSON.parse(data.toString());
+          state.setConfig(JSON.parse(data.toString()));
           connect(cb);
         } catch(e) {
           cb(e);

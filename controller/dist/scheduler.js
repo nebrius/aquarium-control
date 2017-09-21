@@ -18,15 +18,9 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 Object.defineProperty(exports, "__esModule", { value: true });
 const suncalc_1 = require("suncalc");
 const state_1 = require("./state");
-const messaging_1 = require("./messaging");
 const config_1 = require("./config");
 let scheduleTimeout = null;
 let dailySchedule = [];
-function init(cb) {
-    setSchedule();
-    setImmediate(cb);
-}
-exports.init = init;
 function createDate(hours, minutes, seconds) {
     const date = new Date();
     date.setHours(hours);
@@ -39,7 +33,7 @@ function scheduleMidnightReset() {
     console.log(`Scheduling the daily schedule preparation for ${midnightDate}`);
     state_1.state.setNextTransitionTime(midnightDate);
     state_1.state.setNextTransitionState('off');
-    scheduleTimeout = setTimeout(setSchedule, midnightDate.getTime() - Date.now());
+    scheduleTimeout = setTimeout(updateSchedule, midnightDate.getTime() - Date.now());
 }
 function scheduleNextTransition() {
     const nextScheduleEntry = dailySchedule.shift();
@@ -63,8 +57,14 @@ function scheduleNextTransition() {
         }
     }, nextScheduleEntry.date.getTime() - Date.now());
 }
-function setSchedule() {
-    const currentSchedule = messaging_1.getCurrentConfig();
+function init(cb) {
+    updateSchedule();
+    state_1.state.on('change-config', updateSchedule);
+    setImmediate(cb);
+}
+exports.init = init;
+function updateSchedule() {
+    const currentSchedule = state_1.state.getConfig();
     // Cancel the previous schedule, if it was running
     if (scheduleTimeout) {
         clearTimeout(scheduleTimeout);
@@ -142,4 +142,5 @@ function setSchedule() {
         scheduleNextTransition();
     }
 }
+exports.updateSchedule = updateSchedule;
 //# sourceMappingURL=scheduler.js.map

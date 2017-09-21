@@ -24,17 +24,8 @@ const makeDir = require("make-dir");
 const state_1 = require("./state");
 const config_1 = require("./config");
 let client;
-let config = {
-    mode: 'override',
-    overrideState: 'off',
-    schedule: []
-};
-function getCurrentConfig() {
-    return config;
-}
-exports.getCurrentConfig = getCurrentConfig;
 function saveConfig(cb) {
-    fs_1.writeFile(config_1.CONFIG_FILE_PATH, JSON.stringify(config, null, '  '), cb);
+    fs_1.writeFile(config_1.CONFIG_FILE_PATH, JSON.stringify(state_1.state.getConfig(), null, '  '), cb);
 }
 function connect(cb) {
     const IOT_HUB_DEVICE_CONNECTION_STRING = process.env.IOT_HUB_DEVICE_CONNECTION_STRING;
@@ -51,13 +42,19 @@ function connect(cb) {
         client.on('error', (err) => console.error(err));
         client.on('disconnect', () => client.removeAllListeners());
         client.on('message', (msg) => {
-            console.log(JSON.parse(msg.getData().toString()));
-            client.complete(msg, () => {
-            });
+            try {
+                const newConfig = JSON.parse(msg.getData().toString());
+                client.complete(msg, () => {
+                    state_1.state.setConfig(newConfig);
+                });
+            }
+            catch (e) {
+                client.reject(msg, e);
+            }
         });
         console.log('Connected to IoT Hub');
         cb(undefined);
-        state_1.state.on('change', (newState) => {
+        state_1.state.on('change-state', (newState) => {
             const message = new azure_iot_device_1.Message(JSON.stringify(newState));
             console.log('Sending message: ' + message.getData());
             client.sendEvent(message, (err, res) => {
@@ -80,7 +77,7 @@ function init(cb) {
                     return;
                 }
                 try {
-                    config = JSON.parse(data.toString());
+                    state_1.state.setConfig(JSON.parse(data.toString()));
                     connect(cb);
                 }
                 catch (e) {
