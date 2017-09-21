@@ -18,7 +18,6 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 Object.defineProperty(exports, "__esModule", { value: true });
 const messaging_1 = require("./messaging");
 const device_1 = require("./device");
-const state_1 = require("./state");
 function run() {
     device_1.init((err) => {
         if (err) {
@@ -31,9 +30,6 @@ function run() {
                 process.exit(-1);
             }
             console.log('Controller running');
-            setTimeout(() => {
-                state_1.state.setCurrentState('night');
-            }, 1000);
         });
     });
 }

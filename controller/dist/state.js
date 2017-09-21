@@ -31,6 +31,7 @@ class State extends events_1.EventEmitter {
             nextTransitionState: 'off'
         };
         this._temperatureSamples = [];
+        this._hasRecordedTemperature = false;
     }
     getState() {
         return this._state;
@@ -42,20 +43,27 @@ class State extends events_1.EventEmitter {
             this._temperatureSamples.sort();
             this._state.currentTemperature = this._temperatureSamples[Math.floor(TEMPERATURE_SAMPLE_SIZE / 2)];
             this._temperatureSamples = [];
+            this._hasRecordedTemperature = true;
             this.emit('change', this._state);
         }
     }
     setCurrentState(newState) {
         this._state.currentState = newState;
-        this.emit('change', this._state);
+        if (this._hasRecordedTemperature) {
+            this.emit('change', this._state);
+        }
     }
     setNextTransitionTime(date) {
         this._state.nextTransitionTime = date.toString();
-        this.emit('change', this._state);
+        if (this._hasRecordedTemperature) {
+            this.emit('change', this._state);
+        }
     }
     setNextTransitionState(newTransitionState) {
         this._state.nextTransitionState = newTransitionState;
-        this.emit('change', this._state);
+        if (this._hasRecordedTemperature) {
+            this.emit('change', this._state);
+        }
     }
 }
 exports.state = new State();

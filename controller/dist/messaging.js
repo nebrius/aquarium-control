@@ -50,10 +50,18 @@ function connect(cb) {
         }
         client.on('error', (err) => console.error(err));
         client.on('disconnect', () => client.removeAllListeners());
+        client.on('message', (msg) => {
+            console.log(JSON.parse(msg.getData().toString()));
+            client.complete(msg, () => {
+            });
+        });
         console.log('Connected to IoT Hub');
         cb(undefined);
         state_1.state.on('change', (newState) => {
-            const message = new azure_iot_device_1.Message(JSON.stringify(newState));
+            const message = new azure_iot_device_1.Message(JSON.stringify({
+                type: 'state-updated',
+                data: newState
+            }));
             console.log('Sending message: ' + message.getData());
             client.sendEvent(message, (err, res) => {
                 if (err) {

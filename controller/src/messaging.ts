@@ -55,6 +55,11 @@ function connect(cb: (err: Error | undefined) => void): void {
     }
     client.on('error', (err) => console.error(err));
     client.on('disconnect', () => client.removeAllListeners());
+    client.on('message', (msg: Message) => {
+      console.log(JSON.parse(msg.getData().toString()));
+      client.complete(msg, () => {
+      });
+    });
     console.log('Connected to IoT Hub');
     cb(undefined);
 
