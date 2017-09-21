@@ -17,6 +17,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import { init as initMessaging } from './messaging';
 import { init as initDevice } from './device';
+import { init as initScheduler } from './scheduler';
 
 export function run() {
   initDevice((err) => {
@@ -29,7 +30,13 @@ export function run() {
         console.error(err.message || err);
         process.exit(-1);
       }
-      console.log('Controller running');
+      initScheduler((err) => {
+        if (err) {
+          console.error(err.message || err);
+          process.exit(-1);
+        }
+        console.log('Controller running');
+      });
     });
   });
 }

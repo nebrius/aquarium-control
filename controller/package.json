@@ -34,6 +34,7 @@
     "make-dir": "^1.0.0",
     "raspi": "^5.0.1",
     "raspi-gpio": "^5.0.0",
-    "raspi-onewire": "^1.0.1"
+    "raspi-onewire": "^1.0.1",
+    "suncalc": "^1.8.0"
   }
 }

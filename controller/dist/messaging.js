@@ -74,7 +74,19 @@ function connect(cb) {
 function init(cb) {
     fs_1.exists(config_1.CONFIG_FILE_PATH, (exists) => {
         if (exists) {
-            connect(cb);
+            fs_1.readFile(config_1.CONFIG_FILE_PATH, (err, data) => {
+                if (err) {
+                    cb(err);
+                    return;
+                }
+                try {
+                    config = JSON.parse(data.toString());
+                    connect(cb);
+                }
+                catch (e) {
+                    cb(e);
+                }
+            });
             return;
         }
         makeDir(path_1.dirname(config_1.CONFIG_FILE_PATH)).then(() => {

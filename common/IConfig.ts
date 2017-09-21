@@ -22,11 +22,11 @@ export interface IScheduleEntry {
   details: IDynamicScheduleEntry | IManualScheduleEntry;
 }
 
-export interface IDynamicScheduleEntry {
+export interface IDynamicScheduleEntry extends IScheduleEntry {
   event: 'sunrise' | 'sunset';
 }
 
-export interface IManualScheduleEntry {
+export interface IManualScheduleEntry extends IScheduleEntry {
   hour: number;
   minute: number;
 }

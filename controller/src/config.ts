@@ -20,3 +20,5 @@ export const NIGHT_PIN = 'GPIO24';
 export const TEMPERATURE_UPDATE_RATE = 10000;
 export const TEMPERATURE_SAMPLE_SIZE = (5 * 60 * 1000) / TEMPERATURE_UPDATE_RATE;
 export const CONFIG_FILE_PATH = '/var/local/aquarium-control/config.json';
+export const LATITUDE = 37.546267;
+export const LONGITUDE = -121.971132;

@@ -18,6 +18,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 Object.defineProperty(exports, "__esModule", { value: true });
 const messaging_1 = require("./messaging");
 const device_1 = require("./device");
+const scheduler_1 = require("./scheduler");
 function run() {
     device_1.init((err) => {
         if (err) {
@@ -29,7 +30,13 @@ function run() {
                 console.error(err.message || err);
                 process.exit(-1);
             }
-            console.log('Controller running');
+            scheduler_1.init((err) => {
+                if (err) {
+                    console.error(err.message || err);
+                    process.exit(-1);
+                }
+                console.log('Controller running');
+            });
         });
     });
 }

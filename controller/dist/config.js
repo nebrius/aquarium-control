@@ -21,4 +21,6 @@ exports.NIGHT_PIN = 'GPIO24';
 exports.TEMPERATURE_UPDATE_RATE = 10000;
 exports.TEMPERATURE_SAMPLE_SIZE = (5 * 60 * 1000) / exports.TEMPERATURE_UPDATE_RATE;
 exports.CONFIG_FILE_PATH = '/var/local/aquarium-control/config.json';
+exports.LATITUDE = 37.546267;
+exports.LONGITUDE = -121.971132;
 //# sourceMappingURL=config.js.map

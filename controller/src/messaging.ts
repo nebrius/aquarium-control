@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { exists, writeFile } from 'fs';
+import { exists, readFile, writeFile } from 'fs';
 import { dirname } from 'path';
 import { Client, Message } from 'azure-iot-device';
 import { Mqtt as Protocol } from 'azure-iot-device-mqtt';
@@ -79,7 +79,18 @@ function connect(cb: (err: Error | undefined) => void): void {
 export function init(cb: (err: Error | undefined) => void): void {
   exists(CONFIG_FILE_PATH, (exists) => {
     if (exists) {
-      connect(cb);
+      readFile(CONFIG_FILE_PATH, (err, data) => {
+        if (err) {
+          cb(err);
+          return;
+        }
+        try {
+          config = JSON.parse(data.toString());
+          connect(cb);
+        } catch(e) {
+          cb(e);
+        }
+      });
       return;
     }
     makeDir(dirname(CONFIG_FILE_PATH)).then(() => {
