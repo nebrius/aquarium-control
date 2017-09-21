@@ -16,32 +16,55 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
-const azure_event_hubs_1 = require("azure-event-hubs");
+const azure_iothub_1 = require("azure-iothub");
 function run() {
     const IOT_HUB_CONNECTION_STRING = process.env.IOT_HUB_CONNECTION_STRING;
     if (typeof IOT_HUB_CONNECTION_STRING !== 'string') {
         throw new Error('Environment variable IOT_HUB_DEVICE_CONNECTION_STRING is not defined');
     }
     console.log('Connecting to Event Hub');
-    const client = azure_event_hubs_1.Client.fromConnectionString(IOT_HUB_CONNECTION_STRING);
-    client.open()
-        .then(client.getPartitionIds.bind(client))
-        .then((partitionIds) => partitionIds.map((partitionId) => {
-        client.createReceiver('$Default', partitionId, {}).then((receiver) => {
-            console.log(`Created partition receiver: ${partitionId}`);
-            receiver.on('errorReceived', (err) => console.error(err));
-            receiver.on('message', (message) => {
-                console.log('Message received: ');
-                console.log(message.body);
-                // message.annotations['iothub-connection-device-id']
-                // message.body
-            });
+    const registry = azure_iothub_1.Registry.fromConnectionString(IOT_HUB_CONNECTION_STRING);
+    // List devices
+    console.log('**listing devices...');
+    registry.list((err, deviceList) => {
+        if (err || !deviceList) {
+            console.error(err);
+            return;
+        }
+        deviceList.forEach((device) => {
+            let key = '<no primary key>';
+            if (device.authentication && device.authentication.symmetricKey) {
+                key = device.authentication.symmetricKey.primaryKey;
+            }
+            console.log(`${device.deviceId}: ${key}`);
         });
-        client.createSender(partitionId).then((sender) => {
-            console.log(`Created partition sender: ${partitionId}`);
-        });
-    }))
-        .catch((err) => console.error(err));
+        function printAndContinue(op, next) {
+            return function printResult(err, deviceInfo, res) {
+                if (err)
+                    console.log(op + ' error: ' + err.toString());
+                if (res)
+                    console.log(op + ' status: ' + res.statusCode + ' ' + res.statusMessage);
+                if (deviceInfo)
+                    console.log(op + ' device info: ' + JSON.stringify(deviceInfo));
+                if (next)
+                    next();
+            };
+        }
+        // Create a new device
+        var device = {
+            deviceId: 'sample-device-' + Date.now()
+        };
+        console.log('\n**creating device \'' + device.deviceId + '\'');
+        registry.create(device, printAndContinue('create', () => {
+            // Get the newly-created device
+            console.log('\n**getting device \'' + device.deviceId + '\'');
+            registry.get(device.deviceId, printAndContinue('get', () => {
+                // Delete the new device
+                console.log('\n**deleting device \'' + device.deviceId + '\'');
+                registry.delete(device.deviceId, printAndContinue('delete', () => { }));
+            }));
+        }));
+    });
 }
 exports.run = run;
 //# sourceMappingURL=index.js.map

@@ -27,6 +27,8 @@
     "typescript": "^2.5.2"
   },
   "dependencies": {
-    "azure-event-hubs": "0.0.8"
+    "azure-event-hubs": "0.0.8",
+    "azure-iot-device-mqtt": "^1.1.17",
+    "azure-iothub": "1.1.11"
   }
 }
