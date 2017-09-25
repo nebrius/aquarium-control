@@ -17,6 +17,9 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
+const fs_1 = require("fs");
+const path_1 = require("path");
+const makeDir = require("make-dir");
 const config_1 = require("./config");
 class State extends events_1.EventEmitter {
     constructor() {
@@ -39,6 +42,37 @@ class State extends events_1.EventEmitter {
         this._temperatureSamples = [];
         this._hasReportedFirstTemperature = false;
     }
+    init(cb) {
+        fs_1.exists(config_1.CONFIG_FILE_PATH, (exists) => {
+            if (exists) {
+                console.log(`Reading config file from ${config_1.CONFIG_FILE_PATH}`);
+                fs_1.readFile(config_1.CONFIG_FILE_PATH, (err, data) => {
+                    if (err) {
+                        cb(err);
+                        return;
+                    }
+                    try {
+                        this._config = JSON.parse(data.toString());
+                        cb(undefined);
+                    }
+                    catch (e) {
+                        cb(e);
+                    }
+                });
+                return;
+            }
+            console.log(`Configuration file not found, creating a default configuration file at ${config_1.CONFIG_FILE_PATH}`);
+            makeDir(path_1.dirname(config_1.CONFIG_FILE_PATH)).then(() => {
+                fs_1.writeFile(config_1.CONFIG_FILE_PATH, JSON.stringify(exports.state.getConfig(), null, '  '), (err) => {
+                    if (err) {
+                        cb(err);
+                        return;
+                    }
+                    cb(undefined);
+                });
+            }).catch(cb);
+        });
+    }
     getState() {
         return this._state;
     }
@@ -47,6 +81,9 @@ class State extends events_1.EventEmitter {
     }
     setConfig(newConfig) {
         this._config = newConfig;
+        // We use the synchronous method to avoid a possible race condition where `setConfig`
+        // could be called before a previous call finished writing the file.
+        fs_1.writeFileSync(config_1.CONFIG_FILE_PATH, JSON.stringify(exports.state.getConfig(), null, '  '));
         if (this._hasReportedFirstTemperature) {
             this.emit('change-config', this._state);
         }
@@ -87,4 +124,8 @@ class State extends events_1.EventEmitter {
     }
 }
 exports.state = new State();
+function init(cb) {
+    exports.state.init(cb);
+}
+exports.init = init;
 //# sourceMappingURL=state.js.map

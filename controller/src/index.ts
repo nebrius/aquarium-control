@@ -15,28 +15,23 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { series } from 'async';
 import { init as initMessaging } from './messaging';
 import { init as initDevice } from './device';
 import { init as initScheduler } from './scheduler';
+import { init as initState } from './state';
 
 export function run() {
-  initDevice((err) => {
+  series([
+    (next) => initState(next),
+    (next) => initScheduler(next),
+    (next) => initDevice(next),
+    (next) => initMessaging(next)
+  ], (err) => {
     if (err) {
-      console.error(err.message || err);
+      console.error(err);
       process.exit(-1);
     }
-    initMessaging((err) => {
-      if (err) {
-        console.error(err.message || err);
-        process.exit(-1);
-      }
-      initScheduler((err) => {
-        if (err) {
-          console.error(err.message || err);
-          process.exit(-1);
-        }
-        console.log('Controller running');
-      });
-    });
+    console.log('Controller running');
   });
 }

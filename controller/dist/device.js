@@ -62,7 +62,7 @@ function init(cb) {
             }, config_1.TEMPERATURE_UPDATE_RATE);
             const dayLed = new raspi_gpio_1.DigitalOutput(config_1.DAY_PIN);
             const nightLed = new raspi_gpio_1.DigitalOutput(config_1.NIGHT_PIN);
-            state_1.state.on('change-state', (state) => {
+            function setState(state) {
                 switch (state.currentState) {
                     case 'day':
                         console.log('Setting the state to "day"');
@@ -80,7 +80,9 @@ function init(cb) {
                         nightLed.write(raspi_gpio_1.LOW);
                         break;
                 }
-            });
+            }
+            state_1.state.on('change-state', setState);
+            setState(state_1.state.getState());
             cb(undefined);
         });
     });

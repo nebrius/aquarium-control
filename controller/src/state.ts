@@ -16,9 +16,12 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { EventEmitter } from 'events';
+import { exists, readFile, writeFile, writeFileSync } from 'fs';
+import { dirname } from 'path';
+import * as makeDir from 'make-dir';
 import { IState } from './common/IState';
 import { IConfig } from './common/IConfig';
-import { TEMPERATURE_SAMPLE_SIZE } from './config';
+import { TEMPERATURE_SAMPLE_SIZE, CONFIG_FILE_PATH } from './config';
 
 class State extends EventEmitter {
 
@@ -43,6 +46,37 @@ class State extends EventEmitter {
 
   private _hasReportedFirstTemperature = false;
 
+  public init(cb: (err: Error | undefined) => void): void {
+    exists(CONFIG_FILE_PATH, (exists) => {
+      if (exists) {
+        console.log(`Reading config file from ${CONFIG_FILE_PATH}`);
+        readFile(CONFIG_FILE_PATH, (err, data) => {
+          if (err) {
+            cb(err);
+            return;
+          }
+          try {
+            this._config = JSON.parse(data.toString());
+            cb(undefined);
+          } catch(e) {
+            cb(e);
+          }
+        });
+        return;
+      }
+      console.log(`Configuration file not found, creating a default configuration file at ${CONFIG_FILE_PATH}`);
+      makeDir(dirname(CONFIG_FILE_PATH)).then(() => {
+        writeFile(CONFIG_FILE_PATH, JSON.stringify(state.getConfig(), null, '  '), (err) => {
+          if (err) {
+            cb(err);
+            return;
+          }
+          cb(undefined);
+        })
+      }).catch(cb);
+    });
+  }
+
   public getState(): IState {
     return this._state;
   }
@@ -53,6 +87,10 @@ class State extends EventEmitter {
 
   public setConfig(newConfig: IConfig): void {
     this._config = newConfig;
+
+    // We use the synchronous method to avoid a possible race condition where `setConfig`
+    // could be called before a previous call finished writing the file.
+    writeFileSync(CONFIG_FILE_PATH, JSON.stringify(state.getConfig(), null, '  '));
     if (this._hasReportedFirstTemperature) {
       this.emit('change-config', this._state);
     }
@@ -98,3 +136,7 @@ class State extends EventEmitter {
 }
 
 export const state = new State();
+
+export function init(cb: (err: Error | undefined) => void): void {
+  state.init(cb);
+}

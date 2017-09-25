@@ -15,23 +15,16 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { exists, readFile, writeFile } from 'fs';
-import { dirname } from 'path';
 import { Client, Message } from 'azure-iot-device';
 import { Mqtt as Protocol } from 'azure-iot-device-mqtt';
-import * as makeDir from 'make-dir';
+
 import { IConfig } from './common/IConfig';
 import { IState } from './common/IState';
 import { state } from './state';
-import { CONFIG_FILE_PATH } from './config';
 
 let client: Client;
 
-function saveConfig(cb: (err: Error | undefined) => void): void {
-  writeFile(CONFIG_FILE_PATH, JSON.stringify(state.getConfig(), null, '  '), cb);
-}
-
-function connect(cb: (err: Error | undefined) => void): void {
+export function init(cb: (err: Error | undefined) => void): void {
   const IOT_HUB_DEVICE_CONNECTION_STRING = process.env.IOT_HUB_DEVICE_CONNECTION_STRING;
   if (typeof IOT_HUB_DEVICE_CONNECTION_STRING !== 'string') {
     throw new Error('Environment variable IOT_HUB_DEVICE_CONNECTION_STRING is not defined');
@@ -69,34 +62,5 @@ function connect(cb: (err: Error | undefined) => void): void {
         }
       });
     });
-  });
-}
-
-export function init(cb: (err: Error | undefined) => void): void {
-  exists(CONFIG_FILE_PATH, (exists) => {
-    if (exists) {
-      readFile(CONFIG_FILE_PATH, (err, data) => {
-        if (err) {
-          cb(err);
-          return;
-        }
-        try {
-          state.setConfig(JSON.parse(data.toString()));
-          connect(cb);
-        } catch(e) {
-          cb(e);
-        }
-      });
-      return;
-    }
-    makeDir(dirname(CONFIG_FILE_PATH)).then(() => {
-      saveConfig((err) => {
-        if (err) {
-          cb(err);
-          return;
-        }
-        connect(cb);
-      })
-    }).catch(cb);
   });
 }

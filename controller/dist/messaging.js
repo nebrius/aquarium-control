@@ -16,18 +16,11 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs_1 = require("fs");
-const path_1 = require("path");
 const azure_iot_device_1 = require("azure-iot-device");
 const azure_iot_device_mqtt_1 = require("azure-iot-device-mqtt");
-const makeDir = require("make-dir");
 const state_1 = require("./state");
-const config_1 = require("./config");
 let client;
-function saveConfig(cb) {
-    fs_1.writeFile(config_1.CONFIG_FILE_PATH, JSON.stringify(state_1.state.getConfig(), null, '  '), cb);
-}
-function connect(cb) {
+function init(cb) {
     const IOT_HUB_DEVICE_CONNECTION_STRING = process.env.IOT_HUB_DEVICE_CONNECTION_STRING;
     if (typeof IOT_HUB_DEVICE_CONNECTION_STRING !== 'string') {
         throw new Error('Environment variable IOT_HUB_DEVICE_CONNECTION_STRING is not defined');
@@ -66,35 +59,6 @@ function connect(cb) {
                 }
             });
         });
-    });
-}
-function init(cb) {
-    fs_1.exists(config_1.CONFIG_FILE_PATH, (exists) => {
-        if (exists) {
-            fs_1.readFile(config_1.CONFIG_FILE_PATH, (err, data) => {
-                if (err) {
-                    cb(err);
-                    return;
-                }
-                try {
-                    state_1.state.setConfig(JSON.parse(data.toString()));
-                    connect(cb);
-                }
-                catch (e) {
-                    cb(e);
-                }
-            });
-            return;
-        }
-        makeDir(path_1.dirname(config_1.CONFIG_FILE_PATH)).then(() => {
-            saveConfig((err) => {
-                if (err) {
-                    cb(err);
-                    return;
-                }
-                connect(cb);
-            });
-        }).catch(cb);
     });
 }
 exports.init = init;
