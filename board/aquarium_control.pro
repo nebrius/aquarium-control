@@ -1,4 +1,4 @@
-update=Sunday, September 24, 2017 'PMt' 10:27:08 PM
+update=Tuesday, September 26, 2017 'PMt' 01:11:49 PM
 version=1
 last_client=kicad
 [pcbnew]
@@ -59,3 +59,4 @@ LibName27=atmel
 LibName28=contrib
 LibName29=valves
 LibName30=ap1507
+LibName31=tlp3545
