@@ -36,6 +36,7 @@ class State extends events_1.EventEmitter {
             },
             currentTemperature: 0,
             currentState: 'off',
+            currentMode: 'override',
             nextTransitionTime: (new Date()).toString(),
             nextTransitionState: 'off'
         };
@@ -53,7 +54,6 @@ class State extends events_1.EventEmitter {
         }
         const deviceId = match[1];
         this._state.deviceId = deviceId;
-        console.log(this._state.deviceId);
         fs_1.exists(config_1.CONFIG_FILE_PATH, (exists) => {
             if (exists) {
                 console.log(`Reading config file from ${config_1.CONFIG_FILE_PATH}`);
@@ -116,7 +116,19 @@ class State extends events_1.EventEmitter {
         }
     }
     setCurrentState(newState) {
+        if (this._state.currentState === newState) {
+            return;
+        }
         this._state.currentState = newState;
+        if (this._hasReportedFirstTemperature) {
+            this.emit('change-state', this._state);
+        }
+    }
+    setCurrentMode(newMode) {
+        if (this._state.currentMode === newMode) {
+            return;
+        }
+        this._state.currentMode = newMode;
         if (this._hasReportedFirstTemperature) {
             this.emit('change-state', this._state);
         }

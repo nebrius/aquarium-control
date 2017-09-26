@@ -74,10 +74,12 @@ function updateSchedule() {
     if (currentSchedule.mode == 'override') {
         console.log('Setting override mode and skipping daily schedule creation');
         state_1.state.setCurrentState(currentSchedule.overrideState);
+        state_1.state.setCurrentMode('override');
         return;
     }
     // Calculate the daily schedule
     console.log('Creating the daily schedule');
+    state_1.state.setCurrentMode('program');
     let entries = currentSchedule.schedule.map((entry) => {
         // If we're manual, calculate the time for today and return it
         if (entry.type == 'manual') {

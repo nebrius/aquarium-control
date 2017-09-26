@@ -20,6 +20,7 @@ export interface IState {
   currentTime: string; // new Date() parsable string
   currentTemperature: number; // in Celcius
   currentState: 'day' | 'night' | 'off';
+  currentMode: 'program' | 'override';
   nextTransitionTime: string; // new Date() parsable string
   nextTransitionState: 'day' | 'night' | 'off';
 }

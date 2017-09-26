@@ -38,6 +38,7 @@ class State extends EventEmitter {
     },
     currentTemperature: 0,
     currentState: 'off',
+    currentMode: 'override',
     nextTransitionTime: (new Date()).toString(),
     nextTransitionState: 'off'
   }
@@ -124,7 +125,20 @@ class State extends EventEmitter {
   }
 
   public setCurrentState(newState: 'day' | 'night' | 'off'): void {
+    if (this._state.currentState === newState) {
+      return;
+    }
     this._state.currentState = newState;
+    if (this._hasReportedFirstTemperature) {
+      this.emit('change-state', this._state);
+    }
+  }
+
+  public setCurrentMode(newMode: 'program' | 'override'): void {
+    if (this._state.currentMode === newMode) {
+      return;
+    }
+    this._state.currentMode = newMode;
     if (this._hasReportedFirstTemperature) {
       this.emit('change-state', this._state);
     }

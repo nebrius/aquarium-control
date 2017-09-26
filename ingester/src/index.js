@@ -47,8 +47,34 @@ function run() {
 
     // const message = new Message(JSON.stringify({
     //   mode: 'override',
-    //   overrideState: 'off',
-    //   schedule: []
+    //   overrideState: 'night',
+    //   schedule: [
+    //     {
+    //       name: 'Sunrise',
+    //       type: 'dynamic',
+    //       state: 'day',
+    //       details: {
+    //         event: 'sunrise'
+    //       }
+    //     },
+    //     {
+    //       name: 'Sunset',
+    //       type: 'dynamic',
+    //       state: 'night',
+    //       details: {
+    //         event: 'sunset'
+    //       }
+    //     },
+    //     {
+    //       name: 'Late Night',
+    //       type: 'manual',
+    //       state: 'off',
+    //       details: {
+    //         hour: 23,
+    //         minute: 0
+    //       }
+    //     }
+    //   ]
     // }));
 
     const message = new Message(JSON.stringify({
@@ -65,11 +91,19 @@ function run() {
         },
         {
           name: 'Sunset',
-          type: 'manual',
+          type: 'dynamic',
           state: 'night',
           details: {
-            hour: 16,
-            minute: 11
+            event: 'sunset'
+          }
+        },
+        {
+          name: 'Late Night',
+          type: 'manual',
+          state: 'off',
+          details: {
+            hour: 23,
+            minute: 0
           }
         }
       ]
