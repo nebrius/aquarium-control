@@ -23,10 +23,10 @@ import { init as initState } from './state';
 
 export function run() {
   series([
-    (next) => initState(next),
-    (next) => initScheduler(next),
-    (next) => initDevice(next),
-    (next) => initMessaging(next)
+    initState,
+    initScheduler,
+    initDevice,
+    initMessaging
   ], (err) => {
     if (err) {
       console.error(err);

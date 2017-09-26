@@ -23,10 +23,10 @@ const scheduler_1 = require("./scheduler");
 const state_1 = require("./state");
 function run() {
     async_1.series([
-        (next) => state_1.init(next),
-        (next) => scheduler_1.init(next),
-        (next) => device_1.init(next),
-        (next) => messaging_1.init(next)
+        state_1.init,
+        scheduler_1.init,
+        device_1.init,
+        messaging_1.init
     ], (err) => {
         if (err) {
             console.error(err);
