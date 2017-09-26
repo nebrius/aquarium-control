@@ -32,7 +32,7 @@ class State extends EventEmitter {
   }
 
   private _state: IState = {
-    deviceId: 'nebrius-rpi', // TODO: get from connection string/env variable
+    deviceId: '',
     get currentTime() {
       return (new Date()).toString();
     },
@@ -47,6 +47,16 @@ class State extends EventEmitter {
   private _hasReportedFirstTemperature = false;
 
   public init(cb: (err: Error | undefined) => void): void {
+    const IOT_HUB_DEVICE_CONNECTION_STRING = process.env.IOT_HUB_DEVICE_CONNECTION_STRING;
+    if (typeof IOT_HUB_DEVICE_CONNECTION_STRING !== 'string') {
+      throw new Error('Environment variable IOT_HUB_DEVICE_CONNECTION_STRING is not defined');
+    }
+    const match = IOT_HUB_DEVICE_CONNECTION_STRING.match(/DeviceId=(.*);/);
+    if (!match) {
+      throw new Error(`Could not extract DeviceId from IOT_HUB_DEVICE_CONNECTION_STRING="${IOT_HUB_DEVICE_CONNECTION_STRING}"`);
+    }
+    const deviceId = match[1];
+    this._state.deviceId = deviceId;
     exists(CONFIG_FILE_PATH, (exists) => {
       if (exists) {
         console.log(`Reading config file from ${CONFIG_FILE_PATH}`);
