@@ -15,19 +15,33 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { init as initEndpoints } from './endpoints';
-import { init as initDB} from './db';
-import { series } from 'async';
+import { json } from 'body-parser';
+import * as express from 'express';
+import { IConfig } from './common/IConfig';
 
-export function run(): void {
-  series([
-    initDB,
-    initEndpoints
-  ], (err) => {
-    if (err) {
-      console.error(err);
-      process.exit(-1);
-    }
-    console.log('Aquarium Control API running');
+const DEFAULT_PORT = 3000;
+
+export function init(cb: (err: Error | undefined) => void): void {
+  const app = express();
+
+  app.use(json);
+
+  app.get('/api/state', (req, res) => {
+    // TODO
+  });
+
+  app.get('/api/config', (req, res) => {
+    // TODO
+  });
+
+  app.post('/api/config', (req, res) => {
+    const body: IConfig = req.body;
+    console.log(body);
+    res.send('ok');
+  });
+
+  const server = app.listen(process.env.PORT || DEFAULT_PORT, () => {
+    console.log(`API server listening on port ${server.address().port}!`);
+    cb(undefined);
   });
 }

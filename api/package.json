@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/nebrius/aquarium-control#readme",
   "devDependencies": {
+    "@types/async": "^2.0.43",
     "@types/body-parser": "^1.16.5",
     "@types/express": "^4.0.37",
     "@types/node": "^8.0.28",
@@ -28,6 +29,7 @@
     "typescript": "^2.5.2"
   },
   "dependencies": {
+    "async": "^2.5.0",
     "body-parser": "^1.18.1",
     "express": "^4.15.4"
   }

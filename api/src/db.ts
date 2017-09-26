@@ -15,19 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { init as initEndpoints } from './endpoints';
-import { init as initDB} from './db';
-import { series } from 'async';
-
-export function run(): void {
-  series([
-    initDB,
-    initEndpoints
-  ], (err) => {
-    if (err) {
-      console.error(err);
-      process.exit(-1);
-    }
-    console.log('Aquarium Control API running');
-  });
+export function init(cb: (err: Error | undefined) => void): void {
+  cb(undefined);
 }
