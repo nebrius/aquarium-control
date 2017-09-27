@@ -15,6 +15,58 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { IConfig } from './common/IConfig';
+import { IState } from './common/IState';
+import { Connection } from 'tedious';
+
+let connection: Connection;
+let isConnected = false;
+
 export function init(cb: (err: Error | undefined) => void): void {
-  cb(undefined);
+
+  function getEnvironmentVariable(variable: string): string {
+    const value = process.env[variable];
+    if (typeof value !== 'string') {
+      throw new Error(`Environment variable ${variable} is not defined`);
+    }
+    return value;
+  }
+
+  console.log('Connecting to Azure SQL');
+  connection = new Connection({
+    userName: getEnvironmentVariable('AZURE_SQL_USERNAME'),
+    password: getEnvironmentVariable('AZURE_SQL_PASSWORD'),
+    server: getEnvironmentVariable('AZURE_SQL_SERVER'),
+    options: {
+      encrypt: true
+    }
+  });
+
+  connection.on('connect', (err) => {
+    if (err) {
+      cb(err);
+      return;
+    }
+    console.log('Connected to Azure SQL');
+    isConnected = true;
+    cb(undefined);
+  });
+}
+
+export function saveConfig(deviceId: string, config: IConfig, cb: (err: Error | undefined) => void): void {
+  if (!isConnected) {
+    throw new Error('Tried to save config while not connected to the database');
+  }
+}
+
+export function getConfig(deviceId: string, cb: (err: Error | undefined, config: IConfig | undefined) => void): void {
+  if (!isConnected) {
+    throw new Error('Tried to save config while not connected to the database');
+  }
+}
+
+export function getState(deviceId: string, cb: (err: Error | undefined, state: IState | undefined) => void): void {
+  if (!isConnected) {
+    throw new Error('Tried to save config while not connected to the database');
+  }
 }
