@@ -55,13 +55,13 @@ function saveConfig(deviceId, config, cb) {
 exports.saveConfig = saveConfig;
 function getConfig(deviceId, cb) {
     if (!isConnected) {
-        throw new Error('Tried to save config while not connected to the database');
+        throw new Error('Tried to get config while not connected to the database');
     }
 }
 exports.getConfig = getConfig;
 function getState(deviceId, cb) {
     if (!isConnected) {
-        throw new Error('Tried to save config while not connected to the database');
+        throw new Error('Tried to get state while not connected to the database');
     }
 }
 exports.getState = getState;
