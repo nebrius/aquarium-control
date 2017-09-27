@@ -1,13 +1,13 @@
 {
-  "name": "aquarium-control-api",
+  "name": "aquarium-control-server",
   "version": "3.0.0",
-  "description": "The API that provides data for the client, part of the aquarium control system",
+  "description": "The Azure Web App that provides data for the client and sends configuration to the controller, part of the aquarium control system",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prebuild": "tslint src/**/*.ts",
     "build": "rimraf dist && tsc",
     "postbuild": "echo done",
-    "start": "./bin/api.js"
+    "start": "./bin/server.js"
   },
   "repository": {
     "type": "git",

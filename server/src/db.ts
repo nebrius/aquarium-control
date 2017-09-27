@@ -61,12 +61,12 @@ export function saveConfig(deviceId: string, config: IConfig, cb: (err: Error | 
 
 export function getConfig(deviceId: string, cb: (err: Error | undefined, config: IConfig | undefined) => void): void {
   if (!isConnected) {
-    throw new Error('Tried to save config while not connected to the database');
+    throw new Error('Tried to get config while not connected to the database');
   }
 }
 
 export function getState(deviceId: string, cb: (err: Error | undefined, state: IState | undefined) => void): void {
   if (!isConnected) {
-    throw new Error('Tried to save config while not connected to the database');
+    throw new Error('Tried to get state while not connected to the database');
   }
 }
