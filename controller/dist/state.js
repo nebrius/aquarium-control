@@ -32,12 +32,12 @@ class State extends events_1.EventEmitter {
         this._state = {
             deviceId: '',
             get currentTime() {
-                return (new Date()).toString();
+                return Date.now();
             },
             currentTemperature: 0,
             currentState: 'off',
             currentMode: 'override',
-            nextTransitionTime: (new Date()).toString(),
+            nextTransitionTime: Date.now(),
             nextTransitionState: 'off'
         };
         this._temperatureSamples = [];
@@ -134,7 +134,7 @@ class State extends events_1.EventEmitter {
         }
     }
     setNextTransitionTime(date) {
-        this._state.nextTransitionTime = date.toString();
+        this._state.nextTransitionTime = date.getTime();
         if (this._hasReportedFirstTemperature) {
             this.emit('change-state', this._state);
         }

@@ -17,10 +17,10 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 export interface IState {
   deviceId: string;
-  currentTime: string; // new Date() parsable string
+  currentTime: number; // UNIX timestamp, e.g. Date.now()
   currentTemperature: number; // in Celcius
   currentState: 'day' | 'night' | 'off';
   currentMode: 'program' | 'override';
-  nextTransitionTime: string; // new Date() parsable string
+  nextTransitionTime: number; // UNIX timestamp, e.g. Date.now()
   nextTransitionState: 'day' | 'night' | 'off';
 }
