@@ -19,8 +19,12 @@ import { createServer } from 'http';
 import { join } from 'path';
 import { json } from 'body-parser';
 import * as express from 'express';
+import { initialize, session, authenticate, use } from 'passport';
+import { BearerStrategy } from 'passport-azure-ad';
 import { IConfig } from './common/IConfig';
 import { getTemperatureHistory } from './db';
+
+
 
 const DEFAULT_PORT = 3001;
 
@@ -28,26 +32,41 @@ export function init(cb: (err: Error | undefined) => void): void {
   const app = express();
 
   app.use(json());
+  app.use(initialize());
+  app.use(session());
+
+
+  const bearerStrategy = new BearerStrategy({
+    identityMetadata: 'https://login.microsoftonline.com/common/.well-known/openid-configuration',
+    clientID: 'ec1d492e-ba72-44cd-add2-39c09745cb11',
+    validateIssuer: false
+  }, (token, done) => {
+    console.info('verifying the user');
+    console.info(token, 'was the token retreived');
+    // TODO: https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-devquickstarts-webapi-nodejs#step-18-add-authentication-to-our-rest-api-server
+  });
+
+  use(bearerStrategy);
 
   if (process.env.HOST_CLIENT === 'true') {
     app.use(express.static(join(__dirname, '..', '..', 'client', 'dist')));
   }
 
-  app.get('/api/state', (req, res) => {
+  app.get('/api/state', authenticate('oauth-bearer', { session: false }), (req, res) => {
     // TODO
   });
 
-  app.get('/api/config', (req, res) => {
+  app.get('/api/config', authenticate('oauth-bearer', { session: false }), (req, res) => {
     // TODO
   });
 
-  app.post('/api/config', (req, res) => {
+  app.post('/api/config', authenticate('oauth-bearer', { session: false }), (req, res) => {
     const body: IConfig = req.body;
     console.log(body);
     res.send('ok');
   });
 
-  app.get('/api/temperatures', (req, res) => {
+  app.get('/api/temperatures', (req, res, next) => { next(); }, authenticate('oauth-bearer', { session: false }), (req, res) => {
     const period = req.query.period;
     if (period !== 'day' && period !== 'week') {
       res.sendStatus(400);

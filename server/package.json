@@ -24,6 +24,7 @@
     "@types/body-parser": "^1.16.5",
     "@types/express": "^4.0.37",
     "@types/node": "^8.0.28",
+    "@types/passport": "^0.3.4",
     "@types/tedious": "^1.8.31",
     "rimraf": "^2.6.2",
     "tslint": "^5.7.0",
@@ -33,6 +34,8 @@
     "async": "^2.5.0",
     "body-parser": "^1.18.1",
     "express": "^4.15.4",
+    "passport": "^0.4.0",
+    "passport-azure-ad": "^3.0.8",
     "tedious": "^2.0.0"
   }
 }
