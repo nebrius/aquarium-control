@@ -16,7 +16,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { init as initEndpoints } from './endpoints';
-import { init as initDB, getTemperatureHistory } from './db';
+import { init as initDB } from './db';
 import { series } from 'async';
 
 export function run(): void {
@@ -28,13 +28,6 @@ export function run(): void {
       console.error(err);
       process.exit(-1);
     }
-    getTemperatureHistory('nebrius-rpi', 'day', (err, temperatures) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      console.log(temperatures);
-    });
     console.log('Aquarium Control API running');
   });
 }

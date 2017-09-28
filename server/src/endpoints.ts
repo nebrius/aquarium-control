@@ -15,16 +15,22 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { createServer } from 'http';
 import { json } from 'body-parser';
 import * as express from 'express';
 import { IConfig } from './common/IConfig';
+import { getTemperatureHistory } from './db';
 
-const DEFAULT_PORT = 3000;
+const DEFAULT_PORT = 3001;
 
 export function init(cb: (err: Error | undefined) => void): void {
   const app = express();
 
-  app.use(json);
+  app.use(json());
+
+  app.get('/', (req, res) => {
+    res.send('hi');
+  })
 
   app.get('/api/state', (req, res) => {
     // TODO
@@ -40,8 +46,31 @@ export function init(cb: (err: Error | undefined) => void): void {
     res.send('ok');
   });
 
-  const server = app.listen(process.env.PORT || DEFAULT_PORT, () => {
-    console.log(`API server listening on port ${server.address().port}!`);
+  app.get('/api/temperatures', (req, res) => {
+    const period = req.query.period;
+    if (period !== 'day' && period !== 'week') {
+      res.sendStatus(400);
+      return;
+    }
+    getTemperatureHistory('nebrius-rpi', period, (err, temperatures) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      res.send(temperatures);
+    });
+  });
+
+  const server = createServer();
+
+  server.on('request', () => {
+    console.log('request')
+  });
+
+  server.on('request', app);
+
+  server.listen(process.env.PORT || DEFAULT_PORT, () => {
+    console.log(`API server listening on ${server.address().address}:${server.address().port}.`);
     cb(undefined);
   });
 }
