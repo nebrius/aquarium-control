@@ -28,6 +28,13 @@ function run() {
             console.error(err);
             process.exit(-1);
         }
+        db_1.getTemperatureHistory('nebrius-rpi', 'day', (err, temperatures) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            console.log(temperatures);
+        });
         console.log('Aquarium Control API running');
     });
 }

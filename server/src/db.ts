@@ -17,10 +17,12 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import { IConfig } from './common/IConfig';
 import { IState } from './common/IState';
-import { Connection } from 'tedious';
+import { Connection, Request } from 'tedious';
 
 let connection: Connection;
 let isConnected = false;
+
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 export function init(cb: (err: Error | undefined) => void): void {
 
@@ -38,7 +40,9 @@ export function init(cb: (err: Error | undefined) => void): void {
     password: getEnvironmentVariable('AZURE_SQL_PASSWORD'),
     server: getEnvironmentVariable('AZURE_SQL_SERVER'),
     options: {
-      encrypt: true
+      encrypt: true,
+      rowCollectionOnDone: true,
+      database: getEnvironmentVariable('AZURE_SQL_DATABASE')
     }
   });
 
@@ -69,4 +73,73 @@ export function getState(deviceId: string, cb: (err: Error | undefined, state: I
   if (!isConnected) {
     throw new Error('Tried to get state while not connected to the database');
   }
+}
+
+export interface ITemperatureReading {
+  date: Date,
+  temperature: number
+}
+
+export function getTemperatureHistory(deviceId: string, period: 'day' | 'week', cb: (err: Error | undefined, temperatures: ITemperatureReading[] | undefined) => void) {
+  if (!isConnected) {
+    throw new Error('Tried to get day temperature while not connected to the database');
+  }
+
+  const rows: ITemperatureReading[] = [];
+
+  let cutoffDate = Date.now();
+  switch (period) {
+    case 'day':
+      cutoffDate -= DAY_IN_MS;
+      break;
+    case 'week':
+      cutoffDate -= DAY_IN_MS * 7;
+      break;
+    default:
+      throw new Error(`Invalid period "${period}"`);
+  }
+
+  const request = new Request(`SELECT currentTime, currentTemperature FROM aquarium_state WHERE currentTime >= ${cutoffDate} ORDER BY currentTime`, (err, rowCount) => {
+    if (err) {
+      cb(err, undefined);
+      return;
+    }
+    if (rows.length !== rowCount) {
+      cb(new Error('Supplied row count does not match number of rows returned'), undefined);
+    } else {
+      cb(undefined, rows);
+    }
+  });
+
+  request.on('row', (columns) => {
+    let date: Date | null = null;
+    let temperature: number = NaN;
+    for (const column of columns) {
+      switch (column.metadata.colName) {
+        case "currentTime":
+          date = new Date(parseInt(column.value));
+          break;
+        case "currentTemperature":
+          temperature = parseFloat(column.value);
+          break;
+        default:
+          cb(new Error(`Received unknown column "${column.metadata.colName}" in database record`), undefined);
+          return;
+      }
+    }
+    if (date === null) {
+      cb(new Error('Date missing in database record'), undefined);
+      return;
+    }
+    if (temperature === NaN) {
+      cb(new Error('Temperature missing in database record'), undefined);
+      return;
+    }
+    rows.push({
+      date,
+      temperature
+    });
+  });
+
+  connection.execSql(request);
 }
