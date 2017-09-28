@@ -16,6 +16,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { createServer } from 'http';
+import { join } from 'path';
 import { json } from 'body-parser';
 import * as express from 'express';
 import { IConfig } from './common/IConfig';
@@ -28,9 +29,9 @@ export function init(cb: (err: Error | undefined) => void): void {
 
   app.use(json());
 
-  app.get('/', (req, res) => {
-    res.send('hi');
-  })
+  if (process.env.HOST_CLIENT === 'true') {
+    app.use(express.static(join(__dirname, '..', '..', 'client', 'dist')));
+  }
 
   app.get('/api/state', (req, res) => {
     // TODO
@@ -62,10 +63,6 @@ export function init(cb: (err: Error | undefined) => void): void {
   });
 
   const server = createServer();
-
-  server.on('request', () => {
-    console.log('request')
-  });
 
   server.on('request', app);
 

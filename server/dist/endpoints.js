@@ -17,6 +17,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 const http_1 = require("http");
+const path_1 = require("path");
 const body_parser_1 = require("body-parser");
 const express = require("express");
 const db_1 = require("./db");
@@ -24,9 +25,9 @@ const DEFAULT_PORT = 3001;
 function init(cb) {
     const app = express();
     app.use(body_parser_1.json());
-    app.get('/', (req, res) => {
-        res.send('hi');
-    });
+    if (process.env.HOST_CLIENT === 'true') {
+        app.use(express.static(path_1.join(__dirname, '..', '..', 'client', 'dist')));
+    }
     app.get('/api/state', (req, res) => {
         // TODO
     });
