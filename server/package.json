@@ -25,6 +25,7 @@
     "@types/express": "^4.0.37",
     "@types/node": "^8.0.28",
     "@types/passport": "^0.3.4",
+    "@types/passport-facebook": "^2.1.6",
     "@types/tedious": "^1.8.31",
     "rimraf": "^2.6.2",
     "tslint": "^5.7.0",
@@ -36,6 +37,7 @@
     "express": "^4.15.4",
     "passport": "^0.4.0",
     "passport-azure-ad": "^3.0.8",
+    "passport-facebook": "^2.1.1",
     "tedious": "^2.0.0"
   }
 }

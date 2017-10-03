@@ -20,33 +20,39 @@ import { join } from 'path';
 import { json } from 'body-parser';
 import * as express from 'express';
 import { initialize, session, authenticate, use } from 'passport';
-import { BearerStrategy } from 'passport-azure-ad';
+import { Strategy as FacebookStrategy} from 'passport-facebook';
 import { IConfig } from './common/IConfig';
 import { getTemperatureHistory } from './db';
-
-
 
 const DEFAULT_PORT = 3001;
 
 export function init(cb: (err: Error | undefined) => void): void {
+
+  function getEnvironmentVariable(variable: string): string {
+    const value = process.env[variable];
+    if (typeof value !== 'string') {
+      throw new Error(`Environment variable ${variable} is not defined`);
+    }
+    return value;
+  }
+
   const app = express();
 
   app.use(json());
   app.use(initialize());
   app.use(session());
 
-
-  const bearerStrategy = new BearerStrategy({
-    identityMetadata: 'https://login.microsoftonline.com/common/.well-known/openid-configuration',
-    clientID: 'ec1d492e-ba72-44cd-add2-39c09745cb11',
-    validateIssuer: false
-  }, (token, done) => {
-    console.info('verifying the user');
-    console.info(token, 'was the token retreived');
-    // TODO: https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-devquickstarts-webapi-nodejs#step-18-add-authentication-to-our-rest-api-server
-  });
-
-  use(bearerStrategy);
+  use(new FacebookStrategy({
+    clientID: getEnvironmentVariable('FACEBOOK_APP_ID'),
+    clientSecret: getEnvironmentVariable('FACEBOOK_APP_SECRET'),
+    callbackURL: "http://www.example.com/auth/facebook/callback"
+  }, (accessToken, refreshToken, profile, done) => {
+    // User.findOrCreate(..., function(err, user) {
+    //   if (err) { return done(err); }
+    //   done(null, user);
+    // });
+    console.log(accessToken);
+  }));
 
   if (process.env.HOST_CLIENT === 'true') {
     app.use(express.static(join(__dirname, '..', '..', 'client', 'dist')));

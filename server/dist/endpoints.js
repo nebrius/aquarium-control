@@ -21,23 +21,32 @@ const path_1 = require("path");
 const body_parser_1 = require("body-parser");
 const express = require("express");
 const passport_1 = require("passport");
-const passport_azure_ad_1 = require("passport-azure-ad");
+const passport_facebook_1 = require("passport-facebook");
 const db_1 = require("./db");
 const DEFAULT_PORT = 3001;
 function init(cb) {
+    function getEnvironmentVariable(variable) {
+        const value = process.env[variable];
+        if (typeof value !== 'string') {
+            throw new Error(`Environment variable ${variable} is not defined`);
+        }
+        return value;
+    }
     const app = express();
     app.use(body_parser_1.json());
     app.use(passport_1.initialize());
     app.use(passport_1.session());
-    const bearerStrategy = new passport_azure_ad_1.BearerStrategy({
-        identityMetadata: 'https://login.microsoftonline.com/common/.well-known/openid-configuration',
-        clientID: 'ec1d492e-ba72-44cd-add2-39c09745cb11',
-        validateIssuer: false
-    }, (token, done) => {
-        console.info('verifying the user');
-        console.info(token, 'was the token retreived');
-    });
-    passport_1.use(bearerStrategy);
+    passport_1.use(new passport_facebook_1.Strategy({
+        clientID: getEnvironmentVariable('FACEBOOK_APP_ID'),
+        clientSecret: getEnvironmentVariable('FACEBOOK_APP_SECRET'),
+        callbackURL: "http://www.example.com/auth/facebook/callback"
+    }, (accessToken, refreshToken, profile, done) => {
+        // User.findOrCreate(..., function(err, user) {
+        //   if (err) { return done(err); }
+        //   done(null, user);
+        // });
+        console.log(accessToken);
+    }));
     if (process.env.HOST_CLIENT === 'true') {
         app.use(express.static(path_1.join(__dirname, '..', '..', 'client', 'dist')));
     }
