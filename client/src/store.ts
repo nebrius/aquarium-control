@@ -15,15 +15,19 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { HelloWorld } from './views/HelloWorld';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createStore, Reducer } from 'redux';
+import { IState } from './common/IState';
+import { IConfig } from './common/IConfig';
 
-ReactDOM.render(
-  (
-    <div>
-      <HelloWorld />
-    </div>
-  ),
-  document.getElementById('root')
-);
+
+interface IAppState {
+  loggedIn: boolean;
+  state: IState;
+  config: IConfig;
+}
+
+const reducer: Reducer<IAppState> = (state, action) => {
+  return state;
+};
+
+export const store = createStore(reducer);

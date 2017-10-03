@@ -16,18 +16,25 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
+import FacebookLogin from 'react-facebook-login';
 
-interface IHelloWorldProps {
-  foo: number;
-}
+export class HelloWorld extends React.Component<{}, {}> {
 
-interface IHelloWorldState {
-}
-
-export class HelloWorld extends React.Component<IHelloWorldProps, IHelloWorldState> {
   public render() {
     return (
-      <h1>Hello World! {this.props.foo}</h1>
+      <FacebookLogin
+        appId="1988163144802425"
+        autoLoad={true}
+        fields=""
+        callback={this.loginCallback}
+        cssClass="my-facebook-button-class"
+        icon="fa-facebook"
+      />
     );
   }
+
+  private loginCallback(response: any): void {
+    console.log(response);
+  }
+
 }
