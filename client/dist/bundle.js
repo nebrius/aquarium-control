@@ -11318,7 +11318,13 @@ var react_redux_1 = __webpack_require__(51);
 var redux_1 = __webpack_require__(53);
 var RootContainer_1 = __webpack_require__(226);
 var reducers_1 = __webpack_require__(231);
-var store = redux_1.createStore(reducers_1.reducers);
+var preloadedState = {
+    loginState: {
+        currentState: 'unknown',
+        accessToken: ''
+    }
+};
+var store = redux_1.createStore(reducers_1.reducers, preloadedState);
 react_dom_1.render((React.createElement(react_redux_1.Provider, { store: store },
     React.createElement(RootContainer_1.RootContainer, null))), document.getElementById('root'));
 

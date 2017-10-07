@@ -24,6 +24,6 @@ export interface ILoginState {
 
 export interface IAppState {
   loginState: ILoginState;
-  state: IState;
-  config: IConfig;
+  state?: IState;
+  config?: IConfig;
 }
