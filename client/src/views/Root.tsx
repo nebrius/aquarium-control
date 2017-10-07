@@ -16,19 +16,23 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-import { render } from 'react-dom';
-import { Provider } from 'react-redux'
-import { createStore } from 'redux';
-import { RootContainer } from './containers/RootContainer';
-import { reducers } from './reducers/reducers';
+import { LoginContainer } from '../containers/LoginContainer';
 
-const store = createStore(reducers);
+export interface IRootProps {
+  isLoggedIn: boolean;
+}
 
-render(
-  (
-    <Provider store={store}>
-      <RootContainer />
-    </Provider>
-  ),
-  document.getElementById('root')
-);
+export class Root extends React.Component<IRootProps, {}> {
+
+  public render() {
+    if (!this.props.isLoggedIn) {
+      return (
+        <LoginContainer />
+      );
+    }
+    return (
+      <div>Logged in</div>
+    );
+  }
+
+}

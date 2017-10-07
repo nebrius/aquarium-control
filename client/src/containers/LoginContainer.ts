@@ -15,20 +15,23 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import * as React from 'react';
-import { render } from 'react-dom';
-import { Provider } from 'react-redux'
-import { createStore } from 'redux';
-import { RootContainer } from './containers/RootContainer';
-import { reducers } from './reducers/reducers';
+import { connect } from 'react-redux';
+import { loginFailed, loginSucceeded, IAction } from '../actions/actions';
+import { LoginButton } from '../components/LoginButton';
+import { IAppState } from '../IAppState';
 
-const store = createStore(reducers);
+function mapStateToProps(state: IAppState) {
+  return {};
+}
 
-render(
-  (
-    <Provider store={store}>
-      <RootContainer />
-    </Provider>
-  ),
-  document.getElementById('root')
-);
+function mapDispatchToProps(dispatch: (action: IAction) => any) {
+  return {
+    onLoginFailed: () => dispatch(loginFailed()),
+    onLoginSucceeded: (accessToken: string) => dispatch(loginSucceeded(accessToken))
+  };
+}
+
+export const LoginContainer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(LoginButton);

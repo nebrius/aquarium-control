@@ -15,26 +15,26 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import * as React from 'react';
-import FacebookLogin from 'react-facebook-login';
+import { Reducer } from 'redux';
+import { ACTIONS, IAction, ILoginSucceededAction } from '../actions/actions';
+import { ILoginState } from '../IAppState';
 
-export class HelloWorld extends React.Component<{}, {}> {
-
-  public render() {
-    return (
-      <FacebookLogin
-        appId="1988163144802425"
-        autoLoad={true}
-        fields=""
-        callback={this.loginCallback}
-        cssClass="my-facebook-button-class"
-        icon="fa-facebook"
-      />
-    );
+export const loginStateReducer: Reducer<ILoginState> = (state: ILoginState, action: IAction) => {
+  switch (action.type) {
+    case ACTIONS.LOGIN_FAILED:
+      return {
+        currentState: 'not-authenticated',
+        accessToken: ''
+      };
+    case ACTIONS.LOGIN_SUCCEEDED:
+      return {
+        currentState: 'authenticated',
+        accessToken: (action as ILoginSucceededAction).accessToken
+      };
+    default:
+      return state || {
+        currentState: 'unknown',
+        accessToken: ''
+      };
   }
-
-  private loginCallback(response: any): void {
-    console.log(response);
-  }
-
-}
+};

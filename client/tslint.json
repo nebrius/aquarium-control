@@ -10,7 +10,8 @@
     "quotemark": [ true, "single", "jsx-double" ],
     "semicolon": "always",
     "trailing-comma": "never",
-    "ordered-imports": false
+    "ordered-imports": false,
+    "object-literal-sort-keys": false
   },
   "rulesDirectory": []
 }
