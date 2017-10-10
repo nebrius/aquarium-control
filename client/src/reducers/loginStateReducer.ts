@@ -16,8 +16,24 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { Reducer } from 'redux';
-import { ACTIONS, IAction, ILoginSucceededAction } from '../actions/actions';
-import { ILoginState } from '../IAppState';
+import { ACTIONS, IAction, ILoginSucceededAction, stateUpdateFailed, stateUpdateSucceeded } from '../actions/actions';
+import { ILoginState } from '../util/IAppState';
+import { request } from '../util/api';
+
+const STATE_UPDATE_RATE = 1000;
+
+function startStateUpdateLoop(): void {
+  setInterval(() => request({
+    endpoint: 'state',
+    method: 'GET',
+  }, (err, result) => {
+    if (err) {
+      stateUpdateFailed();
+    } else {
+      stateUpdateSucceeded(result);
+    }
+  }), STATE_UPDATE_RATE);
+}
 
 export const loginStateReducer: Reducer<ILoginState> = (state: ILoginState, action: IAction) => {
   switch (action.type) {
@@ -27,14 +43,13 @@ export const loginStateReducer: Reducer<ILoginState> = (state: ILoginState, acti
         accessToken: ''
       };
     case ACTIONS.LOGIN_SUCCEEDED:
+      const accessToken = (action as ILoginSucceededAction).accessToken;
+      startStateUpdateLoop();
       return {
         currentState: 'authenticated',
-        accessToken: (action as ILoginSucceededAction).accessToken
+        accessToken
       };
     default:
-      return state || {
-        currentState: 'unknown',
-        accessToken: ''
-      };
+      return state;
   }
 };

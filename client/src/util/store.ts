@@ -14,16 +14,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
-import { IState } from './common/IState';
-import { IConfig } from './common/IConfig';
 
-export interface ILoginState {
-  currentState: 'unknown' | 'not-authenticated' | 'authenticated';
-  accessToken: string;
-}
+import { createStore } from 'redux';
+import { IAppState } from './IAppState';
+import { reducers } from '../reducers/reducers';
 
-export interface IAppState {
-  loginState: ILoginState;
-  state?: IState;
-  config?: IConfig;
-}
+const preloadedState: IAppState = {
+  loginState: {
+    currentState: 'unknown',
+    accessToken: ''
+  }
+};
+
+export const store = createStore(reducers, preloadedState);

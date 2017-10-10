@@ -16,7 +16,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { connect } from 'react-redux';
-import { IAppState } from '../IAppState';
+import { IAppState } from '../util/IAppState';
 import { IAction } from '../actions/actions';
 import { Root } from '../views/Root';
 

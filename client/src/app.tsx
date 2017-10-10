@@ -18,18 +18,8 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 import * as React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux'
-import { createStore } from 'redux';
 import { RootContainer } from './containers/RootContainer';
-import { reducers } from './reducers/reducers';
-import { IAppState } from './IAppState';
-
-const preloadedState: IAppState = {
-  loginState: {
-    currentState: 'unknown',
-    accessToken: ''
-  }
-};
-const store = createStore(reducers, preloadedState);
+import { store } from './util/store';
 
 render(
   (

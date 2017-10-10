@@ -15,13 +15,13 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { combineReducers } from 'redux';
-import { loginStateReducer } from './loginStateReducer';
-import { aquariumStateReducer } from './aquariumStateReducer';
-import { aquariumConfigReducer } from './aquariumConfigReducer';
+import { Reducer } from 'redux';
+import { IAction } from '../actions/actions';
+import { IAquariumConfig } from '../util/IAppState';
 
-export const reducers = combineReducers({
-  loginState: loginStateReducer,
-  aquariumState: aquariumStateReducer,
-  aquariumConfig: aquariumConfigReducer
-});
+export const aquariumConfigReducer: Reducer<IAquariumConfig> = (state: IAquariumConfig, action: IAction) => {
+  switch (action.type) {
+    default:
+      return state;
+  }
+};

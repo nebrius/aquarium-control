@@ -18,7 +18,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 import { connect } from 'react-redux';
 import { loginFailed, loginSucceeded, IAction } from '../actions/actions';
 import { LoginButton } from '../components/LoginButton';
-import { IAppState } from '../IAppState';
+import { IAppState } from '../util/IAppState';
 
 function mapStateToProps(state: IAppState) {
   return {};
