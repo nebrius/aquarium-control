@@ -24909,7 +24909,7 @@ var Root = /** @class */ (function (_super) {
     }
     Root.prototype.render = function () {
         if (!this.props.isLoggedIn) {
-            return (React.createElement("a", { href: "/auth/facebook" }, "Login with Facebook"));
+            return (React.createElement("div", null, "You are logged in!"));
         }
         return (React.createElement("div", null, "Logged in"));
     };

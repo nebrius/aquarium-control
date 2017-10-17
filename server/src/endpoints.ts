@@ -41,6 +41,9 @@ export function init(cb: (err: Error | undefined) => void): void {
     app.use(express.static(join(__dirname, '..', '..', 'client', 'dist')));
   }
 
+  app.set('view engine', 'pug');
+  app.set('views', join(__dirname, '..', 'views'));
+
   use(new FacebookStrategy({
     clientID: getEnvironmentVariable('FACEBOOK_APP_ID'),
     clientSecret: getEnvironmentVariable('FACEBOOK_APP_SECRET'),
@@ -65,6 +68,14 @@ export function init(cb: (err: Error | undefined) => void): void {
     successRedirect: '/',
     failureRedirect: '/login'
   }));
+
+  app.get('/', ensureLoggedIn(), (req, res) => {
+    res.render('index', {});
+  });
+
+  app.get('/login', (req, res) => {
+    res.render('login', {});
+  });
 
   app.get('/api/state', ensureLoggedIn(), (req, res) => {
     // TODO

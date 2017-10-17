@@ -27,7 +27,7 @@ export class Root extends React.Component<IRootProps, {}> {
   public render() {
     if (!this.props.isLoggedIn) {
       return (
-        <a href="/auth/facebook">Login with Facebook</a>
+        <div>You are logged in!</div>
       );
     }
     return (

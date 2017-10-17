@@ -35,6 +35,8 @@ function init(cb) {
     if (process.env.HOST_CLIENT === 'true') {
         app.use(express.static(path_1.join(__dirname, '..', '..', 'client', 'dist')));
     }
+    app.set('view engine', 'pug');
+    app.set('views', path_1.join(__dirname, '..', 'views'));
     passport_1.use(new passport_facebook_1.Strategy({
         clientID: util_1.getEnvironmentVariable('FACEBOOK_APP_ID'),
         clientSecret: util_1.getEnvironmentVariable('FACEBOOK_APP_SECRET'),
@@ -59,6 +61,12 @@ function init(cb) {
         successRedirect: '/',
         failureRedirect: '/login'
     }));
+    app.get('/', connect_ensure_login_1.ensureLoggedIn(), (req, res) => {
+        res.render('index', {});
+    });
+    app.get('/login', (req, res) => {
+        res.render('login', {});
+    });
     app.get('/api/state', connect_ensure_login_1.ensureLoggedIn(), (req, res) => {
         // TODO
     });

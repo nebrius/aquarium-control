@@ -40,6 +40,7 @@
     "passport": "^0.4.0",
     "passport-azure-ad": "^3.0.8",
     "passport-facebook": "^2.1.1",
+    "pug": "^2.0.0-rc.4",
     "tedious": "^2.0.1"
   }
 }
