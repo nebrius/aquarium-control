@@ -54,7 +54,7 @@ export function isUserRegistered(userId: string, cb: (err: Error | undefined, is
   if (!isConnected) {
     throw new Error('Tried to see if user is registered while not connected to the database');
   }
-  setImmediate(() => cb(undefined, true));
+  setImmediate(() => cb(undefined, false));
 }
 
 export function getDevicesForUserId(userId: string, cb: (err: Error | undefined, devices: string[] | undefined) => void): void {

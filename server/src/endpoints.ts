@@ -19,7 +19,9 @@ import { createServer } from 'http';
 import { join } from 'path';
 import { json } from 'body-parser';
 import * as express from 'express';
-import { initialize, session, authenticate, use, serializeUser, deserializeUser } from 'passport';
+import * as expressSession from 'express-session';
+import * as passport from 'passport';
+import * as cookieParser from 'cookie-parser';
 import { Strategy as FacebookStrategy} from 'passport-facebook';
 import { ensureLoggedIn } from 'connect-ensure-login';
 import { IConfig } from './common/IConfig';
@@ -31,20 +33,7 @@ const DEFAULT_PORT = 3001;
 
 export function init(cb: (err: Error | undefined) => void): void {
 
-  const app = express();
-
-  app.use(json());
-  app.use(initialize());
-  app.use(session());
-
-  if (process.env.HOST_CLIENT === 'true') {
-    app.use(express.static(join(__dirname, '..', '..', 'client', 'dist')));
-  }
-
-  app.set('view engine', 'pug');
-  app.set('views', join(__dirname, '..', 'views'));
-
-  use(new FacebookStrategy({
+  passport.use(new FacebookStrategy({
     clientID: getEnvironmentVariable('FACEBOOK_APP_ID'),
     clientSecret: getEnvironmentVariable('FACEBOOK_APP_SECRET'),
     callbackURL: "http://localhost:3001/auth/facebook/callback"
@@ -53,18 +42,37 @@ export function init(cb: (err: Error | undefined) => void): void {
       if (err) {
         done(err);
       } else if (!isRegistered) {
-        done('User is not registered');
+        done(undefined, false, { message: 'User is not registered to use Aquarium Control.' });
       } else {
         done(null, profile);
       }
     });
   }));
 
-  serializeUser((user, done) => done(null, user));
-  deserializeUser((user, done) => done(null, user));
+  passport.serializeUser((user, done) => done(null, user));
+  passport.deserializeUser((user, done) => done(null, user));
 
-  app.get('/auth/facebook', authenticate('facebook'));
-  app.get('/auth/facebook/callback', authenticate('facebook', {
+  const app = express();
+
+  app.use(json());
+  app.use(cookieParser());
+  app.use(expressSession({
+    secret: getEnvironmentVariable('EXPRESS_SESSION_SECRET'),
+    resave: false,
+    saveUninitialized: true
+  }));
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  if (process.env.HOST_CLIENT === 'true') {
+    app.use(express.static(join(__dirname, '..', '..', 'client', 'dist')));
+  }
+
+  app.set('view engine', 'pug');
+  app.set('views', join(__dirname, '..', 'views'));
+
+  app.get('/auth/facebook', passport.authenticate('facebook'));
+  app.get('/auth/facebook/callback', passport.authenticate('facebook', {
     successRedirect: '/',
     failureRedirect: '/login'
   }));
@@ -78,10 +86,16 @@ export function init(cb: (err: Error | undefined) => void): void {
   });
 
   app.get('/api/state', ensureLoggedIn(), (req, res) => {
+    res.send({
+      state: 'hi'
+    });
     // TODO
   });
 
   app.get('/api/config', ensureLoggedIn(), (req, res) => {
+    res.send({
+      state: 'hi'
+    });
     // TODO
   });
 

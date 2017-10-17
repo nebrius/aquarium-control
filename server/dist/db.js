@@ -48,7 +48,7 @@ function isUserRegistered(userId, cb) {
     if (!isConnected) {
         throw new Error('Tried to see if user is registered while not connected to the database');
     }
-    setImmediate(() => cb(undefined, true));
+    setImmediate(() => cb(undefined, false));
 }
 exports.isUserRegistered = isUserRegistered;
 function getDevicesForUserId(userId, cb) {
