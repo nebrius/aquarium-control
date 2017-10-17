@@ -1,3 +1,4 @@
+"use strict";
 /*
 Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
 
@@ -14,25 +15,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-import * as React from 'react';
-// import { LoginContainer } from '../containers/LoginContainer';
-
-export interface IRootProps {
-  isLoggedIn: boolean;
-}
-
-export class Root extends React.Component<IRootProps, {}> {
-
-  public render() {
-    if (!this.props.isLoggedIn) {
-      return (
-        <a href="/auth/facebook">Login with Facebook</a>
-      );
+Object.defineProperty(exports, "__esModule", { value: true });
+function getEnvironmentVariable(variable) {
+    const value = process.env[variable];
+    if (typeof value !== 'string') {
+        throw new Error(`Environment variable ${variable} is not defined`);
     }
-    return (
-      <div>Logged in</div>
-    );
-  }
-
+    return value;
 }
+exports.getEnvironmentVariable = getEnvironmentVariable;
+//# sourceMappingURL=util.js.map

@@ -16,27 +16,21 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
+const util_1 = require("./util");
 const tedious_1 = require("tedious");
 let connection;
 let isConnected = false;
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 function init(cb) {
-    function getEnvironmentVariable(variable) {
-        const value = process.env[variable];
-        if (typeof value !== 'string') {
-            throw new Error(`Environment variable ${variable} is not defined`);
-        }
-        return value;
-    }
     console.log('Connecting to Azure SQL');
     connection = new tedious_1.Connection({
-        userName: getEnvironmentVariable('AZURE_SQL_USERNAME'),
-        password: getEnvironmentVariable('AZURE_SQL_PASSWORD'),
-        server: getEnvironmentVariable('AZURE_SQL_SERVER'),
+        userName: util_1.getEnvironmentVariable('AZURE_SQL_USERNAME'),
+        password: util_1.getEnvironmentVariable('AZURE_SQL_PASSWORD'),
+        server: util_1.getEnvironmentVariable('AZURE_SQL_SERVER'),
         options: {
             encrypt: true,
             rowCollectionOnDone: true,
-            database: getEnvironmentVariable('AZURE_SQL_DATABASE')
+            database: util_1.getEnvironmentVariable('AZURE_SQL_DATABASE')
         }
     });
     connection.on('connect', (err) => {
@@ -50,6 +44,20 @@ function init(cb) {
     });
 }
 exports.init = init;
+function isUserRegistered(userId, cb) {
+    if (!isConnected) {
+        throw new Error('Tried to see if user is registered while not connected to the database');
+    }
+    setImmediate(() => cb(undefined, true));
+}
+exports.isUserRegistered = isUserRegistered;
+function getDevicesForUserId(userId, cb) {
+    if (!isConnected) {
+        throw new Error('Tried to get devices for user while not connected to the database');
+    }
+    setImmediate(() => cb(undefined, []));
+}
+exports.getDevicesForUserId = getDevicesForUserId;
 function saveConfig(deviceId, config, cb) {
     if (!isConnected) {
         throw new Error('Tried to save config while not connected to the database');

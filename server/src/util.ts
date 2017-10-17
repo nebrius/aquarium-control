@@ -15,24 +15,10 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import * as React from 'react';
-// import { LoginContainer } from '../containers/LoginContainer';
-
-export interface IRootProps {
-  isLoggedIn: boolean;
-}
-
-export class Root extends React.Component<IRootProps, {}> {
-
-  public render() {
-    if (!this.props.isLoggedIn) {
-      return (
-        <a href="/auth/facebook">Login with Facebook</a>
-      );
-    }
-    return (
-      <div>Logged in</div>
-    );
+export function getEnvironmentVariable(variable: string): string {
+  const value = process.env[variable];
+  if (typeof value !== 'string') {
+    throw new Error(`Environment variable ${variable} is not defined`);
   }
-
+  return value;
 }

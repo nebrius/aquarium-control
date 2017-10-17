@@ -22,6 +22,10 @@ import { IAquariumConfig } from '../util/IAppState';
 export const aquariumConfigReducer: Reducer<IAquariumConfig> = (state: IAquariumConfig, action: IAction) => {
   switch (action.type) {
     default:
-      return state;
+      return state || {
+        mode: 'override',
+        overrideState: 'off',
+        schedule: []
+      };
   }
 };

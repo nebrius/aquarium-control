@@ -22,52 +22,61 @@ const body_parser_1 = require("body-parser");
 const express = require("express");
 const passport_1 = require("passport");
 const passport_facebook_1 = require("passport-facebook");
+const connect_ensure_login_1 = require("connect-ensure-login");
 const db_1 = require("./db");
+const util_1 = require("./util");
+const db_2 = require("./db");
 const DEFAULT_PORT = 3001;
 function init(cb) {
-    function getEnvironmentVariable(variable) {
-        const value = process.env[variable];
-        if (typeof value !== 'string') {
-            throw new Error(`Environment variable ${variable} is not defined`);
-        }
-        return value;
-    }
     const app = express();
     app.use(body_parser_1.json());
     app.use(passport_1.initialize());
     app.use(passport_1.session());
-    passport_1.use(new passport_facebook_1.Strategy({
-        clientID: getEnvironmentVariable('FACEBOOK_APP_ID'),
-        clientSecret: getEnvironmentVariable('FACEBOOK_APP_SECRET'),
-        callbackURL: "http://www.example.com/auth/facebook/callback"
-    }, (accessToken, refreshToken, profile, done) => {
-        // User.findOrCreate(..., function(err, user) {
-        //   if (err) { return done(err); }
-        //   done(null, user);
-        // });
-        console.log(accessToken);
-    }));
     if (process.env.HOST_CLIENT === 'true') {
         app.use(express.static(path_1.join(__dirname, '..', '..', 'client', 'dist')));
     }
-    app.get('/api/state', passport_1.authenticate('oauth-bearer', { session: false }), (req, res) => {
+    passport_1.use(new passport_facebook_1.Strategy({
+        clientID: util_1.getEnvironmentVariable('FACEBOOK_APP_ID'),
+        clientSecret: util_1.getEnvironmentVariable('FACEBOOK_APP_SECRET'),
+        callbackURL: "http://localhost:3001/auth/facebook/callback"
+    }, (accessToken, refreshToken, profile, done) => {
+        db_1.isUserRegistered(profile.id, (err, isRegistered) => {
+            if (err) {
+                done(err);
+            }
+            else if (!isRegistered) {
+                done('User is not registered');
+            }
+            else {
+                done(null, profile);
+            }
+        });
+    }));
+    passport_1.serializeUser((user, done) => done(null, user));
+    passport_1.deserializeUser((user, done) => done(null, user));
+    app.get('/auth/facebook', passport_1.authenticate('facebook'));
+    app.get('/auth/facebook/callback', passport_1.authenticate('facebook', {
+        successRedirect: '/',
+        failureRedirect: '/login'
+    }));
+    app.get('/api/state', connect_ensure_login_1.ensureLoggedIn(), (req, res) => {
         // TODO
     });
-    app.get('/api/config', passport_1.authenticate('oauth-bearer', { session: false }), (req, res) => {
+    app.get('/api/config', connect_ensure_login_1.ensureLoggedIn(), (req, res) => {
         // TODO
     });
-    app.post('/api/config', passport_1.authenticate('oauth-bearer', { session: false }), (req, res) => {
+    app.post('/api/config', connect_ensure_login_1.ensureLoggedIn(), (req, res) => {
         const body = req.body;
         console.log(body);
         res.send('ok');
     });
-    app.get('/api/temperatures', (req, res, next) => { next(); }, passport_1.authenticate('oauth-bearer', { session: false }), (req, res) => {
+    app.get('/api/temperatures', connect_ensure_login_1.ensureLoggedIn(), (req, res) => {
         const period = req.query.period;
         if (period !== 'day' && period !== 'week') {
             res.sendStatus(400);
             return;
         }
-        db_1.getTemperatureHistory('nebrius-rpi', period, (err, temperatures) => {
+        db_2.getTemperatureHistory('nebrius-rpi', period, (err, temperatures) => {
             if (err) {
                 console.error(err);
                 return;

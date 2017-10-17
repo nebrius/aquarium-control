@@ -50,6 +50,9 @@ export const loginStateReducer: Reducer<ILoginState> = (state: ILoginState, acti
         accessToken
       };
     default:
-      return state;
+      return state || {
+        currentState: 'unknown',
+        accessToken: ''
+      };
   }
 };

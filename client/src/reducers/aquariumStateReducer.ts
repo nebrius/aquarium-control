@@ -33,6 +33,9 @@ export const aquariumStateReducer: Reducer<IAquariumState> = (state: IAquariumSt
         currentStateValid: true
       } as IAquariumState);
     default:
-      return state;
+      return state || {
+        state: undefined,
+        currentStateValid: false
+      };
   }
 };

@@ -17,6 +17,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import { IConfig } from './common/IConfig';
 import { IState } from './common/IState';
+import { getEnvironmentVariable } from './util';
 import { Connection, Request } from 'tedious';
 
 let connection: Connection;
@@ -25,14 +26,6 @@ let isConnected = false;
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 export function init(cb: (err: Error | undefined) => void): void {
-
-  function getEnvironmentVariable(variable: string): string {
-    const value = process.env[variable];
-    if (typeof value !== 'string') {
-      throw new Error(`Environment variable ${variable} is not defined`);
-    }
-    return value;
-  }
 
   console.log('Connecting to Azure SQL');
   connection = new Connection({
@@ -55,6 +48,20 @@ export function init(cb: (err: Error | undefined) => void): void {
     isConnected = true;
     cb(undefined);
   });
+}
+
+export function isUserRegistered(userId: string, cb: (err: Error | undefined, isRegistered: boolean | undefined) => void): void {
+  if (!isConnected) {
+    throw new Error('Tried to see if user is registered while not connected to the database');
+  }
+  setImmediate(() => cb(undefined, true));
+}
+
+export function getDevicesForUserId(userId: string, cb: (err: Error | undefined, devices: string[] | undefined) => void): void {
+  if (!isConnected) {
+    throw new Error('Tried to get devices for user while not connected to the database');
+  }
+  setImmediate(() => cb(undefined, []));
 }
 
 export function saveConfig(deviceId: string, config: IConfig, cb: (err: Error | undefined) => void): void {

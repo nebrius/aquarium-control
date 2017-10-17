@@ -19,22 +19,17 @@ import { createServer } from 'http';
 import { join } from 'path';
 import { json } from 'body-parser';
 import * as express from 'express';
-import { initialize, session, authenticate, use } from 'passport';
+import { initialize, session, authenticate, use, serializeUser, deserializeUser } from 'passport';
 import { Strategy as FacebookStrategy} from 'passport-facebook';
+import { ensureLoggedIn } from 'connect-ensure-login';
 import { IConfig } from './common/IConfig';
+import { isUserRegistered } from './db';
+import { getEnvironmentVariable } from './util';
 import { getTemperatureHistory } from './db';
 
 const DEFAULT_PORT = 3001;
 
 export function init(cb: (err: Error | undefined) => void): void {
-
-  function getEnvironmentVariable(variable: string): string {
-    const value = process.env[variable];
-    if (typeof value !== 'string') {
-      throw new Error(`Environment variable ${variable} is not defined`);
-    }
-    return value;
-  }
 
   const app = express();
 
@@ -42,37 +37,50 @@ export function init(cb: (err: Error | undefined) => void): void {
   app.use(initialize());
   app.use(session());
 
-  use(new FacebookStrategy({
-    clientID: getEnvironmentVariable('FACEBOOK_APP_ID'),
-    clientSecret: getEnvironmentVariable('FACEBOOK_APP_SECRET'),
-    callbackURL: "http://www.example.com/auth/facebook/callback"
-  }, (accessToken, refreshToken, profile, done) => {
-    // User.findOrCreate(..., function(err, user) {
-    //   if (err) { return done(err); }
-    //   done(null, user);
-    // });
-    console.log(accessToken);
-  }));
-
   if (process.env.HOST_CLIENT === 'true') {
     app.use(express.static(join(__dirname, '..', '..', 'client', 'dist')));
   }
 
-  app.get('/api/state', authenticate('oauth-bearer', { session: false }), (req, res) => {
+  use(new FacebookStrategy({
+    clientID: getEnvironmentVariable('FACEBOOK_APP_ID'),
+    clientSecret: getEnvironmentVariable('FACEBOOK_APP_SECRET'),
+    callbackURL: "http://localhost:3001/auth/facebook/callback"
+  }, (accessToken, refreshToken, profile, done) => {
+    isUserRegistered(profile.id, (err, isRegistered) => {
+      if (err) {
+        done(err);
+      } else if (!isRegistered) {
+        done('User is not registered');
+      } else {
+        done(null, profile);
+      }
+    });
+  }));
+
+  serializeUser((user, done) => done(null, user));
+  deserializeUser((user, done) => done(null, user));
+
+  app.get('/auth/facebook', authenticate('facebook'));
+  app.get('/auth/facebook/callback', authenticate('facebook', {
+    successRedirect: '/',
+    failureRedirect: '/login'
+  }));
+
+  app.get('/api/state', ensureLoggedIn(), (req, res) => {
     // TODO
   });
 
-  app.get('/api/config', authenticate('oauth-bearer', { session: false }), (req, res) => {
+  app.get('/api/config', ensureLoggedIn(), (req, res) => {
     // TODO
   });
 
-  app.post('/api/config', authenticate('oauth-bearer', { session: false }), (req, res) => {
+  app.post('/api/config', ensureLoggedIn(), (req, res) => {
     const body: IConfig = req.body;
     console.log(body);
     res.send('ok');
   });
 
-  app.get('/api/temperatures', (req, res, next) => { next(); }, authenticate('oauth-bearer', { session: false }), (req, res) => {
+  app.get('/api/temperatures', ensureLoggedIn(), (req, res) => {
     const period = req.query.period;
     if (period !== 'day' && period !== 'week') {
       res.sendStatus(400);
