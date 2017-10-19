@@ -19,11 +19,6 @@ import { createStore } from 'redux';
 import { IAppState } from './IAppState';
 import { reducers } from '../reducers/reducers';
 
-const preloadedState: IAppState = {
-  loginState: {
-    currentState: 'unknown',
-    accessToken: ''
-  }
-};
+const preloadedState: IAppState = {};
 
 export const store = createStore(reducers, preloadedState);

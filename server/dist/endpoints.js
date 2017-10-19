@@ -20,85 +20,107 @@ const http_1 = require("http");
 const path_1 = require("path");
 const body_parser_1 = require("body-parser");
 const express = require("express");
-const expressSession = require("express-session");
-const passport = require("passport");
-const cookieParser = require("cookie-parser");
-const passport_facebook_1 = require("passport-facebook");
-const connect_ensure_login_1 = require("connect-ensure-login");
-const db_1 = require("./db");
+const request = require("request");
+// import { isUserRegistered } from './db';
 const util_1 = require("./util");
-const db_2 = require("./db");
+const db_1 = require("./db");
 const DEFAULT_PORT = 3001;
 function init(cb) {
-    passport.use(new passport_facebook_1.Strategy({
-        clientID: util_1.getEnvironmentVariable('FACEBOOK_APP_ID'),
-        clientSecret: util_1.getEnvironmentVariable('FACEBOOK_APP_SECRET'),
-        callbackURL: "http://localhost:3001/auth/facebook/callback"
-    }, (accessToken, refreshToken, profile, done) => {
-        db_1.isUserRegistered(profile.id, (err, isRegistered) => {
-            if (err) {
-                done(err);
-            }
-            else if (!isRegistered) {
-                done(undefined, false, { message: 'User is not registered to use Aquarium Control.' });
-            }
-            else {
-                done(null, profile);
-            }
-        });
-    }));
-    passport.serializeUser((user, done) => done(null, user));
-    passport.deserializeUser((user, done) => done(null, user));
+    const port = process.env.PORT || DEFAULT_PORT;
     const app = express();
     app.use(body_parser_1.json());
-    app.use(cookieParser());
-    app.use(expressSession({
-        secret: util_1.getEnvironmentVariable('EXPRESS_SESSION_SECRET'),
-        resave: false,
-        saveUninitialized: true
-    }));
-    app.use(passport.initialize());
-    app.use(passport.session());
     if (process.env.HOST_CLIENT === 'true') {
         app.use(express.static(path_1.join(__dirname, '..', '..', 'client', 'dist')));
     }
     app.set('view engine', 'pug');
     app.set('views', path_1.join(__dirname, '..', 'views'));
-    app.get('/auth/facebook', passport.authenticate('facebook'));
-    app.get('/auth/facebook/callback', passport.authenticate('facebook', {
-        successRedirect: '/',
-        failureRedirect: '/login'
-    }));
-    app.get('/', connect_ensure_login_1.ensureLoggedIn(), (req, res) => {
-        res.render('index', {});
-    });
+    function ensureAuthentication(req, res, next) {
+        const accessToken = req.query.accessToken;
+        if (!accessToken) {
+            res.redirect('/login');
+            return;
+        }
+        const connectionUrl = 'https://graph.facebook.com/debug_token?' +
+            `input_token=${accessToken}&` +
+            `access_token=${util_1.getEnvironmentVariable('FACEBOOK_APP_ID')}|${util_1.getEnvironmentVariable('FACEBOOK_APP_SECRET')}`;
+        request(connectionUrl, (err, verifyRes, body) => {
+            try {
+                if (!JSON.parse(body).data.is_valid) {
+                    res.sendStatus(401);
+                }
+                else {
+                    next();
+                }
+            }
+            catch (e) {
+                res.sendStatus(500);
+            }
+        });
+    }
+    function getRedirectUri() {
+        return process.env.NODE_ENV === 'production'
+            ? 'https://aquarium.nebri.us/login-success/'
+            : `http://localhost:${port}/login-success/`;
+    }
     app.get('/login', (req, res) => {
-        res.render('login', {});
+        res.render('login', {
+            facebookAppId: util_1.getEnvironmentVariable('FACEBOOK_APP_ID'),
+            redirectUri: getRedirectUri()
+        });
     });
-    app.get('/api/state', connect_ensure_login_1.ensureLoggedIn(), (req, res) => {
+    app.get('/login-success', (req, res) => {
+        if (req.query.code) {
+            const verifyUrl = `https://graph.facebook.com/v2.10/oauth/access_token?` +
+                `client_id=${util_1.getEnvironmentVariable('FACEBOOK_APP_ID')}` +
+                `&redirect_uri=${getRedirectUri()}` +
+                `&client_secret=${util_1.getEnvironmentVariable('FACEBOOK_APP_SECRET')}` +
+                `&code=${req.query.code}`;
+            request(verifyUrl, (err, verifyRes, body) => {
+                try {
+                    const parsedBody = JSON.parse(body);
+                    res.cookie('accessToken', parsedBody.access_token);
+                    res.redirect('/');
+                }
+                catch (e) {
+                    res.sendStatus(500);
+                }
+            });
+        }
+        else if (req.query.token) {
+            res.cookie('accessToken', req.query.token);
+            res.redirect('/');
+        }
+        else {
+            res.redirect('/login');
+        }
+    });
+    app.get('/', (req, res) => {
+        res.render('index', { facebookAppId: util_1.getEnvironmentVariable('FACEBOOK_APP_ID') });
+    });
+    app.get('/api/state', ensureAuthentication, (req, res) => {
         res.send({
             state: 'hi'
         });
         // TODO
     });
-    app.get('/api/config', connect_ensure_login_1.ensureLoggedIn(), (req, res) => {
+    app.get('/api/config', ensureAuthentication, (req, res) => {
         res.send({
             state: 'hi'
         });
         // TODO
     });
-    app.post('/api/config', connect_ensure_login_1.ensureLoggedIn(), (req, res) => {
+    app.post('/api/config', ensureAuthentication, (req, res) => {
         const body = req.body;
         console.log(body);
         res.send('ok');
     });
-    app.get('/api/temperatures', connect_ensure_login_1.ensureLoggedIn(), (req, res) => {
+    app.get('/api/temperatures', ensureAuthentication, (req, res) => {
         const period = req.query.period;
         if (period !== 'day' && period !== 'week') {
             res.sendStatus(400);
             return;
         }
-        db_2.getTemperatureHistory('nebrius-rpi', period, (err, temperatures) => {
+        db_1.getTemperatureHistory('nebrius-rpi', period, (err, temperatures) => {
             if (err) {
                 console.error(err);
                 return;
@@ -108,7 +130,7 @@ function init(cb) {
     });
     const server = http_1.createServer();
     server.on('request', app);
-    server.listen(process.env.PORT || DEFAULT_PORT, () => {
+    server.listen(port, () => {
         console.log(`API server listening on ${server.address().address}:${server.address().port}.`);
         cb(undefined);
     });

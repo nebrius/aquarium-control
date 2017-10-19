@@ -19,13 +19,9 @@ import { createServer } from 'http';
 import { join } from 'path';
 import { json } from 'body-parser';
 import * as express from 'express';
-import * as expressSession from 'express-session';
-import * as passport from 'passport';
-import * as cookieParser from 'cookie-parser';
-import { Strategy as FacebookStrategy} from 'passport-facebook';
-import { ensureLoggedIn } from 'connect-ensure-login';
+import * as request from 'request';
 import { IConfig } from './common/IConfig';
-import { isUserRegistered } from './db';
+// import { isUserRegistered } from './db';
 import { getEnvironmentVariable } from './util';
 import { getTemperatureHistory } from './db';
 
@@ -33,36 +29,11 @@ const DEFAULT_PORT = 3001;
 
 export function init(cb: (err: Error | undefined) => void): void {
 
-  passport.use(new FacebookStrategy({
-    clientID: getEnvironmentVariable('FACEBOOK_APP_ID'),
-    clientSecret: getEnvironmentVariable('FACEBOOK_APP_SECRET'),
-    callbackURL: "http://localhost:3001/auth/facebook/callback"
-  }, (accessToken, refreshToken, profile, done) => {
-    isUserRegistered(profile.id, (err, isRegistered) => {
-      if (err) {
-        done(err);
-      } else if (!isRegistered) {
-        done(undefined, false, { message: 'User is not registered to use Aquarium Control.' });
-      } else {
-        done(null, profile);
-      }
-    });
-  }));
-
-  passport.serializeUser((user, done) => done(null, user));
-  passport.deserializeUser((user, done) => done(null, user));
+  const port = process.env.PORT || DEFAULT_PORT;
 
   const app = express();
 
   app.use(json());
-  app.use(cookieParser());
-  app.use(expressSession({
-    secret: getEnvironmentVariable('EXPRESS_SESSION_SECRET'),
-    resave: false,
-    saveUninitialized: true
-  }));
-  app.use(passport.initialize());
-  app.use(passport.session());
 
   if (process.env.HOST_CLIENT === 'true') {
     app.use(express.static(join(__dirname, '..', '..', 'client', 'dist')));
@@ -71,41 +42,93 @@ export function init(cb: (err: Error | undefined) => void): void {
   app.set('view engine', 'pug');
   app.set('views', join(__dirname, '..', 'views'));
 
-  app.get('/auth/facebook', passport.authenticate('facebook'));
-  app.get('/auth/facebook/callback', passport.authenticate('facebook', {
-    successRedirect: '/',
-    failureRedirect: '/login'
-  }));
+  function ensureAuthentication(req: express.Request, res: express.Response, next: () => void): void {
+    const accessToken = req.query.accessToken;
+    if (!accessToken) {
+      res.redirect('/login');
+      return;
+    }
+    const connectionUrl =
+      'https://graph.facebook.com/debug_token?' +
+      `input_token=${accessToken}&` +
+      `access_token=${getEnvironmentVariable('FACEBOOK_APP_ID')}|${getEnvironmentVariable('FACEBOOK_APP_SECRET')}`;
+    request(connectionUrl, (err, verifyRes, body) => {
+      try {
+        if (!JSON.parse(body).data.is_valid) {
+          res.sendStatus(401);
+        } else {
+          next();
+        }
+      } catch(e) {
+        res.sendStatus(500);
+      }
+    });
+  }
 
-  app.get('/', ensureLoggedIn(), (req, res) => {
-    res.render('index', {});
-  });
+  function getRedirectUri(): string {
+    return process.env.NODE_ENV === 'production'
+      ? 'https://aquarium.nebri.us/login-success/'
+      : `http://localhost:${port}/login-success/`;
+  }
 
   app.get('/login', (req, res) => {
-    res.render('login', {});
+    res.render('login', {
+      facebookAppId: getEnvironmentVariable('FACEBOOK_APP_ID'),
+      redirectUri: getRedirectUri()
+    });
   });
 
-  app.get('/api/state', ensureLoggedIn(), (req, res) => {
+  app.get('/login-success', (req, res) => {
+    if (req.query.code) {
+      const verifyUrl =
+        `https://graph.facebook.com/v2.10/oauth/access_token?` +
+        `client_id=${getEnvironmentVariable('FACEBOOK_APP_ID')}` +
+        `&redirect_uri=${getRedirectUri()}` +
+        `&client_secret=${getEnvironmentVariable('FACEBOOK_APP_SECRET')}` +
+        `&code=${req.query.code}`;
+      request(verifyUrl, (err, verifyRes, body) => {
+        try {
+          const parsedBody = JSON.parse(body);
+          res.cookie('accessToken', parsedBody.access_token);
+          res.redirect('/');
+        } catch(e) {
+          res.sendStatus(500);
+        }
+      });
+    } else if (req.query.token) {
+      res.cookie('accessToken', req.query.token);
+      res.redirect('/');
+    } else {
+      res.redirect('/login');
+    }
+
+  });
+
+  app.get('/', (req, res) => {
+    res.render('index', { facebookAppId: getEnvironmentVariable('FACEBOOK_APP_ID') });
+  });
+
+  app.get('/api/state', ensureAuthentication, (req, res) => {
     res.send({
       state: 'hi'
     });
     // TODO
   });
 
-  app.get('/api/config', ensureLoggedIn(), (req, res) => {
+  app.get('/api/config', ensureAuthentication, (req, res) => {
     res.send({
       state: 'hi'
     });
     // TODO
   });
 
-  app.post('/api/config', ensureLoggedIn(), (req, res) => {
+  app.post('/api/config', ensureAuthentication, (req, res) => {
     const body: IConfig = req.body;
     console.log(body);
     res.send('ok');
   });
 
-  app.get('/api/temperatures', ensureLoggedIn(), (req, res) => {
+  app.get('/api/temperatures', ensureAuthentication, (req, res) => {
     const period = req.query.period;
     if (period !== 'day' && period !== 'week') {
       res.sendStatus(400);
@@ -124,7 +147,7 @@ export function init(cb: (err: Error | undefined) => void): void {
 
   server.on('request', app);
 
-  server.listen(process.env.PORT || DEFAULT_PORT, () => {
+  server.listen(port, () => {
     console.log(`API server listening on ${server.address().address}:${server.address().port}.`);
     cb(undefined);
   });

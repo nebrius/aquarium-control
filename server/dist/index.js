@@ -25,7 +25,7 @@ function run() {
         endpoints_1.init
     ], (err) => {
         if (err) {
-            console.error(err);
+            console.error(err.message || err);
             process.exit(-1);
         }
         console.log('Aquarium Control API running');

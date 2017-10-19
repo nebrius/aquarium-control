@@ -15,8 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { store } from './store';
-import { IAppState } from './IAppState';
+import { get as getCookie } from 'js-cookie';
 
 export interface IRequestOptions {
   endpoint: string;
@@ -28,20 +27,7 @@ export function request(
   { endpoint, method, body = {} }: IRequestOptions,
   cb: (err: Error | string | undefined, result?: any) => void
 ): void {
-  const storeState: IAppState = store.getState() as IAppState;
-  const accessToken = storeState.loginState.accessToken;
-
-  const requestInit: RequestInit = { method };
-  let url: string = `/api/${endpoint}`;
-  if (method === 'GET') {
-    url += `?access_token=${accessToken}`;
-  } else {
-    requestInit.body = JSON.stringify({
-      ...body,
-      accessToken
-    });
-  }
-  fetch(url, requestInit)
+  fetch(`/api/${endpoint}?accessToken=${getCookie('accessToken')}`, { method })
     .then((res) => {
       if (!res.ok) {
         throw new Error(`Server returned ${res.statusText || res.status}`);

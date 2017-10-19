@@ -18,8 +18,6 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 import { IState } from '../util/IAppState';
 
 export const ACTIONS = {
-  LOGIN_SUCCEEDED: 'LOGIN_SUCCEEDED',
-  LOGIN_FAILED: 'LOGIN_FAILED',
   STATE_UPDATE_SUCCEEDED: 'STATE_UPDATE_SUCCEEDED',
   STATE_UPDATE_FAILED: 'STATE_UPDATE_FAILED',
 };
@@ -30,19 +28,6 @@ export interface IAction {
 
 export interface ILoginSucceededAction extends IAction {
   accessToken: string;
-}
-
-export function loginSucceeded(accessToken: string): ILoginSucceededAction {
-  return {
-    type: ACTIONS.LOGIN_SUCCEEDED,
-    accessToken
-  };
-}
-
-export function loginFailed(): IAction {
-  return {
-    type: ACTIONS.LOGIN_FAILED
-  };
 }
 
 export interface IStateUpdateSucceededAction extends IAction {

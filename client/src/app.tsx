@@ -20,6 +20,21 @@ import { render } from 'react-dom';
 import { Provider } from 'react-redux'
 import { RootContainer } from './containers/RootContainer';
 import { store } from './util/store';
+import { request } from './util/api';
+import { stateUpdateFailed, stateUpdateSucceeded } from './actions/actions';
+
+const STATE_UPDATE_RATE = 1000;
+
+setInterval(() => request({
+  endpoint: 'state',
+  method: 'GET',
+}, (err, result) => {
+  if (err) {
+    stateUpdateFailed();
+  } else {
+    stateUpdateSucceeded(result);
+  }
+}), STATE_UPDATE_RATE);
 
 render(
   (

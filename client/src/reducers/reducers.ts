@@ -16,12 +16,10 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { combineReducers } from 'redux';
-import { loginStateReducer } from './loginStateReducer';
 import { aquariumStateReducer } from './aquariumStateReducer';
 import { aquariumConfigReducer } from './aquariumConfigReducer';
 
 export const reducers = combineReducers({
-  loginState: loginStateReducer,
   aquariumState: aquariumStateReducer,
   aquariumConfig: aquariumConfigReducer
 });

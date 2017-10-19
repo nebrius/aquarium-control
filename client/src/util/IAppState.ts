@@ -30,13 +30,7 @@ export interface IAquariumConfig {
   config: IConfig;
 }
 
-export interface ILoginState {
-  currentState: 'unknown' | 'not-authenticated' | 'authenticated';
-  accessToken: string;
-}
-
 export interface IAppState {
-  loginState: ILoginState;
   state?: IState;
   config?: IConfig;
 }

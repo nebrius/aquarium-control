@@ -16,22 +16,12 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-// import { LoginContainer } from '../containers/LoginContainer';
 
-export interface IRootProps {
-  isLoggedIn: boolean;
-}
-
-export class Root extends React.Component<IRootProps, {}> {
+export class Root extends React.Component<{}, {}> {
 
   public render() {
-    if (!this.props.isLoggedIn) {
-      return (
-        <div>You are logged in!</div>
-      );
-    }
     return (
-      <div>Logged in</div>
+      <div>Hi!</div>
     );
   }
 
