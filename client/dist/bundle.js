@@ -2006,18 +2006,22 @@ var RootContainer_1 = __webpack_require__(72);
 var store_1 = __webpack_require__(74);
 var api_1 = __webpack_require__(78);
 var actions_1 = __webpack_require__(29);
-var STATE_UPDATE_RATE = 1000;
-setInterval(function () { return api_1.request({
-    endpoint: 'state',
-    method: 'GET',
-}, function (err, result) {
-    if (err) {
-        actions_1.stateUpdateFailed();
-    }
-    else {
-        actions_1.stateUpdateSucceeded(result);
-    }
-}); }, STATE_UPDATE_RATE);
+var STATE_UPDATE_RATE = 5000;
+function updateState() {
+    api_1.request({
+        endpoint: 'state',
+        method: 'GET',
+    }, function (err, result) {
+        if (err) {
+            store_1.store.dispatch(actions_1.stateUpdateFailed());
+        }
+        else {
+            store_1.store.dispatch(actions_1.stateUpdateSucceeded(result));
+        }
+        setTimeout(updateState, STATE_UPDATE_RATE);
+    });
+}
+updateState();
 react_dom_1.render((React.createElement(react_redux_1.Provider, { store: store_1.store },
     React.createElement(RootContainer_1.RootContainer, null))), document.getElementById('root'));
 

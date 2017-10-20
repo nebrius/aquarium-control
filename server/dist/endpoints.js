@@ -21,9 +21,9 @@ const path_1 = require("path");
 const body_parser_1 = require("body-parser");
 const express = require("express");
 const request = require("request");
-// import { isUserRegistered } from './db';
-const util_1 = require("./util");
 const db_1 = require("./db");
+const util_1 = require("./util");
+const db_2 = require("./db");
 const DEFAULT_PORT = 3001;
 function init(cb) {
     const port = process.env.PORT || DEFAULT_PORT;
@@ -45,11 +45,23 @@ function init(cb) {
             `access_token=${util_1.getEnvironmentVariable('FACEBOOK_APP_ID')}|${util_1.getEnvironmentVariable('FACEBOOK_APP_SECRET')}`;
         request(connectionUrl, (err, verifyRes, body) => {
             try {
-                if (!JSON.parse(body).data.is_valid) {
+                const parsedBody = JSON.parse(body).data;
+                if (!parsedBody.is_valid) {
                     res.sendStatus(401);
                 }
                 else {
-                    next();
+                    db_1.isUserRegistered(parsedBody.user_id, (err, isRegistered) => {
+                        if (err) {
+                            res.sendStatus(500);
+                        }
+                        else if (!isRegistered) {
+                            res.sendStatus(401);
+                        }
+                        else {
+                            req.userId = parsedBody.user_id;
+                            next();
+                        }
+                    });
                 }
             }
             catch (e) {
@@ -98,10 +110,14 @@ function init(cb) {
         res.render('index', { facebookAppId: util_1.getEnvironmentVariable('FACEBOOK_APP_ID') });
     });
     app.get('/api/state', ensureAuthentication, (req, res) => {
-        res.send({
-            state: 'hi'
+        db_2.getState(db_2.getDeviceForUserId(req.userId), (err, state) => {
+            if (err) {
+                res.sendStatus(500);
+            }
+            else {
+                res.send(state);
+            }
         });
-        // TODO
     });
     app.get('/api/config', ensureAuthentication, (req, res) => {
         res.send({
@@ -120,7 +136,7 @@ function init(cb) {
             res.sendStatus(400);
             return;
         }
-        db_1.getTemperatureHistory('nebrius-rpi', period, (err, temperatures) => {
+        db_2.getTemperatureHistory('nebrius-rpi', period, (err, temperatures) => {
             if (err) {
                 console.error(err);
                 return;

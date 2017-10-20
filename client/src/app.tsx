@@ -23,18 +23,22 @@ import { store } from './util/store';
 import { request } from './util/api';
 import { stateUpdateFailed, stateUpdateSucceeded } from './actions/actions';
 
-const STATE_UPDATE_RATE = 1000;
+const STATE_UPDATE_RATE = 5000;
 
-setInterval(() => request({
-  endpoint: 'state',
-  method: 'GET',
-}, (err, result) => {
-  if (err) {
-    stateUpdateFailed();
-  } else {
-    stateUpdateSucceeded(result);
-  }
-}), STATE_UPDATE_RATE);
+function updateState() {
+  request({
+    endpoint: 'state',
+    method: 'GET',
+  }, (err, result) => {
+    if (err) {
+      store.dispatch(stateUpdateFailed());
+    } else {
+      store.dispatch(stateUpdateSucceeded(result));
+    }
+    setTimeout(updateState, STATE_UPDATE_RATE);
+  })
+}
+updateState();
 
 render(
   (

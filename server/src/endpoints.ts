@@ -21,11 +21,15 @@ import { json } from 'body-parser';
 import * as express from 'express';
 import * as request from 'request';
 import { IConfig } from './common/IConfig';
-// import { isUserRegistered } from './db';
+import { isUserRegistered } from './db';
 import { getEnvironmentVariable } from './util';
-import { getTemperatureHistory } from './db';
+import { getTemperatureHistory, getDeviceForUserId, getState } from './db';
 
 const DEFAULT_PORT = 3001;
+
+interface IRequest extends express.Request {
+  userId: string;
+}
 
 export function init(cb: (err: Error | undefined) => void): void {
 
@@ -42,7 +46,7 @@ export function init(cb: (err: Error | undefined) => void): void {
   app.set('view engine', 'pug');
   app.set('views', join(__dirname, '..', 'views'));
 
-  function ensureAuthentication(req: express.Request, res: express.Response, next: () => void): void {
+  function ensureAuthentication(req: IRequest, res: express.Response, next: () => void): void {
     const accessToken = req.query.accessToken;
     if (!accessToken) {
       res.redirect('/login');
@@ -54,10 +58,20 @@ export function init(cb: (err: Error | undefined) => void): void {
       `access_token=${getEnvironmentVariable('FACEBOOK_APP_ID')}|${getEnvironmentVariable('FACEBOOK_APP_SECRET')}`;
     request(connectionUrl, (err, verifyRes, body) => {
       try {
-        if (!JSON.parse(body).data.is_valid) {
+        const parsedBody = JSON.parse(body).data;
+        if (!parsedBody.is_valid) {
           res.sendStatus(401);
         } else {
-          next();
+          isUserRegistered(parsedBody.user_id, (err, isRegistered) => {
+            if (err) {
+              res.sendStatus(500);
+            } else if (!isRegistered) {
+              res.sendStatus(401);
+            } else {
+              req.userId = parsedBody.user_id;
+              next();
+            }
+          });
         }
       } catch(e) {
         res.sendStatus(500);
@@ -108,11 +122,14 @@ export function init(cb: (err: Error | undefined) => void): void {
     res.render('index', { facebookAppId: getEnvironmentVariable('FACEBOOK_APP_ID') });
   });
 
-  app.get('/api/state', ensureAuthentication, (req, res) => {
-    res.send({
-      state: 'hi'
+  app.get('/api/state', ensureAuthentication, (req: IRequest, res) => {
+    getState(getDeviceForUserId(req.userId), (err, state) => {
+      if (err) {
+        res.sendStatus(500);
+      } else {
+        res.send(state);
+      }
     });
-    // TODO
   });
 
   app.get('/api/config', ensureAuthentication, (req, res) => {
