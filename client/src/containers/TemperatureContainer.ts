@@ -14,3 +14,21 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+import { connect } from 'react-redux';
+import { IAppState, IAquariumConfig } from '../util/IAppState';
+import { IAction } from '../actions/actions';
+import { Temperature } from '../components/Temperature';
+
+function mapStateToProps(state: IAppState): IAquariumConfig {
+  return state.aquariumConfig;
+}
+
+function mapDispatchToProps(dispatch: (action: IAction) => any) {
+  return {};
+}
+
+export const TemperatureContainer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Temperature);

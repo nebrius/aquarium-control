@@ -16,16 +16,11 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-import { ConfigurationContainer } from '../containers/ConfigurationContainer';
-// import { TemperatureContainer } from '../containers/TemperatureContainer';
-import { StateContainer} from '../containers/StateContainer';
 
-export function Root(props: {}): JSX.Element {
+export function Temperature(props: {}): JSX.Element {
   return (
-    <div className="root-container">
-      <StateContainer />
-      {/* <TemperatureContainer /> */}
-      <ConfigurationContainer />
+    <div>
+      <div><h1>Temperature History</h1></div>
     </div>
   );
 }

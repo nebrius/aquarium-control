@@ -4,8 +4,11 @@
   "description": "The web client for controlling an aquarium, part of the aquarium control system",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prebuild": "tslint src/**/*.ts src/**/*.tsx",
-    "build": "rimraf dist && webpack && cpy src/style.css dist/",
+    "lint": "tslint src/**/*.ts src/**/*.tsx && rimraf dist",
+    "prebuild": "npm run lint",
+    "build:css": "cpy css/**/*.css dist/css/",
+    "build:ts": "webpack",
+    "build": "npm run build:ts && npm run build:css",
     "postbuild": "echo done",
     "start": "./bin/api.js"
   },
@@ -21,6 +24,7 @@
   "homepage": "https://github.com/nebrius/aquarium-control#readme",
   "dependencies": {
     "js-cookie": "^2.1.4",
+    "moment": "^2.19.1",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-facebook-login": "^3.6.2",
@@ -30,6 +34,7 @@
   "devDependencies": {
     "@types/fb": "0.0.22",
     "@types/js-cookie": "^2.1.0",
+    "@types/moment": "^2.13.0",
     "@types/react": "^16.0.13",
     "@types/react-dom": "^16.0.1",
     "@types/react-facebook-login": "^3.6.1",

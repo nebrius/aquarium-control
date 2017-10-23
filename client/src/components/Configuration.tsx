@@ -16,16 +16,20 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-import { ConfigurationContainer } from '../containers/ConfigurationContainer';
-// import { TemperatureContainer } from '../containers/TemperatureContainer';
-import { StateContainer} from '../containers/StateContainer';
+import { IAquariumConfig } from '../util/IAppState';
 
-export function Root(props: {}): JSX.Element {
+export function Configuration(props: IAquariumConfig): JSX.Element {
+  if (!props.currentConfigValid) {
+    return (
+      <div>
+        <div><h1>Configuration</h1></div>
+        <div className="alert alert-danger">Current configuration not available</div>
+      </div>
+    );
+  }
   return (
-    <div className="root-container">
-      <StateContainer />
-      {/* <TemperatureContainer /> */}
-      <ConfigurationContainer />
+    <div>
+      <div><h1>Configuration</h1></div>
     </div>
   );
 }

@@ -18,7 +18,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 import * as React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux'
-import { RootContainer } from './containers/RootContainer';
+import { Root } from './components/Root';
 import { store } from './util/store';
 import { request } from './util/api';
 import { stateUpdateFailed, stateUpdateSucceeded } from './actions/actions';
@@ -43,7 +43,7 @@ updateState();
 render(
   (
     <Provider store={store}>
-      <RootContainer />
+      <Root />
     </Provider>
   ),
   document.getElementById('root')

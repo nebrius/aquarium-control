@@ -15,20 +15,46 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { connect } from 'react-redux';
-import { IAppState } from '../util/IAppState';
-import { IAction } from '../actions/actions';
-import { Root } from '../components/Root';
-
-function mapStateToProps(state: IAppState) {
-  return {};
+#root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
-function mapDispatchToProps(dispatch: (action: IAction) => any) {
-  return {};
+.root-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 10px;
 }
 
-export const RootContainer = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Root);
+.state-current-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.state-current-group-container {
+  margin-right: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  padding: 4px 10px;
+  flex-grow: 1;
+  flex-basis: 0;
+}
+
+.state-entry-container {
+  padding: 5px 0;
+}
+
+.state-entry-label {
+  font-weight: bold;
+  margin-right: 10px;
+}

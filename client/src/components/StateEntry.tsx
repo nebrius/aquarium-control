@@ -16,16 +16,17 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-import { ConfigurationContainer } from '../containers/ConfigurationContainer';
-// import { TemperatureContainer } from '../containers/TemperatureContainer';
-import { StateContainer} from '../containers/StateContainer';
 
-export function Root(props: {}): JSX.Element {
+export interface IStateEntryProps {
+  label: string;
+  value: string | number;
+}
+
+export function StateEntry(props: IStateEntryProps): JSX.Element {
   return (
-    <div className="root-container">
-      <StateContainer />
-      {/* <TemperatureContainer /> */}
-      <ConfigurationContainer />
+    <div className="state-entry-container" key={props.label}>
+      <span className="state-entry-label">{props.label}:</span>
+      <span className="state-entry-value">{props.value}</span>
     </div>
   );
 }

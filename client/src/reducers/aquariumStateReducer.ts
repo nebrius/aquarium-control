@@ -19,23 +19,28 @@ import { Reducer } from 'redux';
 import { ACTIONS, IAction, IStateUpdateSucceededAction } from '../actions/actions';
 import { IAquariumState } from '../util/IAppState';
 
+const STALE_DURATION = 20 * 60 * 1000;
+
 export const aquariumStateReducer: Reducer<IAquariumState> = (state: IAquariumState, action: IAction) => {
   switch (action.type) {
     case ACTIONS.STATE_UPDATE_FAILED:
       return {
         state: undefined,
-        currentStateValid: false
+        currentStateValid: false,
+        currentStateStale: false
       };
     case ACTIONS.STATE_UPDATE_SUCCEEDED:
       const aquariumState = (action as IStateUpdateSucceededAction).aquariumState;
       return ({
         state: aquariumState,
-        currentStateValid: true
+        currentStateValid: true,
+        currentStateStale: Date.now() - aquariumState.currentTime > STALE_DURATION
       } as IAquariumState);
     default:
       return state || {
         state: undefined,
-        currentStateValid: false
+        currentStateValid: false,
+        currentStateStale: false
       };
   }
 };

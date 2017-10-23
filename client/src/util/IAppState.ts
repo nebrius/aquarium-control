@@ -24,13 +24,15 @@ export { IConfig } from '../common/IConfig';
 export interface IAquariumState {
   state?: IState;
   currentStateValid: boolean;
+  currentStateStale: boolean;
 }
 
 export interface IAquariumConfig {
-  config: IConfig;
+  config?: IConfig;
+  currentConfigValid: boolean;
 }
 
 export interface IAppState {
-  state?: IState;
-  config?: IConfig;
+  aquariumState: IAquariumState;
+  aquariumConfig: IAquariumConfig;
 }

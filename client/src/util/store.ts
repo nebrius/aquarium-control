@@ -19,6 +19,14 @@ import { createStore } from 'redux';
 import { IAppState } from './IAppState';
 import { reducers } from '../reducers/reducers';
 
-const preloadedState: IAppState = {};
+const preloadedState: IAppState = {
+  aquariumConfig: {
+    currentConfigValid: false
+  },
+  aquariumState: {
+    currentStateValid: false,
+    currentStateStale: false
+  }
+};
 
 export const store = createStore(reducers, preloadedState);

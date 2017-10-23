@@ -15,17 +15,20 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import * as React from 'react';
-import { ConfigurationContainer } from '../containers/ConfigurationContainer';
-// import { TemperatureContainer } from '../containers/TemperatureContainer';
-import { StateContainer} from '../containers/StateContainer';
+import { connect } from 'react-redux';
+import { IAppState, IAquariumConfig } from '../util/IAppState';
+import { IAction } from '../actions/actions';
+import { Configuration } from '../components/Configuration';
 
-export function Root(props: {}): JSX.Element {
-  return (
-    <div className="root-container">
-      <StateContainer />
-      {/* <TemperatureContainer /> */}
-      <ConfigurationContainer />
-    </div>
-  );
+function mapStateToProps(state: IAppState): IAquariumConfig {
+  return state.aquariumConfig;
 }
+
+function mapDispatchToProps(dispatch: (action: IAction) => any) {
+  return {};
+}
+
+export const ConfigurationContainer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Configuration);
