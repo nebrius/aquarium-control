@@ -19,9 +19,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const http_1 = require("http");
 const path_1 = require("path");
 const body_parser_1 = require("body-parser");
+const revalidator_1 = require("revalidator");
 const express = require("express");
 const request = require("request");
+const IConfig_1 = require("./common/IConfig");
 const db_1 = require("./db");
+const messaging_1 = require("./messaging");
 const util_1 = require("./util");
 const db_2 = require("./db");
 const DEFAULT_PORT = 3001;
@@ -123,16 +126,31 @@ function init(cb) {
         });
     });
     app.get('/api/config', ensureAuthentication, (req, res) => {
-        res.send({
-            state: 'hi'
+        messaging_1.getConfig(db_2.getDeviceForUserId(req.userId), (err, config, isConfigUpToDate) => {
+            if (err) {
+                res.sendStatus(500);
+            }
+            else {
+                res.send({
+                    config,
+                    isConfigUpToDate
+                });
+            }
         });
-        // TODO
     });
     app.post('/api/config', ensureAuthentication, (req, res) => {
-        const body = req.body;
-        console.log(body);
-        res.send('ok');
-        // TODO
+        if (!revalidator_1.validate(req.body, IConfig_1.configValidationSchema).valid) {
+            res.sendStatus(400);
+            return;
+        }
+        messaging_1.setConfig(db_2.getDeviceForUserId(req.userId), (req.body), (err) => {
+            if (err) {
+                res.sendStatus(500);
+            }
+            else {
+                res.send('ok');
+            }
+        });
     });
     app.get('/api/temperatures', ensureAuthentication, (req, res) => {
         const period = req.query.period;

@@ -24,10 +24,17 @@ export interface IRequestOptions {
 }
 
 export function request(
-  { endpoint, method, body = {} }: IRequestOptions,
+  { endpoint, method, body }: IRequestOptions,
   cb: (err: Error | string | undefined, result?: any) => void
 ): void {
-  fetch(`/api/${endpoint}?accessToken=${getCookie('accessToken')}`, { method })
+  const options: RequestInit = { method };
+  if (body) {
+    const headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    options.headers = headers;
+    options.body = JSON.stringify(body);
+  }
+  fetch(`/api/${endpoint}?accessToken=${getCookie('accessToken')}`, options)
     .then((res) => {
       if (!res.ok) {
         throw new Error(`Server returned ${res.statusText || res.status}`);

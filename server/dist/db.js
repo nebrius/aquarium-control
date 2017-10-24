@@ -81,18 +81,6 @@ function queueRequest(operation) {
     queryRequests.push(operation);
     pump();
 }
-function processDailyTemperatures(cb) {
-    if (!isConnected) {
-        throw new Error('Tried to see if user is registered while not connected to the database');
-    }
-}
-exports.processDailyTemperatures = processDailyTemperatures;
-function processMonthlyTemperatures(cb) {
-    if (!isConnected) {
-        throw new Error('Tried to see if user is registered while not connected to the database');
-    }
-}
-exports.processMonthlyTemperatures = processMonthlyTemperatures;
 function isUserRegistered(userId, cb) {
     if (!isConnected) {
         throw new Error('Tried to see if user is registered while not connected to the database');

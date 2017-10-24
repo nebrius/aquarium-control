@@ -93,18 +93,6 @@ function queueRequest(operation: IQueryRequest): void {
   pump();
 }
 
-export function processDailyTemperatures(cb: (err: Error | undefined) => void): void {
-  if (!isConnected) {
-    throw new Error('Tried to see if user is registered while not connected to the database');
-  }
-}
-
-export function processMonthlyTemperatures(cb: (err: Error | undefined) => void): void {
-  if (!isConnected) {
-    throw new Error('Tried to see if user is registered while not connected to the database');
-  }
-}
-
 export function isUserRegistered(userId: string, cb: (err: Error | undefined, isRegistered: boolean | undefined) => void): void {
   if (!isConnected) {
     throw new Error('Tried to see if user is registered while not connected to the database');

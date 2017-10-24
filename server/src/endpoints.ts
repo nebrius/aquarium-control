@@ -18,10 +18,12 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 import { createServer } from 'http';
 import { join } from 'path';
 import { json } from 'body-parser';
+import { validate } from 'revalidator';
 import * as express from 'express';
 import * as request from 'request';
-import { IConfig } from './common/IConfig';
+import { IConfig, configValidationSchema } from './common/IConfig';
 import { isUserRegistered } from './db';
+import { getConfig, setConfig } from './messaging';
 import { getEnvironmentVariable } from './util';
 import { getTemperatureHistory, getDeviceForUserId, getUser, getState } from './db';
 
@@ -136,18 +138,31 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.get('/api/config', ensureAuthentication, (req, res) => {
-    res.send({
-      state: 'hi'
+  app.get('/api/config', ensureAuthentication, (req: IRequest, res) => {
+    getConfig(getDeviceForUserId(req.userId), (err, config, isConfigUpToDate) => {
+      if (err) {
+        res.sendStatus(500);
+      } else {
+        res.send({
+          config,
+          isConfigUpToDate
+        });
+      }
     });
-    // TODO
   });
 
-  app.post('/api/config', ensureAuthentication, (req, res) => {
-    const body: IConfig = req.body;
-    console.log(body);
-    res.send('ok');
-    // TODO
+  app.post('/api/config', ensureAuthentication, (req: IRequest, res) => {
+    if (!validate(req.body, configValidationSchema).valid) {
+      res.sendStatus(400);
+      return;
+    }
+    setConfig(getDeviceForUserId(req.userId), <IConfig>(req.body), (err) => {
+      if (err) {
+        res.sendStatus(500);
+      } else {
+        res.send('ok');
+      }
+    });
   });
 
   app.get('/api/temperatures', ensureAuthentication, (req, res) => {

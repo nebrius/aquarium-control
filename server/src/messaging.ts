@@ -15,105 +15,45 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// const Registry = require('azure-iothub').Registry;
-// const Client = require('azure-iothub').Client;
-// const Message = require('azure-iot-common').Message;
+import { Registry, Twin } from 'azure-iothub';
+import { IConfig } from './common/IConfig';
 
-// module.exports = {
-//   run
-// };
+let registry: Registry;
 
-// function run() {
-//   const IOT_HUB_CONNECTION_STRING = process.env.IOT_HUB_CONNECTION_STRING;
-//   if (typeof IOT_HUB_CONNECTION_STRING !== 'string') {
-//     throw new Error('Environment variable IOT_HUB_DEVICE_CONNECTION_STRING is not defined');
-//   }
-//   console.log('Connecting to IoT Event Hub');
+export function init(cb: (err: Error | undefined) => void): void {
+  const IOT_HUB_CONNECTION_STRING = process.env.IOT_HUB_CONNECTION_STRING;
+  if (typeof IOT_HUB_CONNECTION_STRING !== 'string') {
+    throw new Error('Environment variable IOT_HUB_DEVICE_CONNECTION_STRING is not defined');
+  }
+  registry = Registry.fromConnectionString(IOT_HUB_CONNECTION_STRING);
+  setImmediate(cb);
+}
 
-//   const client = Client.fromConnectionString(IOT_HUB_CONNECTION_STRING);
-//   client.open((err) => {
-//     if (err) {
-//       console.error('Could not connect: ' + err.message);
-//       return;
-//     }
-//     console.log('Connected to IoT Event Hub');
+export function getConfig(
+  deviceId: string,
+  cb: (err: Error | undefined, config: IConfig | undefined, isConfigUpToDate: boolean | undefined) => void
+): void {
+  registry.getTwin(deviceId, (err, twin: Twin) => {
+    if (err) {
+      cb(err, undefined, undefined);
+      return;
+    }
+    try {
+      const config: IConfig = JSON.parse(twin.properties.desired.config);
+      cb(undefined, config, twin.properties.desired.$version === twin.properties.reported.$version);
+    } catch(e) {
+      cb(e, undefined, undefined);
+    }
+  });
+}
 
-//     client.getFeedbackReceiver((err, receiver) => {
-//       receiver.on('message', (msg) => {
-//         console.log('Feedback message:')
-//         console.log(msg.getData().toString('utf-8'));
-//       });
-//     });
-
-//     const message = new Message(JSON.stringify({
-//       mode: 'override',
-//       overrideState: 'night',
-//       schedule: [
-//         {
-//           name: 'Sunrise',
-//           type: 'dynamic',
-//           state: 'day',
-//           details: {
-//             event: 'sunrise'
-//           }
-//         },
-//         {
-//           name: 'Sunset',
-//           type: 'dynamic',
-//           state: 'night',
-//           details: {
-//             event: 'sunset'
-//           }
-//         },
-//         {
-//           name: 'Late Night',
-//           type: 'manual',
-//           state: 'off',
-//           details: {
-//             hour: 23,
-//             minute: 0
-//           }
-//         }
-//       ]
-//     }));
-
-//     const message = new Message(JSON.stringify({
-//       mode: 'program',
-//       overrideState: 'off',
-//       schedule: [
-//         {
-//           name: 'Sunrise',
-//           type: 'dynamic',
-//           state: 'day',
-//           details: {
-//             event: 'sunrise'
-//           }
-//         },
-//         {
-//           name: 'Sunset',
-//           type: 'dynamic',
-//           state: 'night',
-//           details: {
-//             event: 'sunset'
-//           }
-//         },
-//         {
-//           name: 'Late Night',
-//           type: 'manual',
-//           state: 'off',
-//           details: {
-//             hour: 23,
-//             minute: 0
-//           }
-//         }
-//       ]
-//     }));
-
-//     message.ack = 'full';
-//     client.send('nebrius-rpi', message, (err, res) => {
-//       if (err) console.log('send error: ' + err.toString());
-//       if (res) console.log('send status: ' + res.constructor.name);
-//       client.close();
-//     });
-//   });
-// }
+export function setConfig(deviceId: string, config: IConfig, cb: (err: Error | undefined) => void): void {
+  const patch = {
+    properties: {
+      desired: {
+        config: JSON.stringify(config)
+      }
+    }
+  };
+  registry.updateTwin(deviceId, patch, '*', cb);
+}

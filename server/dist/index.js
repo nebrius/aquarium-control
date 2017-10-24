@@ -18,11 +18,13 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 Object.defineProperty(exports, "__esModule", { value: true });
 const endpoints_1 = require("./endpoints");
 const db_1 = require("./db");
+const messaging_1 = require("./messaging");
 const async_1 = require("async");
 function run() {
     async_1.series([
         db_1.init,
-        endpoints_1.init
+        endpoints_1.init,
+        messaging_1.init
     ], (err) => {
         if (err) {
             console.error(err.message || err);

@@ -40828,8 +40828,15 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 Object.defineProperty(exports, "__esModule", { value: true });
 var js_cookie_1 = __webpack_require__(208);
 function request(_a, cb) {
-    var endpoint = _a.endpoint, method = _a.method, _b = _a.body, body = _b === void 0 ? {} : _b;
-    fetch("/api/" + endpoint + "?accessToken=" + js_cookie_1.get('accessToken'), { method: method })
+    var endpoint = _a.endpoint, method = _a.method, body = _a.body;
+    var options = { method: method };
+    if (body) {
+        var headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        options.headers = headers;
+        options.body = JSON.stringify(body);
+    }
+    fetch("/api/" + endpoint + "?accessToken=" + js_cookie_1.get('accessToken'), options)
         .then(function (res) {
         if (!res.ok) {
             throw new Error("Server returned " + (res.statusText || res.status));

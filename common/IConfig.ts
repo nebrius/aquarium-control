@@ -22,11 +22,11 @@ export interface IScheduleEntry {
   details: IDynamicScheduleEntry | IManualScheduleEntry;
 }
 
-export interface IDynamicScheduleEntry extends IScheduleEntry {
+export interface IDynamicScheduleEntry {
   event: 'sunrise' | 'sunset';
 }
 
-export interface IManualScheduleEntry extends IScheduleEntry {
+export interface IManualScheduleEntry {
   hour: number;
   minute: number;
 }
@@ -34,5 +34,70 @@ export interface IManualScheduleEntry extends IScheduleEntry {
 export interface IConfig {
   mode: 'program' | 'override';
   overrideState: 'day' | 'night' | 'off';
-  schedule: Array<IDynamicScheduleEntry | IManualScheduleEntry>;
+  schedule: IScheduleEntry[];
 }
+
+// Force to "any" type, otherwise TypeScript things the type is too strict
+export const configValidationSchema: any = {
+  type: 'object',
+  properties: {
+    mode: {
+      required: true,
+      type: 'string',
+      enum: [ 'program', 'override' ]
+    },
+    overrideState: {
+      required: true,
+      type: 'string',
+      enum: [ 'day', 'night', 'off' ]
+    },
+    schedule: {
+      required: true,
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          name: {
+            required: true,
+            type: 'string'
+          },
+          type: {
+            required: true,
+            type: 'string',
+            enum: [ 'dynamic', 'manual' ]
+          },
+          state: {
+            required: true,
+            type: 'string',
+            enum: [ 'day', 'night', 'off' ]
+          },
+          details: {
+            required: true,
+            oneOf: [{
+              type: 'object',
+              properties: {
+                event: {
+                  required: true,
+                  type: 'string',
+                  enum: [ 'sunrise', 'sunset' ]
+                }
+              }
+            }, {
+              type: 'object',
+              properties: {
+                hour: {
+                  required: true,
+                  type: 'number'
+                },
+                minute: {
+                  required: true,
+                  type: 'number'
+                }
+              }
+            }]
+          }
+        }
+      }
+    }
+  }
+};
