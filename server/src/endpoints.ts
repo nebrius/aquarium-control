@@ -23,7 +23,7 @@ import * as request from 'request';
 import { IConfig } from './common/IConfig';
 import { isUserRegistered } from './db';
 import { getEnvironmentVariable } from './util';
-import { getTemperatureHistory, getDeviceForUserId, getState } from './db';
+import { getTemperatureHistory, getDeviceForUserId, getUser, getState } from './db';
 
 const DEFAULT_PORT = 3001;
 
@@ -119,7 +119,11 @@ export function init(cb: (err: Error | undefined) => void): void {
   });
 
   app.get('/', (req, res) => {
-    res.render('index', { facebookAppId: getEnvironmentVariable('FACEBOOK_APP_ID') });
+    res.render('index');
+  });
+
+  app.get('/api/user', ensureAuthentication, (req: IRequest, res) => {
+    res.send(getUser(req.userId));
   });
 
   app.get('/api/state', ensureAuthentication, (req: IRequest, res) => {
@@ -143,11 +147,12 @@ export function init(cb: (err: Error | undefined) => void): void {
     const body: IConfig = req.body;
     console.log(body);
     res.send('ok');
+    // TODO
   });
 
   app.get('/api/temperatures', ensureAuthentication, (req, res) => {
     const period = req.query.period;
-    if (period !== 'day' && period !== 'week') {
+    if (period !== 'day' && period !== 'month') {
       res.sendStatus(400);
       return;
     }

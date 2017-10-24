@@ -21,7 +21,7 @@ import { Provider } from 'react-redux'
 import { Root } from './components/Root';
 import { store } from './util/store';
 import { request } from './util/api';
-import { stateUpdateFailed, stateUpdateSucceeded } from './actions/actions';
+import { stateUpdateFailed, stateUpdateSucceeded, userUpdateFailed, userUpdateSucceeded } from './actions/actions';
 
 const STATE_UPDATE_RATE = 5000;
 
@@ -39,6 +39,17 @@ function updateState() {
   })
 }
 updateState();
+
+request({
+  endpoint: 'user',
+  method: 'GET'
+}, (err, result) => {
+  if (err) {
+    store.dispatch(userUpdateFailed());
+  } else {
+    store.dispatch(userUpdateSucceeded(result));
+  }
+});
 
 render(
   (

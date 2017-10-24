@@ -15,19 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Reducer } from 'redux';
-import { IAction } from '../actions/actions';
-import { IAquariumConfig } from '../util/IAppState';
-
-export const aquariumConfigReducer: Reducer<IAquariumConfig> = (state: IAquariumConfig, action: IAction) => {
-  switch (action.type) {
-    default:
-      if (state) {
-        return state;
-      }
-      return {
-        config: undefined,
-        currentConfigValid: false
-      };
-  }
-};
+export interface IUser {
+  userId: string;
+  deviceId: string;
+  timezone: string;
+}

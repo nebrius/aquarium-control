@@ -15,9 +15,11 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { IState } from '../util/IAppState';
+import { IState, IUser } from '../util/IAppState';
 
 export const ACTIONS = {
+  USER_UPDATE_SUCCEEDED: 'USER_UPDATE_SUCCEEDED',
+  USER_UPDATE_FAILED: 'USER_UPDATE_FAILED',
   STATE_UPDATE_SUCCEEDED: 'STATE_UPDATE_SUCCEEDED',
   STATE_UPDATE_FAILED: 'STATE_UPDATE_FAILED',
 };
@@ -26,9 +28,26 @@ export interface IAction {
   type: string;
 }
 
-export interface ILoginSucceededAction extends IAction {
-  accessToken: string;
+// User Actions
+
+export interface IUserUpdateSeucceededAction extends IAction {
+  userInfo: IUser;
 }
+
+export function userUpdateSucceeded(userInfo: IUser): IUserUpdateSeucceededAction {
+  return {
+    type: ACTIONS.USER_UPDATE_SUCCEEDED,
+    userInfo
+  };
+}
+
+export function userUpdateFailed(): IAction {
+  return {
+    type: ACTIONS.USER_UPDATE_FAILED
+  };
+}
+
+// State Actions
 
 export interface IStateUpdateSucceededAction extends IAction {
   aquariumState: IState;

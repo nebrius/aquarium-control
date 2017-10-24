@@ -22,6 +22,22 @@ let connection;
 let isConnected = false;
 const userInfoCache = {};
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
+function getDeviceForUserId(userId) {
+    return userInfoCache[userId].deviceId;
+}
+exports.getDeviceForUserId = getDeviceForUserId;
+function getTimezoneForUserId(userId) {
+    return userInfoCache[userId].timezone;
+}
+exports.getTimezoneForUserId = getTimezoneForUserId;
+function getUser(userId) {
+    return {
+        userId,
+        deviceId: getDeviceForUserId(userId),
+        timezone: getTimezoneForUserId(userId)
+    };
+}
+exports.getUser = getUser;
 function init(cb) {
     console.log('Connecting to Azure SQL');
     connection = new tedious_1.Connection({
@@ -65,6 +81,18 @@ function queueRequest(operation) {
     queryRequests.push(operation);
     pump();
 }
+function processDailyTemperatures(cb) {
+    if (!isConnected) {
+        throw new Error('Tried to see if user is registered while not connected to the database');
+    }
+}
+exports.processDailyTemperatures = processDailyTemperatures;
+function processMonthlyTemperatures(cb) {
+    if (!isConnected) {
+        throw new Error('Tried to see if user is registered while not connected to the database');
+    }
+}
+exports.processMonthlyTemperatures = processMonthlyTemperatures;
 function isUserRegistered(userId, cb) {
     if (!isConnected) {
         throw new Error('Tried to see if user is registered while not connected to the database');
@@ -74,7 +102,7 @@ function isUserRegistered(userId, cb) {
         return;
     }
     queueRequest((done) => {
-        const query = `SELECT deviceId FROM aquarium_users WHERE facebookId=@userId`;
+        const query = `SELECT deviceId, timezone FROM aquarium_users WHERE facebookId=@userId`;
         const request = new tedious_1.Request(query, (err, rowCount, rows) => {
             done();
             if (err) {
@@ -84,11 +112,14 @@ function isUserRegistered(userId, cb) {
                 cb(undefined, false);
             }
             else if (rowCount === 1) {
-                if (!rows[0].hasOwnProperty('deviceId') || !rows[0].deviceId.value) {
-                    cb(new Error(`Received result without deviceId property`), undefined);
+                if (!rows[0].hasOwnProperty('deviceId') || !rows[0].hasOwnProperty('timezone')) {
+                    cb(new Error(`Received result without deviceId and/or timezone property`), undefined);
                 }
                 else {
-                    userInfoCache[userId] = rows[0].deviceId.value;
+                    userInfoCache[userId] = {
+                        deviceId: rows[0].deviceId.value,
+                        timezone: rows[0].timezone.value
+                    };
                     cb(undefined, true);
                 }
             }
@@ -101,10 +132,6 @@ function isUserRegistered(userId, cb) {
     });
 }
 exports.isUserRegistered = isUserRegistered;
-function getDeviceForUserId(userId) {
-    return userInfoCache[userId];
-}
-exports.getDeviceForUserId = getDeviceForUserId;
 function saveConfig(deviceId, config, cb) {
     if (!isConnected) {
         throw new Error('Tried to save config while not connected to the database');
@@ -162,7 +189,7 @@ function getTemperatureHistory(deviceId, period, cb) {
         case 'day':
             cutoffDate -= DAY_IN_MS;
             break;
-        case 'week':
+        case 'month':
             cutoffDate -= DAY_IN_MS * 7;
             break;
         default:

@@ -31,13 +31,16 @@ export const aquariumStateReducer: Reducer<IAquariumState> = (state: IAquariumSt
       };
     case ACTIONS.STATE_UPDATE_SUCCEEDED:
       const aquariumState = (action as IStateUpdateSucceededAction).aquariumState;
-      return ({
+      return {
         state: aquariumState,
         currentStateValid: true,
         currentStateStale: Date.now() - aquariumState.currentTime > STALE_DURATION
-      } as IAquariumState);
+      };
     default:
-      return state || {
+      if (state) {
+        return state;
+      }
+      return {
         state: undefined,
         currentStateValid: false,
         currentStateStale: false

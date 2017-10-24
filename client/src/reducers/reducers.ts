@@ -18,8 +18,10 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 import { combineReducers } from 'redux';
 import { aquariumStateReducer } from './aquariumStateReducer';
 import { aquariumConfigReducer } from './aquariumConfigReducer';
+import { aquariumUserReducer } from './aquariumUserReducer';
 
 export const reducers = combineReducers({
   aquariumState: aquariumStateReducer,
-  aquariumConfig: aquariumConfigReducer
+  aquariumConfig: aquariumConfigReducer,
+  aquariumUser: aquariumUserReducer
 });

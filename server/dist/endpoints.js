@@ -107,7 +107,10 @@ function init(cb) {
         }
     });
     app.get('/', (req, res) => {
-        res.render('index', { facebookAppId: util_1.getEnvironmentVariable('FACEBOOK_APP_ID') });
+        res.render('index');
+    });
+    app.get('/api/user', ensureAuthentication, (req, res) => {
+        res.send(db_2.getUser(req.userId));
     });
     app.get('/api/state', ensureAuthentication, (req, res) => {
         db_2.getState(db_2.getDeviceForUserId(req.userId), (err, state) => {
@@ -129,10 +132,11 @@ function init(cb) {
         const body = req.body;
         console.log(body);
         res.send('ok');
+        // TODO
     });
     app.get('/api/temperatures', ensureAuthentication, (req, res) => {
         const period = req.query.period;
-        if (period !== 'day' && period !== 'week') {
+        if (period !== 'day' && period !== 'month') {
             res.sendStatus(400);
             return;
         }

@@ -16,12 +16,15 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { connect } from 'react-redux';
-import { IAppState, IAquariumState } from '../util/IAppState';
+import { IAppState } from '../util/IAppState';
 import { IAction } from '../actions/actions';
 import { State } from '../components/State';
 
-function mapStateToProps(state: IAppState): IAquariumState {
-  return state.aquariumState;
+function mapStateToProps(state: IAppState) {
+  return {
+    state: state.aquariumState,
+    user: state.aquariumUser
+  };
 }
 
 function mapDispatchToProps(dispatch: (action: IAction) => any) {

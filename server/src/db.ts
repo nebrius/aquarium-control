@@ -17,14 +17,31 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import { IConfig } from './common/IConfig';
 import { IState } from './common/IState';
+import { IUser } from './common/IUser';
 import { getEnvironmentVariable } from './util';
 import { Connection, Request, TYPES } from 'tedious';
 
 let connection: Connection;
 let isConnected = false;
-const userInfoCache: { [ userId: string ]: string } = {};
+const userInfoCache: { [ userId: string ]: { deviceId: string, timezone: string } } = {};
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+export function getDeviceForUserId(userId: string): string {
+  return userInfoCache[userId].deviceId;
+}
+
+export function getTimezoneForUserId(userId: string): string {
+  return userInfoCache[userId].timezone;
+}
+
+export function getUser(userId: string): IUser {
+  return {
+    userId,
+    deviceId: getDeviceForUserId(userId),
+    timezone: getTimezoneForUserId(userId)
+  };
+}
 
 export function init(cb: (err: Error | undefined) => void): void {
 
@@ -76,6 +93,18 @@ function queueRequest(operation: IQueryRequest): void {
   pump();
 }
 
+export function processDailyTemperatures(cb: (err: Error | undefined) => void): void {
+  if (!isConnected) {
+    throw new Error('Tried to see if user is registered while not connected to the database');
+  }
+}
+
+export function processMonthlyTemperatures(cb: (err: Error | undefined) => void): void {
+  if (!isConnected) {
+    throw new Error('Tried to see if user is registered while not connected to the database');
+  }
+}
+
 export function isUserRegistered(userId: string, cb: (err: Error | undefined, isRegistered: boolean | undefined) => void): void {
   if (!isConnected) {
     throw new Error('Tried to see if user is registered while not connected to the database');
@@ -85,7 +114,7 @@ export function isUserRegistered(userId: string, cb: (err: Error | undefined, is
     return;
   }
   queueRequest((done) => {
-    const query = `SELECT deviceId FROM aquarium_users WHERE facebookId=@userId`;
+    const query = `SELECT deviceId, timezone FROM aquarium_users WHERE facebookId=@userId`;
     const request = new Request(query, (err, rowCount, rows) => {
       done();
       if (err) {
@@ -93,10 +122,13 @@ export function isUserRegistered(userId: string, cb: (err: Error | undefined, is
       } else if (rowCount === 0) {
         cb(undefined, false);
       } else if (rowCount === 1) {
-        if (!rows[0].hasOwnProperty('deviceId') || !rows[0].deviceId.value) {
-          cb(new Error(`Received result without deviceId property`), undefined);
+        if (!rows[0].hasOwnProperty('deviceId') || !rows[0].hasOwnProperty('timezone')) {
+          cb(new Error(`Received result without deviceId and/or timezone property`), undefined);
         } else {
-          userInfoCache[userId] = rows[0].deviceId.value;
+          userInfoCache[userId] = {
+            deviceId: rows[0].deviceId.value,
+            timezone: rows[0].timezone.value
+          };
           cb(undefined, true);
         }
       } else {
@@ -106,10 +138,6 @@ export function isUserRegistered(userId: string, cb: (err: Error | undefined, is
     request.addParameter('userId', TYPES.VarChar, userId);
     connection.execSql(request);
   });
-}
-
-export function getDeviceForUserId(userId: string): string {
-  return userInfoCache[userId];
 }
 
 export function saveConfig(deviceId: string, config: IConfig, cb: (err: Error | undefined) => void): void {
@@ -161,7 +189,7 @@ export interface ITemperatureReading {
   temperature: number
 }
 
-export function getTemperatureHistory(deviceId: string, period: 'day' | 'week', cb: (err: Error | undefined, temperatures: ITemperatureReading[] | undefined) => void) {
+export function getTemperatureHistory(deviceId: string, period: 'day' | 'month', cb: (err: Error | undefined, temperatures: ITemperatureReading[] | undefined) => void) {
   if (!isConnected) {
     throw new Error('Tried to get day temperature while not connected to the database');
   }
@@ -173,7 +201,7 @@ export function getTemperatureHistory(deviceId: string, period: 'day' | 'week', 
     case 'day':
       cutoffDate -= DAY_IN_MS;
       break;
-    case 'week':
+    case 'month':
       cutoffDate -= DAY_IN_MS * 7;
       break;
     default:

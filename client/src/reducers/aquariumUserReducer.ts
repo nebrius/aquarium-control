@@ -16,18 +16,29 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { Reducer } from 'redux';
-import { IAction } from '../actions/actions';
-import { IAquariumConfig } from '../util/IAppState';
+import { ACTIONS, IAction, IUserUpdateSeucceededAction } from '../actions/actions';
+import { IAquariumUser } from '../util/IAppState';
 
-export const aquariumConfigReducer: Reducer<IAquariumConfig> = (state: IAquariumConfig, action: IAction) => {
+export const aquariumUserReducer: Reducer<IAquariumUser> = (state: IAquariumUser, action: IAction) => {
   switch (action.type) {
+    case ACTIONS.USER_UPDATE_FAILED:
+      return {
+        user: undefined,
+        currentUserValid: false
+      };
+    case ACTIONS.USER_UPDATE_SUCCEEDED:
+      const user = (action as IUserUpdateSeucceededAction).userInfo;
+      return {
+        user,
+        currentUserValid: true
+      };
     default:
       if (state) {
         return state;
       }
       return {
-        config: undefined,
-        currentConfigValid: false
+        user: undefined,
+        currentUserValid: false
       };
   }
 };

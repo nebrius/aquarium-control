@@ -16,20 +16,19 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-import { IAquariumState } from '../util/IAppState';
+import { IAquariumState, IAquariumUser } from '../util/IAppState';
+import { formatDate, capitalizeFirstLetter } from '../util/format';
 import { StateEntry } from './StateEntry';
-import * as moment from 'moment';
 
-function formatDate(timestamp: number): string {
-  return moment(timestamp).format('MMM D YYYY h:mm a');
+export interface IStateProps {
+  state: IAquariumState;
+  user: IAquariumUser;
 }
 
-function capitalizeFirstLetter(value: string): string {
-  return value[0].toUpperCase() + value.substr(1);
-}
-
-export function State(props: IAquariumState): JSX.Element {
-  if (!props.currentStateValid || !props.state) {
+export function State(props: IStateProps): JSX.Element {
+  if (!props.state.currentStateValid || !props.state || !props.state.state ||
+    !props.user.currentUserValid || !props.user || !props.user.user
+  ) {
     return (
       <div>
         <div><h1>Current State</h1></div>
@@ -38,27 +37,29 @@ export function State(props: IAquariumState): JSX.Element {
     );
   }
   let banner: JSX.Element | undefined;
-  if (props.currentStateStale) {
+  if (props.state.currentStateStale) {
     banner = (
       <div className="alert alert-warning">Current state information is outdated. Is the Raspberry Pi offline?</div>
     );
   }
+  const state = props.state.state;
+  const timezone = props.user.user.timezone;
   return (
     <div>
       <div><h1>Current State</h1></div>
       {banner}
       <div className="state-current-container">
         <div className="state-current-group-container">
-          <StateEntry label="Current Mode" value={capitalizeFirstLetter(props.state.currentMode)} />
-          <StateEntry label="Current Time" value={formatDate(props.state.currentTime)} />
-          <StateEntry label="Current State" value={capitalizeFirstLetter(props.state.currentState)} />
+          <StateEntry label="Current Mode" value={capitalizeFirstLetter(state.currentMode)} />
+          <StateEntry label="Current Time" value={formatDate(state.currentTime, timezone)} />
+          <StateEntry label="Current State" value={capitalizeFirstLetter(state.currentState)} />
         </div>
         <div className="state-current-group-container">
-          <StateEntry label="Next Transition Time" value={formatDate(props.state.nextTransitionTime)} />
-          <StateEntry label="Next Transitition State" value={capitalizeFirstLetter(props.state.nextTransitionState)} />
+          <StateEntry label="Next Transition Time" value={formatDate(state.nextTransitionTime, timezone)} />
+          <StateEntry label="Next Transitition State" value={capitalizeFirstLetter(state.nextTransitionState)} />
         </div>
         <div className="state-current-group-container">
-          <StateEntry label="Current Temperature" value={props.state.currentTemperature + ' C'} />
+          <StateEntry label="Current Temperature" value={state.currentTemperature + ' C'} />
         </div>
       </div>
     </div>

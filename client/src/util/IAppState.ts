@@ -15,11 +15,13 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { IUser } from '../common/IUser';
 import { IState } from '../common/IState';
 import { IConfig } from '../common/IConfig';
 
 export { IState } from '../common/IState';
 export { IConfig } from '../common/IConfig';
+export { IUser } from '../common/IUser';
 
 export interface IAquariumState {
   state?: IState;
@@ -32,7 +34,13 @@ export interface IAquariumConfig {
   currentConfigValid: boolean;
 }
 
+export interface IAquariumUser {
+  user?: IUser;
+  currentUserValid: boolean;
+}
+
 export interface IAppState {
   aquariumState: IAquariumState;
   aquariumConfig: IAquariumConfig;
+  aquariumUser: IAquariumUser;
 }
