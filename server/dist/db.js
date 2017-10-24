@@ -122,7 +122,7 @@ function getState(deviceId, cb) {
         throw new Error('Tried to get state while not connected to the database');
     }
     queueRequest((done) => {
-        const query = `SELECT TOP(1) * FROM aquarium_state WHERE deviceId=@deviceId`;
+        const query = `SELECT TOP(1) * FROM aquarium_state WHERE deviceId=@deviceId ORDER BY currentTime DESC`;
         const request = new tedious_1.Request(query, (err, rowCount, rows) => {
             done();
             if (err) {

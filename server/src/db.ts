@@ -129,7 +129,7 @@ export function getState(deviceId: string, cb: (err: Error | undefined, state: I
     throw new Error('Tried to get state while not connected to the database');
   }
   queueRequest((done) => {
-    const query = `SELECT TOP(1) * FROM aquarium_state WHERE deviceId=@deviceId`;
+    const query = `SELECT TOP(1) * FROM aquarium_state WHERE deviceId=@deviceId ORDER BY currentTime DESC`;
     const request = new Request(query, (err, rowCount, rows) => {
       done();
       if (err) {
