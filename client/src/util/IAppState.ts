@@ -25,18 +25,16 @@ export { IUser } from '../common/IUser';
 
 export interface IAquariumState {
   state?: IState;
-  currentStateValid: boolean;
   currentStateStale: boolean;
 }
 
 export interface IAquariumConfig {
   config?: IConfig;
-  currentConfigValid: boolean;
+  saveStatus: 'pending' | 'failed' | 'succeeded' | 'none';
 }
 
 export interface IAquariumUser {
   user?: IUser;
-  currentUserValid: boolean;
 }
 
 export interface IAppState {

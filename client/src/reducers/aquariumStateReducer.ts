@@ -16,21 +16,21 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { Reducer } from 'redux';
-import { ACTIONS, IAction, IStateUpdateSucceededAction } from '../actions/actions';
+import { ACTIONS, IAction, IStateFetchSucceededAction } from '../actions/actions';
 import { IAquariumState } from '../util/IAppState';
 
 const STALE_DURATION = 20 * 60 * 1000;
 
 export const aquariumStateReducer: Reducer<IAquariumState> = (state: IAquariumState, action: IAction) => {
   switch (action.type) {
-    case ACTIONS.STATE_UPDATE_FAILED:
+    case ACTIONS.STATE_FETCH_FAILED:
       return {
         state: undefined,
         currentStateValid: false,
         currentStateStale: false
       };
-    case ACTIONS.STATE_UPDATE_SUCCEEDED:
-      const aquariumState = (action as IStateUpdateSucceededAction).aquariumState;
+    case ACTIONS.STATE_FETCH_SUCCEEDED:
+      const aquariumState = (action as IStateFetchSucceededAction).aquariumState;
       return {
         state: aquariumState,
         currentStateValid: true,

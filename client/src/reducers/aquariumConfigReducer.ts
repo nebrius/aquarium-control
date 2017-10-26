@@ -16,18 +16,46 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { Reducer } from 'redux';
-import { IAction } from '../actions/actions';
-import { IAquariumConfig } from '../util/IAppState';
+import { IAction, ACTIONS, IConfigFetchSucceededAction, IConfigUpdateSucceededAction } from '../actions/actions';
+import { IAquariumConfig, IConfig } from '../util/IAppState';
 
 export const aquariumConfigReducer: Reducer<IAquariumConfig> = (state: IAquariumConfig, action: IAction) => {
+  let aquariumConfig: IConfig;
   switch (action.type) {
+    case ACTIONS.CONFIG_FETCH_SUCCEEDED:
+      aquariumConfig = (action as IConfigFetchSucceededAction).aquariumConfig;
+      return {
+        config: aquariumConfig,
+        saveStatus: state.saveStatus
+      };
+    case ACTIONS.CONFIG_FETCH_FAILED:
+      return {
+        config: undefined,
+        saveStatus: state.saveStatus
+      };
+    case ACTIONS.CONFIG_REQUEST_UPDATE:
+      return {
+        config: state.config,
+        saveStatus: 'pending'
+      };
+    case ACTIONS.CONFIG_UPDATE_SUCCEEDED:
+      aquariumConfig = (action as IConfigUpdateSucceededAction).aquariumConfig;
+      return {
+        config: aquariumConfig,
+        saveStatus: 'succeeded'
+      };
+    case ACTIONS.CONFIG_UPDATE_FAILED:
+      return {
+        config: state.config,
+        saveStatus: 'failed'
+      };
     default:
       if (state) {
         return state;
       }
       return {
         config: undefined,
-        currentConfigValid: false
+        saveStatus: 'none'
       };
   }
 };

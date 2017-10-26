@@ -148,7 +148,7 @@ function init(cb) {
                 res.sendStatus(500);
             }
             else {
-                res.send('ok');
+                res.send({ result: 'ok' });
             }
         });
     });

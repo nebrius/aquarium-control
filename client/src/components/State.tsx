@@ -26,9 +26,7 @@ export interface IStateProps {
 }
 
 export function State(props: IStateProps): JSX.Element {
-  if (!props.state.currentStateValid || !props.state || !props.state.state ||
-    !props.user.currentUserValid || !props.user || !props.user.user
-  ) {
+  if (!props.state || !props.state.state || !props.user || !props.user.user) {
     return (
       <div>
         <div><h1>Current State</h1></div>

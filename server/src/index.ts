@@ -30,6 +30,6 @@ export function run(): void {
       console.error(err.message || err);
       process.exit(-1);
     }
-    console.log('Aquarium Control API running');
+    console.log('Aquarium Control server running');
   });
 }

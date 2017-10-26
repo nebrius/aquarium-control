@@ -160,7 +160,7 @@ export function init(cb: (err: Error | undefined) => void): void {
       if (err) {
         res.sendStatus(500);
       } else {
-        res.send('ok');
+        res.send({ result: 'ok' });
       }
     });
   });

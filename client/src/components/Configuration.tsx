@@ -16,10 +16,16 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-import { IAquariumConfig } from '../util/IAppState';
+import { IAquariumConfig, IConfig } from '../util/IAppState';
+import { ConfigurationDetails } from './ConfigurationDetails';
 
-export function Configuration(props: IAquariumConfig): JSX.Element {
-  if (!props.currentConfigValid) {
+export interface IConfigurationProps {
+  config: IAquariumConfig;
+  requestConfigUpdate: (newConfig: IConfig) => void;
+}
+
+export function Configuration(props: IConfigurationProps): JSX.Element {
+  if (!props.config.config) {
     return (
       <div>
         <div><h1>Configuration</h1></div>
@@ -28,8 +34,10 @@ export function Configuration(props: IAquariumConfig): JSX.Element {
     );
   }
   return (
-    <div>
-      <div><h1>Configuration</h1></div>
-    </div>
+    <ConfigurationDetails
+      config={props.config.config}
+      saveStatus={props.config.saveStatus}
+      requestConfigUpdate={props.requestConfigUpdate}
+      />
   );
 }

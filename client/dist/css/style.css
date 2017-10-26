@@ -58,3 +58,11 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
   font-weight: bold;
   margin-right: 10px;
 }
+
+.configuration-category {
+  margin: 10px 0px 20px 5px;
+}
+
+.configuration-category > h3 {
+  margin-bottom: 5px;
+}

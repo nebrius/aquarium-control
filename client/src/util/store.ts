@@ -21,13 +21,11 @@ import { reducers } from '../reducers/reducers';
 
 const preloadedState: IAppState = {
   aquariumUser: {
-    currentUserValid: false
   },
   aquariumConfig: {
-    currentConfigValid: false
+    saveStatus: 'none'
   },
   aquariumState: {
-    currentStateValid: false,
     currentStateStale: false
   }
 };

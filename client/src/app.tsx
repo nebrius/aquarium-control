@@ -21,7 +21,14 @@ import { Provider } from 'react-redux'
 import { Root } from './components/Root';
 import { store } from './util/store';
 import { request } from './util/api';
-import { stateUpdateFailed, stateUpdateSucceeded, userUpdateFailed, userUpdateSucceeded } from './actions/actions';
+import {
+  stateFetchFailed,
+  stateFetchSucceeded,
+  userFetchFailed,
+  userFetchSucceeded,
+  configFetchFailed,
+  configFetchSucceeded
+} from './actions/actions';
 
 const STATE_UPDATE_RATE = 5000;
 
@@ -31,9 +38,9 @@ function updateState() {
     method: 'GET',
   }, (err, result) => {
     if (err) {
-      store.dispatch(stateUpdateFailed());
+      store.dispatch(stateFetchFailed());
     } else {
-      store.dispatch(stateUpdateSucceeded(result));
+      store.dispatch(stateFetchSucceeded(result));
     }
     setTimeout(updateState, STATE_UPDATE_RATE);
   })
@@ -45,9 +52,20 @@ request({
   method: 'GET'
 }, (err, result) => {
   if (err) {
-    store.dispatch(userUpdateFailed());
+    store.dispatch(userFetchFailed());
   } else {
-    store.dispatch(userUpdateSucceeded(result));
+    store.dispatch(userFetchSucceeded(result));
+  }
+});
+
+request({
+  endpoint: 'config',
+  method: 'GET'
+}, (err, result) => {
+  if (err) {
+    store.dispatch(configFetchFailed());
+  } else {
+    store.dispatch(configFetchSucceeded(result.config));
   }
 });
 
