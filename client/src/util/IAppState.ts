@@ -21,6 +21,7 @@ import { IConfig } from '../common/IConfig';
 
 export { IState } from '../common/IState';
 export { IConfig } from '../common/IConfig';
+export { IScheduleEntry, IDynamicScheduleEntry, IManualScheduleEntry } from '../common/IConfig';
 export { IUser } from '../common/IUser';
 
 export interface IAquariumState {

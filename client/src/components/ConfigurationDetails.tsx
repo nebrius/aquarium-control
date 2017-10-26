@@ -16,8 +16,9 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-import { IConfig } from '../util/IAppState';
+import { IConfig, IScheduleEntry } from '../util/IAppState';
 import { ButtonBar } from './ButtonBar';
+import { ScheduleEntry } from './ScheduleEntry';
 
 import equals = require('deep-equal');
 
@@ -77,6 +78,13 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
         detailedConfig = (
           <div className="configuration-category">
             <h3>Schedule</h3>
+            {this.props.config.schedule.map((entry, index) => (
+              <ScheduleEntry
+                entry={entry}
+                entryUpdated={(newEntry) => this._handleScheduleEntryChanged(index, newEntry)}
+                entryMovedUp={() => this._handleScheduleEntryMovedUp(index)}
+                entryMovedDown={() => this._handleScheduleEntryMovedDown(index)} />
+            ))}
           </div>
         );
         break;
@@ -152,6 +160,18 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
       };
       return newState;
     });
+  }
+
+  private _handleScheduleEntryChanged(index: number, newEntry: IScheduleEntry) {
+    console.log(index, newEntry);
+  }
+
+  private _handleScheduleEntryMovedUp(index: number) {
+    console.log(index);
+  }
+
+  private _handleScheduleEntryMovedDown(index: number) {
+    console.log(index);
   }
 
   private _handleSubmit(event: React.FormEvent<HTMLFormElement>) {
