@@ -10,7 +10,8 @@
     "quotemark": [ true, "single" ],
     "semicolon": "always",
     "trailing-comma": "never",
-    "ordered-imports": false
+    "ordered-imports": false,
+    "object-literal-sort-keys": false
   },
   "rulesDirectory": []
 }

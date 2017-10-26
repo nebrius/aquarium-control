@@ -22,9 +22,11 @@
   "license": "GPL-3.0",
   "devDependencies": {
     "@types/async": "^2.0.42",
+    "@types/deep-equal": "^1.0.1",
     "@types/make-dir": "^1.0.1",
     "@types/mqtt": "0.0.34",
     "@types/node": "^8.0.28",
+    "@types/revalidator": "^0.3.5",
     "rimraf": "^2.6.2",
     "tslint": "^5.7.0",
     "typescript": "^2.5.2"
@@ -33,10 +35,12 @@
     "async": "^2.5.0",
     "azure-iot-device": "^1.1.17",
     "azure-iot-device-mqtt": "^1.1.17",
+    "deep-equal": "^1.0.1",
     "make-dir": "^1.0.0",
     "raspi": "^5.0.1",
     "raspi-gpio": "^5.0.0",
     "raspi-onewire": "^1.0.1",
+    "revalidator": "^0.3.1",
     "suncalc": "^1.8.0"
   }
 }

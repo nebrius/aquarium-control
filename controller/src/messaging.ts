@@ -17,12 +17,12 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import { Client, Message } from 'azure-iot-device';
 import { Mqtt as Protocol } from 'azure-iot-device-mqtt';
-
-import { IConfig } from './common/IConfig';
+import { validate } from 'revalidator';
+import { IConfig, configValidationSchema } from './common/IConfig';
 import { IState } from './common/IState';
 import { state } from './state';
 
-let client: Client;
+import equals = require('deep-equal');
 
 export function init(cb: (err: Error | undefined) => void): void {
   const IOT_HUB_DEVICE_CONNECTION_STRING = process.env.IOT_HUB_DEVICE_CONNECTION_STRING;
@@ -30,37 +30,54 @@ export function init(cb: (err: Error | undefined) => void): void {
     throw new Error('Environment variable IOT_HUB_DEVICE_CONNECTION_STRING is not defined');
   }
   console.log('Connecting to IoT Hub');
-  client = Client.fromConnectionString(IOT_HUB_DEVICE_CONNECTION_STRING, Protocol);
+  const client = Client.fromConnectionString(IOT_HUB_DEVICE_CONNECTION_STRING, Protocol);
   client.open((err) => {
     if (err) {
       cb(err);
       return;
     }
+
     client.on('error', (err) => console.error(err));
     client.on('disconnect', () => client.removeAllListeners());
-    client.on('message', (msg: Message) => {
-      try {
-        const newConfig: IConfig = JSON.parse(msg.getData().toString());
-        client.complete(msg, () => {
-          state.setConfig(newConfig);
-        });
-      } catch(e) {
-        client.reject(msg, e);
-      }
-    });
-    console.log('Connected to IoT Hub');
-    cb(undefined);
 
-    state.on('change-state', (newState: IState) => {
-      const message = new Message(JSON.stringify(newState));
-      console.log('Sending message: ' + message.getData());
-      client.sendEvent(message, (err, res) => {
-        if (err) {
-          console.error(`Send error: ${err}`);
-        } else if (res) {
-          console.log(`Send status: ${res.constructor.name}`);
+    client.getTwin((err, twin) => {
+      if (err || !twin) {
+        cb(err || new Error('Could not get device Twin'));
+        return;
+      }
+
+      twin.properties.reported.config = JSON.stringify(state.getState());
+
+      // Read configuration changes from the cloud to the device
+      twin.on('properties.desired', (desiredChange) => {
+
+        // Validate the incoming data and see if there are any changes, if so save it
+        const newConfig: IConfig = JSON.parse(desiredChange.config);
+        if (validate(newConfig, configValidationSchema).valid && !equals(state.getConfig(), newConfig)) {
+          state.setConfig(newConfig);
+        }
+
+        // Check if we don't need to acknowledge receipt of the changes and skip if so
+        if (twin.properties.desired.$version === twin.properties.reported.$version) {
+          return;
         }
       });
+
+      // Send state changes from the device to the cloud
+      state.on('change-state', (newState: IState) => {
+        const message = new Message(JSON.stringify(newState));
+        console.log('Sending message: ' + message.getData());
+        client.sendEvent(message, (err, res) => {
+          if (err) {
+            console.error(`Send error: ${err}`);
+          } else if (res) {
+            console.log(`Send status: ${res.constructor.name}`);
+          }
+        });
+      });
+
+      console.log('Connected to IoT Hub');
+      cb(undefined);
     });
   });
 }

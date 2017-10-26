@@ -1,3 +1,4 @@
+"use strict";
 /*
 Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
 
@@ -14,23 +15,5 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-declare module 'suncalc' {
-  interface ITimes {
-    sunrise: Date;
-    sunriseEnd: Date;
-    goldenHourEnd: Date;
-    solarNoon: Date;
-    goldenHour: Date;
-    sunsetStart: Date;
-    sunset: Date;
-    dusk: Date;
-    nauticalDusk: Date;
-    night: Date;
-    nadir: Date;
-    nightEnd: Date;
-    nauticalDawn: Date;
-    dawn: Date;
-  }
-  export function getTimes(date: Date, latitude: number, longitude: number): ITimes;
-}
+Object.defineProperty(exports, "__esModule", { value: true });
+//# sourceMappingURL=IUser.js.map

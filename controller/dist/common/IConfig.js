@@ -16,4 +16,68 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
+// Force to "any" type, otherwise TypeScript things the type is too strict
+exports.configValidationSchema = {
+    type: 'object',
+    properties: {
+        mode: {
+            required: true,
+            type: 'string',
+            enum: ['program', 'override']
+        },
+        overrideState: {
+            required: true,
+            type: 'string',
+            enum: ['day', 'night', 'off']
+        },
+        schedule: {
+            required: true,
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    name: {
+                        required: true,
+                        type: 'string'
+                    },
+                    type: {
+                        required: true,
+                        type: 'string',
+                        enum: ['dynamic', 'manual']
+                    },
+                    state: {
+                        required: true,
+                        type: 'string',
+                        enum: ['day', 'night', 'off']
+                    },
+                    details: {
+                        required: true,
+                        oneOf: [{
+                                type: 'object',
+                                properties: {
+                                    event: {
+                                        required: true,
+                                        type: 'string',
+                                        enum: ['sunrise', 'sunset']
+                                    }
+                                }
+                            }, {
+                                type: 'object',
+                                properties: {
+                                    hour: {
+                                        required: true,
+                                        type: 'number'
+                                    },
+                                    minute: {
+                                        required: true,
+                                        type: 'number'
+                                    }
+                                }
+                            }]
+                    }
+                }
+            }
+        }
+    }
+};
 //# sourceMappingURL=IConfig.js.map
