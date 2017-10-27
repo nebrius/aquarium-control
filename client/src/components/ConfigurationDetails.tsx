@@ -19,6 +19,8 @@ import * as React from 'react';
 import { IConfig, IScheduleEntry } from '../util/IAppState';
 import { ButtonBar } from './ButtonBar';
 import { ScheduleEntry } from './ScheduleEntry';
+import * as clone from 'clone';
+import { v4 } from 'uuid';
 
 import equals = require('deep-equal');
 
@@ -37,13 +39,17 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
   constructor(props: IConfigurationDetailsProps) {
     super(props);
     this.state = {
-      unsavedConfig: { ...props.config }
+      unsavedConfig: clone(props.config)
     };
 
     this._handleModeSelect = this._handleModeSelect.bind(this);
-    this._handleScheduleEntryUpdate = this._handleScheduleEntryUpdate.bind(this);
+    this._handleNewScheduleEntryRequested = this._handleNewScheduleEntryRequested.bind(this);
+    this._handleScheduleEntryUpdated = this._handleScheduleEntryUpdated.bind(this);
     this._handleOverrideStateSelect = this._handleOverrideStateSelect.bind(this);
     this._handleSubmit = this._handleSubmit.bind(this);
+    this._handleScheduleEntryDeleted = this._handleScheduleEntryDeleted.bind(this);
+    this._handleScheduleEntryMovedUp = this._handleScheduleEntryMovedUp.bind(this);
+    this._handleScheduleEntryMovedDown = this._handleScheduleEntryMovedDown.bind(this);
   }
 
   public render() {
@@ -76,13 +82,25 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
     let detailedConfig: JSX.Element;
     switch (mode) {
       case 'program':
-        const entries = this.props.config.schedule.map((entry, index) => (
-          <ScheduleEntry key={index} index={index} entry={entry} onEntryChanged={this._handleScheduleEntryUpdate} />
+        const entries = this.state.unsavedConfig.schedule.map((entry, index) => (
+          <ScheduleEntry
+            key={entry.id || v4()}
+            index={index}
+            entry={entry}
+            onEntryChanged={this._handleScheduleEntryUpdated}
+            onEntryDeleted={this._handleScheduleEntryDeleted}
+            onEntryMovedUp={this._handleScheduleEntryMovedUp}
+            onEntryMovedDown={this._handleScheduleEntryMovedDown}
+          />
         ));
         detailedConfig = (
           <div className="configuration-category">
             <h3>Schedule</h3>
-            <button type="button" className="btn btn-info">Add new entry</button>
+            <button
+              type="button"
+              className="btn btn-info"
+              onClick={this._handleNewScheduleEntryRequested}
+            >Add new entry</button>
             {entries}
           </div>
         );
@@ -107,7 +125,7 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
         throw new Error(`Internal Error: Unknown mode ${mode}`);
     }
 
-    const hasUnsavedChanges = !equals(this.state.unsavedConfig, this.props.config);
+    const hasUnsavedChanges = !equals(this.state.unsavedConfig, props.config);
     return (
       <div>
         <div><h2>Configuration</h2></div>
@@ -136,19 +154,68 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
       throw new Error(`Internal Error: Unknown mode ${newMode}`);
     }
     this.setState((previousState) => {
-      const newState: IConfigState = {
-        unsavedConfig: {
-          ...previousState.unsavedConfig,
-          mode: newMode
-        }
-      };
+      const newState = clone(previousState);
+      newState.unsavedConfig.mode = newMode;
       return newState;
     });
   }
 
-  private _handleScheduleEntryUpdate(index: number, newData: IScheduleEntry) {
-    console.log(index);
-    console.log(newData);
+  private _handleNewScheduleEntryRequested() {
+    this.setState((previousState) => {
+      const newState = clone(previousState);
+      newState.unsavedConfig.schedule.push({
+        id: v4(),
+        name: '',
+        type: 'dynamic',
+        state: 'off',
+        details: {
+          event: 'sunrise'
+        }
+      });
+      return newState;
+    });
+  }
+
+  private _handleScheduleEntryUpdated(index: number, newData: IScheduleEntry) {
+    this.setState((previousState) => {
+      const newState = clone(previousState);
+      newState.unsavedConfig.schedule[index] = clone(newData);
+      return newState;
+    });
+  }
+
+  private _handleScheduleEntryDeleted(index: number) {
+    this.setState((previousState) => {
+      const newState = clone(previousState);
+      newState.unsavedConfig.schedule.splice(index, 1);
+      return newState;
+    });
+  }
+
+  private _handleScheduleEntryMovedUp(index: number) {
+    if (index < 1) {
+      return;
+    }
+    this.setState((previousState) => {
+      const newState = clone(previousState);
+      const entryToMove = newState.unsavedConfig.schedule[index];
+      newState.unsavedConfig.schedule.splice(index, 1);
+      newState.unsavedConfig.schedule.splice(index - 1, 0, entryToMove);
+      return newState;
+    });
+  }
+
+  private _handleScheduleEntryMovedDown(index: number) {
+    if (index > this.state.unsavedConfig.schedule.length - 2) {
+      return;
+    }
+    this.setState((previousState) => {
+      const newState = clone(previousState);
+      const entryToMove = newState.unsavedConfig.schedule[index];
+      newState.unsavedConfig.schedule.splice(index, 1);
+      newState.unsavedConfig.schedule.splice(index + 1, 0, entryToMove);
+      return newState;
+    });
   }
 
   private _handleOverrideStateSelect(newOverrideState: string) {
@@ -156,12 +223,8 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
       throw new Error(`Internal Error: Unknown override state ${newOverrideState}`);
     }
     this.setState((previousState) => {
-      const newState: IConfigState = {
-        unsavedConfig: {
-          ...previousState.unsavedConfig,
-          overrideState: newOverrideState
-        }
-      };
+      const newState = clone(previousState);
+      newState.unsavedConfig.overrideState = newOverrideState;
       return newState;
     });
   }

@@ -18,15 +18,19 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 import * as React from 'react';
 import { IScheduleEntry, IDynamicScheduleEntry, IManualScheduleEntry } from '../util/IAppState';
 import { ButtonBar } from './ButtonBar';
+import * as clone from 'clone';
 
 export interface IScheduleEntryProps {
   entry: IScheduleEntry;
   index: number;
   onEntryChanged(index: number, newData: IScheduleEntry): void;
+  onEntryDeleted(index: number): void;
+  onEntryMovedUp(index: number): void;
+  onEntryMovedDown(index: number): void;
 }
 
 interface IScheduleEntryState {
-  editedEntry: IScheduleEntry;
+  unsavedEntry: IScheduleEntry;
 }
 
 export class ScheduleEntry extends React.Component<IScheduleEntryProps, IScheduleEntryState> {
@@ -35,7 +39,7 @@ export class ScheduleEntry extends React.Component<IScheduleEntryProps, ISchedul
     super(props);
 
     this.state = {
-      editedEntry: { ...props.entry }
+      unsavedEntry: clone(props.entry)
     };
 
     this._handleNameChanged = this._handleNameChanged.bind(this);
@@ -44,10 +48,13 @@ export class ScheduleEntry extends React.Component<IScheduleEntryProps, ISchedul
     this._handleTypeChanged = this._handleTypeChanged.bind(this);
     this._handleHourChange = this._handleHourChange.bind(this);
     this._handleMinuteChange = this._handleMinuteChange.bind(this);
+    this._handleDeletePressed = this._handleDeletePressed.bind(this);
+    this._handleUpPressed = this._handleUpPressed.bind(this);
+    this._handleDownPressed = this._handleDownPressed.bind(this);
   }
 
   public render() {
-    const entry = this.props.entry;
+    const entry = this.state.unsavedEntry;
     let details: JSX.Element;
     switch (entry.type) {
       case 'dynamic':
@@ -93,8 +100,8 @@ export class ScheduleEntry extends React.Component<IScheduleEntryProps, ISchedul
     return (
       <div className="schedule-entry-outer-container">
         <div className="schedule-entry-side-control">
-          <button type="button" className="btn btn-info">↑</button>
-          <button type="button" className="btn btn-info">↓</button>
+          <button type="button" className="btn btn-info" onClick={this._handleUpPressed}>↑</button>
+          <button type="button" className="btn btn-info" onClick={this._handleDownPressed}>↓</button>
         </div>
         <div className="sechedule-entry-container">
           <div className="sechedule-entry-column">
@@ -135,34 +142,92 @@ export class ScheduleEntry extends React.Component<IScheduleEntryProps, ISchedul
           </div>
         </div>
         <div className="schedule-entry-side-control">
-          <button type="button" className="btn btn-danger">X</button>
+          <button type="button" className="btn btn-danger" onClick={this._handleDeletePressed}>X</button>
         </div>
       </div>
     );
   }
 
+  private _handleDeletePressed() {
+    this.props.onEntryDeleted(this.props.index);
+  }
+
+  private _handleUpPressed() {
+    this.props.onEntryMovedUp(this.props.index);
+  }
+
+  private _handleDownPressed() {
+    this.props.onEntryMovedDown(this.props.index);
+  }
+
   private _handleNameChanged(event: React.FormEvent<HTMLInputElement>) {
-    console.log(event);
+    const newName = event.currentTarget.value;
+    this.setState((previousState) => {
+      const newState: IScheduleEntryState = {
+        unsavedEntry: {
+          ...previousState.unsavedEntry,
+          name: newName
+        }
+      };
+      this.props.onEntryChanged(this.props.index, newState.unsavedEntry);
+      return newState;
+    });
   }
 
   private _handleEventChanged(event: string) {
-    console.log(event);
+    if (event !== 'sunrise' && event !== 'sunset') {
+      throw new Error(`Internal Error: Unknown event ${event}`);
+    }
+    this.setState((previousState) => {
+      const newState = clone(previousState);
+      (newState.unsavedEntry.details as IDynamicScheduleEntry).event = event;
+      this.props.onEntryChanged(this.props.index, newState.unsavedEntry);
+      return newState;
+    });
   }
 
   private _handleStateChanged(state: string) {
-    console.log(state);
+    if (state !== 'day' && state !== 'night' && state !== 'off') {
+      throw new Error(`Internal Error: Unknown state ${state}`);
+    }
+    this.setState((previousState) => {
+      const newState = clone(previousState);
+      newState.unsavedEntry.state = state;
+      this.props.onEntryChanged(this.props.index, newState.unsavedEntry);
+      return newState;
+    });
   }
 
   private _handleTypeChanged(type: string) {
-    console.log(type);
+    if (type !== 'dynamic' && type !== 'manual') {
+      throw new Error(`Internal Error: Unknown state ${type}`);
+    }
+    this.setState((previousState) => {
+      const newState = clone(previousState);
+      newState.unsavedEntry.type = type;
+      this.props.onEntryChanged(this.props.index, newState.unsavedEntry);
+      return newState;
+    });
   }
 
   private _handleHourChange(event: React.FormEvent<HTMLInputElement>) {
-    console.log(event);
+    const newHour = parseInt(event.currentTarget.value, 10);
+    this.setState((previousState) => {
+      const newState = clone(previousState);
+      (newState.unsavedEntry.details as IManualScheduleEntry).hour = newHour;
+      this.props.onEntryChanged(this.props.index, newState.unsavedEntry);
+      return newState;
+    });
   }
 
   private _handleMinuteChange(event: React.FormEvent<HTMLInputElement>) {
-    console.log(event);
+    const newMinute = parseInt(event.currentTarget.value, 10);
+    this.setState((previousState) => {
+      const newState = clone(previousState);
+      (newState.unsavedEntry.details as IManualScheduleEntry).minute = newMinute;
+      this.props.onEntryChanged(this.props.index, newState.unsavedEntry);
+      return newState;
+    });
   }
 
 }

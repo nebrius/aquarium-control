@@ -16,6 +16,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 export interface IScheduleEntry {
+  id?: string; // Only used in the client, but put here for simplier interop
   name: string;
   type: 'dynamic' | 'manual';
   state: 'day' | 'night' | 'off';
