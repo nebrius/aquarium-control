@@ -53,7 +53,7 @@ export class ScheduleEntry extends React.Component<IScheduleEntryProps, ISchedul
       case 'dynamic':
         details = (
           <div>
-            <span className="configuration-sechedule-entry-label">Event:</span>
+            <span className="sechedule-entry-label">Event:</span>
             <ButtonBar
               items={[
                 { displayName: 'Sunrise', valueName: 'sunrise' },
@@ -68,7 +68,7 @@ export class ScheduleEntry extends React.Component<IScheduleEntryProps, ISchedul
       case 'manual':
         details = (
           <div>
-            <span className="configuration-sechedule-entry-label">Hour:</span>
+            <span className="sechedule-entry-label">Hour:</span>
             <input
               type="number"
               value={(entry.details as IManualScheduleEntry).hour}
@@ -76,7 +76,7 @@ export class ScheduleEntry extends React.Component<IScheduleEntryProps, ISchedul
               max="23"
               onChange={this._handleHourChange}
             />
-            <span className="configuration-sechedule-entry-label" style={{ marginLeft: '7px' }}>Minute:</span>
+            <span className="sechedule-entry-label" style={{ marginLeft: '7px' }}>Minute:</span>
             <input
               type="number"
               value={(entry.details as IManualScheduleEntry).minute}
@@ -91,42 +91,51 @@ export class ScheduleEntry extends React.Component<IScheduleEntryProps, ISchedul
         throw new Error(`Internal Error: unknown schedule type ${entry.type}`);
     }
     return (
-      <div className="configuration-sechedule-entry-container">
-        <div className="configuration-sechedule-entry-column">
-          <div>
-            <span className="configuration-sechedule-entry-label">Name:</span>
-            <input type="text" value={entry.name} onChange={this._handleNameChanged} />
+      <div className="schedule-entry-outer-container">
+        <div className="schedule-entry-side-control">
+          <button type="button" className="btn btn-info">↑</button>
+          <button type="button" className="btn btn-info">↓</button>
+        </div>
+        <div className="sechedule-entry-container">
+          <div className="sechedule-entry-column">
+            <div>
+              <span className="sechedule-entry-label">Name:</span>
+              <input type="text" value={entry.name} onChange={this._handleNameChanged} />
+            </div>
+          </div>
+          <div className="sechedule-entry-column">
+            <div>
+              <span className="sechedule-entry-label">State:</span>
+              <ButtonBar
+                items={[
+                  { displayName: 'Day', valueName: 'day' },
+                  { displayName: 'Night', valueName: 'night' },
+                  { displayName: 'Off', valueName: 'off' }
+                ]}
+                onItemSelected={this._handleStateChanged}
+                defaultValueName={entry.state}
+              />
+            </div>
+          </div>
+          <div className="sechedule-entry-column">
+            <div>
+              <span className="sechedule-entry-label">Type:</span>
+              <ButtonBar
+                items={[
+                  { displayName: 'Dynamic', valueName: 'dynamic' },
+                  { displayName: 'Manual', valueName: 'manual' }
+                ]}
+                onItemSelected={this._handleTypeChanged}
+                defaultValueName={entry.type}
+              />
+            </div>
+          </div>
+          <div className="sechedule-entry-column">
+            {details}
           </div>
         </div>
-        <div className="configuration-sechedule-entry-column">
-          <div>
-            <span className="configuration-sechedule-entry-label">State:</span>
-            <ButtonBar
-              items={[
-                { displayName: 'Day', valueName: 'day' },
-                { displayName: 'Night', valueName: 'night' },
-                { displayName: 'Off', valueName: 'off' }
-              ]}
-              onItemSelected={this._handleStateChanged}
-              defaultValueName={entry.state}
-            />
-          </div>
-        </div>
-        <div className="configuration-sechedule-entry-column">
-          <div>
-            <span className="configuration-sechedule-entry-label">Type:</span>
-            <ButtonBar
-              items={[
-                { displayName: 'Dynamic', valueName: 'dynamic' },
-                { displayName: 'Manual', valueName: 'manual' }
-              ]}
-              onItemSelected={this._handleTypeChanged}
-              defaultValueName={entry.type}
-            />
-          </div>
-        </div>
-        <div className="configuration-sechedule-entry-column">
-          {details}
+        <div className="schedule-entry-side-control">
+          <button type="button" className="btn btn-danger">X</button>
         </div>
       </div>
     );

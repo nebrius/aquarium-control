@@ -40078,6 +40078,7 @@ var ConfigurationDetails = /** @class */ (function (_super) {
                 var entries = this.props.config.schedule.map(function (entry, index) { return (React.createElement(ScheduleEntry_1.ScheduleEntry, { key: index, index: index, entry: entry, onEntryChanged: _this._handleScheduleEntryUpdate })); });
                 detailedConfig = (React.createElement("div", { className: "configuration-category" },
                     React.createElement("h3", null, "Schedule"),
+                    React.createElement("button", { type: "button", className: "btn btn-info" }, "Add new entry"),
                     entries));
                 break;
             case 'override':
@@ -40261,7 +40262,7 @@ var ScheduleEntry = /** @class */ (function (_super) {
         switch (entry.type) {
             case 'dynamic':
                 details = (React.createElement("div", null,
-                    React.createElement("span", { className: "configuration-sechedule-entry-label" }, "Event:"),
+                    React.createElement("span", { className: "sechedule-entry-label" }, "Event:"),
                     React.createElement(ButtonBar_1.ButtonBar, { items: [
                             { displayName: 'Sunrise', valueName: 'sunrise' },
                             { displayName: 'Sunset', valueName: 'sunset' }
@@ -40269,35 +40270,41 @@ var ScheduleEntry = /** @class */ (function (_super) {
                 break;
             case 'manual':
                 details = (React.createElement("div", null,
-                    React.createElement("span", { className: "configuration-sechedule-entry-label" }, "Hour:"),
+                    React.createElement("span", { className: "sechedule-entry-label" }, "Hour:"),
                     React.createElement("input", { type: "number", value: entry.details.hour, min: "0", max: "23", onChange: this._handleHourChange }),
-                    React.createElement("span", { className: "configuration-sechedule-entry-label", style: { marginLeft: '7px' } }, "Minute:"),
+                    React.createElement("span", { className: "sechedule-entry-label", style: { marginLeft: '7px' } }, "Minute:"),
                     React.createElement("input", { type: "number", value: entry.details.minute, min: "0", max: "59", onChange: this._handleMinuteChange })));
                 break;
             default:
                 throw new Error("Internal Error: unknown schedule type " + entry.type);
         }
-        return (React.createElement("div", { className: "configuration-sechedule-entry-container" },
-            React.createElement("div", { className: "configuration-sechedule-entry-column" },
-                React.createElement("div", null,
-                    React.createElement("span", { className: "configuration-sechedule-entry-label" }, "Name:"),
-                    React.createElement("input", { type: "text", value: entry.name, onChange: this._handleNameChanged }))),
-            React.createElement("div", { className: "configuration-sechedule-entry-column" },
-                React.createElement("div", null,
-                    React.createElement("span", { className: "configuration-sechedule-entry-label" }, "State:"),
-                    React.createElement(ButtonBar_1.ButtonBar, { items: [
-                            { displayName: 'Day', valueName: 'day' },
-                            { displayName: 'Night', valueName: 'night' },
-                            { displayName: 'Off', valueName: 'off' }
-                        ], onItemSelected: this._handleStateChanged, defaultValueName: entry.state }))),
-            React.createElement("div", { className: "configuration-sechedule-entry-column" },
-                React.createElement("div", null,
-                    React.createElement("span", { className: "configuration-sechedule-entry-label" }, "Type:"),
-                    React.createElement(ButtonBar_1.ButtonBar, { items: [
-                            { displayName: 'Dynamic', valueName: 'dynamic' },
-                            { displayName: 'Manual', valueName: 'manual' }
-                        ], onItemSelected: this._handleTypeChanged, defaultValueName: entry.type }))),
-            React.createElement("div", { className: "configuration-sechedule-entry-column" }, details)));
+        return (React.createElement("div", { className: "schedule-entry-outer-container" },
+            React.createElement("div", { className: "schedule-entry-side-control" },
+                React.createElement("button", { type: "button", className: "btn btn-info" }, "\u2191"),
+                React.createElement("button", { type: "button", className: "btn btn-info" }, "\u2193")),
+            React.createElement("div", { className: "sechedule-entry-container" },
+                React.createElement("div", { className: "sechedule-entry-column" },
+                    React.createElement("div", null,
+                        React.createElement("span", { className: "sechedule-entry-label" }, "Name:"),
+                        React.createElement("input", { type: "text", value: entry.name, onChange: this._handleNameChanged }))),
+                React.createElement("div", { className: "sechedule-entry-column" },
+                    React.createElement("div", null,
+                        React.createElement("span", { className: "sechedule-entry-label" }, "State:"),
+                        React.createElement(ButtonBar_1.ButtonBar, { items: [
+                                { displayName: 'Day', valueName: 'day' },
+                                { displayName: 'Night', valueName: 'night' },
+                                { displayName: 'Off', valueName: 'off' }
+                            ], onItemSelected: this._handleStateChanged, defaultValueName: entry.state }))),
+                React.createElement("div", { className: "sechedule-entry-column" },
+                    React.createElement("div", null,
+                        React.createElement("span", { className: "sechedule-entry-label" }, "Type:"),
+                        React.createElement(ButtonBar_1.ButtonBar, { items: [
+                                { displayName: 'Dynamic', valueName: 'dynamic' },
+                                { displayName: 'Manual', valueName: 'manual' }
+                            ], onItemSelected: this._handleTypeChanged, defaultValueName: entry.type }))),
+                React.createElement("div", { className: "sechedule-entry-column" }, details)),
+            React.createElement("div", { className: "schedule-entry-side-control" },
+                React.createElement("button", { type: "button", className: "btn btn-danger" }, "X"))));
     };
     ScheduleEntry.prototype._handleNameChanged = function (event) {
         console.log(event);

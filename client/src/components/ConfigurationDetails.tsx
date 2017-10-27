@@ -82,6 +82,7 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
         detailedConfig = (
           <div className="configuration-category">
             <h3>Schedule</h3>
+            <button type="button" className="btn btn-info">Add new entry</button>
             {entries}
           </div>
         );
