@@ -23,9 +23,13 @@ import { Connection, Request, TYPES } from 'tedious';
 
 let connection: Connection;
 let isConnected = false;
-const userInfoCache: { [ userId: string ]: { deviceId: string, timezone: string } } = {};
+const userInfoCache: { [ userId: string ]: IUser } = {};
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+export function getUsernameForUserId(userId: string): string {
+  return userInfoCache[userId].userName;
+}
 
 export function getDeviceForUserId(userId: string): string {
   return userInfoCache[userId].deviceId;
@@ -36,11 +40,7 @@ export function getTimezoneForUserId(userId: string): string {
 }
 
 export function getUser(userId: string): IUser {
-  return {
-    userId,
-    deviceId: getDeviceForUserId(userId),
-    timezone: getTimezoneForUserId(userId)
-  };
+  return userInfoCache[userId];
 }
 
 export function init(cb: (err: Error | undefined) => void): void {
@@ -102,7 +102,7 @@ export function isUserRegistered(userId: string, cb: (err: Error | undefined, is
     return;
   }
   queueRequest((done) => {
-    const query = `SELECT deviceId, timezone FROM aquarium_users WHERE facebookId=@userId`;
+    const query = `SELECT deviceId, timezone, userName FROM aquarium_users WHERE facebookId=@userId`;
     const request = new Request(query, (err, rowCount, rows) => {
       done();
       if (err) {
@@ -110,10 +110,12 @@ export function isUserRegistered(userId: string, cb: (err: Error | undefined, is
       } else if (rowCount === 0) {
         cb(undefined, false);
       } else if (rowCount === 1) {
-        if (!rows[0].hasOwnProperty('deviceId') || !rows[0].hasOwnProperty('timezone')) {
-          cb(new Error(`Received result without deviceId and/or timezone property`), undefined);
+        if (!rows[0].hasOwnProperty('deviceId') || !rows[0].hasOwnProperty('timezone') || !rows[0].hasOwnProperty('userName')) {
+          cb(new Error(`Received result without deviceId, userName, or timezone property`), undefined);
         } else {
           userInfoCache[userId] = {
+            userId,
+            userName: rows[0].userName.value,
             deviceId: rows[0].deviceId.value,
             timezone: rows[0].timezone.value
           };

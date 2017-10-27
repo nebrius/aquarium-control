@@ -15,9 +15,30 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export interface IUser {
-  userId: string;
-  userName: string;
-  deviceId: string;
-  timezone: string;
+import { connect } from 'react-redux';
+import { IAppState } from '../util/IAppState';
+import { IAction } from '../actions/actions';
+import { Header, IHeaderProps } from '../components/Header';
+
+function mapStateToProps(state: IAppState): IHeaderProps {
+  if (state.aquariumUser.user) {
+    return {
+      userName: state.aquariumUser.user.userName,
+      deviceName: state.aquariumUser.user.deviceId
+    };
+  } else {
+    return {
+      userName: 'loading...',
+      deviceName: 'loading...'
+    };
+  }
 }
+
+function mapDispatchToProps(dispatch: (action: IAction) => any) {
+  return {};
+}
+
+export const HeaderContainer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Header);

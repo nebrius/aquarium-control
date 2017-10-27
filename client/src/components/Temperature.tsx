@@ -20,7 +20,7 @@ import * as React from 'react';
 export function Temperature(props: {}): JSX.Element {
   return (
     <div>
-      <div><h1>Temperature History</h1></div>
+      <div><h2>Temperature History</h2></div>
     </div>
   );
 }

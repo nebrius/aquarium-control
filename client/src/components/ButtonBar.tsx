@@ -46,10 +46,13 @@ export class ButtonBar extends React.Component<IButtonBarProps, IButtonBarState>
   public render() {
     const props = this.props;
     const buttons = props.items.map((item) => {
+      const className = classNames('btn', 'btn-outline-secondary', {
+        active: this.state.currentValueName === item.valueName
+      });
       return (
         <button
           type="button"
-          className={classNames('btn', 'btn-secondary', { active: this.state.currentValueName === item.valueName })}
+          className={className}
           onClick={this._handleItemClick}
           name={item.valueName}
           key={item.valueName}

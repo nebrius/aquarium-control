@@ -28,7 +28,7 @@ export function Configuration(props: IConfigurationProps): JSX.Element {
   if (!props.config.config) {
     return (
       <div>
-        <div><h1>Configuration</h1></div>
+        <div><h2>Configuration</h2></div>
         <div className="alert alert-danger">Current configuration not available</div>
       </div>
     );

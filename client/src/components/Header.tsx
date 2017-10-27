@@ -15,9 +15,22 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export interface IUser {
-  userId: string;
+import * as React from 'react';
+
+export interface IHeaderProps {
   userName: string;
-  deviceId: string;
-  timezone: string;
+  deviceName: string;
+}
+
+export function Header(props: IHeaderProps): JSX.Element {
+  return (
+    <header className="header">
+      <div className="header-side-content"></div>
+      <div className="header-title">
+        <h1>Aquarium Control</h1>
+        <div>Connected to "{props.deviceName}"</div>
+      </div>
+      <div className="header-side-content">{props.userName}</div>
+    </header>
+  );
 }

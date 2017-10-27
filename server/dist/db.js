@@ -22,6 +22,10 @@ let connection;
 let isConnected = false;
 const userInfoCache = {};
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
+function getUsernameForUserId(userId) {
+    return userInfoCache[userId].userName;
+}
+exports.getUsernameForUserId = getUsernameForUserId;
 function getDeviceForUserId(userId) {
     return userInfoCache[userId].deviceId;
 }
@@ -31,11 +35,7 @@ function getTimezoneForUserId(userId) {
 }
 exports.getTimezoneForUserId = getTimezoneForUserId;
 function getUser(userId) {
-    return {
-        userId,
-        deviceId: getDeviceForUserId(userId),
-        timezone: getTimezoneForUserId(userId)
-    };
+    return userInfoCache[userId];
 }
 exports.getUser = getUser;
 function init(cb) {
@@ -90,7 +90,7 @@ function isUserRegistered(userId, cb) {
         return;
     }
     queueRequest((done) => {
-        const query = `SELECT deviceId, timezone FROM aquarium_users WHERE facebookId=@userId`;
+        const query = `SELECT deviceId, timezone, userName FROM aquarium_users WHERE facebookId=@userId`;
         const request = new tedious_1.Request(query, (err, rowCount, rows) => {
             done();
             if (err) {
@@ -100,11 +100,13 @@ function isUserRegistered(userId, cb) {
                 cb(undefined, false);
             }
             else if (rowCount === 1) {
-                if (!rows[0].hasOwnProperty('deviceId') || !rows[0].hasOwnProperty('timezone')) {
-                    cb(new Error(`Received result without deviceId and/or timezone property`), undefined);
+                if (!rows[0].hasOwnProperty('deviceId') || !rows[0].hasOwnProperty('timezone') || !rows[0].hasOwnProperty('userName')) {
+                    cb(new Error(`Received result without deviceId, userName, or timezone property`), undefined);
                 }
                 else {
                     userInfoCache[userId] = {
+                        userId,
+                        userName: rows[0].userName.value,
                         deviceId: rows[0].deviceId.value,
                         timezone: rows[0].timezone.value
                     };

@@ -16,8 +16,9 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-import { IConfig, IDynamicScheduleEntry, IManualScheduleEntry } from '../util/IAppState';
+import { IConfig, IScheduleEntry } from '../util/IAppState';
 import { ButtonBar } from './ButtonBar';
+import { ScheduleEntry } from './ScheduleEntry';
 
 import equals = require('deep-equal');
 
@@ -36,10 +37,11 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
   constructor(props: IConfigurationDetailsProps) {
     super(props);
     this.state = {
-      unsavedConfig: props.config
+      unsavedConfig: { ...props.config }
     };
 
     this._handleModeSelect = this._handleModeSelect.bind(this);
+    this._handleScheduleEntryUpdate = this._handleScheduleEntryUpdate.bind(this);
     this._handleOverrideStateSelect = this._handleOverrideStateSelect.bind(this);
     this._handleSubmit = this._handleSubmit.bind(this);
   }
@@ -74,43 +76,9 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
     let detailedConfig: JSX.Element;
     switch (mode) {
       case 'program':
-        const entries = this.props.config.schedule.map((entry, index) => {
-          let details: JSX.Element;
-          switch (entry.type) {
-            case 'dynamic':
-              details = (
-                <div>
-                  <div>{(entry.details as IDynamicScheduleEntry).event}</div>
-                </div>
-              );
-              break;
-            case 'manual':
-              details = (
-                <div>
-                  <div>{(entry.details as IManualScheduleEntry).hour}</div>
-                  <div>{(entry.details as IManualScheduleEntry).minute}</div>
-                </div>
-              );
-              break;
-            default:
-              throw new Error(`Internal Error: unknown schedule type ${entry.type}`);
-          }
-          return (
-            <div key={entry.name}>
-              <div>Name: {entry.name}</div>
-              <div>State: {entry.state}</div>
-              <div>Type: <ButtonBar
-                items={[
-                  { displayName: 'Dynamic', valueName: 'dynamic' },
-                  { displayName: 'Manual', valueName: 'manual' }
-                ]}
-                onItemSelected={(valueName) => this._handleScheduleEntryTypeChanged(index, valueName)}
-                defaultValueName={entry.type}
-              /></div>
-              {details}
-            </div>
-          );
-        });
+        const entries = this.props.config.schedule.map((entry, index) => (
+          <ScheduleEntry key={index} index={index} entry={entry} onEntryChanged={this._handleScheduleEntryUpdate} />
+        ));
         detailedConfig = (
           <div className="configuration-category">
             <h3>Schedule</h3>
@@ -141,9 +109,9 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
     const hasUnsavedChanges = !equals(this.state.unsavedConfig, this.props.config);
     return (
       <div>
-        <div><h1>Configuration</h1></div>
+        <div><h2>Configuration</h2></div>
         {banner}
-        <form onSubmit={this._handleSubmit}>
+        <form onSubmit={this._handleSubmit} className="configuration-contents">
           <div className="configuration-category">
             <h3>Mode</h3>
             <ButtonBar
@@ -177,8 +145,9 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
     });
   }
 
-  private _handleScheduleEntryTypeChanged(index: number, type: string) {
-    console.log(index, type);
+  private _handleScheduleEntryUpdate(index: number, newData: IScheduleEntry) {
+    console.log(index);
+    console.log(newData);
   }
 
   private _handleOverrideStateSelect(newOverrideState: string) {

@@ -44,20 +44,22 @@ export function State(props: IStateProps): JSX.Element {
   const timezone = props.user.user.timezone;
   return (
     <div>
-      <div><h1>Current State</h1></div>
-      {banner}
-      <div className="state-current-container">
-        <div className="state-current-group-container">
-          <StateEntry label="Current Mode" value={capitalizeFirstLetter(state.currentMode)} />
-          <StateEntry label="Current Time" value={formatDate(state.currentTime, timezone)} />
-          <StateEntry label="Current State" value={capitalizeFirstLetter(state.currentState)} />
-        </div>
-        <div className="state-current-group-container">
-          <StateEntry label="Next Transition Time" value={formatDate(state.nextTransitionTime, timezone)} />
-          <StateEntry label="Next Transitition State" value={capitalizeFirstLetter(state.nextTransitionState)} />
-        </div>
-        <div className="state-current-group-container">
-          <StateEntry label="Current Temperature" value={state.currentTemperature + ' C'} />
+      <div><h2>Current State</h2></div>
+      <div className="state-content">
+        {banner}
+        <div className="state-current-container">
+          <div className="state-current-group-container">
+            <StateEntry label="Current Mode" value={capitalizeFirstLetter(state.currentMode)} />
+            <StateEntry label="Current Time" value={formatDate(state.currentTime, timezone)} />
+            <StateEntry label="Current State" value={capitalizeFirstLetter(state.currentState)} />
+          </div>
+          <div className="state-current-group-container">
+            <StateEntry label="Next Transition Time" value={formatDate(state.nextTransitionTime, timezone)} />
+            <StateEntry label="Next Transitition State" value={capitalizeFirstLetter(state.nextTransitionState)} />
+          </div>
+          <div className="state-current-group-container">
+            <StateEntry label="Current Temperature" value={state.currentTemperature + ' C'} />
+          </div>
         </div>
       </div>
     </div>
