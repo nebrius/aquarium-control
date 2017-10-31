@@ -16,14 +16,16 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-import { IAquariumTemperature } from '../util/IAppState';
+import { IAquariumTemperature, IAquariumUser } from '../util/IAppState';
+import { TemperatureGraph, ISampleSet } from './TemperatureGraph';
 
 export interface ITemperatureProps {
   temperature: IAquariumTemperature;
+  user: IAquariumUser;
 }
 
 export function Temperature(props: ITemperatureProps): JSX.Element {
-  if (!props.temperature || !props.temperature.temperature) {
+  if (!props.temperature.temperature || !props.user.user) {
     return (
       <div>
         <div><h2>Temperature History</h2></div>
@@ -31,17 +33,61 @@ export function Temperature(props: ITemperatureProps): JSX.Element {
       </div>
     );
   }
+  const temperatures = props.temperature.temperature;
+  const dailyTemperatureData: ISampleSet[] = [{
+    label: 'Temperature',
+    color: 'rgb(255, 99, 132)',
+    samples: temperatures.daily.map((sample) => {
+      return {
+        time: sample.time,
+        temperature: sample.temperature
+      };
+    })
+  }];
+  const monthlyTemperatureData: ISampleSet[] = [{
+    label: 'Low',
+    color: 'rgb(54, 162, 235)',
+    samples: temperatures.monthly.map((sample) => {
+      return {
+        time: sample.time,
+        temperature: sample.low
+      };
+    }),
+  }, {
+    label: 'High',
+    color: 'rgb(255, 99, 132)',
+    samples: temperatures.monthly.map((sample) => {
+      return {
+        time: sample.time,
+        temperature: sample.high
+      };
+    })
+  }];
+  const width = Math.max((window.innerWidth - 100) / 2, 335);
+  const height = width * 0.75;
   return (
     <div>
       <div><h2>Temperature History</h2></div>
       <div className="temperature-content">
         <div className="temperature-section-container">
           <div><h3>Daily Temperature History</h3></div>
-          <div>Daily History</div>
+          <TemperatureGraph
+            dataSets={dailyTemperatureData}
+            timezone={props.user.user.timezone}
+            dateType="time"
+            width={width}
+            height={height}
+          />
         </div>
         <div className="temperature-section-container">
           <div><h3>Monthly Temperature History</h3></div>
-          <div>Monthly History</div>
+          <TemperatureGraph
+            dataSets={monthlyTemperatureData}
+            timezone={props.user.user.timezone}
+            dateType="day"
+            width={width}
+            height={height}
+          />
         </div>
       </div>
     </div>

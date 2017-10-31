@@ -215,7 +215,7 @@ export function getDailyTemperatureHistory(
       cb(undefined, rows.map((row) => {
         return {
           deviceId,
-          temperature: parseInt(row.currentTemperature.value),
+          temperature: parseFloat(row.currentTemperature.value),
           time: parseInt(row.currentTime.value)
         }
       }));
@@ -359,9 +359,9 @@ export function getMonthlyTemperatureHistory(
           next(err, rows.map((row) => {
             return {
               deviceId: row.deviceId.value,
-              time: row.time.value,
-              high: row.high.value,
-              low: row.low.value
+              time: parseInt(row.time.value),
+              high: parseFloat(row.high.value),
+              low: parseFloat(row.low.value)
             };
           }));
         });

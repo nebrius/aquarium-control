@@ -22,7 +22,8 @@ import { Temperature, ITemperatureProps } from '../components/Temperature';
 
 function mapStateToProps(state: IAppState): ITemperatureProps {
   return {
-    temperature: state.aquariumTemperature
+    temperature: state.aquariumTemperature,
+    user: state.aquariumUser
   };
 }
 

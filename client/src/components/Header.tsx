@@ -25,12 +25,9 @@ export interface IHeaderProps {
 export function Header(props: IHeaderProps): JSX.Element {
   return (
     <header className="header">
-      <div className="header-side-content"></div>
-      <div className="header-title">
-        <h1>Aquarium Control</h1>
-        <div>Connected to "{props.deviceName}"</div>
-      </div>
-      <div className="header-side-content">{props.userName}</div>
+      <div className="header-side-left-content">{props.deviceName}</div>
+      <div className="header-title"><h1>Aquarium Control</h1></div>
+      <div className="header-side-right-content">{props.userName}</div>
     </header>
   );
 }
