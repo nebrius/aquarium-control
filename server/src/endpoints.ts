@@ -21,6 +21,7 @@ import { json } from 'body-parser';
 import { validate } from 'revalidator';
 import * as express from 'express';
 import * as request from 'request';
+import * as cookieParser from 'cookie-parser';
 import { series } from 'async';
 import { IConfig, configValidationSchema } from './common/IConfig';
 import { ITemperature, IDailyTemperatureSample, IMonthlyTemperatureSample } from './common/ITemperature';
@@ -42,6 +43,7 @@ export function init(cb: (err: Error | undefined) => void): void {
   const app = express();
 
   app.use(json());
+  app.use(cookieParser());
 
   if (process.env.HOST_CLIENT === 'true') {
     app.use(express.static(join(__dirname, '..', '..', 'client', 'dist')));
@@ -50,37 +52,48 @@ export function init(cb: (err: Error | undefined) => void): void {
   app.set('view engine', 'pug');
   app.set('views', join(__dirname, '..', 'views'));
 
-  function ensureAuthentication(req: IRequest, res: express.Response, next: () => void): void {
-    const accessToken = req.query.accessToken;
-    if (!accessToken) {
-      res.redirect('/login');
-      return;
-    }
-    const connectionUrl =
-      'https://graph.facebook.com/debug_token?' +
-      `input_token=${accessToken}&` +
-      `access_token=${getEnvironmentVariable('FACEBOOK_APP_ID')}|${getEnvironmentVariable('FACEBOOK_APP_SECRET')}`;
-    request(connectionUrl, (err, verifyRes, body) => {
-      try {
-        const parsedBody = JSON.parse(body).data;
-        if (!parsedBody.is_valid) {
-          res.sendStatus(401);
+  function ensureAuthentication(redirect: boolean): express.RequestHandler {
+    return (req: IRequest, res, next) => {
+
+      function handleUnauthorized() {
+        if (redirect) {
+          res.redirect('/login');
         } else {
-          isUserRegistered(parsedBody.user_id, (err, isRegistered) => {
-            if (err) {
-              res.sendStatus(500);
-            } else if (!isRegistered) {
-              res.sendStatus(401);
-            } else {
-              req.userId = parsedBody.user_id;
-              next();
-            }
-          });
+          res.sendStatus(401);
         }
-      } catch(e) {
-        res.sendStatus(500);
       }
-    });
+
+      const accessToken = req.cookies.accessToken;
+      if (!accessToken) {
+        handleUnauthorized();
+        return;
+      }
+      const connectionUrl =
+        'https://graph.facebook.com/debug_token?' +
+        `input_token=${accessToken}&` +
+        `access_token=${getEnvironmentVariable('FACEBOOK_APP_ID')}|${getEnvironmentVariable('FACEBOOK_APP_SECRET')}`;
+      request(connectionUrl, (err, verifyRes, body) => {
+        try {
+          const parsedBody = JSON.parse(body).data;
+          if (!parsedBody.is_valid) {
+            handleUnauthorized();
+          } else {
+            isUserRegistered(parsedBody.user_id, (err, isRegistered) => {
+              if (err) {
+                res.sendStatus(500);
+              } else if (!isRegistered) {
+                handleUnauthorized();
+              } else {
+                req.userId = parsedBody.user_id;
+                next();
+              }
+            });
+          }
+        } catch(e) {
+          res.sendStatus(500);
+        }
+      });
+    };
   }
 
   function getRedirectUri(): string {
@@ -122,15 +135,15 @@ export function init(cb: (err: Error | undefined) => void): void {
 
   });
 
-  app.get('/', (req, res) => {
+  app.get('/', ensureAuthentication(true), (req, res) => {
     res.render('index');
   });
 
-  app.get('/api/user', ensureAuthentication, (req: IRequest, res) => {
+  app.get('/api/user', ensureAuthentication(false), (req: IRequest, res) => {
     res.send(getUser(req.userId));
   });
 
-  app.get('/api/state', ensureAuthentication, (req: IRequest, res) => {
+  app.get('/api/state', ensureAuthentication(false), (req: IRequest, res) => {
     getState(getDeviceForUserId(req.userId), (err, state) => {
       if (err) {
         res.sendStatus(500);
@@ -140,7 +153,7 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.get('/api/config', ensureAuthentication, (req: IRequest, res) => {
+  app.get('/api/config', ensureAuthentication(false), (req: IRequest, res) => {
     getConfig(getDeviceForUserId(req.userId), (err, config, isConfigUpToDate) => {
       if (err) {
         res.sendStatus(500);
@@ -153,7 +166,7 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.post('/api/config', ensureAuthentication, (req: IRequest, res) => {
+  app.post('/api/config', ensureAuthentication(false), (req: IRequest, res) => {
     if (!validate(req.body, configValidationSchema).valid) {
       res.sendStatus(400);
       return;
@@ -167,7 +180,7 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.get('/api/temperatures', ensureAuthentication, (req: IRequest, res) => {
+  app.get('/api/temperatures', ensureAuthentication(false), (req: IRequest, res) => {
     series([
       (done) => getMonthlyTemperatureHistory(req.userId, done),
       (done) => getDailyTemperatureHistory(getDeviceForUserId(req.userId), done)

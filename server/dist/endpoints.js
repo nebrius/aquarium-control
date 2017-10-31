@@ -22,6 +22,7 @@ const body_parser_1 = require("body-parser");
 const revalidator_1 = require("revalidator");
 const express = require("express");
 const request = require("request");
+const cookieParser = require("cookie-parser");
 const async_1 = require("async");
 const IConfig_1 = require("./common/IConfig");
 const db_1 = require("./db");
@@ -33,45 +34,56 @@ function init(cb) {
     const port = process.env.PORT || DEFAULT_PORT;
     const app = express();
     app.use(body_parser_1.json());
+    app.use(cookieParser());
     if (process.env.HOST_CLIENT === 'true') {
         app.use(express.static(path_1.join(__dirname, '..', '..', 'client', 'dist')));
     }
     app.set('view engine', 'pug');
     app.set('views', path_1.join(__dirname, '..', 'views'));
-    function ensureAuthentication(req, res, next) {
-        const accessToken = req.query.accessToken;
-        if (!accessToken) {
-            res.redirect('/login');
-            return;
-        }
-        const connectionUrl = 'https://graph.facebook.com/debug_token?' +
-            `input_token=${accessToken}&` +
-            `access_token=${util_1.getEnvironmentVariable('FACEBOOK_APP_ID')}|${util_1.getEnvironmentVariable('FACEBOOK_APP_SECRET')}`;
-        request(connectionUrl, (err, verifyRes, body) => {
-            try {
-                const parsedBody = JSON.parse(body).data;
-                if (!parsedBody.is_valid) {
-                    res.sendStatus(401);
+    function ensureAuthentication(redirect) {
+        return (req, res, next) => {
+            function handleUnauthorized() {
+                if (redirect) {
+                    res.redirect('/login');
                 }
                 else {
-                    db_1.isUserRegistered(parsedBody.user_id, (err, isRegistered) => {
-                        if (err) {
-                            res.sendStatus(500);
-                        }
-                        else if (!isRegistered) {
-                            res.sendStatus(401);
-                        }
-                        else {
-                            req.userId = parsedBody.user_id;
-                            next();
-                        }
-                    });
+                    res.sendStatus(401);
                 }
             }
-            catch (e) {
-                res.sendStatus(500);
+            const accessToken = req.cookies.accessToken;
+            if (!accessToken) {
+                handleUnauthorized();
+                return;
             }
-        });
+            const connectionUrl = 'https://graph.facebook.com/debug_token?' +
+                `input_token=${accessToken}&` +
+                `access_token=${util_1.getEnvironmentVariable('FACEBOOK_APP_ID')}|${util_1.getEnvironmentVariable('FACEBOOK_APP_SECRET')}`;
+            request(connectionUrl, (err, verifyRes, body) => {
+                try {
+                    const parsedBody = JSON.parse(body).data;
+                    if (!parsedBody.is_valid) {
+                        handleUnauthorized();
+                    }
+                    else {
+                        db_1.isUserRegistered(parsedBody.user_id, (err, isRegistered) => {
+                            if (err) {
+                                res.sendStatus(500);
+                            }
+                            else if (!isRegistered) {
+                                handleUnauthorized();
+                            }
+                            else {
+                                req.userId = parsedBody.user_id;
+                                next();
+                            }
+                        });
+                    }
+                }
+                catch (e) {
+                    res.sendStatus(500);
+                }
+            });
+        };
     }
     function getRedirectUri() {
         return process.env.NODE_ENV === 'production'
@@ -110,13 +122,13 @@ function init(cb) {
             res.redirect('/login');
         }
     });
-    app.get('/', (req, res) => {
+    app.get('/', ensureAuthentication(true), (req, res) => {
         res.render('index');
     });
-    app.get('/api/user', ensureAuthentication, (req, res) => {
+    app.get('/api/user', ensureAuthentication(false), (req, res) => {
         res.send(db_2.getUser(req.userId));
     });
-    app.get('/api/state', ensureAuthentication, (req, res) => {
+    app.get('/api/state', ensureAuthentication(false), (req, res) => {
         db_2.getState(db_2.getDeviceForUserId(req.userId), (err, state) => {
             if (err) {
                 res.sendStatus(500);
@@ -126,7 +138,7 @@ function init(cb) {
             }
         });
     });
-    app.get('/api/config', ensureAuthentication, (req, res) => {
+    app.get('/api/config', ensureAuthentication(false), (req, res) => {
         messaging_1.getConfig(db_2.getDeviceForUserId(req.userId), (err, config, isConfigUpToDate) => {
             if (err) {
                 res.sendStatus(500);
@@ -139,7 +151,7 @@ function init(cb) {
             }
         });
     });
-    app.post('/api/config', ensureAuthentication, (req, res) => {
+    app.post('/api/config', ensureAuthentication(false), (req, res) => {
         if (!revalidator_1.validate(req.body, IConfig_1.configValidationSchema).valid) {
             res.sendStatus(400);
             return;
@@ -153,7 +165,7 @@ function init(cb) {
             }
         });
     });
-    app.get('/api/temperatures', ensureAuthentication, (req, res) => {
+    app.get('/api/temperatures', ensureAuthentication(false), (req, res) => {
         async_1.series([
             (done) => db_2.getMonthlyTemperatureHistory(req.userId, done),
             (done) => db_2.getDailyTemperatureHistory(db_2.getDeviceForUserId(req.userId), done)
