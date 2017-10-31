@@ -205,7 +205,7 @@ export function getDailyTemperatureHistory(
   cb: (err: Error | undefined, history: IDailyTemperatureSample[] | undefined) => void
 ): void {
   queueRequest((done) => {
-    const query = `SELECT currentTime, currentTemperature FROM ${DATABASE_NAMES.STATE} WHERE deviceId=@deviceId`;
+    const query = `SELECT currentTime, currentTemperature FROM ${DATABASE_NAMES.STATE} WHERE deviceId=@deviceId ORDER BY currentTime`;
     const request = new Request(query, (err, rowCount, rows) => {
       done();
       if (err) {
@@ -311,7 +311,7 @@ export function getMonthlyTemperatureHistory(
         const values = samples.map((sample) => {
           return `('${sample.deviceId}', ${sample.time}, ${sample.low}, ${sample.high})`
         }).join(', ');
-        const query = `INSERT INTO ${DATABASE_NAMES.TEMPERATUE} (deviceId, time, low, high) VALUES ${values}`;
+        const query = `INSERT INTO ${DATABASE_NAMES.TEMPERATURE} (deviceId, time, low, high) VALUES ${values}`;
         const request = new Request(query, (err, rowCount, rows) => {
           done();
           next(err, !err);
@@ -340,7 +340,7 @@ export function getMonthlyTemperatureHistory(
     // Delete stale monthly samples
     (next: (err: Error | undefined, ...args: any[]) => void) => {
       queueRequest((done) => {
-        const query = `DELETE FROM ${DATABASE_NAMES.TEMPERATUE} WHERE deviceId=@deviceId AND time <= ${monthBegin}`;
+        const query = `DELETE FROM ${DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId AND time <= ${monthBegin}`;
         const request = new Request(query, (err, rowCount, rows) => {
           done();
           next(err);
@@ -353,7 +353,7 @@ export function getMonthlyTemperatureHistory(
     // Fetch all monthly samples
     (next: (err: Error | undefined, ...args: any[]) => void) => {
       queueRequest((done) => {
-        const query = `SELECT * FROM ${DATABASE_NAMES.TEMPERATUE} WHERE deviceId=@deviceId`;
+        const query = `SELECT * FROM ${DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId ORDER BY time`;
         const request = new Request(query, (err, rowCount, rows) => {
           done();
           next(err, rows.map((row) => {

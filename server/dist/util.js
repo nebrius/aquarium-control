@@ -19,7 +19,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DATABASE_NAMES = {
     STATE: 'aquarium_state',
     USERS: 'aquarium_users',
-    TEMPERATUE: 'monthly_temperature'
+    TEMPERATURE: 'monthly_temperature'
 };
 function getEnvironmentVariable(variable) {
     const value = process.env[variable];

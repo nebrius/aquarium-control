@@ -18,7 +18,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 export const DATABASE_NAMES = {
   STATE: 'aquarium_state',
   USERS: 'aquarium_users',
-  TEMPERATUE: 'monthly_temperature'
+  TEMPERATURE: 'monthly_temperature'
 };
 
 export function getEnvironmentVariable(variable: string): string {

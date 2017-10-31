@@ -195,7 +195,7 @@ function getState(deviceId, cb) {
 exports.getState = getState;
 function getDailyTemperatureHistory(deviceId, cb) {
     queueRequest((done) => {
-        const query = `SELECT currentTime, currentTemperature FROM ${util_1.DATABASE_NAMES.STATE} WHERE deviceId=@deviceId`;
+        const query = `SELECT currentTime, currentTemperature FROM ${util_1.DATABASE_NAMES.STATE} WHERE deviceId=@deviceId ORDER BY currentTime`;
         const request = new tedious_1.Request(query, (err, rowCount, rows) => {
             done();
             if (err) {
@@ -285,7 +285,7 @@ function getMonthlyTemperatureHistory(userId, cb) {
                 const values = samples.map((sample) => {
                     return `('${sample.deviceId}', ${sample.time}, ${sample.low}, ${sample.high})`;
                 }).join(', ');
-                const query = `INSERT INTO ${util_1.DATABASE_NAMES.TEMPERATUE} (deviceId, time, low, high) VALUES ${values}`;
+                const query = `INSERT INTO ${util_1.DATABASE_NAMES.TEMPERATURE} (deviceId, time, low, high) VALUES ${values}`;
                 const request = new tedious_1.Request(query, (err, rowCount, rows) => {
                     done();
                     next(err, !err);
@@ -312,7 +312,7 @@ function getMonthlyTemperatureHistory(userId, cb) {
         // Delete stale monthly samples
         (next) => {
             queueRequest((done) => {
-                const query = `DELETE FROM ${util_1.DATABASE_NAMES.TEMPERATUE} WHERE deviceId=@deviceId AND time <= ${monthBegin}`;
+                const query = `DELETE FROM ${util_1.DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId AND time <= ${monthBegin}`;
                 const request = new tedious_1.Request(query, (err, rowCount, rows) => {
                     done();
                     next(err);
@@ -324,7 +324,7 @@ function getMonthlyTemperatureHistory(userId, cb) {
         // Fetch all monthly samples
         (next) => {
             queueRequest((done) => {
-                const query = `SELECT * FROM ${util_1.DATABASE_NAMES.TEMPERATUE} WHERE deviceId=@deviceId`;
+                const query = `SELECT * FROM ${util_1.DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId ORDER BY time`;
                 const request = new tedious_1.Request(query, (err, rowCount, rows) => {
                     done();
                     next(err, rows.map((row) => {
