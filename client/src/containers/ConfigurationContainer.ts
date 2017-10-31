@@ -16,27 +16,16 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { connect } from 'react-redux';
-import { IAppState, IConfig, IScheduleEntry } from '../util/IAppState';
+import { IAppState, IConfig } from '../util/IAppState';
 import { request } from '../util/api';
 import { IAction, configRequestUpdate, configUpdateFailed, configUpdateSucceeded } from '../actions/actions';
 import { Configuration } from '../components/Configuration';
 import * as clone from 'clone';
-import { v4 } from 'uuid';
 
 function mapStateToProps(state: IAppState) {
-  const modifiedConfig = {
+  return {
     config: clone(state.aquariumConfig)
   };
-  if (modifiedConfig.config.config) {
-    modifiedConfig.config.config.schedule = modifiedConfig.config.config.schedule.map((entry) => {
-      const modifiedEntry: IScheduleEntry = {
-        ...entry,
-        id: v4()
-      };
-      return modifiedEntry;
-    });
-  }
-  return modifiedConfig;
 }
 
 function mapDispatchToProps(dispatch: (action: IAction) => any) {

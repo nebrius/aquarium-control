@@ -22,6 +22,7 @@ const body_parser_1 = require("body-parser");
 const revalidator_1 = require("revalidator");
 const express = require("express");
 const request = require("request");
+const async_1 = require("async");
 const IConfig_1 = require("./common/IConfig");
 const db_1 = require("./db");
 const messaging_1 = require("./messaging");
@@ -153,17 +154,20 @@ function init(cb) {
         });
     });
     app.get('/api/temperatures', ensureAuthentication, (req, res) => {
-        const period = req.query.period;
-        if (period !== 'day' && period !== 'month') {
-            res.sendStatus(400);
-            return;
-        }
-        db_2.getTemperatureHistory('nebrius-rpi', period, (err, temperatures) => {
-            if (err) {
-                console.error(err);
-                return;
+        async_1.series([
+            (done) => db_2.getMonthlyTemperatureHistory(req.userId, done),
+            (done) => db_2.getDailyTemperatureHistory(db_2.getDeviceForUserId(req.userId), done)
+        ], (err, results) => {
+            if (err || !results) {
+                res.sendStatus(500);
             }
-            res.send(temperatures);
+            else {
+                const history = {
+                    monthly: results[0],
+                    daily: results[1]
+                };
+                res.send(history);
+            }
         });
     });
     const server = http_1.createServer();

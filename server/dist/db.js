@@ -18,10 +18,15 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 Object.defineProperty(exports, "__esModule", { value: true });
 const util_1 = require("./util");
 const tedious_1 = require("tedious");
+const moment = require("moment-timezone");
+const async_1 = require("async");
 let connection;
 let isConnected = false;
 const userInfoCache = {};
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
+const HOUR_IN_MS = 60 * 60 * 1000;
+const DAY_IN_MS = 24 * HOUR_IN_MS;
+const MONTH_IN_MS = 30 * DAY_IN_MS;
+const TEMPERATURE_UPDATE_RATE = 4 * HOUR_IN_MS;
 function getUsernameForUserId(userId) {
     return userInfoCache[userId].userName;
 }
@@ -38,8 +43,7 @@ function getUser(userId) {
     return userInfoCache[userId];
 }
 exports.getUser = getUser;
-function init(cb) {
-    console.log('Connecting to Azure SQL');
+function connect(cb) {
     connection = new tedious_1.Connection({
         userName: util_1.getEnvironmentVariable('AZURE_SQL_USERNAME'),
         password: util_1.getEnvironmentVariable('AZURE_SQL_PASSWORD'),
@@ -51,14 +55,46 @@ function init(cb) {
             database: util_1.getEnvironmentVariable('AZURE_SQL_DATABASE')
         }
     });
+    isConnected = false;
     connection.on('connect', (err) => {
         if (err) {
             cb(err);
             return;
         }
-        console.log('Connected to Azure SQL');
         isConnected = true;
         cb(undefined);
+    });
+    connection.on('end', (err) => {
+        process.stdout.write('Disconnected from Azure SQL, reconnecting...');
+        connect((err) => {
+            if (err) {
+                console.error(err);
+            }
+            else {
+                process.stdout.write('connected\n');
+            }
+        });
+    });
+}
+function init(cb) {
+    console.log('Connecting to Azure SQL');
+    connect((err) => {
+        if (err) {
+            console.error(err);
+            cb(err);
+        }
+        else {
+            console.log('Connected to Azure SQL');
+            cb(undefined);
+        }
+        setInterval(() => {
+            for (const userId in userInfoCache) {
+                if (!userInfoCache.hasOwnProperty(userId)) {
+                    continue;
+                }
+                getMonthlyTemperatureHistory(userId, (err, samples) => { });
+            }
+        }, TEMPERATURE_UPDATE_RATE);
     });
 }
 exports.init = init;
@@ -90,7 +126,7 @@ function isUserRegistered(userId, cb) {
         return;
     }
     queueRequest((done) => {
-        const query = `SELECT deviceId, timezone, userName FROM aquarium_users WHERE facebookId=@userId`;
+        const query = `SELECT deviceId, timezone, userName FROM ${util_1.DATABASE_NAMES.USERS} WHERE facebookId=@userId`;
         const request = new tedious_1.Request(query, (err, rowCount, rows) => {
             done();
             if (err) {
@@ -122,24 +158,12 @@ function isUserRegistered(userId, cb) {
     });
 }
 exports.isUserRegistered = isUserRegistered;
-function saveConfig(deviceId, config, cb) {
-    if (!isConnected) {
-        throw new Error('Tried to save config while not connected to the database');
-    }
-}
-exports.saveConfig = saveConfig;
-function getConfig(deviceId, cb) {
-    if (!isConnected) {
-        throw new Error('Tried to get config while not connected to the database');
-    }
-}
-exports.getConfig = getConfig;
 function getState(deviceId, cb) {
     if (!isConnected) {
         throw new Error('Tried to get state while not connected to the database');
     }
     queueRequest((done) => {
-        const query = `SELECT TOP(1) * FROM aquarium_state WHERE deviceId=@deviceId ORDER BY currentTime DESC`;
+        const query = `SELECT TOP(1) * FROM ${util_1.DATABASE_NAMES.STATE} WHERE deviceId=@deviceId ORDER BY currentTime DESC`;
         const request = new tedious_1.Request(query, (err, rowCount, rows) => {
             done();
             if (err) {
@@ -169,64 +193,154 @@ function getState(deviceId, cb) {
     });
 }
 exports.getState = getState;
-function getTemperatureHistory(deviceId, period, cb) {
-    if (!isConnected) {
-        throw new Error('Tried to get day temperature while not connected to the database');
-    }
-    const rows = [];
-    let cutoffDate = Date.now();
-    switch (period) {
-        case 'day':
-            cutoffDate -= DAY_IN_MS;
-            break;
-        case 'month':
-            cutoffDate -= DAY_IN_MS * 7;
-            break;
-        default:
-            throw new Error(`Invalid period "${period}"`);
-    }
-    const request = new tedious_1.Request(`SELECT currentTime, currentTemperature FROM aquarium_state WHERE currentTime >= ${cutoffDate} ORDER BY currentTime`, (err, rowCount) => {
-        if (err) {
-            cb(err, undefined);
-            return;
-        }
-        if (rows.length !== rowCount) {
-            cb(new Error('Supplied row count does not match number of rows returned'), undefined);
-        }
-        else {
-            cb(undefined, rows);
-        }
-    });
-    request.on('row', (columns) => {
-        let date = null;
-        let temperature = NaN;
-        for (const column of columns) {
-            switch (column.metadata.colName) {
-                case "currentTime":
-                    date = new Date(parseInt(column.value));
-                    break;
-                case "currentTemperature":
-                    temperature = parseFloat(column.value);
-                    break;
-                default:
-                    cb(new Error(`Received unknown column "${column.metadata.colName}" in database record`), undefined);
-                    return;
+function getDailyTemperatureHistory(deviceId, cb) {
+    queueRequest((done) => {
+        const query = `SELECT currentTime, currentTemperature FROM ${util_1.DATABASE_NAMES.STATE} WHERE deviceId=@deviceId`;
+        const request = new tedious_1.Request(query, (err, rowCount, rows) => {
+            done();
+            if (err) {
+                cb(err, undefined);
+                return;
             }
-        }
-        if (date === null) {
-            cb(new Error('Date missing in database record'), undefined);
-            return;
-        }
-        if (temperature === NaN) {
-            cb(new Error('Temperature missing in database record'), undefined);
-            return;
-        }
-        rows.push({
-            date,
-            temperature
+            cb(undefined, rows.map((row) => {
+                return {
+                    deviceId,
+                    temperature: parseInt(row.currentTemperature.value),
+                    time: parseInt(row.currentTime.value)
+                };
+            }));
         });
+        request.addParameter('deviceId', tedious_1.TYPES.VarChar, deviceId);
+        connection.execSql(request);
     });
-    connection.execSql(request);
 }
-exports.getTemperatureHistory = getTemperatureHistory;
+exports.getDailyTemperatureHistory = getDailyTemperatureHistory;
+function getMonthlyTemperatureHistory(userId, cb) {
+    const user = getUser(userId);
+    const now = moment().tz(user.timezone);
+    const startOfDay = moment.tz(`${util_1.toStringWithPadding(now.year(), 4)}-${util_1.toStringWithPadding(now.month() + 1, 2)}-${util_1.toStringWithPadding(now.date(), 2)}`, user.timezone);
+    const monthEnd = startOfDay.unix() * 1000;
+    const monthBegin = monthEnd - MONTH_IN_MS;
+    async_1.waterfall([
+        // Calculate the up-to-date monthly samples
+        (next) => {
+            queueRequest((done) => {
+                const query = `SELECT currentTemperature, currentTime FROM ${util_1.DATABASE_NAMES.STATE} ` +
+                    `WHERE deviceId=@deviceId AND currentTime <= ${monthEnd} AND currentTime > ${monthBegin} ` +
+                    `ORDER BY currentTime`;
+                const request = new tedious_1.Request(query, (err, rowCount, rows) => {
+                    done();
+                    if (err) {
+                        next(err);
+                        return;
+                    }
+                    else if (!rowCount) {
+                        next(undefined, []);
+                        return;
+                    }
+                    let dayBucketTimestamp = monthEnd - DAY_IN_MS;
+                    const dayBuckets = [{
+                            timestamp: dayBucketTimestamp,
+                            samples: []
+                        }];
+                    for (let i = rowCount - 1; i >= 0; i--) {
+                        if (parseInt(rows[i].currentTime.value) < dayBucketTimestamp) {
+                            dayBucketTimestamp -= DAY_IN_MS;
+                            if (dayBucketTimestamp < monthBegin) {
+                                break;
+                            }
+                            dayBuckets.push({
+                                timestamp: dayBucketTimestamp,
+                                samples: []
+                            });
+                        }
+                        dayBuckets[dayBuckets.length - 1].samples.push(parseFloat(rows[i].currentTemperature.value));
+                    }
+                    const samples = dayBuckets.filter((dayBucket) => !!dayBucket.samples.length).map((dayBucket) => {
+                        let low = Infinity;
+                        let high = -Infinity;
+                        for (const sample of dayBucket.samples) {
+                            if (sample < low) {
+                                low = sample;
+                            }
+                            if (sample > high) {
+                                high = sample;
+                            }
+                        }
+                        return { deviceId: user.deviceId, time: dayBucket.timestamp, low, high };
+                    });
+                    next(undefined, samples);
+                });
+                request.addParameter('deviceId', tedious_1.TYPES.VarChar, user.deviceId);
+                connection.execSql(request);
+            });
+        },
+        // Save the updated monthly samples
+        (samples, next) => {
+            if (!samples.length) {
+                next(undefined, false);
+                return;
+            }
+            queueRequest((done) => {
+                const values = samples.map((sample) => {
+                    return `('${sample.deviceId}', ${sample.time}, ${sample.low}, ${sample.high})`;
+                }).join(', ');
+                const query = `INSERT INTO ${util_1.DATABASE_NAMES.TEMPERATUE} (deviceId, time, low, high) VALUES ${values}`;
+                const request = new tedious_1.Request(query, (err, rowCount, rows) => {
+                    done();
+                    next(err, !err);
+                });
+                connection.execSql(request);
+            });
+        },
+        // Delete the old state samples
+        (needsDelete, next) => {
+            if (!needsDelete) {
+                next(undefined);
+                return;
+            }
+            queueRequest((done) => {
+                const query = `DELETE FROM ${util_1.DATABASE_NAMES.STATE} WHERE deviceId=@deviceId AND currentTime <= ${monthEnd}`;
+                const request = new tedious_1.Request(query, (err, rowCount, rows) => {
+                    done();
+                    next(err);
+                });
+                request.addParameter('deviceId', tedious_1.TYPES.VarChar, user.deviceId);
+                connection.execSql(request);
+            });
+        },
+        // Delete stale monthly samples
+        (next) => {
+            queueRequest((done) => {
+                const query = `DELETE FROM ${util_1.DATABASE_NAMES.TEMPERATUE} WHERE deviceId=@deviceId AND time <= ${monthBegin}`;
+                const request = new tedious_1.Request(query, (err, rowCount, rows) => {
+                    done();
+                    next(err);
+                });
+                request.addParameter('deviceId', tedious_1.TYPES.VarChar, user.deviceId);
+                connection.execSql(request);
+            });
+        },
+        // Fetch all monthly samples
+        (next) => {
+            queueRequest((done) => {
+                const query = `SELECT * FROM ${util_1.DATABASE_NAMES.TEMPERATUE} WHERE deviceId=@deviceId`;
+                const request = new tedious_1.Request(query, (err, rowCount, rows) => {
+                    done();
+                    next(err, rows.map((row) => {
+                        return {
+                            deviceId: row.deviceId.value,
+                            time: row.time.value,
+                            high: row.high.value,
+                            low: row.low.value
+                        };
+                    }));
+                });
+                request.addParameter('deviceId', tedious_1.TYPES.VarChar, user.deviceId);
+                connection.execSql(request);
+            });
+        }
+    ], cb);
+}
+exports.getMonthlyTemperatureHistory = getMonthlyTemperatureHistory;
 //# sourceMappingURL=db.js.map

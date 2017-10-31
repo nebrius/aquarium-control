@@ -27,10 +27,13 @@ import {
   userFetchFailed,
   userFetchSucceeded,
   configFetchFailed,
-  configFetchSucceeded
+  configFetchSucceeded,
+  temperatureFetchFailed,
+  temperatureFetchSuceeded
 } from './actions/actions';
 
-const STATE_UPDATE_RATE = 5000;
+const STATE_UPDATE_RATE = 60 * 1000;
+const TEMPERATURE_UPDATE_RATE = 60 * 1000;
 
 function updateState() {
   request({
@@ -68,6 +71,21 @@ request({
     store.dispatch(configFetchSucceeded(result.config));
   }
 });
+
+function updateTemperature() {
+  request({
+    endpoint: 'temperatures',
+    method: 'GET'
+  }, (err, result) => {
+    if (err) {
+      store.dispatch(temperatureFetchFailed());
+    } else {
+      store.dispatch(temperatureFetchSuceeded(result));
+    }
+    setTimeout(updateTemperature, TEMPERATURE_UPDATE_RATE);
+  });
+}
+updateTemperature();
 
 render(
   (

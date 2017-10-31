@@ -18,7 +18,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 import * as React from 'react';
 import { HeaderContainer } from '../containers/HeaderContainer';
 import { ConfigurationContainer } from '../containers/ConfigurationContainer';
-// import { TemperatureContainer } from '../containers/TemperatureContainer';
+import { TemperatureContainer } from '../containers/TemperatureContainer';
 import { StateContainer} from '../containers/StateContainer';
 
 export function Root(props: {}): JSX.Element {
@@ -26,7 +26,7 @@ export function Root(props: {}): JSX.Element {
     <div className="root-container">
       <HeaderContainer />
       <StateContainer />
-      {/* <TemperatureContainer /> */}
+      <TemperatureContainer />
       <ConfigurationContainer />
     </div>
   );

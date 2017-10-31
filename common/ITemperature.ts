@@ -15,21 +15,20 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { createStore } from 'redux';
-import { IAppState } from './IAppState';
-import { reducers } from '../reducers/reducers';
+export interface IDailyTemperatureSample {
+  deviceId: string;
+  temperature: number;
+  time: number;
+}
 
-const preloadedState: IAppState = {
-  aquariumUser: {
-  },
-  aquariumConfig: {
-    saveStatus: 'none'
-  },
-  aquariumState: {
-    currentStateStale: false
-  },
-  aquariumTemperature: {
-  }
-};
+export interface IMonthlyTemperatureSample {
+  deviceId: string;
+  low: number;
+  high: number;
+  time: number;
+}
 
-export const store = createStore(reducers, preloadedState);
+export interface ITemperature {
+  daily: IDailyTemperatureSample[];
+  monthly: IMonthlyTemperatureSample[];
+}

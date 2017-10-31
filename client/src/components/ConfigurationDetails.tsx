@@ -84,7 +84,7 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
       case 'program':
         const entries = this.state.unsavedConfig.schedule.map((entry, index) => (
           <ScheduleEntry
-            key={entry.id || v4()}
+            key={entry.id}
             index={index}
             entry={entry}
             onEntryChanged={this._handleScheduleEntryUpdated}

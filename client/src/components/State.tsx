@@ -29,7 +29,7 @@ export function State(props: IStateProps): JSX.Element {
   if (!props.state || !props.state.state || !props.user || !props.user.user) {
     return (
       <div>
-        <div><h1>Current State</h1></div>
+        <div><h2>Current State</h2></div>
         <div className="alert alert-danger">Current state not available</div>
       </div>
     );

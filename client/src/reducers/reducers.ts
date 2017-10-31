@@ -19,9 +19,11 @@ import { combineReducers } from 'redux';
 import { aquariumStateReducer } from './aquariumStateReducer';
 import { aquariumConfigReducer } from './aquariumConfigReducer';
 import { aquariumUserReducer } from './aquariumUserReducer';
+import { aquariumTemperatureReducer } from './aquariumTemperatureReducer';
 
 export const reducers = combineReducers({
   aquariumState: aquariumStateReducer,
   aquariumConfig: aquariumConfigReducer,
-  aquariumUser: aquariumUserReducer
+  aquariumUser: aquariumUserReducer,
+  aquariumTemperature: aquariumTemperatureReducer
 });

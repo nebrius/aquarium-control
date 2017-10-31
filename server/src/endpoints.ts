@@ -21,11 +21,13 @@ import { json } from 'body-parser';
 import { validate } from 'revalidator';
 import * as express from 'express';
 import * as request from 'request';
+import { series } from 'async';
 import { IConfig, configValidationSchema } from './common/IConfig';
+import { ITemperature, IDailyTemperatureSample, IMonthlyTemperatureSample } from './common/ITemperature';
 import { isUserRegistered } from './db';
 import { getConfig, setConfig } from './messaging';
 import { getEnvironmentVariable } from './util';
-import { getTemperatureHistory, getDeviceForUserId, getUser, getState } from './db';
+import { getDailyTemperatureHistory, getMonthlyTemperatureHistory, getDeviceForUserId, getUser, getState } from './db';
 
 const DEFAULT_PORT = 3001;
 
@@ -165,18 +167,20 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.get('/api/temperatures', ensureAuthentication, (req, res) => {
-    const period = req.query.period;
-    if (period !== 'day' && period !== 'month') {
-      res.sendStatus(400);
-      return;
-    }
-    getTemperatureHistory('nebrius-rpi', period, (err, temperatures) => {
-      if (err) {
-        console.error(err);
-        return;
+  app.get('/api/temperatures', ensureAuthentication, (req: IRequest, res) => {
+    series([
+      (done) => getMonthlyTemperatureHistory(req.userId, done),
+      (done) => getDailyTemperatureHistory(getDeviceForUserId(req.userId), done)
+    ], (err, results) => {
+      if (err || !results) {
+        res.sendStatus(500);
+      } else {
+        const history: ITemperature = {
+          monthly: <IMonthlyTemperatureSample[]>results[0],
+          daily: <IDailyTemperatureSample[]>results[1]
+        }
+        res.send(history);
       }
-      res.send(temperatures);
     });
   });
 

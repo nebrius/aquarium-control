@@ -18,12 +18,16 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 import { Reducer } from 'redux';
 import { IAction, ACTIONS, IConfigFetchSucceededAction, IConfigUpdateSucceededAction } from '../actions/actions';
 import { IAquariumConfig, IConfig } from '../util/IAppState';
+import { v4 } from 'uuid';
 
 export const aquariumConfigReducer: Reducer<IAquariumConfig> = (state: IAquariumConfig, action: IAction) => {
   let aquariumConfig: IConfig;
   switch (action.type) {
     case ACTIONS.CONFIG_FETCH_SUCCEEDED:
       aquariumConfig = (action as IConfigFetchSucceededAction).aquariumConfig;
+      aquariumConfig.schedule.forEach((scheduleEntry) => {
+        scheduleEntry.id = v4();
+      });
       return {
         config: aquariumConfig,
         saveStatus: state.saveStatus

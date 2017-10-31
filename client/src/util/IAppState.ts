@@ -18,11 +18,12 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 import { IUser } from '../common/IUser';
 import { IState } from '../common/IState';
 import { IConfig } from '../common/IConfig';
+import { ITemperature } from '../common/ITemperature';
 
 export { IState } from '../common/IState';
-export { IConfig } from '../common/IConfig';
-export { IScheduleEntry, IDynamicScheduleEntry, IManualScheduleEntry } from '../common/IConfig';
+export { IConfig, IScheduleEntry, IDynamicScheduleEntry, IManualScheduleEntry } from '../common/IConfig';
 export { IUser } from '../common/IUser';
+export { ITemperature } from '../common/ITemperature';
 
 export interface IAquariumState {
   state?: IState;
@@ -38,8 +39,13 @@ export interface IAquariumUser {
   user?: IUser;
 }
 
+export interface IAquariumTemperature {
+  temperature?: ITemperature;
+}
+
 export interface IAppState {
   aquariumState: IAquariumState;
   aquariumConfig: IAquariumConfig;
   aquariumUser: IAquariumUser;
+  aquariumTemperature: IAquariumTemperature;
 }

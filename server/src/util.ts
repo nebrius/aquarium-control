@@ -15,10 +15,24 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+export const DATABASE_NAMES = {
+  STATE: 'aquarium_state',
+  USERS: 'aquarium_users',
+  TEMPERATUE: 'monthly_temperature'
+};
+
 export function getEnvironmentVariable(variable: string): string {
   const value = process.env[variable];
   if (typeof value !== 'string') {
     throw new Error(`Environment variable ${variable} is not defined`);
   }
   return value;
+}
+
+export function toStringWithPadding(value: number, digits: number): string {
+  let convertedString = value.toString();
+  while (convertedString.length < digits) {
+    convertedString = '0' + convertedString;
+  }
+  return convertedString;
 }

@@ -16,25 +16,4 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DATABASE_NAMES = {
-    STATE: 'aquarium_state',
-    USERS: 'aquarium_users',
-    TEMPERATUE: 'monthly_temperature'
-};
-function getEnvironmentVariable(variable) {
-    const value = process.env[variable];
-    if (typeof value !== 'string') {
-        throw new Error(`Environment variable ${variable} is not defined`);
-    }
-    return value;
-}
-exports.getEnvironmentVariable = getEnvironmentVariable;
-function toStringWithPadding(value, digits) {
-    let convertedString = value.toString();
-    while (convertedString.length < digits) {
-        convertedString = '0' + convertedString;
-    }
-    return convertedString;
-}
-exports.toStringWithPadding = toStringWithPadding;
-//# sourceMappingURL=util.js.map
+//# sourceMappingURL=ITemperature.js.map

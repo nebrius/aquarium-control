@@ -103,6 +103,17 @@ h2 {
   margin-bottom: 15px;
 }
 
+.temperature-content {
+  margin: 15px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.temperature-section-container {
+  padding: 4px 10px;
+}
+
 .schedule-entry-outer-container {
   border: 1px solid #ddd;
   border-radius: 3px;
@@ -110,6 +121,7 @@ h2 {
   flex-direction: row;
   padding: 0 10px;
   margin-top: 10px;
+  min-height: 100px;
 }
 
 .schedule-entry-side-control {

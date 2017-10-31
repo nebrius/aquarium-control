@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { IConfig, IState, IUser } from '../util/IAppState';
+import { IConfig, IState, IUser, ITemperature } from '../util/IAppState';
 
 export const ACTIONS = {
   USER_FETCH_SUCCEEDED: 'USER_FETCH_SUCCEEDED',
@@ -26,7 +26,9 @@ export const ACTIONS = {
   CONFIG_FETCH_FAILED: 'CONFIG_FETCH_FAILED',
   CONFIG_REQUEST_UPDATE: 'CONFIG_REQUEST_UPDATE',
   CONFIG_UPDATE_SUCCEEDED: 'CONFIG_UPDATE_SUCCEEDED',
-  CONFIG_UPDATE_FAILED: 'CONFIG_UPDATE_FAILED'
+  CONFIG_UPDATE_FAILED: 'CONFIG_UPDATE_FAILED',
+  TEMPERATURE_FETCH_SUCCEEDED: 'TEMPERATURE_FETCH_SUCCEEDED',
+  TEMPERATURE_FETCH_FAILED: 'TEMPERATURE_FETCH_FAILED'
 };
 
 export interface IAction {
@@ -68,6 +70,25 @@ export function stateFetchSucceeded(aquariumState: IState): IStateFetchSucceeded
 export function stateFetchFailed(): IAction {
   return {
     type: ACTIONS.STATE_FETCH_FAILED
+  };
+}
+
+// Temperature Actions
+
+export interface ITemperatureFetchSucceededAction extends IAction {
+  temperature: ITemperature;
+}
+
+export function temperatureFetchSuceeded(temperature: ITemperature): ITemperatureFetchSucceededAction {
+  return {
+    type: ACTIONS.TEMPERATURE_FETCH_SUCCEEDED,
+    temperature
+  };
+}
+
+export function temperatureFetchFailed(): IAction {
+  return {
+    type: ACTIONS.TEMPERATURE_FETCH_FAILED
   };
 }
 
