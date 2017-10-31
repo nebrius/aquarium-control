@@ -72,6 +72,11 @@ function connect(cb: (err: Error | undefined) => void): void {
     cb(undefined);
   });
 
+  connection.on('error', (err) => {
+    console.log(`Error with connection to Azure SQL: ${err.toString()}`);
+    connection.close();
+  });
+
   connection.on('end', (err) => {
     process.stdout.write('Disconnected from Azure SQL, reconnecting...');
     connect((err) => {
