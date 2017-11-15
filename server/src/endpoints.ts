@@ -46,14 +46,14 @@ export function init(cb: (err: Error | undefined) => void): void {
   app.use(cookieParser());
 
   if (process.env.HOST_CLIENT === 'true') {
-    app.use(express.static(join(__dirname, '..', '..', 'client', 'dist')));
+    app.use(express.static(join(__dirname, '..', 'client')));
   }
 
   app.set('view engine', 'pug');
   app.set('views', join(__dirname, '..', 'views'));
 
   function ensureAuthentication(redirect: boolean): express.RequestHandler {
-    return (req: IRequest, res, next) => {
+    return (req, res, next) => {
 
       function handleUnauthorized() {
         if (redirect) {
@@ -84,7 +84,7 @@ export function init(cb: (err: Error | undefined) => void): void {
               } else if (!isRegistered) {
                 handleUnauthorized();
               } else {
-                req.userId = parsedBody.user_id;
+                (<IRequest>req).userId = parsedBody.user_id;
                 next();
               }
             });
@@ -98,7 +98,7 @@ export function init(cb: (err: Error | undefined) => void): void {
 
   function getRedirectUri(): string {
     return process.env.NODE_ENV === 'production'
-      ? 'https://aquarium.nebri.us/login-success/'
+      ? `${getEnvironmentVariable('SERVER_HOST')}/login-success/`
       : `http://localhost:${port}/login-success/`;
   }
 
@@ -139,13 +139,14 @@ export function init(cb: (err: Error | undefined) => void): void {
     res.render('index');
   });
 
-  app.get('/api/user', ensureAuthentication(false), (req: IRequest, res) => {
-    res.send(getUser(req.userId));
+  app.get('/api/user', ensureAuthentication(false), (req, res) => {
+    res.send(getUser((<IRequest>req).userId));
   });
 
-  app.get('/api/state', ensureAuthentication(false), (req: IRequest, res) => {
-    getState(getDeviceForUserId(req.userId), (err, state) => {
+  app.get('/api/state', ensureAuthentication(false), (req, res) => {
+    getState(getDeviceForUserId((<IRequest>req).userId), (err, state) => {
       if (err) {
+        console.error(err);
         res.sendStatus(500);
       } else {
         res.send(state);
@@ -153,9 +154,10 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.get('/api/config', ensureAuthentication(false), (req: IRequest, res) => {
-    getConfig(getDeviceForUserId(req.userId), (err, config, isConfigUpToDate) => {
+  app.get('/api/config', ensureAuthentication(false), (req, res) => {
+    getConfig(getDeviceForUserId((<IRequest>req).userId), (err, config, isConfigUpToDate) => {
       if (err) {
+        console.error(err);
         res.sendStatus(500);
       } else {
         res.send({
@@ -166,13 +168,14 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.post('/api/config', ensureAuthentication(false), (req: IRequest, res) => {
+  app.post('/api/config', ensureAuthentication(false), (req, res) => {
     if (!validate(req.body, configValidationSchema).valid) {
       res.sendStatus(400);
       return;
     }
-    setConfig(getDeviceForUserId(req.userId), <IConfig>(req.body), (err) => {
+    setConfig(getDeviceForUserId((<IRequest>req).userId), <IConfig>(req.body), (err) => {
       if (err) {
+        console.error(err);
         res.sendStatus(500);
       } else {
         res.send({ result: 'ok' });
@@ -180,10 +183,10 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.get('/api/temperatures', ensureAuthentication(false), (req: IRequest, res) => {
+  app.get('/api/temperatures', ensureAuthentication(false), (req, res) => {
     series([
-      (done) => getMonthlyTemperatureHistory(req.userId, done),
-      (done) => getDailyTemperatureHistory(getDeviceForUserId(req.userId), done)
+      (done) => getMonthlyTemperatureHistory((<IRequest>req).userId, done),
+      (done) => getDailyTemperatureHistory(getDeviceForUserId((<IRequest>req).userId), done)
     ], (err, results) => {
       if (err || !results) {
         res.sendStatus(500);

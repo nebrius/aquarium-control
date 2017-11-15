@@ -36,7 +36,7 @@ function init(cb) {
     app.use(body_parser_1.json());
     app.use(cookieParser());
     if (process.env.HOST_CLIENT === 'true') {
-        app.use(express.static(path_1.join(__dirname, '..', '..', 'client', 'dist')));
+        app.use(express.static(path_1.join(__dirname, '..', 'client')));
     }
     app.set('view engine', 'pug');
     app.set('views', path_1.join(__dirname, '..', 'views'));
@@ -87,7 +87,7 @@ function init(cb) {
     }
     function getRedirectUri() {
         return process.env.NODE_ENV === 'production'
-            ? 'https://aquarium.nebri.us/login-success/'
+            ? `${util_1.getEnvironmentVariable('SERVER_HOST')}/login-success/`
             : `http://localhost:${port}/login-success/`;
     }
     app.get('/login', (req, res) => {
@@ -131,6 +131,7 @@ function init(cb) {
     app.get('/api/state', ensureAuthentication(false), (req, res) => {
         db_2.getState(db_2.getDeviceForUserId(req.userId), (err, state) => {
             if (err) {
+                console.error(err);
                 res.sendStatus(500);
             }
             else {
@@ -141,6 +142,7 @@ function init(cb) {
     app.get('/api/config', ensureAuthentication(false), (req, res) => {
         messaging_1.getConfig(db_2.getDeviceForUserId(req.userId), (err, config, isConfigUpToDate) => {
             if (err) {
+                console.error(err);
                 res.sendStatus(500);
             }
             else {
@@ -158,6 +160,7 @@ function init(cb) {
         }
         messaging_1.setConfig(db_2.getDeviceForUserId(req.userId), (req.body), (err) => {
             if (err) {
+                console.error(err);
                 res.sendStatus(500);
             }
             else {

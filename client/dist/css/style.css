@@ -30,6 +30,10 @@ h2 {
   padding: 10px 20px;
 }
 
+.alert {
+  margin: 15px;
+}
+
 .root-container {
   display: flex;
   flex-direction: column;
