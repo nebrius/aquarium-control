@@ -1,4 +1,4 @@
-update=Tuesday, September 26, 2017 'PMt' 09:36:01 PM
+update=Friday, November 24, 2017 'PMt' 02:11:35 PM
 version=1
 last_client=kicad
 [pcbnew]
@@ -58,5 +58,6 @@ LibName26=opto
 LibName27=atmel
 LibName28=contrib
 LibName29=valves
-LibName30=AP1507/AP1507
-LibName31=VO14642/VO14642
+LibName30=kicad-components/components/lcd/nebrius-lcd
+LibName31=kicad-components/components/regulators/nebrius-regulators
+LibName32=kicad-components/components/switch/nebrius-switch
