@@ -19,12 +19,10 @@ import { IState } from './common/IState';
 import { IUser } from './common/IUser';
 import { IDailyTemperatureSample, IMonthlyTemperatureSample } from './common/ITemperature';
 import { getEnvironmentVariable, toStringWithPadding, DATABASE_NAMES } from './util';
-import { Connection, Request, TYPES } from 'tedious';
+import { Connection, Request, TYPES, TediousType } from 'tedious';
 import * as moment from 'moment-timezone';
 import { waterfall } from 'async';
 
-let connection: Connection;
-let isConnected = false;
 const userInfoCache: { [ userId: string ]: IUser } = {};
 
 const HOUR_IN_MS = 60 * 60 * 1000;
@@ -49,8 +47,30 @@ export function getUser(userId: string): IUser {
   return userInfoCache[userId];
 }
 
-function connect(cb: (err: Error | undefined) => void): void {
-  connection = new Connection({
+export function init(cb: (err: Error | undefined) => void): void {
+  setInterval(() => {
+    for (const userId in userInfoCache) {
+      if (!userInfoCache.hasOwnProperty(userId)) {
+        continue;
+      }
+      getMonthlyTemperatureHistory(userId, (err, samples) => {});
+    }
+  }, TEMPERATURE_UPDATE_RATE);
+  setImmediate(() => cb(undefined));
+}
+
+interface IQueryParameter {
+  name: string;
+  value: string;
+  type: TediousType;
+}
+
+function request(
+  query: string,
+  parameters: IQueryParameter[],
+  cb: (err: Error, rowCount: number, rows: any[]) => void
+): void {
+  const connection = new Connection({
     userName: getEnvironmentVariable('AZURE_SQL_USERNAME'),
     password: getEnvironmentVariable('AZURE_SQL_PASSWORD'),
     server: getEnvironmentVariable('AZURE_SQL_SERVER'),
@@ -61,93 +81,32 @@ function connect(cb: (err: Error | undefined) => void): void {
       database: getEnvironmentVariable('AZURE_SQL_DATABASE')
     }
   });
-
-  isConnected = false;
   connection.on('connect', (err) => {
     if (err) {
-      cb(err);
+      cb(err, 0, []);
       return;
     }
-    isConnected = true;
-    cb(undefined);
-  });
-
-  connection.on('error', (err) => {
-    console.log(`Error with connection to Azure SQL: ${err.toString()}`);
-    connection.close();
-  });
-
-  connection.on('end', (err) => {
-    console.log('Disconnected from Azure SQL, reconnecting...');
-    connect((err) => {
-      if (err) {
-        console.error(err);
-      } else {
-        console.log('Connected to Azure SQL');
-      }
-    });
-  });
-}
-
-export function init(cb: (err: Error | undefined) => void): void {
-  console.log('Connecting to Azure SQL');
-  connect((err) => {
-    if (err) {
-      console.error(err);
-      cb(err);
-    } else {
-      console.log('Connected to Azure SQL');
-      cb(undefined);
+    const request = new Request(query, cb);
+    for (const parameter of parameters) {
+      request.addParameter(parameter.name, parameter.type, parameter.value);
     }
-
-    setInterval(() => {
-      for (const userId in userInfoCache) {
-        if (!userInfoCache.hasOwnProperty(userId)) {
-          continue;
-        }
-        getMonthlyTemperatureHistory(userId, (err, samples) => {});
-      }
-    }, TEMPERATURE_UPDATE_RATE);
-
+    connection.execSql(request);
   });
-}
-
-interface IQueryRequest {
-  (cb: () => void): void;
-}
-let isQueryRequestPending = false;
-const queryRequests: IQueryRequest[] = [];
-function pump(): void {
-  if (isQueryRequestPending) {
-    return;
-  }
-  const nextRequest = queryRequests.shift();
-  if (nextRequest) {
-    isQueryRequestPending = true;
-    nextRequest(() => {
-      isQueryRequestPending = false;
-      pump();
-    });
-  }
-}
-
-function queueRequest(operation: IQueryRequest): void {
-  queryRequests.push(operation);
-  pump();
 }
 
 export function isUserRegistered(userId: string, cb: (err: Error | undefined, isRegistered: boolean | undefined) => void): void {
-  if (!isConnected) {
-    throw new Error('Tried to see if user is registered while not connected to the database');
-  }
   if (userInfoCache[userId]) {
     setImmediate(() => cb(undefined, true));
     return;
   }
-  queueRequest((done) => {
-    const query = `SELECT deviceId, timezone, userName FROM ${DATABASE_NAMES.USERS} WHERE facebookId=@userId`;
-    const request = new Request(query, (err, rowCount, rows) => {
-      done();
+  request(
+    `SELECT deviceId, timezone, userName FROM ${DATABASE_NAMES.USERS} WHERE facebookId=@userId`,
+    [{
+      name: 'userId',
+      type: TYPES.VarChar,
+      value: userId
+    }],
+    (err, rowCount, rows) => {
       if (err) {
         cb(err, undefined);
       } else if (rowCount === 0) {
@@ -167,20 +126,19 @@ export function isUserRegistered(userId: string, cb: (err: Error | undefined, is
       } else {
         cb(new Error(`More than one user found for user ID ${userId}`), undefined);
       }
-    });
-    request.addParameter('userId', TYPES.VarChar, userId);
-    connection.execSql(request);
-  });
+    }
+  );
 }
 
 export function getState(deviceId: string, cb: (err: Error | undefined, state: IState | undefined) => void): void {
-  if (!isConnected) {
-    throw new Error('Tried to get state while not connected to the database');
-  }
-  queueRequest((done) => {
-    const query = `SELECT TOP(1) * FROM ${DATABASE_NAMES.STATE} WHERE deviceId=@deviceId ORDER BY currentTime DESC`;
-    const request = new Request(query, (err, rowCount, rows) => {
-      done();
+  request(
+    `SELECT TOP(1) * FROM ${DATABASE_NAMES.STATE} WHERE deviceId=@deviceId ORDER BY currentTime DESC`,
+    [{
+      name: 'deviceId',
+      type: TYPES.VarChar,
+      value: deviceId
+    }],
+    (err, rowCount, rows) => {
       if (err) {
         cb(err, undefined);
       } else if (rowCount === 0) {
@@ -199,20 +157,22 @@ export function getState(deviceId: string, cb: (err: Error | undefined, state: I
       } else {
         cb(new Error(`Internal Error: more than one state entry returned.`), undefined);
       }
-    });
-    request.addParameter('deviceId', TYPES.VarChar, deviceId);
-    connection.execSql(request);
-  });
+    }
+  );
 }
 
 export function getDailyTemperatureHistory(
   deviceId: string,
   cb: (err: Error | undefined, history: IDailyTemperatureSample[] | undefined) => void
 ): void {
-  queueRequest((done) => {
-    const query = `SELECT currentTime, currentTemperature FROM ${DATABASE_NAMES.STATE} WHERE deviceId=@deviceId ORDER BY currentTime`;
-    const request = new Request(query, (err, rowCount, rows) => {
-      done();
+  request(
+    `SELECT currentTime, currentTemperature FROM ${DATABASE_NAMES.STATE} WHERE deviceId=@deviceId ORDER BY currentTime`,
+    [{
+      name: 'deviceId',
+      type: TYPES.VarChar,
+      value: deviceId
+    }],
+    (err, rowCount, rows) => {
       if (err) {
         cb(err, undefined);
         return;
@@ -224,10 +184,8 @@ export function getDailyTemperatureHistory(
           time: parseInt(row.currentTime.value)
         }
       }));
-    });
-    request.addParameter('deviceId', TYPES.VarChar, deviceId);
-    connection.execSql(request);
-  });
+    }
+  );
 }
 
 export function getMonthlyTemperatureHistory(
@@ -248,13 +206,16 @@ export function getMonthlyTemperatureHistory(
 
     // Calculate the up-to-date monthly samples
     (next: (err: Error | undefined, ...args: any[]) => void) => {
-      queueRequest((done) => {
-        const query =
-          `SELECT currentTemperature, currentTime FROM ${DATABASE_NAMES.STATE} ` +
-          `WHERE deviceId=@deviceId AND currentTime <= ${monthEnd} AND currentTime > ${monthBegin} ` +
-          `ORDER BY currentTime`;
-        const request = new Request(query, (err, rowCount, rows) => {
-          done();
+      request(
+        `SELECT currentTemperature, currentTime FROM ${DATABASE_NAMES.STATE} ` +
+        `WHERE deviceId=@deviceId AND currentTime <= ${monthEnd} AND currentTime > ${monthBegin} ` +
+        `ORDER BY currentTime`,
+        [{
+          name: 'deviceId',
+          type: TYPES.VarChar,
+          value: user.deviceId
+        }],
+        (err, rowCount, rows) => {
           if (err) {
             next(err);
             return;
@@ -300,10 +261,8 @@ export function getMonthlyTemperatureHistory(
           });
 
           next(undefined, samples);
-        });
-        request.addParameter('deviceId', TYPES.VarChar, user.deviceId);
-        connection.execSql(request);
-      });
+        }
+      );
     },
 
     // Save the updated monthly samples
@@ -312,17 +271,16 @@ export function getMonthlyTemperatureHistory(
         next(undefined, false);
         return;
       }
-      queueRequest((done) => {
-        const values = samples.map((sample) => {
-          return `('${sample.deviceId}', ${sample.time}, ${sample.low}, ${sample.high})`
-        }).join(', ');
-        const query = `INSERT INTO ${DATABASE_NAMES.TEMPERATURE} (deviceId, time, low, high) VALUES ${values}`;
-        const request = new Request(query, (err, rowCount, rows) => {
-          done();
+      const values = samples.map((sample) => {
+        return `('${sample.deviceId}', ${sample.time}, ${sample.low}, ${sample.high})`
+      }).join(', ');
+      request(
+        `INSERT INTO ${DATABASE_NAMES.TEMPERATURE} (deviceId, time, low, high) VALUES ${values}`,
+        [],
+        (err, rowCount, rows) => {
           next(err, !err);
-        });
-        connection.execSql(request);
-      });
+        }
+      );
     },
 
     // Delete the old state samples
@@ -331,36 +289,44 @@ export function getMonthlyTemperatureHistory(
         next(undefined);
         return;
       }
-      queueRequest((done) => {
-        const query = `DELETE FROM ${DATABASE_NAMES.STATE} WHERE deviceId=@deviceId AND currentTime <= ${monthEnd}`;
-        const request = new Request(query, (err, rowCount, rows) => {
-          done();
+      request(
+        `DELETE FROM ${DATABASE_NAMES.STATE} WHERE deviceId=@deviceId AND currentTime <= ${monthEnd}`,
+        [{
+          name: 'deviceId',
+          type: TYPES.VarChar,
+          value: user.deviceId
+        }],
+        (err, rowCount, rows) => {
           next(err);
-        });
-        request.addParameter('deviceId', TYPES.VarChar, user.deviceId);
-        connection.execSql(request);
-      });
+        }
+      );
     },
 
     // Delete stale monthly samples
     (next: (err: Error | undefined, ...args: any[]) => void) => {
-      queueRequest((done) => {
-        const query = `DELETE FROM ${DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId AND time <= ${monthBegin}`;
-        const request = new Request(query, (err, rowCount, rows) => {
-          done();
+      request(
+        `DELETE FROM ${DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId AND time <= ${monthBegin}`,
+        [{
+          name: 'deviceId',
+          type: TYPES.VarChar,
+          value: user.deviceId
+        }],
+        (err, rowCount, rows) => {
           next(err);
-        });
-        request.addParameter('deviceId', TYPES.VarChar, user.deviceId);
-        connection.execSql(request);
-      });
+        }
+      );
     },
 
     // Fetch all monthly samples
     (next: (err: Error | undefined, ...args: any[]) => void) => {
-      queueRequest((done) => {
-        const query = `SELECT * FROM ${DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId ORDER BY time`;
-        const request = new Request(query, (err, rowCount, rows) => {
-          done();
+      request(
+        `SELECT * FROM ${DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId ORDER BY time`,
+        [{
+          name: 'deviceId',
+          type: TYPES.VarChar,
+          value: user.deviceId
+        }],
+        (err, rowCount, rows) => {
           next(err, rows.map((row) => {
             return {
               deviceId: row.deviceId.value,
@@ -369,10 +335,8 @@ export function getMonthlyTemperatureHistory(
               low: parseFloat(row.low.value)
             };
           }));
-        });
-        request.addParameter('deviceId', TYPES.VarChar, user.deviceId);
-        connection.execSql(request);
-      });
+        }
+      );
     }
 
   ], cb);

@@ -49,7 +49,7 @@ function clean(cb) {
   function rmdir(dir) {
     const files = fs.readdirSync(dir);
     for (const file of files) {
-      if (file === '.git') {
+      if (file === '.git' || file === '.vscode') {
         continue;
       }
       const filePath = path.join(dir, file);
@@ -90,6 +90,7 @@ function build(cb) {
 
 function assemble(cb) {
   const fileList = [
+    `${__dirname}/.gitignore`,
     `${__dirname}/server/bin`,
     `${__dirname}/server/dist`,
     `${__dirname}/server/views`,
