@@ -1,8 +1,13 @@
 # Aquarium Control
 
-Automated lighting control and temperature monitoring software for an aquarium using a Raspberry Pi. Lighting can be run on a schedule, configurable by the user, that can change lights at a set time, or based on a solar event such as sunrise and sunset. A server is provided that displays a mobile web friendly status page and exposes the override controls.
+Automated lighting control and temperature monitoring software for an aquarium using a Raspberry Pi. Lighting can be run on a schedule, configurable by the user, that can change lights at a set time, or based on a solar event such as sunrise and sunset. This systems makes use of several services from [Azure](https://azure.microsoft.com) to handle and store aquarium data.
 
 Note: figuring out how to connect the Pi to the lighting hardware is left as an exercise for the reader since there are so many different lighting systems out there.
+
+Here's some photos of the system "in production" on my aquarium at home:
+
+![Screenshot of the client screen](https://nebri.us/static/aquarium-control-client.jpg)
+![Photo of the lights on in my aquarium](https://nebri.us/static/aquarium-control-hardware.jpg)
 
 # License
 
