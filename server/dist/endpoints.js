@@ -65,18 +65,13 @@ function init(cb) {
                         handleUnauthorized();
                     }
                     else {
-                        db_1.isUserRegistered(parsedBody.user_id, (err, isRegistered) => {
-                            if (err) {
-                                res.sendStatus(500);
-                            }
-                            else if (!isRegistered) {
-                                handleUnauthorized();
-                            }
-                            else {
-                                req.userId = parsedBody.user_id;
-                                next();
-                            }
-                        });
+                        if (!db_1.isUserRegistered(parsedBody.user_id)) {
+                            handleUnauthorized();
+                        }
+                        else {
+                            req.userId = parsedBody.user_id;
+                            next();
+                        }
                     }
                 }
                 catch (e) {

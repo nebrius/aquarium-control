@@ -29,7 +29,7 @@ const HOUR_IN_MS = 60 * 60 * 1000;
 const DAY_IN_MS = 24 * HOUR_IN_MS;
 const MONTH_IN_MS = 30 * DAY_IN_MS;
 
-const TEMPERATURE_UPDATE_RATE = 4 * HOUR_IN_MS;
+const TEMPERATURE_UPDATE_RATE = HOUR_IN_MS;
 
 export function getUsernameForUserId(userId: string): string {
   return userInfoCache[userId].userName;
@@ -47,16 +47,48 @@ export function getUser(userId: string): IUser {
   return userInfoCache[userId];
 }
 
-export function init(cb: (err: Error | undefined) => void): void {
-  setInterval(() => {
-    for (const userId in userInfoCache) {
-      if (!userInfoCache.hasOwnProperty(userId)) {
-        continue;
-      }
-      getMonthlyTemperatureHistory(userId, (err, samples) => {});
+function cleanup() {
+  for (const userId in userInfoCache) {
+    if (!userInfoCache.hasOwnProperty(userId)) {
+      continue;
     }
-  }, TEMPERATURE_UPDATE_RATE);
-  setImmediate(() => cb(undefined));
+    getMonthlyTemperatureHistory(userId, (err, samples) => {
+      if (err) {
+        console.error(err);
+      }
+    });
+  }
+}
+
+export function init(cb: (err: Error | undefined) => void): void {
+  request(
+    `SELECT facebookId, deviceId, timezone, userName FROM ${DATABASE_NAMES.USERS}`,
+    [],
+    (err, rowCount, rows) => {
+      if (err) {
+        cb(err);
+        return;
+      }
+
+      for (const row of rows) {
+        if (!row.hasOwnProperty('facebookId') || !row.hasOwnProperty('deviceId') || !row.hasOwnProperty('timezone') || !row.hasOwnProperty('userName')) {
+          cb(new Error(`Received result without facebookId, deviceId, userName, or timezone property`));
+          return;
+        }
+        userInfoCache[row.facebookId.value] = {
+          userId: row.facebookId.value,
+          userName: row.userName.value,
+          deviceId: row.deviceId.value,
+          timezone: row.timezone.value
+        };
+      }
+
+      setInterval(cleanup, TEMPERATURE_UPDATE_RATE);
+      cleanup();
+
+      cb(undefined);
+    }
+  );
 }
 
 interface IQueryParameter {
@@ -78,7 +110,8 @@ function request(
       encrypt: true,
       rowCollectionOnRequestCompletion: true,
       useColumnNames: true,
-      database: getEnvironmentVariable('AZURE_SQL_DATABASE')
+      database: getEnvironmentVariable('AZURE_SQL_DATABASE'),
+      requestTimeout: 0
     }
   });
   connection.on('connect', (err) => {
@@ -94,40 +127,8 @@ function request(
   });
 }
 
-export function isUserRegistered(userId: string, cb: (err: Error | undefined, isRegistered: boolean | undefined) => void): void {
-  if (userInfoCache[userId]) {
-    setImmediate(() => cb(undefined, true));
-    return;
-  }
-  request(
-    `SELECT deviceId, timezone, userName FROM ${DATABASE_NAMES.USERS} WHERE facebookId=@userId`,
-    [{
-      name: 'userId',
-      type: TYPES.VarChar,
-      value: userId
-    }],
-    (err, rowCount, rows) => {
-      if (err) {
-        cb(err, undefined);
-      } else if (rowCount === 0) {
-        cb(undefined, false);
-      } else if (rowCount === 1) {
-        if (!rows[0].hasOwnProperty('deviceId') || !rows[0].hasOwnProperty('timezone') || !rows[0].hasOwnProperty('userName')) {
-          cb(new Error(`Received result without deviceId, userName, or timezone property`), undefined);
-        } else {
-          userInfoCache[userId] = {
-            userId,
-            userName: rows[0].userName.value,
-            deviceId: rows[0].deviceId.value,
-            timezone: rows[0].timezone.value
-          };
-          cb(undefined, true);
-        }
-      } else {
-        cb(new Error(`More than one user found for user ID ${userId}`), undefined);
-      }
-    }
-  );
+export function isUserRegistered(userId: string): boolean {
+  return !!userInfoCache[userId];
 }
 
 export function getState(deviceId: string, cb: (err: Error | undefined, state: IState | undefined) => void): void {
@@ -203,6 +204,21 @@ export function getMonthlyTemperatureHistory(
   const monthBegin = monthEnd - MONTH_IN_MS;
 
   waterfall([
+
+    // Delete stale monthly samples
+    (next: (err: Error | undefined, ...args: any[]) => void) => {
+      request(
+        `DELETE FROM ${DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId AND time <= ${monthBegin}`,
+        [{
+          name: 'deviceId',
+          type: TYPES.VarChar,
+          value: user.deviceId
+        }],
+        (err, rowCount, rows) => {
+          next(err);
+        }
+      );
+    },
 
     // Calculate the up-to-date monthly samples
     (next: (err: Error | undefined, ...args: any[]) => void) => {
@@ -291,21 +307,6 @@ export function getMonthlyTemperatureHistory(
       }
       request(
         `DELETE FROM ${DATABASE_NAMES.STATE} WHERE deviceId=@deviceId AND currentTime <= ${monthEnd}`,
-        [{
-          name: 'deviceId',
-          type: TYPES.VarChar,
-          value: user.deviceId
-        }],
-        (err, rowCount, rows) => {
-          next(err);
-        }
-      );
-    },
-
-    // Delete stale monthly samples
-    (next: (err: Error | undefined, ...args: any[]) => void) => {
-      request(
-        `DELETE FROM ${DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId AND time <= ${monthBegin}`,
         [{
           name: 'deviceId',
           type: TYPES.VarChar,

@@ -24,7 +24,7 @@ const userInfoCache = {};
 const HOUR_IN_MS = 60 * 60 * 1000;
 const DAY_IN_MS = 24 * HOUR_IN_MS;
 const MONTH_IN_MS = 30 * DAY_IN_MS;
-const TEMPERATURE_UPDATE_RATE = 4 * HOUR_IN_MS;
+const TEMPERATURE_UPDATE_RATE = HOUR_IN_MS;
 function getUsernameForUserId(userId) {
     return userInfoCache[userId].userName;
 }
@@ -41,16 +41,40 @@ function getUser(userId) {
     return userInfoCache[userId];
 }
 exports.getUser = getUser;
-function init(cb) {
-    setInterval(() => {
-        for (const userId in userInfoCache) {
-            if (!userInfoCache.hasOwnProperty(userId)) {
-                continue;
-            }
-            getMonthlyTemperatureHistory(userId, (err, samples) => { });
+function cleanup() {
+    for (const userId in userInfoCache) {
+        if (!userInfoCache.hasOwnProperty(userId)) {
+            continue;
         }
-    }, TEMPERATURE_UPDATE_RATE);
-    setImmediate(() => cb(undefined));
+        getMonthlyTemperatureHistory(userId, (err, samples) => {
+            if (err) {
+                console.error(err);
+            }
+        });
+    }
+}
+function init(cb) {
+    request(`SELECT facebookId, deviceId, timezone, userName FROM ${util_1.DATABASE_NAMES.USERS}`, [], (err, rowCount, rows) => {
+        if (err) {
+            cb(err);
+            return;
+        }
+        for (const row of rows) {
+            if (!row.hasOwnProperty('facebookId') || !row.hasOwnProperty('deviceId') || !row.hasOwnProperty('timezone') || !row.hasOwnProperty('userName')) {
+                cb(new Error(`Received result without facebookId, deviceId, userName, or timezone property`));
+                return;
+            }
+            userInfoCache[row.facebookId.value] = {
+                userId: row.facebookId.value,
+                userName: row.userName.value,
+                deviceId: row.deviceId.value,
+                timezone: row.timezone.value
+            };
+        }
+        setInterval(cleanup, TEMPERATURE_UPDATE_RATE);
+        cleanup();
+        cb(undefined);
+    });
 }
 exports.init = init;
 function request(query, parameters, cb) {
@@ -62,7 +86,8 @@ function request(query, parameters, cb) {
             encrypt: true,
             rowCollectionOnRequestCompletion: true,
             useColumnNames: true,
-            database: util_1.getEnvironmentVariable('AZURE_SQL_DATABASE')
+            database: util_1.getEnvironmentVariable('AZURE_SQL_DATABASE'),
+            requestTimeout: 0
         }
     });
     connection.on('connect', (err) => {
@@ -77,40 +102,8 @@ function request(query, parameters, cb) {
         connection.execSql(request);
     });
 }
-function isUserRegistered(userId, cb) {
-    if (userInfoCache[userId]) {
-        setImmediate(() => cb(undefined, true));
-        return;
-    }
-    request(`SELECT deviceId, timezone, userName FROM ${util_1.DATABASE_NAMES.USERS} WHERE facebookId=@userId`, [{
-            name: 'userId',
-            type: tedious_1.TYPES.VarChar,
-            value: userId
-        }], (err, rowCount, rows) => {
-        if (err) {
-            cb(err, undefined);
-        }
-        else if (rowCount === 0) {
-            cb(undefined, false);
-        }
-        else if (rowCount === 1) {
-            if (!rows[0].hasOwnProperty('deviceId') || !rows[0].hasOwnProperty('timezone') || !rows[0].hasOwnProperty('userName')) {
-                cb(new Error(`Received result without deviceId, userName, or timezone property`), undefined);
-            }
-            else {
-                userInfoCache[userId] = {
-                    userId,
-                    userName: rows[0].userName.value,
-                    deviceId: rows[0].deviceId.value,
-                    timezone: rows[0].timezone.value
-                };
-                cb(undefined, true);
-            }
-        }
-        else {
-            cb(new Error(`More than one user found for user ID ${userId}`), undefined);
-        }
-    });
+function isUserRegistered(userId) {
+    return !!userInfoCache[userId];
 }
 exports.isUserRegistered = isUserRegistered;
 function getState(deviceId, cb) {
@@ -170,6 +163,16 @@ function getMonthlyTemperatureHistory(userId, cb) {
     const monthEnd = startOfDay.unix() * 1000;
     const monthBegin = monthEnd - MONTH_IN_MS;
     async_1.waterfall([
+        // Delete stale monthly samples
+        (next) => {
+            request(`DELETE FROM ${util_1.DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId AND time <= ${monthBegin}`, [{
+                    name: 'deviceId',
+                    type: tedious_1.TYPES.VarChar,
+                    value: user.deviceId
+                }], (err, rowCount, rows) => {
+                next(err);
+            });
+        },
         // Calculate the up-to-date monthly samples
         (next) => {
             request(`SELECT currentTemperature, currentTime FROM ${util_1.DATABASE_NAMES.STATE} ` +
@@ -241,16 +244,6 @@ function getMonthlyTemperatureHistory(userId, cb) {
                 return;
             }
             request(`DELETE FROM ${util_1.DATABASE_NAMES.STATE} WHERE deviceId=@deviceId AND currentTime <= ${monthEnd}`, [{
-                    name: 'deviceId',
-                    type: tedious_1.TYPES.VarChar,
-                    value: user.deviceId
-                }], (err, rowCount, rows) => {
-                next(err);
-            });
-        },
-        // Delete stale monthly samples
-        (next) => {
-            request(`DELETE FROM ${util_1.DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId AND time <= ${monthBegin}`, [{
                     name: 'deviceId',
                     type: tedious_1.TYPES.VarChar,
                     value: user.deviceId

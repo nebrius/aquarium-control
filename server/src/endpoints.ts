@@ -78,16 +78,12 @@ export function init(cb: (err: Error | undefined) => void): void {
           if (!parsedBody.is_valid) {
             handleUnauthorized();
           } else {
-            isUserRegistered(parsedBody.user_id, (err, isRegistered) => {
-              if (err) {
-                res.sendStatus(500);
-              } else if (!isRegistered) {
-                handleUnauthorized();
-              } else {
-                (<IRequest>req).userId = parsedBody.user_id;
-                next();
-              }
-            });
+            if (!isUserRegistered(parsedBody.user_id)) {
+              handleUnauthorized();
+            } else {
+              (<IRequest>req).userId = parsedBody.user_id;
+              next();
+            }
           }
         } catch(e) {
           res.sendStatus(500);
