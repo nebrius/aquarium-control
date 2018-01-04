@@ -37,6 +37,7 @@
     "azure-iot-device-mqtt": "^1.1.17",
     "deep-equal": "^1.0.1",
     "make-dir": "^1.0.0",
+    "mqtt": "^2.15.0",
     "raspi": "^5.0.1",
     "raspi-gpio": "^5.0.0",
     "raspi-onewire": "^1.0.1",
