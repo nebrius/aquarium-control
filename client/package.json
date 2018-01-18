@@ -4,9 +4,9 @@
   "description": "The web client for controlling an aquarium, part of the aquarium control system",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "tslint src/**/*.ts src/**/*.tsx && rimraf dist",
+    "lint": "tslint 'src/**/*.ts' 'src/**/*.tsx' && rimraf dist",
     "prebuild": "npm run lint",
-    "build:css": "cpy css/**/*.css dist/css/",
+    "build:css": "cpy 'css/**/*.css' dist/css/",
     "build:ts": "webpack",
     "build": "npm run build:ts && npm run build:css",
     "postbuild": "echo done",

@@ -81,11 +81,11 @@ export function init(cb: (err: Error | undefined) => void): void {
             if (!isUserRegistered(parsedBody.user_id)) {
               handleUnauthorized();
             } else {
-              (<IRequest>req).userId = parsedBody.user_id;
+              (req as IRequest).userId = parsedBody.user_id;
               next();
             }
           }
-        } catch(e) {
+        } catch (e) {
           res.sendStatus(500);
         }
       });
@@ -118,7 +118,7 @@ export function init(cb: (err: Error | undefined) => void): void {
           const parsedBody = JSON.parse(body);
           res.cookie('accessToken', parsedBody.access_token);
           res.redirect('/');
-        } catch(e) {
+        } catch (e) {
           res.sendStatus(500);
         }
       });
@@ -136,11 +136,11 @@ export function init(cb: (err: Error | undefined) => void): void {
   });
 
   app.get('/api/user', ensureAuthentication(false), (req, res) => {
-    res.send(getUser((<IRequest>req).userId));
+    res.send(getUser((req as IRequest).userId));
   });
 
   app.get('/api/state', ensureAuthentication(false), (req, res) => {
-    getState(getDeviceForUserId((<IRequest>req).userId), (err, state) => {
+    getState(getDeviceForUserId((req as IRequest).userId), (err, state) => {
       if (err) {
         console.error(err);
         res.sendStatus(500);
@@ -151,7 +151,7 @@ export function init(cb: (err: Error | undefined) => void): void {
   });
 
   app.get('/api/config', ensureAuthentication(false), (req, res) => {
-    getConfig(getDeviceForUserId((<IRequest>req).userId), (err, config, isConfigUpToDate) => {
+    getConfig(getDeviceForUserId((req as IRequest).userId), (err, config, isConfigUpToDate) => {
       if (err) {
         console.error(err);
         res.sendStatus(500);
@@ -169,7 +169,7 @@ export function init(cb: (err: Error | undefined) => void): void {
       res.sendStatus(400);
       return;
     }
-    setConfig(getDeviceForUserId((<IRequest>req).userId), <IConfig>(req.body), (err) => {
+    setConfig(getDeviceForUserId((req as IRequest).userId), (req.body as IConfig), (err) => {
       if (err) {
         console.error(err);
         res.sendStatus(500);
@@ -181,16 +181,16 @@ export function init(cb: (err: Error | undefined) => void): void {
 
   app.get('/api/temperatures', ensureAuthentication(false), (req, res) => {
     series([
-      (done) => getMonthlyTemperatureHistory((<IRequest>req).userId, done),
-      (done) => getDailyTemperatureHistory(getDeviceForUserId((<IRequest>req).userId), done)
+      (done) => getMonthlyTemperatureHistory((req as IRequest).userId, done),
+      (done) => getDailyTemperatureHistory(getDeviceForUserId((req as IRequest).userId), done)
     ], (err, results) => {
       if (err || !results) {
         res.sendStatus(500);
       } else {
         const history: ITemperature = {
-          monthly: <IMonthlyTemperatureSample[]>results[0],
-          daily: <IDailyTemperatureSample[]>results[1]
-        }
+          monthly: results[0] as IMonthlyTemperatureSample[],
+          daily: results[1] as IDailyTemperatureSample[]
+        };
         res.send(history);
       }
     });

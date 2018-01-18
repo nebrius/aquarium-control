@@ -153,7 +153,7 @@ function init(cb) {
             res.sendStatus(400);
             return;
         }
-        messaging_1.setConfig(db_2.getDeviceForUserId(req.userId), (req.body), (err) => {
+        messaging_1.setConfig(db_2.getDeviceForUserId(req.userId), req.body, (err) => {
             if (err) {
                 console.error(err);
                 res.sendStatus(500);

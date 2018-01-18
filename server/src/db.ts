@@ -71,7 +71,11 @@ export function init(cb: (err: Error | undefined) => void): void {
       }
 
       for (const row of rows) {
-        if (!row.hasOwnProperty('facebookId') || !row.hasOwnProperty('deviceId') || !row.hasOwnProperty('timezone') || !row.hasOwnProperty('userName')) {
+        if (!row.hasOwnProperty('facebookId') ||
+          !row.hasOwnProperty('deviceId') ||
+          !row.hasOwnProperty('timezone') ||
+          !row.hasOwnProperty('userName')
+        ) {
           cb(new Error(`Received result without facebookId, deviceId, userName, or timezone property`));
           return;
         }
@@ -119,11 +123,11 @@ function request(
       cb(err, 0, []);
       return;
     }
-    const request = new Request(query, cb);
+    const req = new Request(query, cb);
     for (const parameter of parameters) {
-      request.addParameter(parameter.name, parameter.type, parameter.value);
+      req.addParameter(parameter.name, parameter.type, parameter.value);
     }
-    connection.execSql(request);
+    connection.execSql(req);
   });
 }
 
@@ -147,11 +151,11 @@ export function getState(deviceId: string, cb: (err: Error | undefined, state: I
       } else if (rowCount === 1) {
         const state: IState = {
           deviceId,
-          currentTime: parseInt(rows[0].currentTime.value),
+          currentTime: parseInt(rows[0].currentTime.value, 10),
           currentTemperature: rows[0].currentTemperature.value, // in Celcius
           currentState: rows[0].currentState.value,
           currentMode: rows[0].currentMode.value,
-          nextTransitionTime: parseInt(rows[0].nextTransitionTime.value), // UNIX timestamp, e.g. Date.now()
+          nextTransitionTime: parseInt(rows[0].nextTransitionTime.value, 10), // UNIX timestamp, e.g. Date.now()
           nextTransitionState: rows[0].nextTransitionState.value
         };
         cb(undefined, state);
@@ -182,8 +186,8 @@ export function getDailyTemperatureHistory(
         return {
           deviceId,
           temperature: parseFloat(row.currentTemperature.value),
-          time: parseInt(row.currentTime.value)
-        }
+          time: parseInt(row.currentTime.value, 10)
+        };
       }));
     }
   );
@@ -241,15 +245,15 @@ export function getMonthlyTemperatureHistory(
           }
 
           let dayBucketTimestamp = monthEnd - DAY_IN_MS;
-          const dayBuckets: {
+          const dayBuckets: Array<{
             timestamp: number,
             samples: number[]
-          }[] = [{
+          }> = [{
             timestamp: dayBucketTimestamp,
             samples: []
           }];
           for (let i = rowCount - 1; i >= 0; i--) {
-            if (parseInt(rows[i].currentTime.value) < dayBucketTimestamp) {
+            if (parseInt(rows[i].currentTime.value, 0) < dayBucketTimestamp) {
               dayBucketTimestamp -= DAY_IN_MS;
               if (dayBucketTimestamp < monthBegin) {
                 break;
@@ -262,19 +266,21 @@ export function getMonthlyTemperatureHistory(
             dayBuckets[dayBuckets.length - 1].samples.push(parseFloat(rows[i].currentTemperature.value));
           }
 
-          const samples: IMonthlyTemperatureSample[] = dayBuckets.filter((dayBucket) => !!dayBucket.samples.length).map((dayBucket) => {
-            let low = Infinity;
-            let high = -Infinity;
-            for (const sample of dayBucket.samples) {
-              if (sample < low) {
-                low = sample;
+          const samples: IMonthlyTemperatureSample[] = dayBuckets
+            .filter((dayBucket) => !!dayBucket.samples.length)
+            .map((dayBucket) => {
+              let low = Infinity;
+              let high = -Infinity;
+              for (const sample of dayBucket.samples) {
+                if (sample < low) {
+                  low = sample;
+                }
+                if (sample > high) {
+                  high = sample;
+                }
               }
-              if (sample > high) {
-                high = sample;
-              }
-            }
-            return { deviceId: user.deviceId, time: dayBucket.timestamp, low, high };
-          });
+              return { deviceId: user.deviceId, time: dayBucket.timestamp, low, high };
+            });
 
           next(undefined, samples);
         }
@@ -288,7 +294,7 @@ export function getMonthlyTemperatureHistory(
         return;
       }
       const values = samples.map((sample) => {
-        return `('${sample.deviceId}', ${sample.time}, ${sample.low}, ${sample.high})`
+        return `('${sample.deviceId}', ${sample.time}, ${sample.low}, ${sample.high})`;
       }).join(', ');
       request(
         `INSERT INTO ${DATABASE_NAMES.TEMPERATURE} (deviceId, time, low, high) VALUES ${values}`,
@@ -331,7 +337,7 @@ export function getMonthlyTemperatureHistory(
           next(err, rows.map((row) => {
             return {
               deviceId: row.deviceId.value,
-              time: parseInt(row.time.value),
+              time: parseInt(row.time.value, 10),
               high: parseFloat(row.high.value),
               low: parseFloat(row.low.value)
             };

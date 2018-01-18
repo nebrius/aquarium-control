@@ -60,7 +60,10 @@ function init(cb) {
             return;
         }
         for (const row of rows) {
-            if (!row.hasOwnProperty('facebookId') || !row.hasOwnProperty('deviceId') || !row.hasOwnProperty('timezone') || !row.hasOwnProperty('userName')) {
+            if (!row.hasOwnProperty('facebookId') ||
+                !row.hasOwnProperty('deviceId') ||
+                !row.hasOwnProperty('timezone') ||
+                !row.hasOwnProperty('userName')) {
                 cb(new Error(`Received result without facebookId, deviceId, userName, or timezone property`));
                 return;
             }
@@ -95,11 +98,11 @@ function request(query, parameters, cb) {
             cb(err, 0, []);
             return;
         }
-        const request = new tedious_1.Request(query, cb);
+        const req = new tedious_1.Request(query, cb);
         for (const parameter of parameters) {
-            request.addParameter(parameter.name, parameter.type, parameter.value);
+            req.addParameter(parameter.name, parameter.type, parameter.value);
         }
-        connection.execSql(request);
+        connection.execSql(req);
     });
 }
 function isUserRegistered(userId) {
@@ -121,11 +124,11 @@ function getState(deviceId, cb) {
         else if (rowCount === 1) {
             const state = {
                 deviceId,
-                currentTime: parseInt(rows[0].currentTime.value),
+                currentTime: parseInt(rows[0].currentTime.value, 10),
                 currentTemperature: rows[0].currentTemperature.value,
                 currentState: rows[0].currentState.value,
                 currentMode: rows[0].currentMode.value,
-                nextTransitionTime: parseInt(rows[0].nextTransitionTime.value),
+                nextTransitionTime: parseInt(rows[0].nextTransitionTime.value, 10),
                 nextTransitionState: rows[0].nextTransitionState.value
             };
             cb(undefined, state);
@@ -150,7 +153,7 @@ function getDailyTemperatureHistory(deviceId, cb) {
             return {
                 deviceId,
                 temperature: parseFloat(row.currentTemperature.value),
-                time: parseInt(row.currentTime.value)
+                time: parseInt(row.currentTime.value, 10)
             };
         }));
     });
@@ -196,7 +199,7 @@ function getMonthlyTemperatureHistory(userId, cb) {
                         samples: []
                     }];
                 for (let i = rowCount - 1; i >= 0; i--) {
-                    if (parseInt(rows[i].currentTime.value) < dayBucketTimestamp) {
+                    if (parseInt(rows[i].currentTime.value, 0) < dayBucketTimestamp) {
                         dayBucketTimestamp -= DAY_IN_MS;
                         if (dayBucketTimestamp < monthBegin) {
                             break;
@@ -208,7 +211,9 @@ function getMonthlyTemperatureHistory(userId, cb) {
                     }
                     dayBuckets[dayBuckets.length - 1].samples.push(parseFloat(rows[i].currentTemperature.value));
                 }
-                const samples = dayBuckets.filter((dayBucket) => !!dayBucket.samples.length).map((dayBucket) => {
+                const samples = dayBuckets
+                    .filter((dayBucket) => !!dayBucket.samples.length)
+                    .map((dayBucket) => {
                     let low = Infinity;
                     let high = -Infinity;
                     for (const sample of dayBucket.samples) {
@@ -261,7 +266,7 @@ function getMonthlyTemperatureHistory(userId, cb) {
                 next(err, rows.map((row) => {
                     return {
                         deviceId: row.deviceId.value,
-                        time: parseInt(row.time.value),
+                        time: parseInt(row.time.value, 10),
                         high: parseFloat(row.high.value),
                         low: parseFloat(row.low.value)
                     };

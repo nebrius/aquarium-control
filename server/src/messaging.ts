@@ -41,7 +41,7 @@ export function getConfig(
     try {
       const config: IConfig = JSON.parse(twin.properties.desired.config);
       cb(undefined, config, twin.properties.desired.$version === twin.properties.reported.$version);
-    } catch(e) {
+    } catch (e) {
       cb(e, undefined, undefined);
     }
   });
