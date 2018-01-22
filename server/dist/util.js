@@ -16,8 +16,9 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
+const moment = require("moment-timezone");
 exports.DATABASE_NAMES = {
-    STATE: 'aquarium_state',
+    STATE: 'current_state',
     USERS: 'aquarium_users',
     TEMPERATURE: 'monthly_temperature'
 };
@@ -37,4 +38,10 @@ function toStringWithPadding(value, digits) {
     return convertedString;
 }
 exports.toStringWithPadding = toStringWithPadding;
+function getStartOfToday(timezone) {
+    const now = moment().tz(timezone);
+    const startOfDay = moment.tz(`${toStringWithPadding(now.year(), 4)}-${toStringWithPadding(now.month() + 1, 2)}-${toStringWithPadding(now.date(), 2)}`, timezone);
+    return startOfDay.unix() * 1000;
+}
+exports.getStartOfToday = getStartOfToday;
 //# sourceMappingURL=util.js.map

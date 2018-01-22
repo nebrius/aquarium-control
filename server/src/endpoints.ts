@@ -24,11 +24,11 @@ import * as request from 'request';
 import * as cookieParser from 'cookie-parser';
 import { series } from 'async';
 import { IConfig, configValidationSchema } from './common/IConfig';
-import { ITemperature, IDailyTemperatureSample, IMonthlyTemperatureSample } from './common/ITemperature';
+import { ITemperature, ITemperatureSample } from './common/ITemperature';
 import { isUserRegistered } from './db';
 import { getConfig, setConfig } from './messaging';
 import { getEnvironmentVariable } from './util';
-import { getDailyTemperatureHistory, getMonthlyTemperatureHistory, getDeviceForUserId, getUser, getState } from './db';
+import { getMonthlyTemperatureHistory, getDeviceForUserId, getUser, getState } from './db';
 
 const DEFAULT_PORT = 3001;
 
@@ -182,14 +182,12 @@ export function init(cb: (err: Error | undefined) => void): void {
   app.get('/api/temperatures', ensureAuthentication(false), (req, res) => {
     series([
       (done) => getMonthlyTemperatureHistory((req as IRequest).userId, done),
-      (done) => getDailyTemperatureHistory(getDeviceForUserId((req as IRequest).userId), done)
     ], (err, results) => {
       if (err || !results) {
         res.sendStatus(500);
       } else {
         const history: ITemperature = {
-          monthly: results[0] as IMonthlyTemperatureSample[],
-          daily: results[1] as IDailyTemperatureSample[]
+          temperatures: results[0] as ITemperatureSample[]
         };
         res.send(history);
       }

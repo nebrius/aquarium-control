@@ -17,13 +17,22 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import { IState } from './common/IState';
 import { IUser } from './common/IUser';
-import { IDailyTemperatureSample, IMonthlyTemperatureSample } from './common/ITemperature';
-import { getEnvironmentVariable, toStringWithPadding, DATABASE_NAMES } from './util';
+import { ITemperatureSample } from './common/ITemperature';
+import { getEnvironmentVariable, getStartOfToday, DATABASE_NAMES } from './util';
 import { Connection, Request, TYPES, TediousType } from 'tedious';
-import * as moment from 'moment-timezone';
 import { waterfall } from 'async';
 
 const userInfoCache: { [ userId: string ]: IUser } = {};
+
+interface ITemperatureCacheEntry {
+  time: number;
+  high: number;
+  low: number;
+}
+const dailyTemperatureCache: { [ deviceId: string ]: ITemperatureCacheEntry } = {};
+
+type CB = (err: Error | undefined) => void;
+type CBWithValue<T> = (err: Error | undefined, value: T | undefined) => void;
 
 const HOUR_IN_MS = 60 * 60 * 1000;
 const DAY_IN_MS = 24 * HOUR_IN_MS;
@@ -37,6 +46,18 @@ export function getUsernameForUserId(userId: string): string {
 
 export function getDeviceForUserId(userId: string): string {
   return userInfoCache[userId].deviceId;
+}
+
+export function getUserIdForDeviceId(deviceId: string): string | undefined {
+  for (const userId in userInfoCache) {
+    if (!userInfoCache.hasOwnProperty(userId)) {
+      continue;
+    }
+    if (userInfoCache[userId].deviceId === deviceId) {
+      return userId;
+    }
+  }
+  return undefined; // User is missing for some reason
 }
 
 export function getTimezoneForUserId(userId: string): string {
@@ -137,7 +158,7 @@ export function isUserRegistered(userId: string): boolean {
 
 export function getState(deviceId: string, cb: (err: Error | undefined, state: IState | undefined) => void): void {
   request(
-    `SELECT TOP(1) * FROM ${DATABASE_NAMES.STATE} WHERE deviceId=@deviceId ORDER BY currentTime DESC`,
+    `SELECT * FROM ${DATABASE_NAMES.STATE} WHERE deviceId=@deviceId`,
     [{
       name: 'deviceId',
       type: TYPES.VarChar,
@@ -166,185 +187,192 @@ export function getState(deviceId: string, cb: (err: Error | undefined, state: I
   );
 }
 
-export function getDailyTemperatureHistory(
-  deviceId: string,
-  cb: (err: Error | undefined, history: IDailyTemperatureSample[] | undefined) => void
-): void {
+export function updateState(newState: IState, cb?: (err: Error | undefined) => void): void {
+  console.log(`Updating state for ${newState.deviceId}`);
   request(
-    `SELECT currentTime, currentTemperature FROM ${DATABASE_NAMES.STATE} WHERE deviceId=@deviceId ORDER BY currentTime`,
+`IF NOT EXISTS(SELECT * FROM current_state WHERE deviceId=@deviceId)
+BEGIN
+  INSERT INTO ${DATABASE_NAMES.STATE}(
+    deviceId,
+    currentTime,
+    currentTemperature,
+    currentState,
+    currentMode,
+    nextTransitionTime,
+    nextTransitionState
+  )
+  VALUES(
+    @deviceId,
+    ${newState.currentTime},
+    ${newState.currentTemperature},
+    '${newState.currentState}',
+    '${newState.currentMode}',
+    ${newState.nextTransitionTime},
+    '${newState.nextTransitionState}'
+  )
+END
+ELSE
+BEGIN
+  UPDATE ${DATABASE_NAMES.STATE} SET
+    currentTime=${newState.currentTime},
+    currentTemperature=${newState.currentTemperature},
+    currentState='${newState.currentState}',
+    currentMode='${newState.currentMode}',
+    nextTransitionTime=${newState.nextTransitionTime},
+    nextTransitionState='${newState.nextTransitionTime}'
+  WHERE deviceId=@deviceId
+END`,
     [{
       name: 'deviceId',
       type: TYPES.VarChar,
-      value: deviceId
+      value: newState.deviceId
     }],
-    (err, rowCount, rows) => {
-      if (err) {
-        cb(err, undefined);
+    (stateErr) => {
+      if (stateErr) {
+        if (cb) {
+          cb(stateErr);
+        }
         return;
       }
-      cb(undefined, rows.map((row) => {
-        return {
-          deviceId,
-          temperature: parseFloat(row.currentTemperature.value),
-          time: parseInt(row.currentTime.value, 10)
-        };
-      }));
+      const userId = getUserIdForDeviceId(newState.deviceId);
+      if (!userId) {
+        throw new Error(`Internal Error: unknown user ID ${userId}`);
+      }
+      const startOfToday = getStartOfToday(getUser(userId).timezone);
+      const monthBegin = startOfToday - MONTH_IN_MS;
+      const dailyCache = dailyTemperatureCache[newState.deviceId];
+
+      // Skip updating if possible
+      if (dailyCache &&
+        dailyCache.time === startOfToday &&
+        dailyCache.low < newState.currentTemperature &&
+        dailyCache.high > newState.currentTemperature
+      ) {
+        if (cb) {
+          cb(stateErr);
+        }
+        return;
+      }
+
+      waterfall([
+        // Fetch the data from the DB
+        (next: CBWithValue<ITemperatureCacheEntry[]>) => request(
+          `SELECT * FROM ${DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId ORDER BY time DESC`,
+          [{
+            name: 'deviceId',
+            type: TYPES.VarChar,
+            value: newState.deviceId
+          }],
+          (err, rowCount, rows) => {
+            if (err) {
+              next(err, undefined);
+              return;
+            }
+            const temperatureHistory: ITemperatureCacheEntry[] = rows.map((row) => ({
+              time: parseInt(row.time.value, 10),
+              high: parseFloat(row.high.value),
+              low: parseFloat(row.low.value)
+            }));
+            next(undefined, temperatureHistory);
+          }
+        ),
+
+        // Update the data in the DB
+        (data: ITemperatureCacheEntry[], next: CB) => {
+          const latestEntry = data[0];
+
+          // Check if we need to create a new entry
+          if (latestEntry.time !== startOfToday) {
+            dailyTemperatureCache[newState.deviceId] = {
+              time: startOfToday,
+              low: newState.currentTemperature,
+              high: newState.currentTemperature
+            };
+            waterfall([
+              (deleteNext: CB) => request(
+                `DELETE FROM ${DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId AND time <= ${monthBegin}`,
+                [{
+                  name: 'deviceId',
+                  type: TYPES.VarChar,
+                  value: newState.deviceId
+                }],
+                (err, rowCount, rows) => deleteNext(err)
+              ),
+              (insertNext: CB) => request(
+                `INSERT INTO ${DATABASE_NAMES.TEMPERATURE} (deviceId, time, low, high) ` +
+                  `VALUES (@deviceId, ${startOfToday}, ${newState.currentTemperature}, ${newState.currentTemperature})`,
+                [{
+                  name: 'deviceId',
+                  type: TYPES.VarChar,
+                  value: newState.deviceId
+                }],
+                (err, rowCount, rows) => insertNext(err)
+              )
+            ], next);
+            // Create the new entry
+
+          // Else check if we need to update the high temperature
+          } else if (latestEntry.high < newState.currentTemperature) {
+            dailyTemperatureCache[newState.deviceId].high = newState.currentTemperature;
+            request(
+              `UPDATE ${DATABASE_NAMES.TEMPERATURE} ` +
+              `SET high=${newState.currentTemperature} ` +
+              `WHERE deviceId=@deviceId AND time=${startOfToday}`,
+              [{
+                name: 'deviceId',
+                type: TYPES.VarChar,
+                value: newState.deviceId
+              }],
+              (updateErr) => next(updateErr)
+            );
+
+          // Else check if we need to update the low temperature
+          } else if (latestEntry.low > newState.currentTemperature) {
+            dailyTemperatureCache[newState.deviceId].low = newState.currentTemperature;
+            request(
+              `UPDATE ${DATABASE_NAMES.TEMPERATURE} ` +
+              `SET low=${newState.currentTemperature} ` +
+              `WHERE deviceId=@deviceId AND time=${startOfToday}`,
+              [{
+                name: 'deviceId',
+                type: TYPES.VarChar,
+                value: newState.deviceId
+              }],
+              (updateErr) => next(updateErr)
+            );
+          } else {
+            next(undefined);
+          }
+        }
+
+      ], cb);
     }
   );
 }
 
 export function getMonthlyTemperatureHistory(
   userId: string,
-  cb: (err: Error | undefined, history: IMonthlyTemperatureSample[] | undefined) => void
+  cb: (err: Error | undefined, history: ITemperatureSample[] | undefined) => void
 ): void {
-
   const user = getUser(userId);
-  const now = moment().tz(user.timezone);
-  const startOfDay = moment.tz(
-    `${toStringWithPadding(now.year(), 4)
-    }-${toStringWithPadding(now.month() + 1, 2)
-    }-${toStringWithPadding(now.date(), 2)}`, user.timezone);
-  const monthEnd = startOfDay.unix() * 1000;
-  const monthBegin = monthEnd - MONTH_IN_MS;
-
-  waterfall([
-
-    // Delete stale monthly samples
-    (next: (err: Error | undefined, ...args: any[]) => void) => {
-      request(
-        `DELETE FROM ${DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId AND time <= ${monthBegin}`,
-        [{
-          name: 'deviceId',
-          type: TYPES.VarChar,
-          value: user.deviceId
-        }],
-        (err, rowCount, rows) => {
-          next(err);
-        }
-      );
-    },
-
-    // Calculate the up-to-date monthly samples
-    (next: (err: Error | undefined, ...args: any[]) => void) => {
-      request(
-        `SELECT currentTemperature, currentTime FROM ${DATABASE_NAMES.STATE} ` +
-        `WHERE deviceId=@deviceId AND currentTime <= ${monthEnd} AND currentTime > ${monthBegin} ` +
-        `ORDER BY currentTime`,
-        [{
-          name: 'deviceId',
-          type: TYPES.VarChar,
-          value: user.deviceId
-        }],
-        (err, rowCount, rows) => {
-          if (err) {
-            next(err);
-            return;
-          } else if (!rowCount) {
-            next(undefined, []);
-            return;
-          }
-
-          let dayBucketTimestamp = monthEnd - DAY_IN_MS;
-          const dayBuckets: Array<{
-            timestamp: number,
-            samples: number[]
-          }> = [{
-            timestamp: dayBucketTimestamp,
-            samples: []
-          }];
-          for (let i = rowCount - 1; i >= 0; i--) {
-            if (parseInt(rows[i].currentTime.value, 0) < dayBucketTimestamp) {
-              dayBucketTimestamp -= DAY_IN_MS;
-              if (dayBucketTimestamp < monthBegin) {
-                break;
-              }
-              dayBuckets.push({
-                timestamp: dayBucketTimestamp,
-                samples: []
-              });
-            }
-            dayBuckets[dayBuckets.length - 1].samples.push(parseFloat(rows[i].currentTemperature.value));
-          }
-
-          const samples: IMonthlyTemperatureSample[] = dayBuckets
-            .filter((dayBucket) => !!dayBucket.samples.length)
-            .map((dayBucket) => {
-              let low = Infinity;
-              let high = -Infinity;
-              for (const sample of dayBucket.samples) {
-                if (sample < low) {
-                  low = sample;
-                }
-                if (sample > high) {
-                  high = sample;
-                }
-              }
-              return { deviceId: user.deviceId, time: dayBucket.timestamp, low, high };
-            });
-
-          next(undefined, samples);
-        }
-      );
-    },
-
-    // Save the updated monthly samples
-    (samples: IMonthlyTemperatureSample[], next: (err: Error | undefined, ...args: any[]) => void) => {
-      if (!samples.length) {
-        next(undefined, false);
+  request(
+    `SELECT * FROM ${DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId ORDER BY time`,
+    [{
+      name: 'deviceId',
+      type: TYPES.VarChar,
+      value: user.deviceId
+    }],
+    (err, rowCount, rows) => {
+      if (err) {
+        cb(err, undefined);
         return;
       }
-      const values = samples.map((sample) => {
-        return `('${sample.deviceId}', ${sample.time}, ${sample.low}, ${sample.high})`;
-      }).join(', ');
-      request(
-        `INSERT INTO ${DATABASE_NAMES.TEMPERATURE} (deviceId, time, low, high) VALUES ${values}`,
-        [],
-        (err, rowCount, rows) => {
-          next(err, !err);
-        }
-      );
-    },
-
-    // Delete the old state samples
-    (needsDelete: boolean, next: (err: Error | undefined, ...args: any[]) => void) => {
-      if (!needsDelete) {
-        next(undefined);
-        return;
-      }
-      request(
-        `DELETE FROM ${DATABASE_NAMES.STATE} WHERE deviceId=@deviceId AND currentTime <= ${monthEnd}`,
-        [{
-          name: 'deviceId',
-          type: TYPES.VarChar,
-          value: user.deviceId
-        }],
-        (err, rowCount, rows) => {
-          next(err);
-        }
-      );
-    },
-
-    // Fetch all monthly samples
-    (next: (err: Error | undefined, ...args: any[]) => void) => {
-      request(
-        `SELECT * FROM ${DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId ORDER BY time`,
-        [{
-          name: 'deviceId',
-          type: TYPES.VarChar,
-          value: user.deviceId
-        }],
-        (err, rowCount, rows) => {
-          next(err, rows.map((row) => {
-            return {
-              deviceId: row.deviceId.value,
-              time: parseInt(row.time.value, 10),
-              high: parseFloat(row.high.value),
-              low: parseFloat(row.low.value)
-            };
-          }));
-        }
-      );
+      cb(undefined, rows.map((row) => ({
+        deviceId: row.deviceId.value,
+        time: parseInt(row.time.value, 10),
+        high: parseFloat(row.high.value),
+        low: parseFloat(row.low.value)
+      })));
     }
-
-  ], cb);
+  );
 }

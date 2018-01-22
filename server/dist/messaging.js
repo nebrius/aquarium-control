@@ -17,6 +17,8 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 const azure_iothub_1 = require("azure-iothub");
+const azure_event_hubs_1 = require("azure-event-hubs");
+const db_1 = require("./db");
 let registry;
 function init(cb) {
     const IOT_HUB_CONNECTION_STRING = process.env.IOT_HUB_CONNECTION_STRING;
@@ -24,6 +26,17 @@ function init(cb) {
         throw new Error('Environment variable IOT_HUB_DEVICE_CONNECTION_STRING is not defined');
     }
     registry = azure_iothub_1.Registry.fromConnectionString(IOT_HUB_CONNECTION_STRING);
+    const client = azure_event_hubs_1.Client.fromConnectionString(IOT_HUB_CONNECTION_STRING);
+    client.open()
+        .then(client.getPartitionIds.bind(client))
+        .then((partitionIds) => partitionIds.map((partitionId) => client.createReceiver('$Default', partitionId, {
+        startAfterTime: Date.now()
+    }).then((receiver) => {
+        console.log('Created partition receiver: ' + partitionId);
+        receiver.on('errorReceived', (err) => console.error(err));
+        receiver.on('message', (message) => db_1.updateState(message.body));
+    })))
+        .catch((err) => console.error(err));
     setImmediate(cb);
 }
 exports.init = init;

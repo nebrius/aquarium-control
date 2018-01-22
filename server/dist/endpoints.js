@@ -166,15 +166,13 @@ function init(cb) {
     app.get('/api/temperatures', ensureAuthentication(false), (req, res) => {
         async_1.series([
             (done) => db_2.getMonthlyTemperatureHistory(req.userId, done),
-            (done) => db_2.getDailyTemperatureHistory(db_2.getDeviceForUserId(req.userId), done)
         ], (err, results) => {
             if (err || !results) {
                 res.sendStatus(500);
             }
             else {
                 const history = {
-                    monthly: results[0],
-                    daily: results[1]
+                    temperatures: results[0]
                 };
                 res.send(history);
             }

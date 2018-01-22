@@ -18,9 +18,9 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 Object.defineProperty(exports, "__esModule", { value: true });
 const util_1 = require("./util");
 const tedious_1 = require("tedious");
-const moment = require("moment-timezone");
 const async_1 = require("async");
 const userInfoCache = {};
+const dailyTemperatureCache = {};
 const HOUR_IN_MS = 60 * 60 * 1000;
 const DAY_IN_MS = 24 * HOUR_IN_MS;
 const MONTH_IN_MS = 30 * DAY_IN_MS;
@@ -33,6 +33,18 @@ function getDeviceForUserId(userId) {
     return userInfoCache[userId].deviceId;
 }
 exports.getDeviceForUserId = getDeviceForUserId;
+function getUserIdForDeviceId(deviceId) {
+    for (const userId in userInfoCache) {
+        if (!userInfoCache.hasOwnProperty(userId)) {
+            continue;
+        }
+        if (userInfoCache[userId].deviceId === deviceId) {
+            return userId;
+        }
+    }
+    return undefined; // User is missing for some reason
+}
+exports.getUserIdForDeviceId = getUserIdForDeviceId;
 function getTimezoneForUserId(userId) {
     return userInfoCache[userId].timezone;
 }
@@ -110,7 +122,7 @@ function isUserRegistered(userId) {
 }
 exports.isUserRegistered = isUserRegistered;
 function getState(deviceId, cb) {
-    request(`SELECT TOP(1) * FROM ${util_1.DATABASE_NAMES.STATE} WHERE deviceId=@deviceId ORDER BY currentTime DESC`, [{
+    request(`SELECT * FROM ${util_1.DATABASE_NAMES.STATE} WHERE deviceId=@deviceId`, [{
             name: 'deviceId',
             type: tedious_1.TYPES.VarChar,
             value: deviceId
@@ -139,141 +151,158 @@ function getState(deviceId, cb) {
     });
 }
 exports.getState = getState;
-function getDailyTemperatureHistory(deviceId, cb) {
-    request(`SELECT currentTime, currentTemperature FROM ${util_1.DATABASE_NAMES.STATE} WHERE deviceId=@deviceId ORDER BY currentTime`, [{
+function updateState(newState, cb) {
+    console.log(`Updating state for ${newState.deviceId}`);
+    request(`IF NOT EXISTS(SELECT * FROM current_state WHERE deviceId=@deviceId)
+BEGIN
+  INSERT INTO ${util_1.DATABASE_NAMES.STATE}(
+    deviceId,
+    currentTime,
+    currentTemperature,
+    currentState,
+    currentMode,
+    nextTransitionTime,
+    nextTransitionState
+  )
+  VALUES(
+    @deviceId,
+    ${newState.currentTime},
+    ${newState.currentTemperature},
+    '${newState.currentState}',
+    '${newState.currentMode}',
+    ${newState.nextTransitionTime},
+    '${newState.nextTransitionState}'
+  )
+END
+ELSE
+BEGIN
+  UPDATE ${util_1.DATABASE_NAMES.STATE} SET
+    currentTime=${newState.currentTime},
+    currentTemperature=${newState.currentTemperature},
+    currentState='${newState.currentState}',
+    currentMode='${newState.currentMode}',
+    nextTransitionTime=${newState.nextTransitionTime},
+    nextTransitionState='${newState.nextTransitionTime}'
+  WHERE deviceId=@deviceId
+END`, [{
             name: 'deviceId',
             type: tedious_1.TYPES.VarChar,
-            value: deviceId
+            value: newState.deviceId
+        }], (stateErr) => {
+        if (stateErr) {
+            if (cb) {
+                cb(stateErr);
+            }
+            return;
+        }
+        const userId = getUserIdForDeviceId(newState.deviceId);
+        if (!userId) {
+            throw new Error(`Internal Error: unknown user ID ${userId}`);
+        }
+        const startOfToday = util_1.getStartOfToday(getUser(userId).timezone);
+        const monthBegin = startOfToday - MONTH_IN_MS;
+        const dailyCache = dailyTemperatureCache[newState.deviceId];
+        // Skip updating if possible
+        if (dailyCache &&
+            dailyCache.time === startOfToday &&
+            dailyCache.low < newState.currentTemperature &&
+            dailyCache.high > newState.currentTemperature) {
+            if (cb) {
+                cb(stateErr);
+            }
+            return;
+        }
+        async_1.waterfall([
+            // Fetch the data from the DB
+            (next) => request(`SELECT * FROM ${util_1.DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId ORDER BY time DESC`, [{
+                    name: 'deviceId',
+                    type: tedious_1.TYPES.VarChar,
+                    value: newState.deviceId
+                }], (err, rowCount, rows) => {
+                if (err) {
+                    next(err, undefined);
+                    return;
+                }
+                const temperatureHistory = rows.map((row) => ({
+                    time: parseInt(row.time.value, 10),
+                    high: parseFloat(row.high.value),
+                    low: parseFloat(row.low.value)
+                }));
+                next(undefined, temperatureHistory);
+            }),
+            // Update the data in the DB
+            (data, next) => {
+                const latestEntry = data[0];
+                // Check if we need to create a new entry
+                if (latestEntry.time !== startOfToday) {
+                    dailyTemperatureCache[newState.deviceId] = {
+                        time: startOfToday,
+                        low: newState.currentTemperature,
+                        high: newState.currentTemperature
+                    };
+                    async_1.waterfall([
+                        (deleteNext) => request(`DELETE FROM ${util_1.DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId AND time <= ${monthBegin}`, [{
+                                name: 'deviceId',
+                                type: tedious_1.TYPES.VarChar,
+                                value: newState.deviceId
+                            }], (err, rowCount, rows) => deleteNext(err)),
+                        (insertNext) => request(`INSERT INTO ${util_1.DATABASE_NAMES.TEMPERATURE} (deviceId, time, low, high) ` +
+                            `VALUES (@deviceId, ${startOfToday}, ${newState.currentTemperature}, ${newState.currentTemperature})`, [{
+                                name: 'deviceId',
+                                type: tedious_1.TYPES.VarChar,
+                                value: newState.deviceId
+                            }], (err, rowCount, rows) => insertNext(err))
+                    ], next);
+                    // Create the new entry
+                    // Else check if we need to update the high temperature
+                }
+                else if (latestEntry.high < newState.currentTemperature) {
+                    dailyTemperatureCache[newState.deviceId].high = newState.currentTemperature;
+                    request(`UPDATE ${util_1.DATABASE_NAMES.TEMPERATURE} ` +
+                        `SET high=${newState.currentTemperature} ` +
+                        `WHERE deviceId=@deviceId AND time=${startOfToday}`, [{
+                            name: 'deviceId',
+                            type: tedious_1.TYPES.VarChar,
+                            value: newState.deviceId
+                        }], (updateErr) => next(updateErr));
+                    // Else check if we need to update the low temperature
+                }
+                else if (latestEntry.low > newState.currentTemperature) {
+                    dailyTemperatureCache[newState.deviceId].low = newState.currentTemperature;
+                    request(`UPDATE ${util_1.DATABASE_NAMES.TEMPERATURE} ` +
+                        `SET low=${newState.currentTemperature} ` +
+                        `WHERE deviceId=@deviceId AND time=${startOfToday}`, [{
+                            name: 'deviceId',
+                            type: tedious_1.TYPES.VarChar,
+                            value: newState.deviceId
+                        }], (updateErr) => next(updateErr));
+                }
+                else {
+                    next(undefined);
+                }
+            }
+        ], cb);
+    });
+}
+exports.updateState = updateState;
+function getMonthlyTemperatureHistory(userId, cb) {
+    const user = getUser(userId);
+    request(`SELECT * FROM ${util_1.DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId ORDER BY time`, [{
+            name: 'deviceId',
+            type: tedious_1.TYPES.VarChar,
+            value: user.deviceId
         }], (err, rowCount, rows) => {
         if (err) {
             cb(err, undefined);
             return;
         }
-        cb(undefined, rows.map((row) => {
-            return {
-                deviceId,
-                temperature: parseFloat(row.currentTemperature.value),
-                time: parseInt(row.currentTime.value, 10)
-            };
-        }));
+        cb(undefined, rows.map((row) => ({
+            deviceId: row.deviceId.value,
+            time: parseInt(row.time.value, 10),
+            high: parseFloat(row.high.value),
+            low: parseFloat(row.low.value)
+        })));
     });
-}
-exports.getDailyTemperatureHistory = getDailyTemperatureHistory;
-function getMonthlyTemperatureHistory(userId, cb) {
-    const user = getUser(userId);
-    const now = moment().tz(user.timezone);
-    const startOfDay = moment.tz(`${util_1.toStringWithPadding(now.year(), 4)}-${util_1.toStringWithPadding(now.month() + 1, 2)}-${util_1.toStringWithPadding(now.date(), 2)}`, user.timezone);
-    const monthEnd = startOfDay.unix() * 1000;
-    const monthBegin = monthEnd - MONTH_IN_MS;
-    async_1.waterfall([
-        // Delete stale monthly samples
-        (next) => {
-            request(`DELETE FROM ${util_1.DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId AND time <= ${monthBegin}`, [{
-                    name: 'deviceId',
-                    type: tedious_1.TYPES.VarChar,
-                    value: user.deviceId
-                }], (err, rowCount, rows) => {
-                next(err);
-            });
-        },
-        // Calculate the up-to-date monthly samples
-        (next) => {
-            request(`SELECT currentTemperature, currentTime FROM ${util_1.DATABASE_NAMES.STATE} ` +
-                `WHERE deviceId=@deviceId AND currentTime <= ${monthEnd} AND currentTime > ${monthBegin} ` +
-                `ORDER BY currentTime`, [{
-                    name: 'deviceId',
-                    type: tedious_1.TYPES.VarChar,
-                    value: user.deviceId
-                }], (err, rowCount, rows) => {
-                if (err) {
-                    next(err);
-                    return;
-                }
-                else if (!rowCount) {
-                    next(undefined, []);
-                    return;
-                }
-                let dayBucketTimestamp = monthEnd - DAY_IN_MS;
-                const dayBuckets = [{
-                        timestamp: dayBucketTimestamp,
-                        samples: []
-                    }];
-                for (let i = rowCount - 1; i >= 0; i--) {
-                    if (parseInt(rows[i].currentTime.value, 0) < dayBucketTimestamp) {
-                        dayBucketTimestamp -= DAY_IN_MS;
-                        if (dayBucketTimestamp < monthBegin) {
-                            break;
-                        }
-                        dayBuckets.push({
-                            timestamp: dayBucketTimestamp,
-                            samples: []
-                        });
-                    }
-                    dayBuckets[dayBuckets.length - 1].samples.push(parseFloat(rows[i].currentTemperature.value));
-                }
-                const samples = dayBuckets
-                    .filter((dayBucket) => !!dayBucket.samples.length)
-                    .map((dayBucket) => {
-                    let low = Infinity;
-                    let high = -Infinity;
-                    for (const sample of dayBucket.samples) {
-                        if (sample < low) {
-                            low = sample;
-                        }
-                        if (sample > high) {
-                            high = sample;
-                        }
-                    }
-                    return { deviceId: user.deviceId, time: dayBucket.timestamp, low, high };
-                });
-                next(undefined, samples);
-            });
-        },
-        // Save the updated monthly samples
-        (samples, next) => {
-            if (!samples.length) {
-                next(undefined, false);
-                return;
-            }
-            const values = samples.map((sample) => {
-                return `('${sample.deviceId}', ${sample.time}, ${sample.low}, ${sample.high})`;
-            }).join(', ');
-            request(`INSERT INTO ${util_1.DATABASE_NAMES.TEMPERATURE} (deviceId, time, low, high) VALUES ${values}`, [], (err, rowCount, rows) => {
-                next(err, !err);
-            });
-        },
-        // Delete the old state samples
-        (needsDelete, next) => {
-            if (!needsDelete) {
-                next(undefined);
-                return;
-            }
-            request(`DELETE FROM ${util_1.DATABASE_NAMES.STATE} WHERE deviceId=@deviceId AND currentTime <= ${monthEnd}`, [{
-                    name: 'deviceId',
-                    type: tedious_1.TYPES.VarChar,
-                    value: user.deviceId
-                }], (err, rowCount, rows) => {
-                next(err);
-            });
-        },
-        // Fetch all monthly samples
-        (next) => {
-            request(`SELECT * FROM ${util_1.DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId ORDER BY time`, [{
-                    name: 'deviceId',
-                    type: tedious_1.TYPES.VarChar,
-                    value: user.deviceId
-                }], (err, rowCount, rows) => {
-                next(err, rows.map((row) => {
-                    return {
-                        deviceId: row.deviceId.value,
-                        time: parseInt(row.time.value, 10),
-                        high: parseFloat(row.high.value),
-                        low: parseFloat(row.low.value)
-                    };
-                }));
-            });
-        }
-    ], cb);
 }
 exports.getMonthlyTemperatureHistory = getMonthlyTemperatureHistory;
 //# sourceMappingURL=db.js.map
