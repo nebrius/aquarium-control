@@ -15,13 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export interface IDailyTemperatureSample {
-  deviceId: string;
-  temperature: number;
-  time: number;
-}
-
-export interface IMonthlyTemperatureSample {
+export interface ITemperatureSample {
   deviceId: string;
   low: number;
   high: number;
@@ -29,6 +23,5 @@ export interface IMonthlyTemperatureSample {
 }
 
 export interface ITemperature {
-  daily: IDailyTemperatureSample[];
-  monthly: IMonthlyTemperatureSample[];
+  temperatures: ITemperatureSample[];
 }

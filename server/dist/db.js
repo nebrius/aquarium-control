@@ -58,7 +58,7 @@ function cleanup() {
         if (!userInfoCache.hasOwnProperty(userId)) {
             continue;
         }
-        getMonthlyTemperatureHistory(userId, (err, samples) => {
+        getTemperatureHistory(userId, (err, samples) => {
             if (err) {
                 console.error(err);
             }
@@ -285,7 +285,7 @@ END`, [{
     });
 }
 exports.updateState = updateState;
-function getMonthlyTemperatureHistory(userId, cb) {
+function getTemperatureHistory(userId, cb) {
     const user = getUser(userId);
     request(`SELECT * FROM ${util_1.DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId ORDER BY time`, [{
             name: 'deviceId',
@@ -304,5 +304,5 @@ function getMonthlyTemperatureHistory(userId, cb) {
         })));
     });
 }
-exports.getMonthlyTemperatureHistory = getMonthlyTemperatureHistory;
+exports.getTemperatureHistory = getTemperatureHistory;
 //# sourceMappingURL=db.js.map

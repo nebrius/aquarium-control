@@ -33,21 +33,11 @@ export function Temperature(props: ITemperatureProps): JSX.Element {
       </div>
     );
   }
-  const temperatures = props.temperature.temperature;
-  const dailyTemperatureData: ISampleSet[] = [{
-    label: 'Temperature',
-    color: 'rgb(255, 99, 132)',
-    samples: temperatures.daily.map((sample) => {
-      return {
-        time: sample.time,
-        temperature: sample.temperature
-      };
-    })
-  }];
+  const temperatures = props.temperature.temperature.temperatures;
   const monthlyTemperatureData: ISampleSet[] = [{
     label: 'Low',
     color: 'rgb(54, 162, 235)',
-    samples: temperatures.monthly.map((sample) => {
+    samples: temperatures.map((sample) => {
       return {
         time: sample.time,
         temperature: sample.low
@@ -56,7 +46,7 @@ export function Temperature(props: ITemperatureProps): JSX.Element {
   }, {
     label: 'High',
     color: 'rgb(255, 99, 132)',
-    samples: temperatures.monthly.map((sample) => {
+    samples: temperatures.map((sample) => {
       return {
         time: sample.time,
         temperature: sample.high
@@ -67,20 +57,9 @@ export function Temperature(props: ITemperatureProps): JSX.Element {
   const height = width * 0.75;
   return (
     <div>
-      <div><h2>Temperature History</h2></div>
+      <div><h2>Monthly Temperature History</h2></div>
       <div className="temperature-content">
         <div className="temperature-section-container">
-          <div><h3>Daily Temperature History</h3></div>
-          <TemperatureGraph
-            dataSets={dailyTemperatureData}
-            timezone={props.user.user.timezone}
-            dateType="time"
-            width={width}
-            height={height}
-          />
-        </div>
-        <div className="temperature-section-container">
-          <div><h3>Monthly Temperature History</h3></div>
           <TemperatureGraph
             dataSets={monthlyTemperatureData}
             timezone={props.user.user.timezone}

@@ -61326,21 +61326,11 @@ function Temperature(props) {
                 React.createElement("h2", null, "Temperature History")),
             React.createElement("div", { className: "alert alert-danger" }, "Current temperature history not available")));
     }
-    var temperatures = props.temperature.temperature;
-    var dailyTemperatureData = [{
-            label: 'Temperature',
-            color: 'rgb(255, 99, 132)',
-            samples: temperatures.daily.map(function (sample) {
-                return {
-                    time: sample.time,
-                    temperature: sample.temperature
-                };
-            })
-        }];
+    var temperatures = props.temperature.temperature.temperatures;
     var monthlyTemperatureData = [{
             label: 'Low',
             color: 'rgb(54, 162, 235)',
-            samples: temperatures.monthly.map(function (sample) {
+            samples: temperatures.map(function (sample) {
                 return {
                     time: sample.time,
                     temperature: sample.low
@@ -61349,7 +61339,7 @@ function Temperature(props) {
         }, {
             label: 'High',
             color: 'rgb(255, 99, 132)',
-            samples: temperatures.monthly.map(function (sample) {
+            samples: temperatures.map(function (sample) {
                 return {
                     time: sample.time,
                     temperature: sample.high
@@ -61360,15 +61350,9 @@ function Temperature(props) {
     var height = width * 0.75;
     return (React.createElement("div", null,
         React.createElement("div", null,
-            React.createElement("h2", null, "Temperature History")),
+            React.createElement("h2", null, "Monthly Temperature History")),
         React.createElement("div", { className: "temperature-content" },
             React.createElement("div", { className: "temperature-section-container" },
-                React.createElement("div", null,
-                    React.createElement("h3", null, "Daily Temperature History")),
-                React.createElement(TemperatureGraph_1.TemperatureGraph, { dataSets: dailyTemperatureData, timezone: props.user.user.timezone, dateType: "time", width: width, height: height })),
-            React.createElement("div", { className: "temperature-section-container" },
-                React.createElement("div", null,
-                    React.createElement("h3", null, "Monthly Temperature History")),
                 React.createElement(TemperatureGraph_1.TemperatureGraph, { dataSets: monthlyTemperatureData, timezone: props.user.user.timezone, dateType: "day", width: width, height: height })))));
 }
 exports.Temperature = Temperature;

@@ -165,7 +165,7 @@ function init(cb) {
     });
     app.get('/api/temperatures', ensureAuthentication(false), (req, res) => {
         async_1.series([
-            (done) => db_2.getMonthlyTemperatureHistory(req.userId, done),
+            (done) => db_2.getTemperatureHistory(req.userId, done),
         ], (err, results) => {
             if (err || !results) {
                 res.sendStatus(500);

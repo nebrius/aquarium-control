@@ -28,7 +28,7 @@ import { ITemperature, ITemperatureSample } from './common/ITemperature';
 import { isUserRegistered } from './db';
 import { getConfig, setConfig } from './messaging';
 import { getEnvironmentVariable } from './util';
-import { getMonthlyTemperatureHistory, getDeviceForUserId, getUser, getState } from './db';
+import { getTemperatureHistory, getDeviceForUserId, getUser, getState } from './db';
 
 const DEFAULT_PORT = 3001;
 
@@ -181,7 +181,7 @@ export function init(cb: (err: Error | undefined) => void): void {
 
   app.get('/api/temperatures', ensureAuthentication(false), (req, res) => {
     series([
-      (done) => getMonthlyTemperatureHistory((req as IRequest).userId, done),
+      (done) => getTemperatureHistory((req as IRequest).userId, done),
     ], (err, results) => {
       if (err || !results) {
         res.sendStatus(500);

@@ -73,7 +73,7 @@ function cleanup() {
     if (!userInfoCache.hasOwnProperty(userId)) {
       continue;
     }
-    getMonthlyTemperatureHistory(userId, (err, samples) => {
+    getTemperatureHistory(userId, (err, samples) => {
       if (err) {
         console.error(err);
       }
@@ -350,7 +350,7 @@ END`,
   );
 }
 
-export function getMonthlyTemperatureHistory(
+export function getTemperatureHistory(
   userId: string,
   cb: (err: Error | undefined, history: ITemperatureSample[] | undefined) => void
 ): void {
