@@ -29,7 +29,7 @@ class State extends EventEmitter {
     mode: 'override',
     overrideState: 'off',
     schedule: []
-  }
+  };
 
   private _state: IState = {
     deviceId: '',
@@ -41,7 +41,7 @@ class State extends EventEmitter {
     currentMode: 'override',
     nextTransitionTime: Date.now(),
     nextTransitionState: 'off'
-  }
+  };
 
   private _temperatureSamples: number[] = [];
 
@@ -54,12 +54,13 @@ class State extends EventEmitter {
     }
     const match = IOT_HUB_DEVICE_CONNECTION_STRING.match(/DeviceId=(.*);/);
     if (!match) {
-      throw new Error(`Could not extract DeviceId from IOT_HUB_DEVICE_CONNECTION_STRING="${IOT_HUB_DEVICE_CONNECTION_STRING}"`);
+      throw new Error(
+        `Could not extract DeviceId from IOT_HUB_DEVICE_CONNECTION_STRING="${IOT_HUB_DEVICE_CONNECTION_STRING}"`);
     }
     const deviceId = match[1];
     this._state.deviceId = deviceId;
-    exists(CONFIG_FILE_PATH, (exists) => {
-      if (exists) {
+    exists(CONFIG_FILE_PATH, (configFileExists) => {
+      if (configFileExists) {
         console.log(`Reading config file from ${CONFIG_FILE_PATH}`);
         readFile(CONFIG_FILE_PATH, (err, data) => {
           if (err) {
@@ -69,7 +70,7 @@ class State extends EventEmitter {
           try {
             this._config = JSON.parse(data.toString());
             cb(undefined);
-          } catch(e) {
+          } catch (e) {
             cb(e);
           }
         });
@@ -83,7 +84,7 @@ class State extends EventEmitter {
             return;
           }
           cb(undefined);
-        })
+        });
       }).catch(cb);
     });
   }

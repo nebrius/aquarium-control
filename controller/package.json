@@ -5,7 +5,7 @@
   "bin": "./bin/controller.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prebuild": "tslint src/**/*.ts",
+    "prebuild": "tslint 'src/**/*.ts'",
     "build": "rimraf dist && tsc",
     "postbuild": "echo done",
     "start": "./bin/controller.js"
@@ -21,15 +21,18 @@
   "author": "Bryan Hughes <bryan@nebri.us>",
   "license": "GPL-3.0",
   "devDependencies": {
-    "@types/async": "^2.0.42",
+    "@types/async": "^2.0.47",
     "@types/deep-equal": "^1.0.1",
     "@types/make-dir": "^1.0.1",
     "@types/mqtt": "^2.5.0",
-    "@types/node": "^8.0.28",
+    "@types/node": "^9.3.0",
+    "@types/raspi": "^5.0.0",
+    "@types/raspi-gpio": "^5.0.0",
+    "@types/raspi-onewire": "^1.0.0",
     "@types/revalidator": "^0.3.5",
     "rimraf": "^2.6.2",
-    "tslint": "^5.7.0",
-    "typescript": "^2.5.2"
+    "tslint": "^5.9.1",
+    "typescript": "^2.6.2"
   },
   "dependencies": {
     "async": "^2.5.0",

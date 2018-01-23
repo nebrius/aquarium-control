@@ -27,12 +27,12 @@ const TEMPERATURE_REGEX = /t=([0-9]*)/;
 export function init(cb: (err: Error | undefined) => void) {
   initRaspi(() => {
     const oneWire = new OneWire();
-    oneWire.searchForDevices((err, devices) => {
-      if (err || !devices) {
-        if (typeof err === 'string') {
-          err = new Error(err);
+    oneWire.searchForDevices((searchErr, devices) => {
+      if (searchErr || !devices) {
+        if (typeof searchErr === 'string') {
+          searchErr = new Error(searchErr);
         }
-        cb(err);
+        cb(searchErr);
         return;
       }
 
@@ -61,22 +61,22 @@ export function init(cb: (err: Error | undefined) => void) {
             console.error(`Invalid data received from sensor: ${data.toString()}`);
             return;
           }
-          state.setCurrentTemperature(parseInt(match[1]) / 1000);
+          state.setCurrentTemperature(parseInt(match[1], 10) / 1000);
         });
       }, TEMPERATURE_UPDATE_RATE);
 
       const dayLed = new DigitalOutput(DAY_PIN);
       const nightLed = new DigitalOutput(NIGHT_PIN);
 
-      function setState(state: IState): void {
-        switch (state.currentState) {
+      function setState(newState: IState): void {
+        switch (newState.currentState) {
           case 'day':
             console.log('Setting the state to "day"');
             dayLed.write(HIGH);
             nightLed.write(LOW);
             break;
           case 'night':
-          console.log('Setting the state to "night"');
+            console.log('Setting the state to "night"');
             dayLed.write(LOW);
             nightLed.write(HIGH);
             break;

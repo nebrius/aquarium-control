@@ -29,16 +29,16 @@ function init(cb) {
     }
     console.log('Connecting to IoT Hub');
     const client = azure_iot_device_1.Client.fromConnectionString(IOT_HUB_DEVICE_CONNECTION_STRING, azure_iot_device_mqtt_1.Mqtt);
-    client.open((err) => {
-        if (err) {
-            cb(err);
+    client.open((openErr) => {
+        if (openErr) {
+            cb(openErr);
             return;
         }
         client.on('error', (err) => console.error(err));
         client.on('disconnect', () => client.removeAllListeners());
-        client.getTwin((err, twin) => {
-            if (err || !twin) {
-                cb(err || new Error('Could not get device Twin'));
+        client.getTwin((getTwinErr, twin) => {
+            if (getTwinErr || !twin) {
+                cb(getTwinErr || new Error('Could not get device Twin'));
                 return;
             }
             twin.properties.reported.config = JSON.stringify(state_1.state.getState());

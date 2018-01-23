@@ -31,18 +31,18 @@ export function init(cb: (err: Error | undefined) => void): void {
   }
   console.log('Connecting to IoT Hub');
   const client = Client.fromConnectionString(IOT_HUB_DEVICE_CONNECTION_STRING, Protocol);
-  client.open((err) => {
-    if (err) {
-      cb(err);
+  client.open((openErr) => {
+    if (openErr) {
+      cb(openErr);
       return;
     }
 
     client.on('error', (err) => console.error(err));
     client.on('disconnect', () => client.removeAllListeners());
 
-    client.getTwin((err, twin) => {
-      if (err || !twin) {
-        cb(err || new Error('Could not get device Twin'));
+    client.getTwin((getTwinErr, twin) => {
+      if (getTwinErr || !twin) {
+        cb(getTwinErr || new Error('Could not get device Twin'));
         return;
       }
 

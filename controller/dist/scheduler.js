@@ -71,7 +71,7 @@ function updateSchedule() {
         scheduleTimeout = null;
     }
     // If we're in override mode, set that mode and exit early
-    if (currentSchedule.mode == 'override') {
+    if (currentSchedule.mode === 'override') {
         console.log('Setting override mode and skipping daily schedule creation');
         state_1.state.setCurrentState(currentSchedule.overrideState);
         state_1.state.setCurrentMode('override');
@@ -82,20 +82,21 @@ function updateSchedule() {
     state_1.state.setCurrentMode('program');
     let entries = currentSchedule.schedule.map((entry) => {
         // If we're manual, calculate the time for today and return it
-        if (entry.type == 'manual') {
-            const details = entry.details;
+        if (entry.type === 'manual') {
+            const manualDetails = entry.details;
             return {
-                date: createDate(details.hour, details.minute, 0),
+                date: createDate(manualDetails.hour, manualDetails.minute, 0),
                 state: entry.state,
                 name: entry.name
             };
         }
         // If we're dynamic, use suncalc to figure out the time
-        const details = entry.details;
+        const dynamicDetails = entry.details;
         const times = suncalc_1.getTimes(createDate(12, 0, 0), config_1.LATITUDE, config_1.LONGITUDE);
-        const date = times[details.event];
+        const date = times[dynamicDetails.event];
         if (!date) {
-            throw new Error(`Invalid dynamic event "${details.event}". Must be one of ${Object.keys(times).join(', ')}.`);
+            const eventNames = Object.keys(times).join(', ');
+            throw new Error(`Invalid dynamic event "${dynamicDetails.event}". Must be one of ${eventNames}.`);
         }
         return {
             date,
@@ -106,7 +107,7 @@ function updateSchedule() {
     // Remove any events that occur after the next event, e.g. sunset is late enough that
     // it would occur after a manual time event due to time of year
     entries = entries.filter((entry, i) => {
-        if (i == entries.length - 1) {
+        if (i === entries.length - 1) {
             return true;
         }
         const isValid = entry.date.getTime() < entries[i + 1].date.getTime();

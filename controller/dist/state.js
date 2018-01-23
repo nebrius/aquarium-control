@@ -54,8 +54,8 @@ class State extends events_1.EventEmitter {
         }
         const deviceId = match[1];
         this._state.deviceId = deviceId;
-        fs_1.exists(config_1.CONFIG_FILE_PATH, (exists) => {
-            if (exists) {
+        fs_1.exists(config_1.CONFIG_FILE_PATH, (configFileExists) => {
+            if (configFileExists) {
                 console.log(`Reading config file from ${config_1.CONFIG_FILE_PATH}`);
                 fs_1.readFile(config_1.CONFIG_FILE_PATH, (err, data) => {
                     if (err) {

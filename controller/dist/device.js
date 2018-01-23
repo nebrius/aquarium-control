@@ -25,12 +25,12 @@ const TEMPERATURE_REGEX = /t=([0-9]*)/;
 function init(cb) {
     raspi_1.init(() => {
         const oneWire = new raspi_onewire_1.OneWire();
-        oneWire.searchForDevices((err, devices) => {
-            if (err || !devices) {
-                if (typeof err === 'string') {
-                    err = new Error(err);
+        oneWire.searchForDevices((searchErr, devices) => {
+            if (searchErr || !devices) {
+                if (typeof searchErr === 'string') {
+                    searchErr = new Error(searchErr);
                 }
-                cb(err);
+                cb(searchErr);
                 return;
             }
             if (devices.length === 0) {
@@ -57,13 +57,13 @@ function init(cb) {
                         console.error(`Invalid data received from sensor: ${data.toString()}`);
                         return;
                     }
-                    state_1.state.setCurrentTemperature(parseInt(match[1]) / 1000);
+                    state_1.state.setCurrentTemperature(parseInt(match[1], 10) / 1000);
                 });
             }, config_1.TEMPERATURE_UPDATE_RATE);
             const dayLed = new raspi_gpio_1.DigitalOutput(config_1.DAY_PIN);
             const nightLed = new raspi_gpio_1.DigitalOutput(config_1.NIGHT_PIN);
-            function setState(state) {
-                switch (state.currentState) {
+            function setState(newState) {
+                switch (newState.currentState) {
                     case 'day':
                         console.log('Setting the state to "day"');
                         dayLed.write(raspi_gpio_1.HIGH);
