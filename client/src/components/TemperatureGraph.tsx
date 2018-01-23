@@ -75,7 +75,7 @@ export function TemperatureGraph(props: ITemperatureGraphOptions): JSX.Element {
         display: true,
         scaleLabel: {
           display: true,
-          labelString: 'Time'
+          labelString: 'Date'
         }
       }],
       yAxes: [{
@@ -85,8 +85,8 @@ export function TemperatureGraph(props: ITemperatureGraphOptions): JSX.Element {
           labelString: 'Temperature (C)'
         },
         ticks: {
-          suggestedMin: 20,
-          suggestedMax: 30
+          suggestedMin: 23,
+          suggestedMax: 27
         } as any
       }]
     }

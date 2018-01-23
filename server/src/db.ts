@@ -38,8 +38,6 @@ const HOUR_IN_MS = 60 * 60 * 1000;
 const DAY_IN_MS = 24 * HOUR_IN_MS;
 const MONTH_IN_MS = 30 * DAY_IN_MS;
 
-const TEMPERATURE_UPDATE_RATE = HOUR_IN_MS;
-
 export function getUsernameForUserId(userId: string): string {
   return userInfoCache[userId].userName;
 }
@@ -68,19 +66,6 @@ export function getUser(userId: string): IUser {
   return userInfoCache[userId];
 }
 
-function cleanup() {
-  for (const userId in userInfoCache) {
-    if (!userInfoCache.hasOwnProperty(userId)) {
-      continue;
-    }
-    getTemperatureHistory(userId, (err, samples) => {
-      if (err) {
-        console.error(err);
-      }
-    });
-  }
-}
-
 export function init(cb: (err: Error | undefined) => void): void {
   request(
     `SELECT facebookId, deviceId, timezone, userName FROM ${DATABASE_NAMES.USERS}`,
@@ -107,9 +92,6 @@ export function init(cb: (err: Error | undefined) => void): void {
           timezone: row.timezone.value
         };
       }
-
-      setInterval(cleanup, TEMPERATURE_UPDATE_RATE);
-      cleanup();
 
       cb(undefined);
     }

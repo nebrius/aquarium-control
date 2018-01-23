@@ -61346,11 +61346,11 @@ function Temperature(props) {
                 };
             })
         }];
-    var width = Math.max((window.innerWidth - 100) / 2, 335);
-    var height = width * 0.75;
+    var width = Math.max(window.innerWidth - 100);
+    var height = window.innerHeight / 4;
     return (React.createElement("div", null,
         React.createElement("div", null,
-            React.createElement("h2", null, "Monthly Temperature History")),
+            React.createElement("h2", null, "Temperature History")),
         React.createElement("div", { className: "temperature-content" },
             React.createElement("div", { className: "temperature-section-container" },
                 React.createElement(TemperatureGraph_1.TemperatureGraph, { dataSets: monthlyTemperatureData, timezone: props.user.user.timezone, dateType: "day", width: width, height: height })))));
@@ -61416,7 +61416,7 @@ function TemperatureGraph(props) {
                     display: true,
                     scaleLabel: {
                         display: true,
-                        labelString: 'Time'
+                        labelString: 'Date'
                     }
                 }],
             yAxes: [{
@@ -61426,8 +61426,8 @@ function TemperatureGraph(props) {
                         labelString: 'Temperature (C)'
                     },
                     ticks: {
-                        suggestedMin: 20,
-                        suggestedMax: 30
+                        suggestedMin: 23,
+                        suggestedMax: 27
                     }
                 }]
         }

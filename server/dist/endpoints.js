@@ -36,7 +36,12 @@ function init(cb) {
     app.use(body_parser_1.json());
     app.use(cookieParser());
     if (process.env.HOST_CLIENT === 'true') {
-        app.use(express.static(path_1.join(__dirname, '..', 'client')));
+        if (process.env.NODE_ENV === 'production') {
+            app.use(express.static(path_1.join(__dirname, '..', 'client')));
+        }
+        else {
+            app.use(express.static(path_1.join(__dirname, '..', '..', 'client', 'dist')));
+        }
     }
     app.set('view engine', 'pug');
     app.set('views', path_1.join(__dirname, '..', 'views'));
@@ -66,7 +71,7 @@ function init(cb) {
                     }
                     else {
                         if (!db_1.isUserRegistered(parsedBody.user_id)) {
-                            handleUnauthorized();
+                            res.sendStatus(403);
                         }
                         else {
                             req.userId = parsedBody.user_id;

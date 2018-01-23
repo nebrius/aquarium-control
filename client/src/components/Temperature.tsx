@@ -53,11 +53,11 @@ export function Temperature(props: ITemperatureProps): JSX.Element {
       };
     })
   }];
-  const width = Math.max((window.innerWidth - 100) / 2, 335);
-  const height = width * 0.75;
+  const width = Math.max(window.innerWidth - 100);
+  const height = window.innerHeight / 4;
   return (
     <div>
-      <div><h2>Monthly Temperature History</h2></div>
+      <div><h2>Temperature History</h2></div>
       <div className="temperature-content">
         <div className="temperature-section-container">
           <TemperatureGraph

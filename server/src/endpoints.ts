@@ -46,7 +46,11 @@ export function init(cb: (err: Error | undefined) => void): void {
   app.use(cookieParser());
 
   if (process.env.HOST_CLIENT === 'true') {
-    app.use(express.static(join(__dirname, '..', 'client')));
+    if (process.env.NODE_ENV === 'production') {
+      app.use(express.static(join(__dirname, '..', 'client')));
+    } else {
+      app.use(express.static(join(__dirname, '..', '..', 'client', 'dist')));
+    }
   }
 
   app.set('view engine', 'pug');
@@ -79,7 +83,7 @@ export function init(cb: (err: Error | undefined) => void): void {
             handleUnauthorized();
           } else {
             if (!isUserRegistered(parsedBody.user_id)) {
-              handleUnauthorized();
+              res.sendStatus(403);
             } else {
               (req as IRequest).userId = parsedBody.user_id;
               next();
