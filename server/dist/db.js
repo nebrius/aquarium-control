@@ -260,6 +260,13 @@ END`, [{
                     // Else check if we need to update the low temperature
                 }
                 else if (latestEntry.low > newState.currentTemperature) {
+                    if (!dailyTemperatureCache[newState.deviceId]) {
+                        dailyTemperatureCache[newState.deviceId] = {
+                            time: startOfToday,
+                            low: newState.currentTemperature,
+                            high: newState.currentTemperature
+                        };
+                    }
                     dailyTemperatureCache[newState.deviceId].low = newState.currentTemperature;
                     request(`UPDATE ${util_1.DATABASE_NAMES.TEMPERATURE} ` +
                         `SET low=${newState.currentTemperature} ` +
