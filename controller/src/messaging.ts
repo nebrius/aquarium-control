@@ -21,8 +21,11 @@ import { validate } from 'revalidator';
 import { IConfig, configValidationSchema } from './common/IConfig';
 import { IState } from './common/IState';
 import { state } from './state';
+import * as request from 'request';
 
 import equals = require('deep-equal');
+
+const SERVER_URL = 'https://aquarium-control.azurewebsites.net';
 
 export function init(cb: (err: Error | undefined) => void): void {
   const IOT_HUB_DEVICE_CONNECTION_STRING = process.env.IOT_HUB_DEVICE_CONNECTION_STRING;
@@ -67,12 +70,22 @@ export function init(cb: (err: Error | undefined) => void): void {
       state.on('change-state', (newState: IState) => {
         const message = new Message(JSON.stringify(newState));
         console.log('Sending message: ' + message.getData());
-        client.sendEvent(message, (err, res) => {
-          if (err) {
-            console.error(`Send error: ${err}`);
-          } else if (res) {
-            console.log(`Send status: ${res.constructor.name}`);
+        request(`${SERVER_URL}/api/ping`, (pingErr, pingRes, body) => {
+          if (pingErr) {
+            console.error(`Ping error: ${pingErr}`);
+            return;
           }
+          if (pingRes.statusCode >= 400) {
+            console.error(`Ping error: Server returned status ${pingRes.statusCode}`);
+            return;
+          }
+          client.sendEvent(message, (sendErr, sendRes) => {
+            if (sendErr) {
+              console.error(`Send error: ${sendErr}`);
+            } else if (sendRes) {
+              console.log(`Send status: ${sendRes.constructor.name}`);
+            }
+          });
         });
       });
 

@@ -20,7 +20,6 @@ import { join } from 'path';
 import { json } from 'body-parser';
 import { validate } from 'revalidator';
 import * as express from 'express';
-import * as request from 'request';
 import * as cookieParser from 'cookie-parser';
 import { series } from 'async';
 import { IConfig, configValidationSchema } from './common/IConfig';
@@ -29,6 +28,7 @@ import { isUserRegistered } from './db';
 import { getConfig, setConfig } from './messaging';
 import { getEnvironmentVariable } from './util';
 import { getTemperatureHistory, getDeviceForUserId, getUser, getState } from './db';
+import { Authenticator } from 'express-facebook-auth';
 
 const DEFAULT_PORT = 3001;
 
@@ -40,7 +40,21 @@ export function init(cb: (err: Error | undefined) => void): void {
 
   const port = process.env.PORT || DEFAULT_PORT;
 
+  function getRedirectUri(): string {
+    return process.env.NODE_ENV === 'production'
+      ? `${getEnvironmentVariable('SERVER_HOST')}/login-success/`
+      : `http://localhost:${port}/login-success/`;
+  }
+
   const app = express();
+
+  const authenticator = new Authenticator({
+    facebookAppId: getEnvironmentVariable('FACEBOOK_APP_ID'),
+    facebookAppSecret: getEnvironmentVariable('FACEBOOK_APP_SECRET'),
+    isUserRegistered,
+    loginUri: '/login',
+    redirectUri: getRedirectUri()
+  });
 
   app.use(json());
   app.use(cookieParser());
@@ -56,52 +70,6 @@ export function init(cb: (err: Error | undefined) => void): void {
   app.set('view engine', 'pug');
   app.set('views', join(__dirname, '..', 'views'));
 
-  function ensureAuthentication(redirect: boolean): express.RequestHandler {
-    return (req, res, next) => {
-
-      function handleUnauthorized() {
-        if (redirect) {
-          res.redirect('/login');
-        } else {
-          res.sendStatus(401);
-        }
-      }
-
-      const accessToken = req.cookies.accessToken;
-      if (!accessToken) {
-        handleUnauthorized();
-        return;
-      }
-      const connectionUrl =
-        'https://graph.facebook.com/debug_token?' +
-        `input_token=${accessToken}&` +
-        `access_token=${getEnvironmentVariable('FACEBOOK_APP_ID')}|${getEnvironmentVariable('FACEBOOK_APP_SECRET')}`;
-      request(connectionUrl, (err, verifyRes, body) => {
-        try {
-          const parsedBody = JSON.parse(body).data;
-          if (!parsedBody.is_valid) {
-            handleUnauthorized();
-          } else {
-            if (!isUserRegistered(parsedBody.user_id)) {
-              res.sendStatus(403);
-            } else {
-              (req as IRequest).userId = parsedBody.user_id;
-              next();
-            }
-          }
-        } catch (e) {
-          res.sendStatus(500);
-        }
-      });
-    };
-  }
-
-  function getRedirectUri(): string {
-    return process.env.NODE_ENV === 'production'
-      ? `${getEnvironmentVariable('SERVER_HOST')}/login-success/`
-      : `http://localhost:${port}/login-success/`;
-  }
-
   app.get('/login', (req, res) => {
     res.render('login', {
       facebookAppId: getEnvironmentVariable('FACEBOOK_APP_ID'),
@@ -109,41 +77,17 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.get('/login-success', (req, res) => {
-    if (req.query.code) {
-      const verifyUrl =
-        `https://graph.facebook.com/v2.10/oauth/access_token?` +
-        `client_id=${getEnvironmentVariable('FACEBOOK_APP_ID')}` +
-        `&redirect_uri=${getRedirectUri()}` +
-        `&client_secret=${getEnvironmentVariable('FACEBOOK_APP_SECRET')}` +
-        `&code=${req.query.code}`;
-      request(verifyUrl, (err, verifyRes, body) => {
-        try {
-          const parsedBody = JSON.parse(body);
-          res.cookie('accessToken', parsedBody.access_token);
-          res.redirect('/');
-        } catch (e) {
-          res.sendStatus(500);
-        }
-      });
-    } else if (req.query.token) {
-      res.cookie('accessToken', req.query.token);
-      res.redirect('/');
-    } else {
-      res.redirect('/login');
-    }
+  authenticator.createLoginSuccessEndpoint(app);
 
-  });
-
-  app.get('/', ensureAuthentication(true), (req, res) => {
+  app.get('/', authenticator.createMiddleware(true), (req, res) => {
     res.render('index');
   });
 
-  app.get('/api/user', ensureAuthentication(false), (req, res) => {
+  app.get('/api/user', authenticator.createMiddleware(false), (req, res) => {
     res.send(getUser((req as IRequest).userId));
   });
 
-  app.get('/api/state', ensureAuthentication(false), (req, res) => {
+  app.get('/api/state', authenticator.createMiddleware(false), (req, res) => {
     getState(getDeviceForUserId((req as IRequest).userId), (err, state) => {
       if (err) {
         console.error(err);
@@ -154,7 +98,7 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.get('/api/config', ensureAuthentication(false), (req, res) => {
+  app.get('/api/config', authenticator.createMiddleware(false), (req, res) => {
     getConfig(getDeviceForUserId((req as IRequest).userId), (err, config, isConfigUpToDate) => {
       if (err) {
         console.error(err);
@@ -168,7 +112,7 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.post('/api/config', ensureAuthentication(false), (req, res) => {
+  app.post('/api/config', authenticator.createMiddleware(false), (req, res) => {
     if (!validate(req.body, configValidationSchema).valid) {
       res.sendStatus(400);
       return;
@@ -183,7 +127,7 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.get('/api/temperatures', ensureAuthentication(false), (req, res) => {
+  app.get('/api/temperatures', authenticator.createMiddleware(false), (req, res) => {
     series([
       (done) => getTemperatureHistory((req as IRequest).userId, done),
     ], (err, results) => {
@@ -196,6 +140,10 @@ export function init(cb: (err: Error | undefined) => void): void {
         res.send(history);
       }
     });
+  });
+
+  app.get('/api/ping', (req, res) => {
+    res.send('ok');
   });
 
   const server = createServer();

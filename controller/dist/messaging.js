@@ -21,7 +21,9 @@ const azure_iot_device_mqtt_1 = require("azure-iot-device-mqtt");
 const revalidator_1 = require("revalidator");
 const IConfig_1 = require("./common/IConfig");
 const state_1 = require("./state");
+const request = require("request");
 const equals = require("deep-equal");
+const SERVER_URL = 'https://aquarium-control.azurewebsites.net';
 function init(cb) {
     const IOT_HUB_DEVICE_CONNECTION_STRING = process.env.IOT_HUB_DEVICE_CONNECTION_STRING;
     if (typeof IOT_HUB_DEVICE_CONNECTION_STRING !== 'string') {
@@ -58,13 +60,23 @@ function init(cb) {
             state_1.state.on('change-state', (newState) => {
                 const message = new azure_iot_device_1.Message(JSON.stringify(newState));
                 console.log('Sending message: ' + message.getData());
-                client.sendEvent(message, (err, res) => {
-                    if (err) {
-                        console.error(`Send error: ${err}`);
+                request(`${SERVER_URL}/api/ping`, (pingErr, pingRes, body) => {
+                    if (pingErr) {
+                        console.error(`Ping error: ${pingErr}`);
+                        return;
                     }
-                    else if (res) {
-                        console.log(`Send status: ${res.constructor.name}`);
+                    if (pingRes.statusCode >= 400) {
+                        console.error(`Ping error: Server returned status ${pingRes.statusCode}`);
+                        return;
                     }
+                    client.sendEvent(message, (sendErr, sendRes) => {
+                        if (sendErr) {
+                            console.error(`Send error: ${sendErr}`);
+                        }
+                        else if (sendRes) {
+                            console.log(`Send status: ${sendRes.constructor.name}`);
+                        }
+                    });
                 });
             });
             console.log('Connected to IoT Hub');

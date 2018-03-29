@@ -21,7 +21,6 @@ const path_1 = require("path");
 const body_parser_1 = require("body-parser");
 const revalidator_1 = require("revalidator");
 const express = require("express");
-const request = require("request");
 const cookieParser = require("cookie-parser");
 const async_1 = require("async");
 const IConfig_1 = require("./common/IConfig");
@@ -29,10 +28,23 @@ const db_1 = require("./db");
 const messaging_1 = require("./messaging");
 const util_1 = require("./util");
 const db_2 = require("./db");
+const express_facebook_auth_1 = require("express-facebook-auth");
 const DEFAULT_PORT = 3001;
 function init(cb) {
     const port = process.env.PORT || DEFAULT_PORT;
+    function getRedirectUri() {
+        return process.env.NODE_ENV === 'production'
+            ? `${util_1.getEnvironmentVariable('SERVER_HOST')}/login-success/`
+            : `http://localhost:${port}/login-success/`;
+    }
     const app = express();
+    const authenticator = new express_facebook_auth_1.Authenticator({
+        facebookAppId: util_1.getEnvironmentVariable('FACEBOOK_APP_ID'),
+        facebookAppSecret: util_1.getEnvironmentVariable('FACEBOOK_APP_SECRET'),
+        isUserRegistered: db_1.isUserRegistered,
+        loginUri: '/login',
+        redirectUri: getRedirectUri()
+    });
     app.use(body_parser_1.json());
     app.use(cookieParser());
     if (process.env.HOST_CLIENT === 'true') {
@@ -45,90 +57,20 @@ function init(cb) {
     }
     app.set('view engine', 'pug');
     app.set('views', path_1.join(__dirname, '..', 'views'));
-    function ensureAuthentication(redirect) {
-        return (req, res, next) => {
-            function handleUnauthorized() {
-                if (redirect) {
-                    res.redirect('/login');
-                }
-                else {
-                    res.sendStatus(401);
-                }
-            }
-            const accessToken = req.cookies.accessToken;
-            if (!accessToken) {
-                handleUnauthorized();
-                return;
-            }
-            const connectionUrl = 'https://graph.facebook.com/debug_token?' +
-                `input_token=${accessToken}&` +
-                `access_token=${util_1.getEnvironmentVariable('FACEBOOK_APP_ID')}|${util_1.getEnvironmentVariable('FACEBOOK_APP_SECRET')}`;
-            request(connectionUrl, (err, verifyRes, body) => {
-                try {
-                    const parsedBody = JSON.parse(body).data;
-                    if (!parsedBody.is_valid) {
-                        handleUnauthorized();
-                    }
-                    else {
-                        if (!db_1.isUserRegistered(parsedBody.user_id)) {
-                            res.sendStatus(403);
-                        }
-                        else {
-                            req.userId = parsedBody.user_id;
-                            next();
-                        }
-                    }
-                }
-                catch (e) {
-                    res.sendStatus(500);
-                }
-            });
-        };
-    }
-    function getRedirectUri() {
-        return process.env.NODE_ENV === 'production'
-            ? `${util_1.getEnvironmentVariable('SERVER_HOST')}/login-success/`
-            : `http://localhost:${port}/login-success/`;
-    }
     app.get('/login', (req, res) => {
         res.render('login', {
             facebookAppId: util_1.getEnvironmentVariable('FACEBOOK_APP_ID'),
             redirectUri: getRedirectUri()
         });
     });
-    app.get('/login-success', (req, res) => {
-        if (req.query.code) {
-            const verifyUrl = `https://graph.facebook.com/v2.10/oauth/access_token?` +
-                `client_id=${util_1.getEnvironmentVariable('FACEBOOK_APP_ID')}` +
-                `&redirect_uri=${getRedirectUri()}` +
-                `&client_secret=${util_1.getEnvironmentVariable('FACEBOOK_APP_SECRET')}` +
-                `&code=${req.query.code}`;
-            request(verifyUrl, (err, verifyRes, body) => {
-                try {
-                    const parsedBody = JSON.parse(body);
-                    res.cookie('accessToken', parsedBody.access_token);
-                    res.redirect('/');
-                }
-                catch (e) {
-                    res.sendStatus(500);
-                }
-            });
-        }
-        else if (req.query.token) {
-            res.cookie('accessToken', req.query.token);
-            res.redirect('/');
-        }
-        else {
-            res.redirect('/login');
-        }
-    });
-    app.get('/', ensureAuthentication(true), (req, res) => {
+    authenticator.createLoginSuccessEndpoint(app);
+    app.get('/', authenticator.createMiddleware(true), (req, res) => {
         res.render('index');
     });
-    app.get('/api/user', ensureAuthentication(false), (req, res) => {
+    app.get('/api/user', authenticator.createMiddleware(false), (req, res) => {
         res.send(db_2.getUser(req.userId));
     });
-    app.get('/api/state', ensureAuthentication(false), (req, res) => {
+    app.get('/api/state', authenticator.createMiddleware(false), (req, res) => {
         db_2.getState(db_2.getDeviceForUserId(req.userId), (err, state) => {
             if (err) {
                 console.error(err);
@@ -139,7 +81,7 @@ function init(cb) {
             }
         });
     });
-    app.get('/api/config', ensureAuthentication(false), (req, res) => {
+    app.get('/api/config', authenticator.createMiddleware(false), (req, res) => {
         messaging_1.getConfig(db_2.getDeviceForUserId(req.userId), (err, config, isConfigUpToDate) => {
             if (err) {
                 console.error(err);
@@ -153,7 +95,7 @@ function init(cb) {
             }
         });
     });
-    app.post('/api/config', ensureAuthentication(false), (req, res) => {
+    app.post('/api/config', authenticator.createMiddleware(false), (req, res) => {
         if (!revalidator_1.validate(req.body, IConfig_1.configValidationSchema).valid) {
             res.sendStatus(400);
             return;
@@ -168,7 +110,7 @@ function init(cb) {
             }
         });
     });
-    app.get('/api/temperatures', ensureAuthentication(false), (req, res) => {
+    app.get('/api/temperatures', authenticator.createMiddleware(false), (req, res) => {
         async_1.series([
             (done) => db_2.getTemperatureHistory(req.userId, done),
         ], (err, results) => {
@@ -182,6 +124,9 @@ function init(cb) {
                 res.send(history);
             }
         });
+    });
+    app.get('/api/ping', (req, res) => {
+        res.send('ok');
     });
     const server = http_1.createServer();
     server.on('request', app);

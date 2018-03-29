@@ -201,7 +201,7 @@ BEGIN
     currentState='${newState.currentState}',
     currentMode='${newState.currentMode}',
     nextTransitionTime=${newState.nextTransitionTime},
-    nextTransitionState='${newState.nextTransitionTime}'
+    nextTransitionState='${newState.nextTransitionState}'
   WHERE deviceId=@deviceId
 END`,
     [{
