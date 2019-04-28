@@ -20,23 +20,30 @@ import { ACTIONS, IAction, ITemperatureFetchSucceededAction } from '../actions/a
 import { IAquariumTemperature } from '../util/IAppState';
 
 export const aquariumTemperatureReducer: Reducer<IAquariumTemperature> =
-  (state: IAquariumTemperature, action: IAction) => {
+  (state: IAquariumTemperature | undefined, action: IAction) => {
   switch (action.type) {
-    case ACTIONS.TEMPERATURE_FETCH_FAILED:
-    return {
-      temperature: undefined
-    };
-  case ACTIONS.TEMPERATURE_FETCH_SUCCEEDED:
-    const temperature = (action as ITemperatureFetchSucceededAction).temperature;
-    return {
-      temperature
-    };
-    default:
+    case ACTIONS.TEMPERATURE_FETCH_FAILED: {
+      const newState: IAquariumTemperature = {
+        temperature: undefined
+      };
+      return newState;
+    }
+
+    case ACTIONS.TEMPERATURE_FETCH_SUCCEEDED: {
+      const newState: IAquariumTemperature = {
+        temperature: (action as ITemperatureFetchSucceededAction).temperature
+      };
+      return newState;
+    }
+
+    default: {
       if (state) {
         return state;
       }
-      return {
+      const newState: IAquariumTemperature = {
         temperature: undefined
       };
+      return newState;
+    }
   }
 };

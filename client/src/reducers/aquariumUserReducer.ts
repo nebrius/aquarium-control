@@ -19,26 +19,30 @@ import { Reducer } from 'redux';
 import { ACTIONS, IAction, IUserFetchSeucceededAction } from '../actions/actions';
 import { IAquariumUser } from '../util/IAppState';
 
-export const aquariumUserReducer: Reducer<IAquariumUser> = (state: IAquariumUser, action: IAction) => {
+export const aquariumUserReducer: Reducer<IAquariumUser> = (state: IAquariumUser | undefined, action: IAction) => {
   switch (action.type) {
-    case ACTIONS.USER_FETCH_FAILED:
-      return {
-        user: undefined,
-        currentUserValid: false
+    case ACTIONS.USER_FETCH_FAILED: {
+      const newState: IAquariumUser = {
+        user: undefined
       };
-    case ACTIONS.USER_FETCH_SUCCEEDED:
-      const user = (action as IUserFetchSeucceededAction).userInfo;
-      return {
-        user,
-        currentUserValid: true
+      return newState;
+    }
+
+    case ACTIONS.USER_FETCH_SUCCEEDED: {
+      const newState: IAquariumUser = {
+        user: (action as IUserFetchSeucceededAction).userInfo
       };
-    default:
+      return newState;
+    }
+
+    default: {
       if (state) {
         return state;
       }
-      return {
-        user: undefined,
-        currentUserValid: false
+      const newState: IAquariumUser = {
+        user: undefined
       };
+      return newState;
+    }
   }
 };

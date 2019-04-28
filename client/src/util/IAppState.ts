@@ -26,21 +26,21 @@ export { IUser } from '../common/IUser';
 export { ITemperature } from '../common/ITemperature';
 
 export interface IAquariumState {
-  state?: IState;
+  state: IState | undefined;
   currentStateStale: boolean;
 }
 
 export interface IAquariumConfig {
-  config?: IConfig;
+  config: IConfig | undefined;
   saveStatus: 'pending' | 'failed' | 'succeeded' | 'none';
 }
 
 export interface IAquariumUser {
-  user?: IUser;
+  user: IUser | undefined;
 }
 
 export interface IAquariumTemperature {
-  temperature?: ITemperature;
+  temperature: ITemperature | undefined;
 }
 
 export interface IAppState {

@@ -21,29 +21,34 @@ import { IAquariumState } from '../util/IAppState';
 
 const STALE_DURATION = 20 * 60 * 1000;
 
-export const aquariumStateReducer: Reducer<IAquariumState> = (state: IAquariumState, action: IAction) => {
+export const aquariumStateReducer: Reducer<IAquariumState> = (state: IAquariumState | undefined, action: IAction) => {
   switch (action.type) {
-    case ACTIONS.STATE_FETCH_FAILED:
-      return {
+    case ACTIONS.STATE_FETCH_FAILED: {
+      const newState: IAquariumState = {
         state: undefined,
-        currentStateValid: false,
         currentStateStale: false
       };
-    case ACTIONS.STATE_FETCH_SUCCEEDED:
+      return newState;
+    }
+
+    case ACTIONS.STATE_FETCH_SUCCEEDED: {
       const aquariumState = (action as IStateFetchSucceededAction).aquariumState;
-      return {
+      const newState: IAquariumState = {
         state: aquariumState,
-        currentStateValid: true,
         currentStateStale: Date.now() - aquariumState.currentTime > STALE_DURATION
       };
-    default:
+      return newState;
+    }
+
+    default: {
       if (state) {
         return state;
       }
-      return {
+      const newState: IAquariumState = {
         state: undefined,
-        currentStateValid: false,
         currentStateStale: false
       };
+      return newState;
+    }
   }
 };

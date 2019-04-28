@@ -24,7 +24,8 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const IConfig_1 = require("./common/IConfig");
 const DEFAULT_PORT = 3001;
-const USER_ID = 'nebrius';
+const USER_ID = '129897358';
+const USER_NAME = 'nebrius';
 const DEVICE_ID = 'nebrius-rpi';
 const port = process.env.PORT || DEFAULT_PORT;
 const app = express();
@@ -44,7 +45,13 @@ app.get('/', (req, res) => {
     res.render('index');
 });
 app.get('/api/user', (req, res) => {
-    res.send(USER_ID);
+    const userInfo = {
+        userId: USER_ID,
+        userName: USER_NAME,
+        deviceId: DEVICE_ID,
+        timezone: 'Pacific-new'
+    };
+    res.send(userInfo);
 });
 app.get('/api/state', (req, res) => {
     const state = {

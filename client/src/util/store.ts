@@ -21,14 +21,18 @@ import { reducers } from '../reducers/reducers';
 
 const preloadedState: IAppState = {
   aquariumUser: {
+    user: undefined
   },
   aquariumConfig: {
+    config: undefined,
     saveStatus: 'none'
   },
   aquariumState: {
+    state: undefined,
     currentStateStale: false
   },
   aquariumTemperature: {
+    temperature: undefined
   }
 };
 

@@ -17,49 +17,71 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import { Reducer } from 'redux';
 import { IAction, ACTIONS, IConfigFetchSucceededAction, IConfigUpdateSucceededAction } from '../actions/actions';
-import { IAquariumConfig, IConfig } from '../util/IAppState';
+import { IAquariumConfig } from '../util/IAppState';
 import { v4 } from 'uuid';
 
-export const aquariumConfigReducer: Reducer<IAquariumConfig> = (state: IAquariumConfig, action: IAction) => {
-  let aquariumConfig: IConfig;
+export const aquariumConfigReducer: Reducer<IAquariumConfig> =
+  (state: IAquariumConfig | undefined, action: IAction): IAquariumConfig => {
+  if (!state) {
+    state = {
+      config: undefined,
+      saveStatus: 'none'
+    };
+  }
   switch (action.type) {
-    case ACTIONS.CONFIG_FETCH_SUCCEEDED:
-      aquariumConfig = (action as IConfigFetchSucceededAction).aquariumConfig;
+    case ACTIONS.CONFIG_FETCH_SUCCEEDED: {
+      const aquariumConfig = (action as IConfigFetchSucceededAction).aquariumConfig;
       aquariumConfig.schedule.forEach((scheduleEntry) => {
         scheduleEntry.id = v4();
       });
-      return {
+      const newState: IAquariumConfig = {
         config: aquariumConfig,
         saveStatus: state.saveStatus
       };
-    case ACTIONS.CONFIG_FETCH_FAILED:
-      return {
+      return newState;
+    }
+
+    case ACTIONS.CONFIG_FETCH_FAILED: {
+      const newState: IAquariumConfig = {
         config: undefined,
         saveStatus: state.saveStatus
       };
-    case ACTIONS.CONFIG_REQUEST_UPDATE:
-      return {
+      return newState;
+    }
+
+    case ACTIONS.CONFIG_REQUEST_UPDATE: {
+      const newState: IAquariumConfig = {
         config: state.config,
         saveStatus: 'pending'
       };
-    case ACTIONS.CONFIG_UPDATE_SUCCEEDED:
-      aquariumConfig = (action as IConfigUpdateSucceededAction).aquariumConfig;
-      return {
-        config: aquariumConfig,
+      return newState;
+    }
+
+    case ACTIONS.CONFIG_UPDATE_SUCCEEDED: {
+      const newState: IAquariumConfig = {
+        config: (action as IConfigUpdateSucceededAction).aquariumConfig,
         saveStatus: 'succeeded'
       };
-    case ACTIONS.CONFIG_UPDATE_FAILED:
-      return {
+      return newState;
+    }
+
+    case ACTIONS.CONFIG_UPDATE_FAILED: {
+      const newState: IAquariumConfig = {
         config: state.config,
         saveStatus: 'failed'
       };
-    default:
+      return newState;
+    }
+
+    default: {
       if (state) {
         return state;
       }
-      return {
+      const newState: IAquariumConfig = {
         config: undefined,
         saveStatus: 'none'
       };
+      return newState;
+    }
   }
 };

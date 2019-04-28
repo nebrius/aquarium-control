@@ -24,9 +24,11 @@ import * as cookieParser from 'cookie-parser';
 import { IConfig, configValidationSchema } from './common/IConfig';
 import { ITemperature } from './common/ITemperature';
 import { IState } from './common/IState';
+import { IUser } from './common/IUser';
 
 const DEFAULT_PORT = 3001;
-const USER_ID = 'nebrius';
+const USER_ID = '129897358';
+const USER_NAME = 'nebrius';
 const DEVICE_ID = 'nebrius-rpi';
 
 const port = process.env.PORT || DEFAULT_PORT;
@@ -52,7 +54,13 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/user', (req, res) => {
-  res.send(USER_ID);
+  const userInfo: IUser = {
+    userId: USER_ID,
+    userName: USER_NAME,
+    deviceId: DEVICE_ID,
+    timezone: 'Pacific-new'
+  }
+  res.send(userInfo);
 });
 
 app.get('/api/state', (req, res) => {
