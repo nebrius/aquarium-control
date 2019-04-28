@@ -1,0 +1,13 @@
+import { IState } from './common/IState';
+import { IUser } from './common/IUser';
+import { ITemperatureSample } from './common/ITemperature';
+export declare function getUsernameForUserId(userId: string): string;
+export declare function getDeviceForUserId(userId: string): string;
+export declare function getUserIdForDeviceId(deviceId: string): string | undefined;
+export declare function getTimezoneForUserId(userId: string): string;
+export declare function getUser(userId: string): IUser;
+export declare function init(cb: (err: Error | undefined) => void): void;
+export declare function isUserRegistered(userId: string): boolean;
+export declare function getState(deviceId: string, cb: (err: Error | undefined, state: IState | undefined) => void): void;
+export declare function updateState(newState: IState, cb?: (err: Error | undefined) => void): void;
+export declare function getTemperatureHistory(userId: string, cb: (err: Error | undefined, history: ITemperatureSample[] | undefined) => void): void;

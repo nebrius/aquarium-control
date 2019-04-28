@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+"use strict";
 /*
 Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
 
@@ -15,5 +15,5 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-require('../dist/index').run();
+Object.defineProperty(exports, "__esModule", { value: true });
+//# sourceMappingURL=ITemperature.js.map

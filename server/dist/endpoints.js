@@ -131,7 +131,16 @@ function init(cb) {
     const server = http_1.createServer();
     server.on('request', app);
     server.listen(port, () => {
-        console.log(`API server listening on ${server.address().address}:${server.address().port}.`);
+        const address = server.address();
+        if (!address) {
+            throw new Error(`server address is unexpectedly null`);
+        }
+        if (typeof address === 'string') {
+            console.log(`API server listening on ${address}.`);
+        }
+        else {
+            console.log(`API server listening on ${address.address}:${address.port}.`);
+        }
         cb(undefined);
     });
 }

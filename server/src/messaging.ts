@@ -16,9 +16,9 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { Registry, Twin } from 'azure-iothub';
-import { Client, Receiver, Message } from 'azure-event-hubs';
+// import { Client, Receiver, Message } from 'azure-event-hubs';
 import { IConfig } from './common/IConfig';
-import { updateState } from './db';
+// import { updateState } from './db';
 
 let registry: Registry;
 
@@ -29,20 +29,20 @@ export function init(cb: (err: Error | undefined) => void): void {
   }
   registry = Registry.fromConnectionString(IOT_HUB_CONNECTION_STRING);
 
-  const client = Client.fromConnectionString(IOT_HUB_CONNECTION_STRING);
-  client.open()
-    .then(client.getPartitionIds.bind(client))
-    .then((partitionIds: any) =>
-      partitionIds.map((partitionId: Client.PartitionId) =>
-        client.createReceiver('$Default', partitionId, {
-          startAfterTime: Date.now()
-        }).then((receiver: Receiver) => {
-          console.log('Created partition receiver: ' + partitionId);
-          receiver.on('errorReceived', (err) => console.error(err));
-          receiver.on('message', (message: Message) => updateState(message.body));
-        })
-      ))
-    .catch((err) => console.error(err));
+  // const client = Client.fromConnectionString(IOT_HUB_CONNECTION_STRING);
+  // client.open()
+  //   .then(client.getPartitionIds.bind(client))
+  //   .then((partitionIds: any) =>
+  //     partitionIds.map((partitionId: Client.PartitionId) =>
+  //       client.createReceiver('$Default', partitionId, {
+  //         startAfterTime: Date.now()
+  //       }).then((receiver: Receiver) => {
+  //         console.log('Created partition receiver: ' + partitionId);
+  //         receiver.on('errorReceived', (err: Error) => console.error(err));
+  //         receiver.on('message', (message: Message) => updateState(message.body));
+  //       })
+  //     ))
+  //   .catch((err: Error) => console.error(err));
   setImmediate(cb);
 }
 

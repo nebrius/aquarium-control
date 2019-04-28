@@ -290,7 +290,7 @@ END`,
                 }],
                 (err, rowCount, rows) => insertNext(err)
               )
-            ], next);
+            ], next as any);
             // Create the new entry
 
           // Else check if we need to update the high temperature
@@ -341,7 +341,7 @@ END`,
           }
         }
 
-      ], cb);
+      ], cb as any);
     }
   );
 }

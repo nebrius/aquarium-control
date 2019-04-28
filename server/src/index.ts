@@ -25,7 +25,7 @@ export function run(): void {
     initDB,
     initEndpoints,
     initMessaging
-  ], (err: Error | undefined) => {
+  ] as any, (err: Error | undefined) => {
     if (err) {
       console.error(err.message || err);
       process.exit(-1);
