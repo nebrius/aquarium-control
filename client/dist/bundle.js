@@ -69512,6 +69512,50 @@ exports.ButtonBar = ButtonBar;
 
 /***/ }),
 
+/***/ "./src/components/Cleaning.tsx":
+/*!*************************************!*\
+  !*** ./src/components/Cleaning.tsx ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/*
+Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
+
+Aquarium Control is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Aquarium Control is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
+*/
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+function Cleaning(props) {
+    if (!props.cleaningHistory) {
+        return (React.createElement("div", null,
+            React.createElement("div", null,
+                React.createElement("h2", null, "Cleaning History")),
+            React.createElement("div", { className: "alert alert-danger" }, "Current cleaning history is not available")));
+    }
+    return (React.createElement("div", null,
+        React.createElement("div", null,
+            React.createElement("h2", null, "Cleaning History")),
+        React.createElement("div", { className: "cleaning-content" }, "Cleaning History")));
+}
+exports.Cleaning = Cleaning;
+
+
+/***/ }),
+
 /***/ "./src/components/Configuration.tsx":
 /*!******************************************!*\
   !*** ./src/components/Configuration.tsx ***!
@@ -69820,19 +69864,71 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 var HeaderContainer_1 = __webpack_require__(/*! ../containers/HeaderContainer */ "./src/containers/HeaderContainer.ts");
 var ConfigurationContainer_1 = __webpack_require__(/*! ../containers/ConfigurationContainer */ "./src/containers/ConfigurationContainer.ts");
-var TemperatureContainer_1 = __webpack_require__(/*! ../containers/TemperatureContainer */ "./src/containers/TemperatureContainer.ts");
 var StateContainer_1 = __webpack_require__(/*! ../containers/StateContainer */ "./src/containers/StateContainer.ts");
-function Root(props) {
-    return (React.createElement("div", { className: "root-container" },
-        React.createElement(HeaderContainer_1.HeaderContainer, null),
-        React.createElement(StateContainer_1.StateContainer, null),
-        React.createElement(TemperatureContainer_1.TemperatureContainer, null),
-        React.createElement(ConfigurationContainer_1.ConfigurationContainer, null)));
-}
+var TemperatureContainer_1 = __webpack_require__(/*! ../containers/TemperatureContainer */ "./src/containers/TemperatureContainer.ts");
+var TestingContainer_1 = __webpack_require__(/*! ../containers/TestingContainer */ "./src/containers/TestingContainer.ts");
+var CleaningContainer_1 = __webpack_require__(/*! ../containers/CleaningContainer */ "./src/containers/CleaningContainer.ts");
+var ButtonBar_1 = __webpack_require__(/*! ./ButtonBar */ "./src/components/ButtonBar.tsx");
+var Root = /** @class */ (function (_super) {
+    __extends(Root, _super);
+    function Root() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.state = {
+            selectedTab: 'state'
+        };
+        _this._handleTabSelect = function (newTab) {
+            _this.setState(function (previousState) {
+                return __assign({}, previousState, { selectedTab: newTab });
+            });
+        };
+        return _this;
+    }
+    Root.prototype.render = function () {
+        return (React.createElement("div", { className: "root-container" },
+            React.createElement(HeaderContainer_1.HeaderContainer, null),
+            React.createElement("div", { className: "navBar" },
+                React.createElement(ButtonBar_1.ButtonBar, { items: [
+                        { displayName: 'State', valueName: 'state' },
+                        { displayName: 'Schedule', valueName: 'schedule' },
+                        { displayName: 'Cleaning', valueName: 'cleaning' },
+                        { displayName: 'Testing', valueName: 'testing' }
+                    ], onItemSelected: this._handleTabSelect, defaultValueName: this.state.selectedTab })),
+            this.state.selectedTab === 'state' && React.createElement(StateContainer_1.StateContainer, null),
+            this.state.selectedTab === 'state' && React.createElement(TemperatureContainer_1.TemperatureContainer, null),
+            this.state.selectedTab === 'schedule' && React.createElement(ConfigurationContainer_1.ConfigurationContainer, null),
+            this.state.selectedTab === 'testing' && React.createElement(TestingContainer_1.TestingContainer, null),
+            this.state.selectedTab === 'cleaning' && React.createElement(CleaningContainer_1.CleaningContainer, null)));
+    };
+    return Root;
+}(React.Component));
 exports.Root = Root;
 
 
@@ -70297,6 +70393,91 @@ exports.TemperatureGraph = TemperatureGraph;
 
 /***/ }),
 
+/***/ "./src/components/Testing.tsx":
+/*!************************************!*\
+  !*** ./src/components/Testing.tsx ***!
+  \************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/*
+Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
+
+Aquarium Control is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Aquarium Control is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
+*/
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+function Testing(props) {
+    if (!props.testingHistory) {
+        return (React.createElement("div", null,
+            React.createElement("div", null,
+                React.createElement("h2", null, "Testing History")),
+            React.createElement("div", { className: "alert alert-danger" }, "Current testing history is not available")));
+    }
+    return (React.createElement("div", null,
+        React.createElement("div", null,
+            React.createElement("h2", null, "Testing History")),
+        React.createElement("div", { className: "Testing-content" }, "Testing History")));
+}
+exports.Testing = Testing;
+
+
+/***/ }),
+
+/***/ "./src/containers/CleaningContainer.ts":
+/*!*********************************************!*\
+  !*** ./src/containers/CleaningContainer.ts ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/*
+Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
+
+Aquarium Control is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Aquarium Control is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
+*/
+Object.defineProperty(exports, "__esModule", { value: true });
+var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+var Cleaning_1 = __webpack_require__(/*! ../components/Cleaning */ "./src/components/Cleaning.tsx");
+function mapStateToProps(state) {
+    return {
+        cleaningHistory: undefined
+    };
+}
+function mapDispatchToProps(dispatch) {
+    return {};
+}
+exports.CleaningContainer = react_redux_1.connect(mapStateToProps, mapDispatchToProps)(Cleaning_1.Cleaning);
+
+
+/***/ }),
+
 /***/ "./src/containers/ConfigurationContainer.ts":
 /*!**************************************************!*\
   !*** ./src/containers/ConfigurationContainer.ts ***!
@@ -70487,6 +70668,47 @@ function mapDispatchToProps(dispatch) {
     return {};
 }
 exports.TemperatureContainer = react_redux_1.connect(mapStateToProps, mapDispatchToProps)(Temperature_1.Temperature);
+
+
+/***/ }),
+
+/***/ "./src/containers/TestingContainer.ts":
+/*!********************************************!*\
+  !*** ./src/containers/TestingContainer.ts ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/*
+Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
+
+Aquarium Control is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Aquarium Control is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
+*/
+Object.defineProperty(exports, "__esModule", { value: true });
+var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+var Testing_1 = __webpack_require__(/*! ../components/Testing */ "./src/components/Testing.tsx");
+function mapStateToProps(state) {
+    return {
+        testingHistory: undefined
+    };
+}
+function mapDispatchToProps(dispatch) {
+    return {};
+}
+exports.TestingContainer = react_redux_1.connect(mapStateToProps, mapDispatchToProps)(Testing_1.Testing);
 
 
 /***/ }),

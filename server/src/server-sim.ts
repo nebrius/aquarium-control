@@ -29,6 +29,7 @@ import { IUser } from './common/IUser';
 const DEFAULT_PORT = 3001;
 const USER_ID = '129897358';
 const USER_NAME = 'nebrius';
+const USER_TIMEZONE = 'America/Los_Angeles';
 const DEVICE_ID = 'nebrius-rpi';
 
 const port = process.env.PORT || DEFAULT_PORT;
@@ -58,7 +59,7 @@ app.get('/api/user', (req, res) => {
     userId: USER_ID,
     userName: USER_NAME,
     deviceId: DEVICE_ID,
-    timezone: 'Pacific-new'
+    timezone: USER_TIMEZONE
   }
   res.send(userInfo);
 });

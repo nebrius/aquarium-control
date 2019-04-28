@@ -46,7 +46,6 @@ h2 {
 
 .header {
   background-color: #222;
-  margin-bottom: 2px;
   display: flex;
   color: white;
   align-items: center;
@@ -68,6 +67,13 @@ h2 {
   align-items: center;
   flex-grow: 1;
   text-align: center;
+}
+
+.navBar {
+  background-color: #222;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
 }
 
 .state-content {
