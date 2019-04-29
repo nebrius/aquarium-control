@@ -15,22 +15,28 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { connect } from 'react-redux';
-import { IAppState } from '../util/IAppState';
-import { IAction } from '../actions/actions';
-import { Testing, ITestingProps } from '../components/Testing';
+import * as React from 'react';
+import { ICleaningEntry } from '../common/ICleaning';
 
-function mapStateToProps(state: IAppState): ITestingProps {
-  return {
-    testingHistory: undefined
-  };
+export interface ICleaningHistoryProps {
+  cleaningHistory: ICleaningEntry[] | undefined;
 }
 
-function mapDispatchToProps(dispatch: (action: IAction) => any) {
-  return {};
+export function CleaningHistory(props: ICleaningHistoryProps): JSX.Element {
+  if (!props.cleaningHistory) {
+    return (
+      <div>
+        <div><h2>Cleaning History</h2></div>
+        <div className="alert alert-danger">Current cleaning history is not available</div>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <div><h2>Cleaning History</h2></div>
+      <div className="cleaning-history-content">
+        Cleaning History
+      </div>
+    </div>
+  );
 }
-
-export const TestingContainer = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Testing);

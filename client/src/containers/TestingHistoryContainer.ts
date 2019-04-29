@@ -15,33 +15,22 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { createStore } from 'redux';
-import { IAppState, SaveStatusState } from './IAppState';
-import { reducers } from '../reducers/reducers';
+import { connect } from 'react-redux';
+import { IAppState } from '../util/IAppState';
+import { IAction } from '../actions/actions';
+import { TestingHistory, ITestingHistoryProps } from '../components/TestingHistory';
 
-const preloadedState: IAppState = {
-  aquariumUser: {
-    user: undefined
-  },
-  aquariumConfig: {
-    config: undefined,
-    saveStatus: SaveStatusState.None
-  },
-  aquariumState: {
-    state: undefined,
-    currentStateStale: false
-  },
-  aquariumTemperature: {
-    temperature: undefined
-  },
-  aquariumCleaning: {
-    cleaning: undefined,
-    saveStatus: SaveStatusState.None
-  },
-  aquariumTesting: {
-    testing: undefined,
-    saveStatus: SaveStatusState.None
-  }
-};
+function mapStateToProps(state: IAppState): ITestingHistoryProps {
+  return {
+    testingHistory: undefined
+  };
+}
 
-export const store = createStore(reducers, preloadedState);
+function mapDispatchToProps(dispatch: (action: IAction) => any) {
+  return {};
+}
+
+export const TestingContainer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TestingHistory);

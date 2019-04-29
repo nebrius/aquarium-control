@@ -15,33 +15,13 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { createStore } from 'redux';
-import { IAppState, SaveStatusState } from './IAppState';
-import { reducers } from '../reducers/reducers';
+export interface ICleaningEntry {
+  time: number;
+  bioFilterReplaced: boolean;
+  mechanicalFilterReplaced: boolean;
+  spongeReplaced: boolean;
+}
 
-const preloadedState: IAppState = {
-  aquariumUser: {
-    user: undefined
-  },
-  aquariumConfig: {
-    config: undefined,
-    saveStatus: SaveStatusState.None
-  },
-  aquariumState: {
-    state: undefined,
-    currentStateStale: false
-  },
-  aquariumTemperature: {
-    temperature: undefined
-  },
-  aquariumCleaning: {
-    cleaning: undefined,
-    saveStatus: SaveStatusState.None
-  },
-  aquariumTesting: {
-    testing: undefined,
-    saveStatus: SaveStatusState.None
-  }
-};
-
-export const store = createStore(reducers, preloadedState);
+export interface ICleaning {
+  history: ICleaningEntry[];
+}

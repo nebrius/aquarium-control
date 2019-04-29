@@ -1,3 +1,4 @@
+"use strict";
 /*
 Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
 
@@ -14,34 +15,5 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-import { createStore } from 'redux';
-import { IAppState, SaveStatusState } from './IAppState';
-import { reducers } from '../reducers/reducers';
-
-const preloadedState: IAppState = {
-  aquariumUser: {
-    user: undefined
-  },
-  aquariumConfig: {
-    config: undefined,
-    saveStatus: SaveStatusState.None
-  },
-  aquariumState: {
-    state: undefined,
-    currentStateStale: false
-  },
-  aquariumTemperature: {
-    temperature: undefined
-  },
-  aquariumCleaning: {
-    cleaning: undefined,
-    saveStatus: SaveStatusState.None
-  },
-  aquariumTesting: {
-    testing: undefined,
-    saveStatus: SaveStatusState.None
-  }
-};
-
-export const store = createStore(reducers, preloadedState);
+Object.defineProperty(exports, "__esModule", { value: true });
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiSUNsZWFuaW5nLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsic3JjL0lDbGVhbmluZy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7Ozs7Ozs7Ozs7Ozs7OztFQWVFIn0=

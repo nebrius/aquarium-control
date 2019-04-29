@@ -69252,6 +69252,11 @@ exports.ACTIONS = {
     USER_FETCH_FAILED: 'USER_FETCH_FAILED',
     STATE_FETCH_SUCCEEDED: 'STATE_FETCH_SUCCEEDED',
     STATE_FETCH_FAILED: 'STATE_FETCH_FAILED',
+    CLEANING_FETCH_SUCCEEDED: 'CLEANING_FETCH_SUCCEEDED',
+    CLEANING_FETCH_FAILED: 'CLEANING_FETCH_FAILED',
+    CLEANING_REQUEST_NEW_RECORD: 'CLEANING_REQUEST_NEW_RECORD',
+    CLEANING_NEW_RECORD_SUCEEDED: 'CLEANING_NEW_RECORD_SUCEEDED',
+    CLEANING_NEW_RECORD_FAILED: 'CLEANING_NEW_RECORD_FAILED',
     CONFIG_FETCH_SUCCEEDED: 'CONFIG_FETCH_SUCCEEDED',
     CONFIG_FETCH_FAILED: 'CONFIG_FETCH_FAILED',
     CONFIG_REQUEST_UPDATE: 'CONFIG_REQUEST_UPDATE',
@@ -69299,6 +69304,39 @@ function temperatureFetchFailed() {
     };
 }
 exports.temperatureFetchFailed = temperatureFetchFailed;
+function cleaningHistoryFetchSucceeded(aquariumCleaning) {
+    return {
+        type: exports.ACTIONS.CLEANING_FETCH_SUCCEEDED,
+        aquariumCleaning: aquariumCleaning
+    };
+}
+exports.cleaningHistoryFetchSucceeded = cleaningHistoryFetchSucceeded;
+function cleaningHistoryFetchFailed() {
+    return {
+        type: exports.ACTIONS.CLEANING_FETCH_FAILED
+    };
+}
+exports.cleaningHistoryFetchFailed = cleaningHistoryFetchFailed;
+function cleaningRequestCreateRecord(newRecord) {
+    return {
+        type: exports.ACTIONS.CLEANING_REQUEST_NEW_RECORD,
+        newRecord: newRecord
+    };
+}
+exports.cleaningRequestCreateRecord = cleaningRequestCreateRecord;
+function cleaningCreateRecordSucceeded(aquariumCleaning) {
+    return {
+        type: exports.ACTIONS.CLEANING_NEW_RECORD_SUCEEDED,
+        aquariumCleaning: aquariumCleaning
+    };
+}
+exports.cleaningCreateRecordSucceeded = cleaningCreateRecordSucceeded;
+function cleaningCreateRecordFailed() {
+    return {
+        type: exports.ACTIONS.CLEANING_NEW_RECORD_FAILED
+    };
+}
+exports.cleaningCreateRecordFailed = cleaningCreateRecordFailed;
 function configFetchSucceeded(aquariumConfig) {
     return {
         type: exports.ACTIONS.CONFIG_FETCH_SUCCEEDED,
@@ -69512,10 +69550,10 @@ exports.ButtonBar = ButtonBar;
 
 /***/ }),
 
-/***/ "./src/components/Cleaning.tsx":
-/*!*************************************!*\
-  !*** ./src/components/Cleaning.tsx ***!
-  \*************************************/
+/***/ "./src/components/CleaningHistory.tsx":
+/*!********************************************!*\
+  !*** ./src/components/CleaningHistory.tsx ***!
+  \********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -69539,7 +69577,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-function Cleaning(props) {
+function CleaningHistory(props) {
     if (!props.cleaningHistory) {
         return (React.createElement("div", null,
             React.createElement("div", null,
@@ -69549,9 +69587,9 @@ function Cleaning(props) {
     return (React.createElement("div", null,
         React.createElement("div", null,
             React.createElement("h2", null, "Cleaning History")),
-        React.createElement("div", { className: "cleaning-content" }, "Cleaning History")));
+        React.createElement("div", { className: "cleaning-history-content" }, "Cleaning History")));
 }
-exports.Cleaning = Cleaning;
+exports.CleaningHistory = CleaningHistory;
 
 
 /***/ }),
@@ -69640,6 +69678,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 var ButtonBar_1 = __webpack_require__(/*! ./ButtonBar */ "./src/components/ButtonBar.tsx");
 var ScheduleEntry_1 = __webpack_require__(/*! ./ScheduleEntry */ "./src/components/ScheduleEntry.tsx");
+var SaveStatus_1 = __webpack_require__(/*! ./SaveStatus */ "./src/components/SaveStatus.tsx");
 var clone = __webpack_require__(/*! clone */ "./node_modules/clone/clone.js");
 var uuid_1 = __webpack_require__(/*! uuid */ "./node_modules/uuid/index.js");
 var equals = __webpack_require__(/*! deep-equal */ "./node_modules/deep-equal/index.js");
@@ -69664,22 +69703,6 @@ var ConfigurationDetails = /** @class */ (function (_super) {
         var _this = this;
         var props = this.props;
         var mode = this.state.unsavedConfig.mode;
-        var banner;
-        switch (props.saveStatus) {
-            case 'pending':
-                banner = (React.createElement("div", { className: "alert alert-primary" }, "Applying configuration"));
-                break;
-            case 'succeeded':
-                banner = (React.createElement("div", { className: "alert alert-success" }, "Configuration applied!"));
-                break;
-            case 'failed':
-                banner = (React.createElement("div", { className: "alert alert-danger" }, "Could not apply configuration!"));
-                break;
-            case 'none':
-                break;
-            default:
-                throw new Error("Internal Error: unknown save status " + props.saveStatus);
-        }
         var detailedConfig;
         switch (mode) {
             case 'program':
@@ -69705,7 +69728,11 @@ var ConfigurationDetails = /** @class */ (function (_super) {
         return (React.createElement("div", null,
             React.createElement("div", null,
                 React.createElement("h2", null, "Configuration")),
-            banner,
+            React.createElement(SaveStatus_1.SaveStatus, { saveStatus: this.props.saveStatus, labels: {
+                    pending: 'Applying configuration',
+                    suceeded: 'Configuration applied!',
+                    failed: 'Could not apply configuration!'
+                } }),
             React.createElement("form", { onSubmit: this._handleSubmit, className: "configuration-contents" },
                 React.createElement("div", { className: "configuration-category" },
                     React.createElement("h3", null, "Mode"),
@@ -69839,6 +69866,70 @@ exports.Header = Header;
 
 /***/ }),
 
+/***/ "./src/components/RecordCleaning.tsx":
+/*!*******************************************!*\
+  !*** ./src/components/RecordCleaning.tsx ***!
+  \*******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/*
+Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
+
+Aquarium Control is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Aquarium Control is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
+*/
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+var SaveStatus_1 = __webpack_require__(/*! ./SaveStatus */ "./src/components/SaveStatus.tsx");
+var RecordCleaning = /** @class */ (function (_super) {
+    __extends(RecordCleaning, _super);
+    function RecordCleaning() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    RecordCleaning.prototype.render = function () {
+        return (React.createElement("div", null,
+            React.createElement("div", null,
+                React.createElement("h2", null, "Record Cleaning")),
+            React.createElement(SaveStatus_1.SaveStatus, { saveStatus: this.props.saveStatus, labels: {
+                    pending: 'Creating cleaning record',
+                    suceeded: 'Cleaning record created!',
+                    failed: 'Could not create cleaning record!'
+                } }),
+            React.createElement("div", null, "New Record")));
+    };
+    return RecordCleaning;
+}(React.Component));
+exports.RecordCleaning = RecordCleaning;
+
+
+/***/ }),
+
 /***/ "./src/components/Root.tsx":
 /*!*********************************!*\
   !*** ./src/components/Root.tsx ***!
@@ -69894,8 +69985,9 @@ var HeaderContainer_1 = __webpack_require__(/*! ../containers/HeaderContainer */
 var ConfigurationContainer_1 = __webpack_require__(/*! ../containers/ConfigurationContainer */ "./src/containers/ConfigurationContainer.ts");
 var StateContainer_1 = __webpack_require__(/*! ../containers/StateContainer */ "./src/containers/StateContainer.ts");
 var TemperatureContainer_1 = __webpack_require__(/*! ../containers/TemperatureContainer */ "./src/containers/TemperatureContainer.ts");
-var TestingContainer_1 = __webpack_require__(/*! ../containers/TestingContainer */ "./src/containers/TestingContainer.ts");
-var CleaningContainer_1 = __webpack_require__(/*! ../containers/CleaningContainer */ "./src/containers/CleaningContainer.ts");
+var TestingHistoryContainer_1 = __webpack_require__(/*! ../containers/TestingHistoryContainer */ "./src/containers/TestingHistoryContainer.ts");
+var RecordCleaningContainer_1 = __webpack_require__(/*! ../containers/RecordCleaningContainer */ "./src/containers/RecordCleaningContainer.ts");
+var CleaningHistoryContainer_1 = __webpack_require__(/*! ../containers/CleaningHistoryContainer */ "./src/containers/CleaningHistoryContainer.ts");
 var ButtonBar_1 = __webpack_require__(/*! ./ButtonBar */ "./src/components/ButtonBar.tsx");
 var Root = /** @class */ (function (_super) {
     __extends(Root, _super);
@@ -69924,12 +70016,60 @@ var Root = /** @class */ (function (_super) {
             this.state.selectedTab === 'state' && React.createElement(StateContainer_1.StateContainer, null),
             this.state.selectedTab === 'state' && React.createElement(TemperatureContainer_1.TemperatureContainer, null),
             this.state.selectedTab === 'schedule' && React.createElement(ConfigurationContainer_1.ConfigurationContainer, null),
-            this.state.selectedTab === 'testing' && React.createElement(TestingContainer_1.TestingContainer, null),
-            this.state.selectedTab === 'cleaning' && React.createElement(CleaningContainer_1.CleaningContainer, null)));
+            this.state.selectedTab === 'testing' && React.createElement(TestingHistoryContainer_1.TestingContainer, null),
+            this.state.selectedTab === 'cleaning' && React.createElement(RecordCleaningContainer_1.RecordCleaningContainer, null),
+            this.state.selectedTab === 'cleaning' && React.createElement(CleaningHistoryContainer_1.CleaningHistoryContainer, null)));
     };
     return Root;
 }(React.Component));
 exports.Root = Root;
+
+
+/***/ }),
+
+/***/ "./src/components/SaveStatus.tsx":
+/*!***************************************!*\
+  !*** ./src/components/SaveStatus.tsx ***!
+  \***************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/*
+Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
+
+Aquarium Control is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Aquarium Control is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
+*/
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+var IAppState_1 = __webpack_require__(/*! ../util/IAppState */ "./src/util/IAppState.ts");
+function SaveStatus(props) {
+    switch (props.saveStatus) {
+        case IAppState_1.SaveStatusState.Pending:
+            return (React.createElement("div", { className: "alert alert-primary" }, props.labels.pending));
+        case IAppState_1.SaveStatusState.Succeeded:
+            return (React.createElement("div", { className: "alert alert-success" }, props.labels.suceeded));
+        case IAppState_1.SaveStatusState.Failed:
+            return (React.createElement("div", { className: "alert alert-danger" }, props.labels.failed));
+        case IAppState_1.SaveStatusState.None:
+            return (React.createElement("span", null));
+        default:
+            throw new Error("Internal Error: unknown save status " + props.saveStatus);
+    }
+}
+exports.SaveStatus = SaveStatus;
 
 
 /***/ }),
@@ -70393,10 +70533,10 @@ exports.TemperatureGraph = TemperatureGraph;
 
 /***/ }),
 
-/***/ "./src/components/Testing.tsx":
-/*!************************************!*\
-  !*** ./src/components/Testing.tsx ***!
-  \************************************/
+/***/ "./src/components/TestingHistory.tsx":
+/*!*******************************************!*\
+  !*** ./src/components/TestingHistory.tsx ***!
+  \*******************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -70420,7 +70560,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-function Testing(props) {
+function TestingHistory(props) {
     if (!props.testingHistory) {
         return (React.createElement("div", null,
             React.createElement("div", null,
@@ -70432,15 +70572,15 @@ function Testing(props) {
             React.createElement("h2", null, "Testing History")),
         React.createElement("div", { className: "Testing-content" }, "Testing History")));
 }
-exports.Testing = Testing;
+exports.TestingHistory = TestingHistory;
 
 
 /***/ }),
 
-/***/ "./src/containers/CleaningContainer.ts":
-/*!*********************************************!*\
-  !*** ./src/containers/CleaningContainer.ts ***!
-  \*********************************************/
+/***/ "./src/containers/CleaningHistoryContainer.ts":
+/*!****************************************************!*\
+  !*** ./src/containers/CleaningHistoryContainer.ts ***!
+  \****************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -70464,7 +70604,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
-var Cleaning_1 = __webpack_require__(/*! ../components/Cleaning */ "./src/components/Cleaning.tsx");
+var CleaningHistory_1 = __webpack_require__(/*! ../components/CleaningHistory */ "./src/components/CleaningHistory.tsx");
 function mapStateToProps(state) {
     return {
         cleaningHistory: undefined
@@ -70473,7 +70613,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {};
 }
-exports.CleaningContainer = react_redux_1.connect(mapStateToProps, mapDispatchToProps)(Cleaning_1.Cleaning);
+exports.CleaningHistoryContainer = react_redux_1.connect(mapStateToProps, mapDispatchToProps)(CleaningHistory_1.CleaningHistory);
 
 
 /***/ }),
@@ -70588,6 +70728,66 @@ exports.HeaderContainer = react_redux_1.connect(mapStateToProps, mapDispatchToPr
 
 /***/ }),
 
+/***/ "./src/containers/RecordCleaningContainer.ts":
+/*!***************************************************!*\
+  !*** ./src/containers/RecordCleaningContainer.ts ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/*
+Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
+
+Aquarium Control is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Aquarium Control is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
+*/
+Object.defineProperty(exports, "__esModule", { value: true });
+var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+var api_1 = __webpack_require__(/*! ../util/api */ "./src/util/api.ts");
+var actions_1 = __webpack_require__(/*! ../actions/actions */ "./src/actions/actions.ts");
+var RecordCleaning_1 = __webpack_require__(/*! ../components/RecordCleaning */ "./src/components/RecordCleaning.tsx");
+var clone = __webpack_require__(/*! clone */ "./node_modules/clone/clone.js");
+function mapStateToProps(state) {
+    return {
+        saveStatus: clone(state.aquariumCleaning.saveStatus)
+    };
+}
+function mapDispatchToProps(dispatch) {
+    return {
+        requestCreateCleaningRecord: function (newRecord) {
+            dispatch(actions_1.cleaningRequestCreateRecord(newRecord));
+            api_1.request({
+                endpoint: 'config',
+                method: 'POST',
+                body: newRecord
+            }, function (err, result) {
+                if (err) {
+                    dispatch(actions_1.cleaningCreateRecordFailed());
+                }
+                else {
+                    dispatch(actions_1.cleaningCreateRecordSucceeded(result));
+                }
+            });
+        }
+    };
+}
+exports.RecordCleaningContainer = react_redux_1.connect(mapStateToProps, mapDispatchToProps)(RecordCleaning_1.RecordCleaning);
+
+
+/***/ }),
+
 /***/ "./src/containers/StateContainer.ts":
 /*!******************************************!*\
   !*** ./src/containers/StateContainer.ts ***!
@@ -70672,10 +70872,10 @@ exports.TemperatureContainer = react_redux_1.connect(mapStateToProps, mapDispatc
 
 /***/ }),
 
-/***/ "./src/containers/TestingContainer.ts":
-/*!********************************************!*\
-  !*** ./src/containers/TestingContainer.ts ***!
-  \********************************************/
+/***/ "./src/containers/TestingHistoryContainer.ts":
+/*!***************************************************!*\
+  !*** ./src/containers/TestingHistoryContainer.ts ***!
+  \***************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -70699,7 +70899,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
-var Testing_1 = __webpack_require__(/*! ../components/Testing */ "./src/components/Testing.tsx");
+var TestingHistory_1 = __webpack_require__(/*! ../components/TestingHistory */ "./src/components/TestingHistory.tsx");
 function mapStateToProps(state) {
     return {
         testingHistory: undefined
@@ -70708,7 +70908,71 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {};
 }
-exports.TestingContainer = react_redux_1.connect(mapStateToProps, mapDispatchToProps)(Testing_1.Testing);
+exports.TestingContainer = react_redux_1.connect(mapStateToProps, mapDispatchToProps)(TestingHistory_1.TestingHistory);
+
+
+/***/ }),
+
+/***/ "./src/reducers/aquariumCleaningReducer.ts":
+/*!*************************************************!*\
+  !*** ./src/reducers/aquariumCleaningReducer.ts ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/*
+Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
+
+Aquarium Control is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Aquarium Control is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
+*/
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var actions_1 = __webpack_require__(/*! ../actions/actions */ "./src/actions/actions.ts");
+var IAppState_1 = __webpack_require__(/*! ../util/IAppState */ "./src/util/IAppState.ts");
+exports.aquariumCleaningReducer = function (state, action) {
+    if (!state) {
+        state = {
+            cleaning: undefined,
+            saveStatus: IAppState_1.SaveStatusState.None
+        };
+    }
+    switch (action.type) {
+        case actions_1.ACTIONS.CLEANING_FETCH_FAILED: {
+            var newState = __assign({}, state, { cleaning: undefined });
+            return newState;
+        }
+        case actions_1.ACTIONS.CLEANING_FETCH_SUCCEEDED: {
+            var newState = __assign({}, state, { cleaning: action.aquariumCleaning });
+            return newState;
+        }
+        default: {
+            return state;
+        }
+    }
+};
 
 
 /***/ }),
@@ -70740,12 +71004,13 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 var actions_1 = __webpack_require__(/*! ../actions/actions */ "./src/actions/actions.ts");
+var IAppState_1 = __webpack_require__(/*! ../util/IAppState */ "./src/util/IAppState.ts");
 var uuid_1 = __webpack_require__(/*! uuid */ "./node_modules/uuid/index.js");
 exports.aquariumConfigReducer = function (state, action) {
     if (!state) {
         state = {
             config: undefined,
-            saveStatus: 'none'
+            saveStatus: IAppState_1.SaveStatusState.None
         };
     }
     switch (action.type) {
@@ -70770,21 +71035,21 @@ exports.aquariumConfigReducer = function (state, action) {
         case actions_1.ACTIONS.CONFIG_REQUEST_UPDATE: {
             var newState = {
                 config: state.config,
-                saveStatus: 'pending'
+                saveStatus: IAppState_1.SaveStatusState.Pending
             };
             return newState;
         }
         case actions_1.ACTIONS.CONFIG_UPDATE_SUCCEEDED: {
             var newState = {
                 config: action.aquariumConfig,
-                saveStatus: 'succeeded'
+                saveStatus: IAppState_1.SaveStatusState.Succeeded
             };
             return newState;
         }
         case actions_1.ACTIONS.CONFIG_UPDATE_FAILED: {
             var newState = {
                 config: state.config,
-                saveStatus: 'failed'
+                saveStatus: IAppState_1.SaveStatusState.Failed
             };
             return newState;
         }
@@ -70794,7 +71059,7 @@ exports.aquariumConfigReducer = function (state, action) {
             }
             var newState = {
                 config: undefined,
-                saveStatus: 'none'
+                saveStatus: IAppState_1.SaveStatusState.None
             };
             return newState;
         }
@@ -70921,6 +71186,47 @@ exports.aquariumTemperatureReducer = function (state, action) {
 
 /***/ }),
 
+/***/ "./src/reducers/aquariumTestingReducer.ts":
+/*!************************************************!*\
+  !*** ./src/reducers/aquariumTestingReducer.ts ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/*
+Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
+
+Aquarium Control is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Aquarium Control is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
+*/
+Object.defineProperty(exports, "__esModule", { value: true });
+var IAppState_1 = __webpack_require__(/*! ../util/IAppState */ "./src/util/IAppState.ts");
+exports.aquariumTestingReducer = function (state, action) {
+    if (!state) {
+        state = {
+            testing: undefined,
+            saveStatus: IAppState_1.SaveStatusState.None
+        };
+    }
+    // TODO:
+    return state;
+};
+
+
+/***/ }),
+
 /***/ "./src/reducers/aquariumUserReducer.ts":
 /*!*********************************************!*\
   !*** ./src/reducers/aquariumUserReducer.ts ***!
@@ -71008,12 +71314,53 @@ var aquariumStateReducer_1 = __webpack_require__(/*! ./aquariumStateReducer */ "
 var aquariumConfigReducer_1 = __webpack_require__(/*! ./aquariumConfigReducer */ "./src/reducers/aquariumConfigReducer.ts");
 var aquariumUserReducer_1 = __webpack_require__(/*! ./aquariumUserReducer */ "./src/reducers/aquariumUserReducer.ts");
 var aquariumTemperatureReducer_1 = __webpack_require__(/*! ./aquariumTemperatureReducer */ "./src/reducers/aquariumTemperatureReducer.ts");
+var aquariumTestingReducer_1 = __webpack_require__(/*! ./aquariumTestingReducer */ "./src/reducers/aquariumTestingReducer.ts");
+var aquariumCleaningReducer_1 = __webpack_require__(/*! ./aquariumCleaningReducer */ "./src/reducers/aquariumCleaningReducer.ts");
 exports.reducers = redux_1.combineReducers({
     aquariumState: aquariumStateReducer_1.aquariumStateReducer,
     aquariumConfig: aquariumConfigReducer_1.aquariumConfigReducer,
     aquariumUser: aquariumUserReducer_1.aquariumUserReducer,
-    aquariumTemperature: aquariumTemperatureReducer_1.aquariumTemperatureReducer
+    aquariumTemperature: aquariumTemperatureReducer_1.aquariumTemperatureReducer,
+    aquariumTesting: aquariumTestingReducer_1.aquariumTestingReducer,
+    aquariumCleaning: aquariumCleaningReducer_1.aquariumCleaningReducer
 });
+
+
+/***/ }),
+
+/***/ "./src/util/IAppState.ts":
+/*!*******************************!*\
+  !*** ./src/util/IAppState.ts ***!
+  \*******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/*
+Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
+
+Aquarium Control is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Aquarium Control is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
+*/
+Object.defineProperty(exports, "__esModule", { value: true });
+var SaveStatusState;
+(function (SaveStatusState) {
+    SaveStatusState[SaveStatusState["Pending"] = 0] = "Pending";
+    SaveStatusState[SaveStatusState["Failed"] = 1] = "Failed";
+    SaveStatusState[SaveStatusState["Succeeded"] = 2] = "Succeeded";
+    SaveStatusState[SaveStatusState["None"] = 3] = "None";
+})(SaveStatusState = exports.SaveStatusState || (exports.SaveStatusState = {}));
 
 
 /***/ }),
@@ -71134,6 +71481,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 var redux_1 = __webpack_require__(/*! redux */ "./node_modules/redux/es/redux.js");
+var IAppState_1 = __webpack_require__(/*! ./IAppState */ "./src/util/IAppState.ts");
 var reducers_1 = __webpack_require__(/*! ../reducers/reducers */ "./src/reducers/reducers.ts");
 var preloadedState = {
     aquariumUser: {
@@ -71141,7 +71489,7 @@ var preloadedState = {
     },
     aquariumConfig: {
         config: undefined,
-        saveStatus: 'none'
+        saveStatus: IAppState_1.SaveStatusState.None
     },
     aquariumState: {
         state: undefined,
@@ -71149,6 +71497,14 @@ var preloadedState = {
     },
     aquariumTemperature: {
         temperature: undefined
+    },
+    aquariumCleaning: {
+        cleaning: undefined,
+        saveStatus: IAppState_1.SaveStatusState.None
+    },
+    aquariumTesting: {
+        testing: undefined,
+        saveStatus: IAppState_1.SaveStatusState.None
     }
 };
 exports.store = redux_1.createStore(reducers_1.reducers, preloadedState);

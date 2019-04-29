@@ -19,11 +19,22 @@ import { IUser } from '../common/IUser';
 import { IState } from '../common/IState';
 import { IConfig } from '../common/IConfig';
 import { ITemperature } from '../common/ITemperature';
+import { ICleaning } from '../common/ICleaning';
+import { ITesting } from '../common/ITesting';
 
 export { IState } from '../common/IState';
 export { IConfig, IScheduleEntry, IDynamicScheduleEntry, IManualScheduleEntry } from '../common/IConfig';
 export { IUser } from '../common/IUser';
 export { ITemperature } from '../common/ITemperature';
+export { ICleaning, ICleaningEntry } from '../common/ICleaning';
+export { ITesting } from '../common/ITesting';
+
+export enum SaveStatusState {
+  Pending,
+  Failed,
+  Succeeded,
+  None
+}
 
 export interface IAquariumState {
   state: IState | undefined;
@@ -32,7 +43,7 @@ export interface IAquariumState {
 
 export interface IAquariumConfig {
   config: IConfig | undefined;
-  saveStatus: 'pending' | 'failed' | 'succeeded' | 'none';
+  saveStatus: SaveStatusState;
 }
 
 export interface IAquariumUser {
@@ -43,9 +54,21 @@ export interface IAquariumTemperature {
   temperature: ITemperature | undefined;
 }
 
+export interface IAquariumCleaning {
+  cleaning: ICleaning | undefined;
+  saveStatus: SaveStatusState;
+}
+
+export interface IAquariumTesting {
+  testing: ITesting | undefined;
+  saveStatus: SaveStatusState;
+}
+
 export interface IAppState {
   aquariumState: IAquariumState;
   aquariumConfig: IAquariumConfig;
   aquariumUser: IAquariumUser;
   aquariumTemperature: IAquariumTemperature;
+  aquariumCleaning: IAquariumCleaning;
+  aquariumTesting: IAquariumTesting;
 }

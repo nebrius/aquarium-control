@@ -20,8 +20,9 @@ import { HeaderContainer } from '../containers/HeaderContainer';
 import { ConfigurationContainer } from '../containers/ConfigurationContainer';
 import { StateContainer} from '../containers/StateContainer';
 import { TemperatureContainer } from '../containers/TemperatureContainer';
-import { TestingContainer } from '../containers/TestingContainer';
-import { CleaningContainer } from '../containers/CleaningContainer';
+import { TestingContainer } from '../containers/TestingHistoryContainer';
+import { RecordCleaningContainer } from '../containers/RecordCleaningContainer';
+import { CleaningHistoryContainer } from '../containers/CleaningHistoryContainer';
 import { ButtonBar } from './ButtonBar';
 
 type Tab = 'state' | 'schedule' | 'cleaning' | 'testing';
@@ -59,7 +60,8 @@ export class Root extends React.Component<{}, IRootState> {
 
         {this.state.selectedTab === 'testing' && <TestingContainer />}
 
-        {this.state.selectedTab === 'cleaning' && <CleaningContainer />}
+        {this.state.selectedTab === 'cleaning' && <RecordCleaningContainer />}
+        {this.state.selectedTab === 'cleaning' && <CleaningHistoryContainer />}
       </div>
     );
   }

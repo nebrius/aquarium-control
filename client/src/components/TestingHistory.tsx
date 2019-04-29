@@ -24,11 +24,11 @@ interface ITestingEntry {
   spongeReplaced: boolean;
 }
 
-export interface ITestingProps {
+export interface ITestingHistoryProps {
   testingHistory: ITestingEntry[] | undefined;
 }
 
-export function Testing(props: ITestingProps): JSX.Element {
+export function TestingHistory(props: ITestingHistoryProps): JSX.Element {
   if (!props.testingHistory) {
     return (
       <div>

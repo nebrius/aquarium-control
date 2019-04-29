@@ -16,32 +16,24 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
+import { SaveStatus } from './SaveStatus';
+import { SaveStatusState } from '../util/IAppState';
 
-interface ICleaningEntry {
-  time: number;
-  bioFilterReplaced: boolean;
-  mechanicalFilterReplaced: boolean;
-  spongeReplaced: boolean;
+export interface IRecordTestingProps {
+  saveStatus: SaveStatusState;
 }
 
-export interface ICleaningProps {
-  cleaningHistory: ICleaningEntry[] | undefined;
-}
-
-export function Cleaning(props: ICleaningProps): JSX.Element {
-  if (!props.cleaningHistory) {
-    return (
-      <div>
-        <div><h2>Cleaning History</h2></div>
-        <div className="alert alert-danger">Current cleaning history is not available</div>
-      </div>
-    );
-  }
+export function RecordTesting(props: IRecordTestingProps): JSX.Element {
   return (
     <div>
-      <div><h2>Cleaning History</h2></div>
-      <div className="cleaning-content">
-        Cleaning History
+      <div><h2>Record Testing</h2></div>
+      <SaveStatus saveStatus={props.saveStatus} labels={{
+          pending: 'Creating testing record',
+          suceeded: 'Testing record created!',
+          failed: 'Could not create testing record!'
+        }} />
+      <div>
+        New Record
       </div>
     </div>
   );

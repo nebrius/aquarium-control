@@ -17,7 +17,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import { Reducer } from 'redux';
 import { IAction, ACTIONS, IConfigFetchSucceededAction, IConfigUpdateSucceededAction } from '../actions/actions';
-import { IAquariumConfig } from '../util/IAppState';
+import { IAquariumConfig, SaveStatusState } from '../util/IAppState';
 import { v4 } from 'uuid';
 
 export const aquariumConfigReducer: Reducer<IAquariumConfig> =
@@ -25,7 +25,7 @@ export const aquariumConfigReducer: Reducer<IAquariumConfig> =
   if (!state) {
     state = {
       config: undefined,
-      saveStatus: 'none'
+      saveStatus: SaveStatusState.None
     };
   }
   switch (action.type) {
@@ -52,7 +52,7 @@ export const aquariumConfigReducer: Reducer<IAquariumConfig> =
     case ACTIONS.CONFIG_REQUEST_UPDATE: {
       const newState: IAquariumConfig = {
         config: state.config,
-        saveStatus: 'pending'
+        saveStatus: SaveStatusState.Pending
       };
       return newState;
     }
@@ -60,7 +60,7 @@ export const aquariumConfigReducer: Reducer<IAquariumConfig> =
     case ACTIONS.CONFIG_UPDATE_SUCCEEDED: {
       const newState: IAquariumConfig = {
         config: (action as IConfigUpdateSucceededAction).aquariumConfig,
-        saveStatus: 'succeeded'
+        saveStatus: SaveStatusState.Succeeded
       };
       return newState;
     }
@@ -68,7 +68,7 @@ export const aquariumConfigReducer: Reducer<IAquariumConfig> =
     case ACTIONS.CONFIG_UPDATE_FAILED: {
       const newState: IAquariumConfig = {
         config: state.config,
-        saveStatus: 'failed'
+        saveStatus: SaveStatusState.Failed
       };
       return newState;
     }
@@ -79,7 +79,7 @@ export const aquariumConfigReducer: Reducer<IAquariumConfig> =
       }
       const newState: IAquariumConfig = {
         config: undefined,
-        saveStatus: 'none'
+        saveStatus: SaveStatusState.None
       };
       return newState;
     }

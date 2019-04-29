@@ -20,10 +20,14 @@ import { aquariumStateReducer } from './aquariumStateReducer';
 import { aquariumConfigReducer } from './aquariumConfigReducer';
 import { aquariumUserReducer } from './aquariumUserReducer';
 import { aquariumTemperatureReducer } from './aquariumTemperatureReducer';
+import { aquariumTestingReducer } from './aquariumTestingReducer';
+import { aquariumCleaningReducer } from './aquariumCleaningReducer';
 
 export const reducers = combineReducers({
   aquariumState: aquariumStateReducer,
   aquariumConfig: aquariumConfigReducer,
   aquariumUser: aquariumUserReducer,
-  aquariumTemperature: aquariumTemperatureReducer
+  aquariumTemperature: aquariumTemperatureReducer,
+  aquariumTesting: aquariumTestingReducer,
+  aquariumCleaning: aquariumCleaningReducer
 });

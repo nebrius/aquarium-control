@@ -16,17 +16,17 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-import { IConfig, IScheduleEntry } from '../util/IAppState';
+import { IConfig, IScheduleEntry, SaveStatusState } from '../util/IAppState';
 import { ButtonBar } from './ButtonBar';
 import { ScheduleEntry } from './ScheduleEntry';
+import { SaveStatus } from './SaveStatus';
 import * as clone from 'clone';
 import { v4 } from 'uuid';
-
 import equals = require('deep-equal');
 
 export interface IConfigurationDetailsProps {
   config: IConfig;
-  saveStatus: 'pending' | 'failed' | 'succeeded' | 'none';
+  saveStatus: SaveStatusState;
   requestConfigUpdate: (newConfig: IConfig) => void;
 }
 
@@ -55,29 +55,6 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
   public render() {
     const props = this.props;
     const mode = this.state.unsavedConfig.mode;
-
-    let banner: JSX.Element | undefined;
-    switch (props.saveStatus) {
-      case 'pending':
-        banner = (
-          <div className="alert alert-primary">Applying configuration</div>
-        );
-        break;
-      case 'succeeded':
-        banner = (
-          <div className="alert alert-success">Configuration applied!</div>
-        );
-        break;
-      case 'failed':
-        banner = (
-          <div className="alert alert-danger">Could not apply configuration!</div>
-        );
-        break;
-      case 'none':
-        break;
-      default:
-        throw new Error(`Internal Error: unknown save status ${props.saveStatus}`);
-    }
 
     let detailedConfig: JSX.Element;
     switch (mode) {
@@ -129,7 +106,11 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
     return (
       <div>
         <div><h2>Configuration</h2></div>
-        {banner}
+        <SaveStatus saveStatus={this.props.saveStatus} labels={{
+          pending: 'Applying configuration',
+          suceeded: 'Configuration applied!',
+          failed: 'Could not apply configuration!'
+        }} />
         <form onSubmit={this._handleSubmit} className="configuration-contents">
           <div className="configuration-category">
             <h3>Mode</h3>

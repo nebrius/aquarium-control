@@ -15,13 +15,18 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { IConfig, IState, IUser, ITemperature } from '../util/IAppState';
+import { IConfig, IState, IUser, ITemperature, ICleaning, ICleaningEntry } from '../util/IAppState';
 
 export const ACTIONS = {
   USER_FETCH_SUCCEEDED: 'USER_FETCH_SUCCEEDED',
   USER_FETCH_FAILED: 'USER_FETCH_FAILED',
   STATE_FETCH_SUCCEEDED: 'STATE_FETCH_SUCCEEDED',
   STATE_FETCH_FAILED: 'STATE_FETCH_FAILED',
+  CLEANING_FETCH_SUCCEEDED: 'CLEANING_FETCH_SUCCEEDED',
+  CLEANING_FETCH_FAILED: 'CLEANING_FETCH_FAILED',
+  CLEANING_REQUEST_NEW_RECORD: 'CLEANING_REQUEST_NEW_RECORD',
+  CLEANING_NEW_RECORD_SUCEEDED: 'CLEANING_NEW_RECORD_SUCEEDED',
+  CLEANING_NEW_RECORD_FAILED: 'CLEANING_NEW_RECORD_FAILED',
   CONFIG_FETCH_SUCCEEDED: 'CONFIG_FETCH_SUCCEEDED',
   CONFIG_FETCH_FAILED: 'CONFIG_FETCH_FAILED',
   CONFIG_REQUEST_UPDATE: 'CONFIG_REQUEST_UPDATE',
@@ -91,6 +96,58 @@ export function temperatureFetchFailed(): IAction {
     type: ACTIONS.TEMPERATURE_FETCH_FAILED
   };
 }
+
+// Cleaning Actions
+
+// TODO: change interfaces so the `type` entry is explicitly specified
+// e.g. "CLEANING_FETCH_SUCCEEDED", as opposed to just "string"
+
+export interface ICleaningHistoryFetchSucceededAction extends IAction {
+  aquariumCleaning: ICleaning;
+}
+
+export function cleaningHistoryFetchSucceeded(aquariumCleaning: ICleaning): ICleaningHistoryFetchSucceededAction {
+  return {
+    type: ACTIONS.CLEANING_FETCH_SUCCEEDED,
+    aquariumCleaning
+  };
+}
+
+export function cleaningHistoryFetchFailed(): IAction {
+  return {
+    type: ACTIONS.CLEANING_FETCH_FAILED
+  };
+}
+
+export interface ICleaningRequestCreateRecordAction extends IAction {
+  newRecord: ICleaningEntry;
+}
+
+export function cleaningRequestCreateRecord(newRecord: ICleaningEntry): ICleaningRequestCreateRecordAction {
+  return {
+    type: ACTIONS.CLEANING_REQUEST_NEW_RECORD,
+    newRecord
+  };
+}
+
+export interface ICleaningCreateRecordSucceededAction extends IAction {
+  aquariumCleaning: ICleaning;
+}
+
+export function cleaningCreateRecordSucceeded(aquariumCleaning: ICleaning): ICleaningCreateRecordSucceededAction {
+  return {
+    type: ACTIONS.CLEANING_NEW_RECORD_SUCEEDED,
+    aquariumCleaning
+  };
+}
+
+export function cleaningCreateRecordFailed(): IAction {
+  return {
+    type: ACTIONS.CLEANING_NEW_RECORD_FAILED
+  };
+}
+
+// Testing Actions
 
 // Config Actions
 
