@@ -69910,7 +69910,17 @@ var SaveStatus_1 = __webpack_require__(/*! ./SaveStatus */ "./src/components/Sav
 var RecordCleaning = /** @class */ (function (_super) {
     __extends(RecordCleaning, _super);
     function RecordCleaning() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this._handleSubmit = function (event) {
+            event.preventDefault();
+            _this.props.requestCreateCleaningRecord({
+                time: Date.now(),
+                bioFilterReplaced: false,
+                mechanicalFilterReplaced: false,
+                spongeReplaced: false
+            });
+        };
+        return _this;
     }
     RecordCleaning.prototype.render = function () {
         return (React.createElement("div", null,
@@ -69921,7 +69931,19 @@ var RecordCleaning = /** @class */ (function (_super) {
                     suceeded: 'Cleaning record created!',
                     failed: 'Could not create cleaning record!'
                 } }),
-            React.createElement("div", null, "New Record")));
+            React.createElement("form", { onSubmit: this._handleSubmit, className: "record-cleaning-form" },
+                React.createElement("div", { className: "record-cleaning-form-details" },
+                    React.createElement("div", null,
+                        React.createElement("label", null, "Bio filter replaced"),
+                        React.createElement("input", { type: "checkbox", id: "request-cleaning-form-bioFilter" })),
+                    React.createElement("div", null,
+                        React.createElement("label", null, "Mechanical filter replaced"),
+                        React.createElement("input", { type: "checkbox", id: "request-cleaning-form-mechanicalFilter" })),
+                    React.createElement("div", null,
+                        React.createElement("label", null, "Sponge replaced"),
+                        React.createElement("input", { type: "checkbox", id: "request-cleaning-form-sponge" }))),
+                React.createElement("div", { className: "record-cleaning-form-submit" },
+                    React.createElement("input", { className: "btn btn-primary", type: "submit", value: "Create New Record", disabled: false })))));
     };
     return RecordCleaning;
 }(React.Component));

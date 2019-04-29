@@ -40,10 +40,36 @@ export class RecordCleaning extends
           suceeded: 'Cleaning record created!',
           failed: 'Could not create cleaning record!'
         }} />
-        <div>
-          New Record
-        </div>
+        <form onSubmit={this._handleSubmit} className="record-cleaning-form">
+          <div className="record-cleaning-form-details">
+            <div>
+              <label>Bio filter replaced</label>
+              <input type="checkbox" id="request-cleaning-form-bioFilter" />
+            </div>
+            <div>
+              <label>Mechanical filter replaced</label>
+              <input type="checkbox" id="request-cleaning-form-mechanicalFilter" />
+            </div>
+            <div>
+              <label>Sponge replaced</label>
+              <input type="checkbox" id="request-cleaning-form-sponge" />
+            </div>
+          </div>
+          <div className="record-cleaning-form-submit">
+            <input className="btn btn-primary" type="submit" value="Create New Record" disabled={false} />
+          </div>
+        </form>
       </div>
     );
+  }
+
+  private _handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    this.props.requestCreateCleaningRecord({
+      time: Date.now(),
+      bioFilterReplaced: false,
+      mechanicalFilterReplaced: false,
+      spongeReplaced: false
+    });
   }
 }

@@ -169,3 +169,24 @@ h2 {
   font-weight: bold;
   margin-right: 10px;
 }
+
+.record-cleaning-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.record-cleaning-form-details {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.record-cleaning-form-submit {
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.record-cleaning-form-details > div {
+  margin: 5px;
+}
