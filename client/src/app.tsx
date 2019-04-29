@@ -28,6 +28,8 @@ import {
   userFetchSucceeded,
   configFetchFailed,
   configFetchSucceeded,
+  cleaningHistoryFetchFailed,
+  cleaningHistoryFetchSucceeded,
   temperatureFetchFailed,
   temperatureFetchSuceeded
 } from './actions/actions';
@@ -69,6 +71,17 @@ request({
     store.dispatch(configFetchFailed());
   } else {
     store.dispatch(configFetchSucceeded(result.config));
+  }
+});
+
+request({
+  endpoint: 'cleaning',
+  method: 'GET'
+}, (err, result) => {
+  if (err) {
+    store.dispatch(cleaningHistoryFetchFailed());
+  } else {
+    store.dispatch(cleaningHistoryFetchSucceeded(result.cleaning));
   }
 });
 

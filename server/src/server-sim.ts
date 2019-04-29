@@ -25,6 +25,7 @@ import { IConfig, configValidationSchema } from './common/IConfig';
 import { ITemperature } from './common/ITemperature';
 import { IState } from './common/IState';
 import { IUser } from './common/IUser';
+import { ICleaning } from './common/ICleaning';
 
 const DEFAULT_PORT = 3001;
 const USER_ID = '129897358';
@@ -118,6 +119,20 @@ app.post('/api/config', (req, res) => {
     return;
   }
   res.send({ result: 'ok' });
+});
+
+app.get('/api/cleaning', (req, res) => {
+  const cleaning: ICleaning = {
+    history: [{
+      time: Date.now(),
+      bioFilterReplaced: false,
+      mechanicalFilterReplaced: true,
+      spongeReplaced: false
+    }]
+  };
+  res.send({
+    cleaning
+  });
 });
 
 app.get('/api/temperatures', (req, res) => {

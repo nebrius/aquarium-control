@@ -69446,6 +69446,17 @@ api_1.request({
         store_1.store.dispatch(actions_1.configFetchSucceeded(result.config));
     }
 });
+api_1.request({
+    endpoint: 'cleaning',
+    method: 'GET'
+}, function (err, result) {
+    if (err) {
+        store_1.store.dispatch(actions_1.cleaningHistoryFetchFailed());
+    }
+    else {
+        store_1.store.dispatch(actions_1.cleaningHistoryFetchSucceeded(result.cleaning));
+    }
+});
 function updateTemperature() {
     api_1.request({
         endpoint: 'temperatures',
@@ -69933,15 +69944,15 @@ var RecordCleaning = /** @class */ (function (_super) {
                 } }),
             React.createElement("form", { onSubmit: this._handleSubmit, className: "record-cleaning-form" },
                 React.createElement("div", { className: "record-cleaning-form-details" },
-                    React.createElement("div", null,
-                        React.createElement("label", null, "Bio filter replaced"),
-                        React.createElement("input", { type: "checkbox", id: "request-cleaning-form-bioFilter" })),
-                    React.createElement("div", null,
-                        React.createElement("label", null, "Mechanical filter replaced"),
-                        React.createElement("input", { type: "checkbox", id: "request-cleaning-form-mechanicalFilter" })),
-                    React.createElement("div", null,
-                        React.createElement("label", null, "Sponge replaced"),
-                        React.createElement("input", { type: "checkbox", id: "request-cleaning-form-sponge" }))),
+                    React.createElement("div", { className: "record-cleaning-form-detail" },
+                        React.createElement("input", { type: "checkbox", id: "request-cleaning-form-bioFilter" }),
+                        React.createElement("label", { htmlFor: "request-cleaning-form-bioFilter" }, "Bio filter replaced")),
+                    React.createElement("div", { className: "record-cleaning-form-detail" },
+                        React.createElement("input", { type: "checkbox", id: "request-cleaning-form-mechanicalFilter" }),
+                        React.createElement("label", { htmlFor: "request-cleaning-form-mechanicalFilter" }, "Mechanical filter replaced")),
+                    React.createElement("div", { className: "record-cleaning-form-detail" },
+                        React.createElement("input", { type: "checkbox", id: "request-cleaning-form-sponge" }),
+                        React.createElement("label", { htmlFor: "request-cleaning-form-sponge" }, "Sponge replaced"))),
                 React.createElement("div", { className: "record-cleaning-form-submit" },
                     React.createElement("input", { className: "btn btn-primary", type: "submit", value: "Create New Record", disabled: false })))));
     };
@@ -70628,9 +70639,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 var CleaningHistory_1 = __webpack_require__(/*! ../components/CleaningHistory */ "./src/components/CleaningHistory.tsx");
 function mapStateToProps(state) {
-    return {
-        cleaningHistory: undefined
-    };
+    if (state.aquariumCleaning.cleaning) {
+        return {
+            cleaningHistory: state.aquariumCleaning.cleaning.history
+        };
+    }
+    else {
+        return {
+            cleaningHistory: undefined
+        };
+    }
 }
 function mapDispatchToProps(dispatch) {
     return {};

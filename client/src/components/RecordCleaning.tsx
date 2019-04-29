@@ -42,17 +42,17 @@ export class RecordCleaning extends
         }} />
         <form onSubmit={this._handleSubmit} className="record-cleaning-form">
           <div className="record-cleaning-form-details">
-            <div>
-              <label>Bio filter replaced</label>
+            <div className="record-cleaning-form-detail">
               <input type="checkbox" id="request-cleaning-form-bioFilter" />
+              <label htmlFor="request-cleaning-form-bioFilter">Bio filter replaced</label>
             </div>
-            <div>
-              <label>Mechanical filter replaced</label>
+            <div className="record-cleaning-form-detail">
               <input type="checkbox" id="request-cleaning-form-mechanicalFilter" />
+              <label htmlFor="request-cleaning-form-mechanicalFilter">Mechanical filter replaced</label>
             </div>
-            <div>
-              <label>Sponge replaced</label>
+            <div className="record-cleaning-form-detail">
               <input type="checkbox" id="request-cleaning-form-sponge" />
+              <label htmlFor="request-cleaning-form-sponge">Sponge replaced</label>
             </div>
           </div>
           <div className="record-cleaning-form-submit">

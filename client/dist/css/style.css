@@ -184,9 +184,20 @@ h2 {
 .record-cleaning-form-submit {
   padding: 10px;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
 }
 
-.record-cleaning-form-details > div {
+.record-cleaning-form-detail {
   margin: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.record-cleaning-form-detail > input {
+  margin-right: 5px;
+}
+
+.record-cleaning-form-detail > label {
+  margin-bottom: .25rem;
 }

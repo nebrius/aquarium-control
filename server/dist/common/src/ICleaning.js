@@ -1,3 +1,4 @@
+"use strict";
 /*
 Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
 
@@ -14,29 +15,5 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-import { connect } from 'react-redux';
-import { IAppState } from '../util/IAppState';
-import { IAction } from '../actions/actions';
-import { CleaningHistory, ICleaningHistoryProps } from '../components/CleaningHistory';
-
-function mapStateToProps(state: IAppState): ICleaningHistoryProps {
-  if (state.aquariumCleaning.cleaning) {
-    return {
-      cleaningHistory: state.aquariumCleaning.cleaning.history
-    };
-  } else {
-    return {
-      cleaningHistory: undefined
-    };
-  }
-}
-
-function mapDispatchToProps(dispatch: (action: IAction) => any) {
-  return {};
-}
-
-export const CleaningHistoryContainer = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(CleaningHistory);
+Object.defineProperty(exports, "__esModule", { value: true });
+//# sourceMappingURL=ICleaning.js.map

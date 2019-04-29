@@ -107,6 +107,19 @@ app.post('/api/config', (req, res) => {
     }
     res.send({ result: 'ok' });
 });
+app.get('/api/cleaning', (req, res) => {
+    const cleaning = {
+        history: [{
+                time: Date.now(),
+                bioFilterReplaced: false,
+                mechanicalFilterReplaced: true,
+                spongeReplaced: false
+            }]
+    };
+    res.send({
+        cleaning
+    });
+});
 app.get('/api/temperatures', (req, res) => {
     const history = {
         temperatures: [{
