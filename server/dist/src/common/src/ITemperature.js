@@ -1,3 +1,4 @@
+"use strict";
 /*
 Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
 
@@ -14,37 +15,5 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-export interface ICleaningEntry {
-  time: number;
-  bioFilterReplaced: boolean;
-  mechanicalFilterReplaced: boolean;
-  spongeReplaced: boolean;
-}
-
-export interface ICleaning {
-  history: ICleaningEntry[];
-}
-
-// Force to "any" type, otherwise TypeScript thinks the type is too strict
-export const cleaningValidationSchema: any = {
-  type: 'object',
-  properties: {
-    time: {
-      required: true,
-      type: 'number'
-    },
-    bioFilterReplaced: {
-      required: true,
-      type: 'boolean'
-    },
-    mechanicalFilterReplaced: {
-      required: true,
-      type: 'boolean'
-    },
-    spongeReplaced: {
-      required: true,
-      type: 'boolean'
-    },
-  }
-};
+Object.defineProperty(exports, "__esModule", { value: true });
+//# sourceMappingURL=ITemperature.js.map

@@ -16,4 +16,26 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiSUNsZWFuaW5nLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsic3JjL0lDbGVhbmluZy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7Ozs7Ozs7Ozs7Ozs7OztFQWVFIn0=
+// Force to "any" type, otherwise TypeScript thinks the type is too strict
+exports.cleaningValidationSchema = {
+    type: 'object',
+    properties: {
+        time: {
+            required: true,
+            type: 'number'
+        },
+        bioFilterReplaced: {
+            required: true,
+            type: 'boolean'
+        },
+        mechanicalFilterReplaced: {
+            required: true,
+            type: 'boolean'
+        },
+        spongeReplaced: {
+            required: true,
+            type: 'boolean'
+        },
+    }
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiSUNsZWFuaW5nLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsic3JjL0lDbGVhbmluZy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7Ozs7Ozs7Ozs7Ozs7OztFQWVFOztBQWFGLDBFQUEwRTtBQUM3RCxRQUFBLHdCQUF3QixHQUFRO0lBQzNDLElBQUksRUFBRSxRQUFRO0lBQ2QsVUFBVSxFQUFFO1FBQ1YsSUFBSSxFQUFFO1lBQ0osUUFBUSxFQUFFLElBQUk7WUFDZCxJQUFJLEVBQUUsUUFBUTtTQUNmO1FBQ0QsaUJBQWlCLEVBQUU7WUFDakIsUUFBUSxFQUFFLElBQUk7WUFDZCxJQUFJLEVBQUUsU0FBUztTQUNoQjtRQUNELHdCQUF3QixFQUFFO1lBQ3hCLFFBQVEsRUFBRSxJQUFJO1lBQ2QsSUFBSSxFQUFFLFNBQVM7U0FDaEI7UUFDRCxjQUFjLEVBQUU7WUFDZCxRQUFRLEVBQUUsSUFBSTtZQUNkLElBQUksRUFBRSxTQUFTO1NBQ2hCO0tBQ0Y7Q0FDRixDQUFDIn0=

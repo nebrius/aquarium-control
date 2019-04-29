@@ -22,6 +22,7 @@ import { validate } from 'revalidator';
 import * as express from 'express';
 import * as cookieParser from 'cookie-parser';
 import { IConfig, configValidationSchema } from './common/IConfig';
+import { cleaningValidationSchema } from './common/ICleaning';
 import { ITemperature } from './common/ITemperature';
 import { IState } from './common/IState';
 import { IUser } from './common/IUser';
@@ -118,21 +119,7 @@ app.post('/api/config', (req, res) => {
     res.sendStatus(400);
     return;
   }
-  res.send({ result: 'ok' });
-});
-
-app.get('/api/cleaning', (req, res) => {
-  const cleaning: ICleaning = {
-    history: [{
-      time: Date.now(),
-      bioFilterReplaced: false,
-      mechanicalFilterReplaced: true,
-      spongeReplaced: false
-    }]
-  };
-  res.send({
-    cleaning
-  });
+  setTimeout(() => res.send({ result: 'ok' }), 1000);
 });
 
 app.get('/api/temperatures', (req, res) => {
@@ -150,6 +137,32 @@ app.get('/api/temperatures', (req, res) => {
 app.get('/api/ping', (req, res) => {
   res.send('ok');
 });
+
+// NEW ENDPOINTS
+
+app.get('/api/cleaning', (req, res) => {
+  const cleaning: ICleaning = {
+    history: [{
+      time: Date.now(),
+      bioFilterReplaced: false,
+      mechanicalFilterReplaced: true,
+      spongeReplaced: false
+    }]
+  };
+  res.send({
+    cleaning
+  });
+});
+
+app.post('/api/cleaning', (req, res) => {
+  if (!validate(req.body, cleaningValidationSchema).valid) {
+    res.sendStatus(400);
+    return;
+  }
+  setTimeout(() => res.send({ result: 'ok' }), 1000);
+});
+
+// END NEW ENDPOINTS
 
 const server = createServer();
 

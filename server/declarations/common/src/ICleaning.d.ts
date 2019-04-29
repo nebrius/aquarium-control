@@ -7,3 +7,4 @@ export interface ICleaningEntry {
 export interface ICleaning {
     history: ICleaningEntry[];
 }
+export declare const cleaningValidationSchema: any;

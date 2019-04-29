@@ -20,7 +20,7 @@
     "declaration": true,
     "declarationDir": "declarations",
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     // "outFile": "./",                       /* Concatenate and emit output to single file. */
     // "removeComments": true,                /* Do not emit comments to output. */
     // "noEmit": true,                        /* Do not emit outputs. */

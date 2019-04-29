@@ -38,7 +38,7 @@ export interface IConfig {
   schedule: IScheduleEntry[];
 }
 
-// Force to "any" type, otherwise TypeScript things the type is too strict
+// Force to "any" type, otherwise TypeScript thinks the type is too strict
 export const configValidationSchema: any = {
   type: 'object',
   properties: {

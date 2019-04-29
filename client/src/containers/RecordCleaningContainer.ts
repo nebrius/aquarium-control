@@ -39,7 +39,7 @@ function mapDispatchToProps(dispatch: (action: IAction) => any): IRecordCleaning
     requestCreateCleaningRecord: (newRecord: ICleaningEntry) => {
       dispatch(cleaningRequestCreateRecord(newRecord));
       request({
-        endpoint: 'config',
+        endpoint: 'cleaning',
         method: 'POST',
         body: newRecord
       }, (err, result: ICleaning) => {

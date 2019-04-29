@@ -1,3 +1,4 @@
+"use strict";
 /*
 Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
 
@@ -14,37 +15,23 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-export interface ICleaningEntry {
-  time: number;
-  bioFilterReplaced: boolean;
-  mechanicalFilterReplaced: boolean;
-  spongeReplaced: boolean;
+Object.defineProperty(exports, "__esModule", { value: true });
+const endpoints_1 = require("./endpoints");
+const db_1 = require("./db");
+const messaging_1 = require("./messaging");
+const async_1 = require("async");
+function run() {
+    async_1.series([
+        db_1.init,
+        endpoints_1.init,
+        messaging_1.init
+    ], (err) => {
+        if (err) {
+            console.error(err.message || err);
+            process.exit(-1);
+        }
+        console.log('Aquarium Control server running');
+    });
 }
-
-export interface ICleaning {
-  history: ICleaningEntry[];
-}
-
-// Force to "any" type, otherwise TypeScript thinks the type is too strict
-export const cleaningValidationSchema: any = {
-  type: 'object',
-  properties: {
-    time: {
-      required: true,
-      type: 'number'
-    },
-    bioFilterReplaced: {
-      required: true,
-      type: 'boolean'
-    },
-    mechanicalFilterReplaced: {
-      required: true,
-      type: 'boolean'
-    },
-    spongeReplaced: {
-      required: true,
-      type: 'boolean'
-    },
-  }
-};
+exports.run = run;
+//# sourceMappingURL=index.js.map

@@ -70830,7 +70830,7 @@ function mapDispatchToProps(dispatch) {
         requestCreateCleaningRecord: function (newRecord) {
             dispatch(actions_1.cleaningRequestCreateRecord(newRecord));
             api_1.request({
-                endpoint: 'config',
+                endpoint: 'cleaning',
                 method: 'POST',
                 body: newRecord
             }, function (err, result) {
@@ -71021,6 +71021,18 @@ exports.aquariumCleaningReducer = function (state, action) {
         };
     }
     switch (action.type) {
+        case actions_1.ACTIONS.CLEANING_REQUEST_NEW_RECORD: {
+            var newState = __assign({}, state, { saveStatus: IAppState_1.SaveStatusState.Pending });
+            return newState;
+        }
+        case actions_1.ACTIONS.CLEANING_NEW_RECORD_FAILED: {
+            var newState = __assign({}, state, { saveStatus: IAppState_1.SaveStatusState.Failed });
+            return newState;
+        }
+        case actions_1.ACTIONS.CLEANING_NEW_RECORD_SUCEEDED: {
+            var newState = __assign({}, state, { saveStatus: IAppState_1.SaveStatusState.Succeeded });
+            return newState;
+        }
         case actions_1.ACTIONS.CLEANING_FETCH_FAILED: {
             var newState = __assign({}, state, { cleaning: undefined });
             return newState;

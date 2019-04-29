@@ -28,6 +28,30 @@ export const aquariumCleaningReducer: Reducer<IAquariumCleaning> =
     };
   }
   switch (action.type) {
+    case ACTIONS.CLEANING_REQUEST_NEW_RECORD: {
+      const newState: IAquariumCleaning = {
+        ...state,
+        saveStatus: SaveStatusState.Pending
+      };
+      return newState;
+    }
+
+    case ACTIONS.CLEANING_NEW_RECORD_FAILED: {
+      const newState: IAquariumCleaning = {
+        ...state,
+        saveStatus: SaveStatusState.Failed
+      };
+      return newState;
+    }
+
+    case ACTIONS.CLEANING_NEW_RECORD_SUCEEDED: {
+      const newState: IAquariumCleaning = {
+        ...state,
+        saveStatus: SaveStatusState.Succeeded
+      };
+      return newState;
+    }
+
     case ACTIONS.CLEANING_FETCH_FAILED: {
       const newState: IAquariumCleaning = {
         ...state,

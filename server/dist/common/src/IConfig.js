@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
-// Force to "any" type, otherwise TypeScript things the type is too strict
+// Force to "any" type, otherwise TypeScript thinks the type is too strict
 exports.configValidationSchema = {
     type: 'object',
     properties: {

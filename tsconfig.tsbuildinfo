@@ -122,11 +122,11 @@
         "signature": "63b66918290d794f73832a6d0325be5026236674fe8c0cb0b68d162000d7bbe8"
       },
       "/mnt/c/Users/nebri/Projects/aquarium-control/common/src/ICleaning.ts": {
-        "version": "05fbd70eac7357d8a4b2c01f03e8167c3be3b05652283c340aca78b743d45075",
-        "signature": "b55c575a92ccbcdaeffd2a6d70324f44c58563ae5f987f89aa1ab0558f102d14"
+        "version": "058a10e46bb713d66e5e13ddd6cc8534ca2a51a2399efc277c434e97638c5e19",
+        "signature": "1f9661a6964696c864577a87583ef35a3d4566db50adcd109442ab01cf500c9b"
       },
       "/mnt/c/Users/nebri/Projects/aquarium-control/common/src/IConfig.ts": {
-        "version": "55d770f93cb7867b0f5f6bb03c198cb89509744c7eaa5ddb6583e128c6eb367d",
+        "version": "2dcf4cc0067dcd2214556bc5adb9836f91abbe6127fd6b8f96571dddc27dfe6b",
         "signature": "2b3058c8339f77e22ca0d2e6b6c72f643fa7a14ff50cf15a1230a8ad83170a07"
       },
       "/mnt/c/Users/nebri/Projects/aquarium-control/common/src/IState.ts": {
@@ -1503,9 +1503,9 @@
       "/mnt/c/Users/nebri/Projects/aquarium-control/server/node_modules/typescript/lib/lib.es2018.regexp.d.ts",
       "/mnt/c/Users/nebri/Projects/aquarium-control/server/node_modules/typescript/lib/lib.esnext.intl.d.ts",
       "/mnt/c/Users/nebri/Projects/aquarium-control/server/node_modules/typescript/lib/lib.esnext.bigint.d.ts",
-      "/mnt/c/Users/nebri/Projects/aquarium-control/common/src/IConfig.ts",
       "/mnt/c/Users/nebri/Projects/aquarium-control/common/src/IState.ts",
       "/mnt/c/Users/nebri/Projects/aquarium-control/common/src/ITemperature.ts",
+      "/mnt/c/Users/nebri/Projects/aquarium-control/common/src/ITesting.ts",
       "/mnt/c/Users/nebri/Projects/aquarium-control/common/src/IUser.ts",
       "/mnt/c/Users/nebri/Projects/aquarium-control/server/node_modules/@types/async/index.d.ts",
       "/mnt/c/Users/nebri/Projects/aquarium-control/server/node_modules/@types/babel-types/index.d.ts",
@@ -1574,7 +1574,7 @@
       "/mnt/c/Users/nebri/Projects/aquarium-control/server/node_modules/@types/revalidator/index.d.ts",
       "/mnt/c/Users/nebri/Projects/aquarium-control/server/node_modules/@types/tedious/index.d.ts",
       "/mnt/c/Users/nebri/Projects/aquarium-control/common/src/ICleaning.ts",
-      "/mnt/c/Users/nebri/Projects/aquarium-control/common/src/ITesting.ts"
+      "/mnt/c/Users/nebri/Projects/aquarium-control/common/src/IConfig.ts"
     ]
   },
   "version": "3.4.5"
