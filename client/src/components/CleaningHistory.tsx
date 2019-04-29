@@ -17,9 +17,12 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import * as React from 'react';
 import { ICleaningEntry } from '../common/ICleaning';
+import { IAquariumUser } from '../util/IAppState';
+import { formatDate } from '../util/format';
 
 export interface ICleaningHistoryProps {
   cleaningHistory: ICleaningEntry[] | undefined;
+  user: IAquariumUser | undefined;
 }
 
 export function CleaningHistory(props: ICleaningHistoryProps): JSX.Element {
@@ -31,11 +34,36 @@ export function CleaningHistory(props: ICleaningHistoryProps): JSX.Element {
       </div>
     );
   }
+  let timezone: string;
+  if (props.user && props.user.user) {
+    timezone = props.user.user.timezone;
+  } else {
+    timezone = 'Etc/UTC';
+  }
   return (
     <div>
       <div><h2>Cleaning History</h2></div>
       <div className="cleaning-history-content">
-        Cleaning History
+        <table className="table cleaning-history-content-table">
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Bio Filter</th>
+              <th scope="col">Mechanical Filter</th>
+              <th scope="col">Sponge</th>
+            </tr>
+          </thead>
+          <tbody>
+            {props.cleaningHistory.map((entry) => (
+              <tr key={entry.time}>
+                <td>{formatDate(entry.time, timezone)}</td>
+                <td>{entry.bioFilterReplaced ? '✔' : ''}</td>
+                <td>{entry.mechanicalFilterReplaced ? '✔' : ''}</td>
+                <td>{entry.spongeReplaced ? '✔' : ''}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

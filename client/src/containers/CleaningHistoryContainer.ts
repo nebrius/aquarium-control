@@ -21,15 +21,17 @@ import { IAction } from '../actions/actions';
 import { CleaningHistory, ICleaningHistoryProps } from '../components/CleaningHistory';
 
 function mapStateToProps(state: IAppState): ICleaningHistoryProps {
+  const cleaningState: ICleaningHistoryProps = {
+    cleaningHistory: undefined,
+    user: undefined
+  };
   if (state.aquariumCleaning.cleaning) {
-    return {
-      cleaningHistory: state.aquariumCleaning.cleaning.history
-    };
-  } else {
-    return {
-      cleaningHistory: undefined
-    };
+    cleaningState.cleaningHistory = state.aquariumCleaning.cleaning.history;
   }
+  if (state.aquariumUser.user) {
+    cleaningState.user = state.aquariumUser;
+  }
+  return cleaningState;
 }
 
 function mapDispatchToProps(dispatch: (action: IAction) => any) {

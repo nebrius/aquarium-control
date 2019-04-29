@@ -69588,6 +69588,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+var format_1 = __webpack_require__(/*! ../util/format */ "./src/util/format.ts");
 function CleaningHistory(props) {
     if (!props.cleaningHistory) {
         return (React.createElement("div", null,
@@ -69595,10 +69596,29 @@ function CleaningHistory(props) {
                 React.createElement("h2", null, "Cleaning History")),
             React.createElement("div", { className: "alert alert-danger" }, "Current cleaning history is not available")));
     }
+    var timezone;
+    if (props.user && props.user.user) {
+        timezone = props.user.user.timezone;
+    }
+    else {
+        timezone = 'Etc/UTC';
+    }
     return (React.createElement("div", null,
         React.createElement("div", null,
             React.createElement("h2", null, "Cleaning History")),
-        React.createElement("div", { className: "cleaning-history-content" }, "Cleaning History")));
+        React.createElement("div", { className: "cleaning-history-content" },
+            React.createElement("table", { className: "table cleaning-history-content-table" },
+                React.createElement("thead", null,
+                    React.createElement("tr", null,
+                        React.createElement("th", { scope: "col" }, "Date"),
+                        React.createElement("th", { scope: "col" }, "Bio Filter"),
+                        React.createElement("th", { scope: "col" }, "Mechanical Filter"),
+                        React.createElement("th", { scope: "col" }, "Sponge"))),
+                React.createElement("tbody", null, props.cleaningHistory.map(function (entry) { return (React.createElement("tr", { key: entry.time },
+                    React.createElement("td", null, format_1.formatDate(entry.time, timezone)),
+                    React.createElement("td", null, entry.bioFilterReplaced ? '✔' : ''),
+                    React.createElement("td", null, entry.mechanicalFilterReplaced ? '✔' : ''),
+                    React.createElement("td", null, entry.spongeReplaced ? '✔' : ''))); }))))));
 }
 exports.CleaningHistory = CleaningHistory;
 
@@ -70639,16 +70659,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 var CleaningHistory_1 = __webpack_require__(/*! ../components/CleaningHistory */ "./src/components/CleaningHistory.tsx");
 function mapStateToProps(state) {
+    var cleaningState = {
+        cleaningHistory: undefined,
+        user: undefined
+    };
     if (state.aquariumCleaning.cleaning) {
-        return {
-            cleaningHistory: state.aquariumCleaning.cleaning.history
-        };
+        cleaningState.cleaningHistory = state.aquariumCleaning.cleaning.history;
     }
-    else {
-        return {
-            cleaningHistory: undefined
-        };
+    if (state.aquariumUser.user) {
+        cleaningState.user = state.aquariumUser;
     }
+    return cleaningState;
 }
 function mapDispatchToProps(dispatch) {
     return {};

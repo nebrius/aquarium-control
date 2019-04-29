@@ -201,3 +201,11 @@ h2 {
 .record-cleaning-form-detail > label {
   margin-bottom: .25rem;
 }
+
+.cleaning-history-content-table th {
+  text-align: center;
+}
+
+.cleaning-history-content-table td {
+  text-align: center;
+}
