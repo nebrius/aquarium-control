@@ -16,7 +16,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-import { ICleaningEntry } from '../common/ICleaning';
+import { ICleaningEntry } from '../common/common';
 import { SaveStatus } from './SaveStatus';
 import { SaveStatusState } from '../util/IAppState';
 

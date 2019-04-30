@@ -15,9 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { IState } from './common/IState';
-import { IUser } from './common/IUser';
-import { ITemperatureSample } from './common/ITemperature';
+import { IState, IUser, ITemperatureSample } from './common/common';
 import { getEnvironmentVariable, getStartOfToday, DATABASE_NAMES } from './util';
 import { Connection, Request, TYPES, TediousType } from 'tedious';
 import { waterfall } from 'async';

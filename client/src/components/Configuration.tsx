@@ -16,7 +16,8 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-import { IAquariumConfig, IConfig } from '../util/IAppState';
+import { IAquariumConfig } from '../util/IAppState';
+import { IConfig } from '../common/common';
 import { ConfigurationDetails } from './ConfigurationDetails';
 
 export interface IConfigurationProps {

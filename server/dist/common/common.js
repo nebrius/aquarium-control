@@ -15,5 +15,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
 Object.defineProperty(exports, "__esModule", { value: true });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiSVN0YXRlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsic3JjL0lTdGF0ZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7Ozs7Ozs7Ozs7Ozs7OztFQWVFIn0=
+__export(require("./src/ICleaning"));
+__export(require("./src/IConfig"));
+//# sourceMappingURL=common.js.map

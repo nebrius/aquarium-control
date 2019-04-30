@@ -16,7 +16,8 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-import { IConfig, IScheduleEntry, SaveStatusState } from '../util/IAppState';
+import { SaveStatusState } from '../util/IAppState';
+import { IConfig, IScheduleEntry } from '../common/common';
 import { ButtonBar } from './ButtonBar';
 import { ScheduleEntry } from './ScheduleEntry';
 import { SaveStatus } from './SaveStatus';

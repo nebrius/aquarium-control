@@ -23,7 +23,7 @@ const revalidator_1 = require("revalidator");
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const async_1 = require("async");
-const IConfig_1 = require("./common/IConfig");
+const common_1 = require("./common/common");
 const db_1 = require("./db");
 const messaging_1 = require("./messaging");
 const util_1 = require("./util");
@@ -96,7 +96,7 @@ function init(cb) {
         });
     });
     app.post('/api/config', authenticator.createMiddleware(false), (req, res) => {
-        if (!revalidator_1.validate(req.body, IConfig_1.configValidationSchema).valid) {
+        if (!revalidator_1.validate(req.body, common_1.configValidationSchema).valid) {
             res.sendStatus(400);
             return;
         }

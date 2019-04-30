@@ -17,7 +17,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import { Registry, Twin } from 'azure-iothub';
 // import { Client, Receiver, Message } from 'azure-event-hubs';
-import { IConfig } from './common/IConfig';
+import { IConfig } from './common/common';
 // import { updateState } from './db';
 
 let registry: Registry;

@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { IConfig, IState, IUser, ITemperature, ICleaning, ICleaningEntry } from '../util/IAppState';
+import { IConfig, IState, IUser, ITemperature, ICleaning, ICleaningEntry } from '../common/common';
 
 export const ACTIONS = {
   USER_FETCH_SUCCEEDED: 'USER_FETCH_SUCCEEDED',

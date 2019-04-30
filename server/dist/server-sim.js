@@ -22,8 +22,7 @@ const body_parser_1 = require("body-parser");
 const revalidator_1 = require("revalidator");
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const IConfig_1 = require("./common/IConfig");
-const ICleaning_1 = require("./common/ICleaning");
+const common_1 = require("./common/common");
 const DEFAULT_PORT = 3001;
 const USER_ID = '129897358';
 const USER_NAME = 'nebrius';
@@ -102,7 +101,7 @@ app.get('/api/config', (req, res) => {
     });
 });
 app.post('/api/config', (req, res) => {
-    if (!revalidator_1.validate(req.body, IConfig_1.configValidationSchema).valid) {
+    if (!revalidator_1.validate(req.body, common_1.configValidationSchema).valid) {
         res.sendStatus(400);
         return;
     }
@@ -137,7 +136,7 @@ app.get('/api/cleaning', (req, res) => {
     });
 });
 app.post('/api/cleaning', (req, res) => {
-    if (!revalidator_1.validate(req.body, ICleaning_1.cleaningValidationSchema).valid) {
+    if (!revalidator_1.validate(req.body, common_1.cleaningValidationSchema).valid) {
         res.sendStatus(400);
         return;
     }

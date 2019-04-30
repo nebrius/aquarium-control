@@ -21,12 +21,15 @@ import { json } from 'body-parser';
 import { validate } from 'revalidator';
 import * as express from 'express';
 import * as cookieParser from 'cookie-parser';
-import { IConfig, configValidationSchema } from './common/IConfig';
-import { cleaningValidationSchema } from './common/ICleaning';
-import { ITemperature } from './common/ITemperature';
-import { IState } from './common/IState';
-import { IUser } from './common/IUser';
-import { ICleaning } from './common/ICleaning';
+import {
+  configValidationSchema,
+  cleaningValidationSchema,
+  IConfig,
+  ITemperature,
+  IState,
+  IUser,
+  ICleaning
+} from './common/common';
 
 const DEFAULT_PORT = 3001;
 const USER_ID = '129897358';
@@ -62,7 +65,7 @@ app.get('/api/user', (req, res) => {
     userName: USER_NAME,
     deviceId: DEVICE_ID,
     timezone: USER_TIMEZONE
-  }
+  };
   res.send(userInfo);
 });
 

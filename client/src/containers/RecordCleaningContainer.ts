@@ -25,7 +25,7 @@ import {
   cleaningCreateRecordSucceeded
 } from '../actions/actions';
 import { RecordCleaning, IRecordCleaningDispatch, IRecordCleaningProps } from '../components/RecordCleaning';
-import { ICleaning, ICleaningEntry } from '../common/ICleaning';
+import { ICleaning, ICleaningEntry } from '../common/common';
 import * as clone from 'clone';
 
 function mapStateToProps(state: IAppState): IRecordCleaningProps {

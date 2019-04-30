@@ -15,19 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { IUser } from '../common/IUser';
-import { IState } from '../common/IState';
-import { IConfig } from '../common/IConfig';
-import { ITemperature } from '../common/ITemperature';
-import { ICleaning } from '../common/ICleaning';
-import { ITesting } from '../common/ITesting';
-
-export { IState } from '../common/IState';
-export { IConfig, IScheduleEntry, IDynamicScheduleEntry, IManualScheduleEntry } from '../common/IConfig';
-export { IUser } from '../common/IUser';
-export { ITemperature } from '../common/ITemperature';
-export { ICleaning, ICleaningEntry } from '../common/ICleaning';
-export { ITesting } from '../common/ITesting';
+import {
+  IUser, IState, IConfig, ITemperature, ICleaning, ITesting } from '../common/common';
 
 export enum SaveStatusState {
   Pending,

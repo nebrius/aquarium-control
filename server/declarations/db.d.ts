@@ -1,6 +1,4 @@
-import { IState } from './common/IState';
-import { IUser } from './common/IUser';
-import { ITemperatureSample } from './common/ITemperature';
+import { IState, IUser, ITemperatureSample } from './common/common';
 export declare function getUsernameForUserId(userId: string): string;
 export declare function getDeviceForUserId(userId: string): string;
 export declare function getUserIdForDeviceId(deviceId: string): string | undefined;
