@@ -69935,6 +69935,17 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 var SaveStatus_1 = __webpack_require__(/*! ./SaveStatus */ "./src/components/SaveStatus.tsx");
@@ -69942,13 +69953,39 @@ var RecordCleaning = /** @class */ (function (_super) {
     __extends(RecordCleaning, _super);
     function RecordCleaning() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.state = {
+            isBioFilterChecked: false,
+            isMechanicalFilterChecked: false,
+            isSpongeChecked: false
+        };
+        _this._handleBioFilterChanged = function (event) {
+            var isBioFilterChecked = event.currentTarget.checked;
+            _this.setState(function (previousState) {
+                var newState = __assign({}, previousState, { isBioFilterChecked: isBioFilterChecked });
+                return newState;
+            });
+        };
+        _this._handleMechanicalFilterChanged = function (event) {
+            var isMechanicalFilterChecked = event.currentTarget.checked;
+            _this.setState(function (previousState) {
+                var newState = __assign({}, previousState, { isMechanicalFilterChecked: isMechanicalFilterChecked });
+                return newState;
+            });
+        };
+        _this._handleSpongeChanged = function (event) {
+            var isSpongeChecked = event.currentTarget.checked;
+            _this.setState(function (previousState) {
+                var newState = __assign({}, previousState, { isSpongeChecked: isSpongeChecked });
+                return newState;
+            });
+        };
         _this._handleSubmit = function (event) {
             event.preventDefault();
             _this.props.requestCreateCleaningRecord({
                 time: Date.now(),
-                bioFilterReplaced: false,
-                mechanicalFilterReplaced: false,
-                spongeReplaced: false
+                bioFilterReplaced: _this.state.isBioFilterChecked,
+                mechanicalFilterReplaced: _this.state.isMechanicalFilterChecked,
+                spongeReplaced: _this.state.isSpongeChecked
             });
         };
         return _this;
@@ -69965,13 +70002,13 @@ var RecordCleaning = /** @class */ (function (_super) {
             React.createElement("form", { onSubmit: this._handleSubmit, className: "record-cleaning-form" },
                 React.createElement("div", { className: "record-cleaning-form-details" },
                     React.createElement("div", { className: "record-cleaning-form-detail" },
-                        React.createElement("input", { type: "checkbox", id: "request-cleaning-form-bioFilter" }),
-                        React.createElement("label", { htmlFor: "request-cleaning-form-bioFilter" }, "Bio filter replaced")),
+                        React.createElement("input", { type: "checkbox", id: "request-cleaning-form-bio", onChange: this._handleBioFilterChanged }),
+                        React.createElement("label", { htmlFor: "request-cleaning-form-bio" }, "Bio filter replaced")),
                     React.createElement("div", { className: "record-cleaning-form-detail" },
-                        React.createElement("input", { type: "checkbox", id: "request-cleaning-form-mechanicalFilter" }),
-                        React.createElement("label", { htmlFor: "request-cleaning-form-mechanicalFilter" }, "Mechanical filter replaced")),
+                        React.createElement("input", { type: "checkbox", id: "request-cleaning-form-mechanical", onChange: this._handleMechanicalFilterChanged }),
+                        React.createElement("label", { htmlFor: "request-cleaning-form-mechanical" }, "Mechanical filter replaced")),
                     React.createElement("div", { className: "record-cleaning-form-detail" },
-                        React.createElement("input", { type: "checkbox", id: "request-cleaning-form-sponge" }),
+                        React.createElement("input", { type: "checkbox", id: "request-cleaning-form-sponge", onChange: this._handleSpongeChanged }),
                         React.createElement("label", { htmlFor: "request-cleaning-form-sponge" }, "Sponge replaced"))),
                 React.createElement("div", { className: "record-cleaning-form-submit" },
                     React.createElement("input", { className: "btn btn-primary", type: "submit", value: "Create New Record", disabled: false })))));
@@ -70838,7 +70875,7 @@ function mapDispatchToProps(dispatch) {
                     dispatch(actions_1.cleaningCreateRecordFailed());
                 }
                 else {
-                    dispatch(actions_1.cleaningCreateRecordSucceeded(result));
+                    dispatch(actions_1.cleaningCreateRecordSucceeded(result.cleaning));
                 }
             });
         }
@@ -71030,7 +71067,7 @@ exports.aquariumCleaningReducer = function (state, action) {
             return newState;
         }
         case actions_1.ACTIONS.CLEANING_NEW_RECORD_SUCEEDED: {
-            var newState = __assign({}, state, { saveStatus: IAppState_1.SaveStatusState.Succeeded });
+            var newState = __assign({}, state, { saveStatus: IAppState_1.SaveStatusState.Succeeded, cleaning: action.aquariumCleaning });
             return newState;
         }
         case actions_1.ACTIONS.CLEANING_FETCH_FAILED: {

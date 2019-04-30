@@ -28,8 +28,20 @@ export interface IRecordCleaningDispatch {
   requestCreateCleaningRecord: (newRecord: ICleaningEntry) => void;
 }
 
+interface IRecordCleaningState {
+  isBioFilterChecked: boolean;
+  isMechanicalFilterChecked: boolean;
+  isSpongeChecked: boolean;
+}
+
 export class RecordCleaning extends
-  React.Component<IRecordCleaningProps & IRecordCleaningDispatch, {}> {
+  React.Component<IRecordCleaningProps & IRecordCleaningDispatch, IRecordCleaningState> {
+
+  public state: IRecordCleaningState = {
+    isBioFilterChecked: false,
+    isMechanicalFilterChecked: false,
+    isSpongeChecked: false
+  };
 
   public render() {
     return (
@@ -43,15 +55,16 @@ export class RecordCleaning extends
         <form onSubmit={this._handleSubmit} className="record-cleaning-form">
           <div className="record-cleaning-form-details">
             <div className="record-cleaning-form-detail">
-              <input type="checkbox" id="request-cleaning-form-bioFilter" />
-              <label htmlFor="request-cleaning-form-bioFilter">Bio filter replaced</label>
+              <input type="checkbox" id="request-cleaning-form-bio" onChange={this._handleBioFilterChanged} />
+              <label htmlFor="request-cleaning-form-bio">Bio filter replaced</label>
             </div>
             <div className="record-cleaning-form-detail">
-              <input type="checkbox" id="request-cleaning-form-mechanicalFilter" />
-              <label htmlFor="request-cleaning-form-mechanicalFilter">Mechanical filter replaced</label>
+              <input type="checkbox" id="request-cleaning-form-mechanical"
+                onChange={this._handleMechanicalFilterChanged} />
+              <label htmlFor="request-cleaning-form-mechanical">Mechanical filter replaced</label>
             </div>
             <div className="record-cleaning-form-detail">
-              <input type="checkbox" id="request-cleaning-form-sponge" />
+              <input type="checkbox" id="request-cleaning-form-sponge" onChange={this._handleSpongeChanged} />
               <label htmlFor="request-cleaning-form-sponge">Sponge replaced</label>
             </div>
           </div>
@@ -63,13 +76,46 @@ export class RecordCleaning extends
     );
   }
 
+  private _handleBioFilterChanged = (event: React.FormEvent<HTMLInputElement>) => {
+    const isBioFilterChecked = event.currentTarget.checked;
+    this.setState((previousState) => {
+      const newState = {
+        ...previousState,
+        isBioFilterChecked
+      };
+      return newState;
+    });
+  }
+
+  private _handleMechanicalFilterChanged = (event: React.FormEvent<HTMLInputElement>) => {
+    const isMechanicalFilterChecked = event.currentTarget.checked;
+    this.setState((previousState) => {
+      const newState = {
+        ...previousState,
+        isMechanicalFilterChecked
+      };
+      return newState;
+    });
+  }
+
+  private _handleSpongeChanged = (event: React.FormEvent<HTMLInputElement>) => {
+    const isSpongeChecked = event.currentTarget.checked;
+    this.setState((previousState) => {
+      const newState = {
+        ...previousState,
+        isSpongeChecked
+      };
+      return newState;
+    });
+  }
+
   private _handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     this.props.requestCreateCleaningRecord({
       time: Date.now(),
-      bioFilterReplaced: false,
-      mechanicalFilterReplaced: false,
-      spongeReplaced: false
+      bioFilterReplaced: this.state.isBioFilterChecked,
+      mechanicalFilterReplaced: this.state.isMechanicalFilterChecked,
+      spongeReplaced: this.state.isSpongeChecked
     });
   }
 }

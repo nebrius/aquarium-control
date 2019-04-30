@@ -66,37 +66,37 @@ app.get('/api/state', (req, res) => {
     };
     res.send(state);
 });
+let aquariumConfig = {
+    mode: 'program',
+    overrideState: 'off',
+    schedule: [{
+            name: 'Sunrise',
+            type: 'dynamic',
+            state: 'day',
+            details: {
+                event: 'sunrise'
+            }
+        }, {
+            name: 'Sunset',
+            type: 'dynamic',
+            state: 'night',
+            details: {
+                event: 'sunset'
+            }
+        }, {
+            name: 'Bedtime',
+            type: 'manual',
+            state: 'off',
+            details: {
+                hour: 23,
+                minute: 0
+            }
+        }]
+};
 app.get('/api/config', (req, res) => {
-    const config = {
-        mode: 'program',
-        overrideState: 'off',
-        schedule: [{
-                name: 'Sunrise',
-                type: 'dynamic',
-                state: 'day',
-                details: {
-                    event: 'sunrise'
-                }
-            }, {
-                name: 'Sunset',
-                type: 'dynamic',
-                state: 'night',
-                details: {
-                    event: 'sunset'
-                }
-            }, {
-                name: 'Bedtime',
-                type: 'manual',
-                state: 'off',
-                details: {
-                    hour: 23,
-                    minute: 0
-                }
-            }]
-    };
     const isConfigUpToDate = true;
     res.send({
-        config,
+        config: aquariumConfig,
         isConfigUpToDate
     });
 });
@@ -105,6 +105,7 @@ app.post('/api/config', (req, res) => {
         res.sendStatus(400);
         return;
     }
+    aquariumConfig = req.body;
     setTimeout(() => res.send({ result: 'ok' }), 1000);
 });
 app.get('/api/temperatures', (req, res) => {
@@ -122,15 +123,15 @@ app.get('/api/ping', (req, res) => {
     res.send('ok');
 });
 // NEW ENDPOINTS
+const cleaning = {
+    history: [{
+            time: Date.now(),
+            bioFilterReplaced: false,
+            mechanicalFilterReplaced: true,
+            spongeReplaced: false
+        }]
+};
 app.get('/api/cleaning', (req, res) => {
-    const cleaning = {
-        history: [{
-                time: Date.now(),
-                bioFilterReplaced: false,
-                mechanicalFilterReplaced: true,
-                spongeReplaced: false
-            }]
-    };
     res.send({
         cleaning
     });
@@ -140,7 +141,8 @@ app.post('/api/cleaning', (req, res) => {
         res.sendStatus(400);
         return;
     }
-    setTimeout(() => res.send({ result: 'ok' }), 1000);
+    cleaning.history.unshift(req.body);
+    setTimeout(() => res.send({ cleaning }), 1000);
 });
 // END NEW ENDPOINTS
 const server = http_1.createServer();

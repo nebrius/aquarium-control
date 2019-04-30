@@ -42,11 +42,11 @@ function mapDispatchToProps(dispatch: (action: IAction) => any): IRecordCleaning
         endpoint: 'cleaning',
         method: 'POST',
         body: newRecord
-      }, (err, result: ICleaning) => {
+      }, (err, result: { cleaning: ICleaning }) => {
         if (err) {
           dispatch(cleaningCreateRecordFailed());
         } else {
-          dispatch(cleaningCreateRecordSucceeded(result));
+          dispatch(cleaningCreateRecordSucceeded(result.cleaning));
         }
       });
     }

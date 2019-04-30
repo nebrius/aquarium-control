@@ -47,7 +47,8 @@ export const aquariumCleaningReducer: Reducer<IAquariumCleaning> =
     case ACTIONS.CLEANING_NEW_RECORD_SUCEEDED: {
       const newState: IAquariumCleaning = {
         ...state,
-        saveStatus: SaveStatusState.Succeeded
+        saveStatus: SaveStatusState.Succeeded,
+        cleaning: (action as ICleaningHistoryFetchSucceededAction).aquariumCleaning
       };
       return newState;
     }
