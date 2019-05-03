@@ -77,7 +77,23 @@ function init(cb) {
     });
 }
 exports.init = init;
+const requestQueue = [];
+let requestProcessing = false;
 function request(query, parameters, cb) {
+    requestQueue.push({
+        query,
+        parameters,
+        cb
+    });
+    requestPump();
+}
+function requestPump() {
+    if (requestProcessing || !requestQueue.length) {
+        return;
+    }
+    const { query, parameters, cb } = requestQueue.shift();
+    console.debug(`Connecting to database`);
+    requestProcessing = true;
     const connection = new tedious_1.Connection({
         userName: util_1.getEnvironmentVariable('AZURE_SQL_USERNAME'),
         password: util_1.getEnvironmentVariable('AZURE_SQL_PASSWORD'),
@@ -95,7 +111,13 @@ function request(query, parameters, cb) {
             cb(err, 0, []);
             return;
         }
-        const req = new tedious_1.Request(query, cb);
+        console.debug(`Connected...executing query`);
+        const req = new tedious_1.Request(query, (err, rowCount, rows) => {
+            cb(err, rowCount, rows);
+            console.debug(`Closing conenction`);
+            connection.close();
+            setImmediate(requestPump);
+        });
         for (const parameter of parameters) {
             req.addParameter(parameter.name, parameter.type, parameter.value);
         }

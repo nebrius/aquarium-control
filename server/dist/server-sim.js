@@ -142,7 +142,9 @@ app.post('/api/cleaning', (req, res) => {
         return;
     }
     cleaning.history.unshift(req.body);
-    setTimeout(() => res.send({ cleaning }), 1000);
+    setTimeout(() => res.send({
+        cleaning
+    }), 1000);
 });
 // END NEW ENDPOINTS
 const server = http_1.createServer();

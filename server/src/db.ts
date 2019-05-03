@@ -102,11 +102,34 @@ interface IQueryParameter {
   type: TediousType;
 }
 
+interface IRequestQueueEntry {
+  query: string;
+  parameters: IQueryParameter[];
+  cb: (err: Error, rowCount: number, rows: any[]) => void;
+}
+const requestQueue: Array<IRequestQueueEntry> = [];
+let requestProcessing = false;
+
 function request(
   query: string,
   parameters: IQueryParameter[],
   cb: (err: Error, rowCount: number, rows: any[]) => void
 ): void {
+  requestQueue.push({
+    query,
+    parameters,
+    cb
+  });
+  requestPump();
+}
+
+function requestPump() {
+  if (requestProcessing || !requestQueue.length) {
+    return;
+  }
+  const { query, parameters, cb } = requestQueue.shift() as IRequestQueueEntry;
+  console.debug(`Connecting to database`);
+  requestProcessing = true;
   const connection = new Connection({
     userName: getEnvironmentVariable('AZURE_SQL_USERNAME'),
     password: getEnvironmentVariable('AZURE_SQL_PASSWORD'),
@@ -124,7 +147,13 @@ function request(
       cb(err, 0, []);
       return;
     }
-    const req = new Request(query, cb);
+    console.debug(`Connected...executing query`);
+    const req = new Request(query, (err: Error, rowCount: number, rows: any[]) => {
+      cb(err, rowCount, rows);
+      console.debug(`Closing conenction`);
+      connection.close();
+      setImmediate(requestPump);
+    });
     for (const parameter of parameters) {
       req.addParameter(parameter.name, parameter.type, parameter.value);
     }

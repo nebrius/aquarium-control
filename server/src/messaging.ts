@@ -16,34 +16,48 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { Registry, Twin } from 'azure-iothub';
-// import { Client, Receiver, Message } from 'azure-event-hubs';
+import { EventHubClient, EventPosition } from '@azure/event-hubs';
 import { IConfig } from './common/common';
-// import { updateState } from './db';
+import { updateState } from './db';
+import { getEnvironmentVariable } from './util';
 
 let registry: Registry;
 
 export function init(cb: (err: Error | undefined) => void): void {
-  const IOT_HUB_CONNECTION_STRING = process.env.IOT_HUB_CONNECTION_STRING;
-  if (typeof IOT_HUB_CONNECTION_STRING !== 'string') {
-    throw new Error('Environment variable IOT_HUB_DEVICE_CONNECTION_STRING is not defined');
+  try {
+    doInit();
+    cb(undefined);
+  } catch(e) {
+    cb(e);
   }
+}
+
+async function doInit() {
+  const IOT_HUB_CONNECTION_STRING = getEnvironmentVariable('IOT_HUB_CONNECTION_STRING');
   registry = Registry.fromConnectionString(IOT_HUB_CONNECTION_STRING);
 
-  // const client = Client.fromConnectionString(IOT_HUB_CONNECTION_STRING);
-  // client.open()
-  //   .then(client.getPartitionIds.bind(client))
-  //   .then((partitionIds: any) =>
-  //     partitionIds.map((partitionId: Client.PartitionId) =>
-  //       client.createReceiver('$Default', partitionId, {
-  //         startAfterTime: Date.now()
-  //       }).then((receiver: Receiver) => {
-  //         console.log('Created partition receiver: ' + partitionId);
-  //         receiver.on('errorReceived', (err: Error) => console.error(err));
-  //         receiver.on('message', (message: Message) => updateState(message.body));
-  //       })
-  //     ))
-  //   .catch((err: Error) => console.error(err));
-  setImmediate(cb);
+  const client = await EventHubClient.createFromIotHubConnectionString(IOT_HUB_CONNECTION_STRING);
+  const hubInfo = await client.getHubRuntimeInformation();
+  console.log(`Connected to IoT Hub at ${hubInfo.path}`);
+
+  client.receive(
+    '1',
+    (eventData) => { // on 'message
+      if (eventData.annotations) {
+        const enqueuedTime = eventData.annotations['x-opt-enqueued-time'];
+        console.debug(`Received message from IoT Hub, enqueued at ${enqueuedTime}`);
+      } else {
+        console.debug(`Received message from IoT Hub`);
+      }
+      updateState(eventData.body);
+    },
+    (error) => {
+      console.error(`Error receiving message from Event Hubs: ${error}`);
+    },
+    {
+      eventPosition: EventPosition.fromEnqueuedTime(Date.now())
+    }
+  );
 }
 
 export function getConfig(

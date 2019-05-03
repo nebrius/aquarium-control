@@ -35,8 +35,8 @@
     "typescript": "^3.4.5"
   },
   "dependencies": {
+    "@azure/event-hubs": "^2.0.0",
     "async": "^2.6.0",
-    "azure-event-hubs": "^0.2.11",
     "azure-iothub": "^1.2.3",
     "babel-runtime": "^6.26.0",
     "body-parser": "^1.18.2",
@@ -48,7 +48,6 @@
     "pug": "^2.0.0-rc.4",
     "request": "^2.83.0",
     "revalidator": "^0.3.1",
-    "tedious": "^6.1.1",
-    "aquarium-control-common": "^1.0.0"
+    "tedious": "^6.1.1"
   }
 }
