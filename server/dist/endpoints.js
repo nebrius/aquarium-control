@@ -24,10 +24,9 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const async_1 = require("async");
 const common_1 = require("./common/common");
-const db_1 = require("./db");
 const messaging_1 = require("./messaging");
 const util_1 = require("./util");
-const db_2 = require("./db");
+const db_1 = require("./db");
 const express_facebook_auth_1 = require("express-facebook-auth");
 const DEFAULT_PORT = 3001;
 function init(cb) {
@@ -69,10 +68,10 @@ function init(cb) {
         res.render('index');
     });
     app.get('/api/user', authenticator.createMiddleware(false), (req, res) => {
-        res.send(db_2.getUser(req.userId));
+        res.send(db_1.getUser(req.userId));
     });
     app.get('/api/state', authenticator.createMiddleware(false), (req, res) => {
-        db_2.getState(db_2.getDeviceForUserId(req.userId), (err, state) => {
+        db_1.getState(db_1.getDeviceForUserId(req.userId), (err, state) => {
             if (err) {
                 console.error(err);
                 res.sendStatus(500);
@@ -83,7 +82,7 @@ function init(cb) {
         });
     });
     app.get('/api/config', authenticator.createMiddleware(false), (req, res) => {
-        messaging_1.getConfig(db_2.getDeviceForUserId(req.userId), (err, config, isConfigUpToDate) => {
+        messaging_1.getConfig(db_1.getDeviceForUserId(req.userId), (err, config, isConfigUpToDate) => {
             if (err) {
                 console.error(err);
                 res.sendStatus(500);
@@ -101,7 +100,7 @@ function init(cb) {
             res.sendStatus(400);
             return;
         }
-        messaging_1.setConfig(db_2.getDeviceForUserId(req.userId), req.body, (err) => {
+        messaging_1.setConfig(db_1.getDeviceForUserId(req.userId), req.body, (err) => {
             if (err) {
                 console.error(err);
                 res.sendStatus(500);
@@ -113,7 +112,7 @@ function init(cb) {
     });
     app.get('/api/temperatures', authenticator.createMiddleware(false), (req, res) => {
         async_1.series([
-            (done) => db_2.getTemperatureHistory(req.userId, done),
+            (done) => db_1.getTemperatureHistory(req.userId, done),
         ], (err, results) => {
             if (err || !results) {
                 res.sendStatus(500);
@@ -124,6 +123,39 @@ function init(cb) {
                 };
                 res.send(history);
             }
+        });
+    });
+    app.get('/api/cleaning', authenticator.createMiddleware(false), (req, res) => {
+        db_1.getCleaningHistory(req.userId, (err, history) => {
+            if (err || !history) {
+                res.sendStatus(500);
+            }
+            else {
+                res.send({
+                    cleaning: { history }
+                });
+            }
+        });
+    });
+    app.post('/api/cleaning', authenticator.createMiddleware(false), (req, res) => {
+        if (!revalidator_1.validate(req.body, common_1.cleaningValidationSchema).valid) {
+            res.sendStatus(400);
+            return;
+        }
+        db_1.createCleaningEntry(req.userId, req.body, (err) => {
+            if (err) {
+                res.sendStatus(500);
+            }
+            db_1.getCleaningHistory(req.userId, (err, history) => {
+                if (err || !history) {
+                    res.sendStatus(500);
+                }
+                else {
+                    res.send({
+                        cleaning: { history }
+                    });
+                }
+            });
         });
     });
     app.get('/api/ping', (req, res) => {

@@ -20,7 +20,9 @@ import * as moment from 'moment-timezone';
 export const DATABASE_NAMES = {
   STATE: 'current_state',
   USERS: 'aquarium_users',
-  TEMPERATURE: 'monthly_temperature'
+  TEMPERATURE: 'monthly_temperature',
+  CLEANING: 'cleaning',
+  TESTING: 'testing'
 };
 
 export function getEnvironmentVariable(variable: string): string {

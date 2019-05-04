@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { IState, IUser, ITemperatureSample } from './common/common';
+import { IState, IUser, ITemperatureSample, ICleaningEntry } from './common/common';
 import { getEnvironmentVariable, getStartOfToday, DATABASE_NAMES } from './util';
 import { Connection, Request, TYPES, TediousType } from 'tedious';
 import { waterfall } from 'async';
@@ -158,6 +158,7 @@ function requestPump() {
       console.debug(`Closing conenction`);
       connection.close();
       cb(err, rowCount, rows);
+      requestProcessing = false;
       setImmediate(requestPump);
     });
     for (const parameter of parameters) {
@@ -403,5 +404,62 @@ export function getTemperatureHistory(
         low: parseFloat(row.low.value)
       })));
     }
+  );
+}
+
+export function getCleaningHistory(
+  userId: string,
+  cb: (err: Error | undefined, history: ICleaningEntry[] | undefined) => void
+): void {
+  const user = getUser(userId);
+  request(
+    `SELECT * FROM ${DATABASE_NAMES.CLEANING} WHERE deviceId=@deviceId ORDER BY time`,
+    [{
+      name: 'deviceId',
+      type: TYPES.VarChar,
+      value: user.deviceId
+    }],
+    (err, rowCount, rows) => {
+      if (err) {
+        cb(err, undefined);
+        return;
+      }
+      cb(undefined, rows.map((row) => ({
+        time: parseInt(row.time.value, 10),
+        bioFilterReplaced: row.bioFilterReplaced.value,
+        mechanicalFilterReplaced: row.mechanicalFilterReplaced.value,
+        spongeReplaced: row.spongeReplaced.value
+      })));
+    }
+  );
+}
+
+export function createCleaningEntry(
+  userId: string,
+  cleaningEntry: ICleaningEntry,
+  cb: (err: Error | undefined) => void
+) {
+  const user = getUser(userId);
+  request(
+`INSERT INTO ${DATABASE_NAMES.CLEANING} (
+  deviceId,
+  time,
+  bioFilterReplaced,
+  mechanicalFilterReplaced,
+  spongeReplaced
+)
+VALUES (
+  @deviceId,
+  ${cleaningEntry.time},
+  ${cleaningEntry.bioFilterReplaced ? 1 : 0},
+  ${cleaningEntry.mechanicalFilterReplaced ? 1 : 0},
+  ${cleaningEntry.spongeReplaced ? 1 : 0}
+)`,
+    [{
+      name: 'deviceId',
+      type: TYPES.VarChar,
+      value: user.deviceId
+    }],
+    (err) => cb(err)
   );
 }

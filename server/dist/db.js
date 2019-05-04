@@ -122,6 +122,7 @@ function requestPump() {
             console.debug(`Closing conenction`);
             connection.close();
             cb(err, rowCount, rows);
+            requestProcessing = false;
             setImmediate(requestPump);
         });
         for (const parameter of parameters) {
@@ -332,4 +333,46 @@ function getTemperatureHistory(userId, cb) {
     });
 }
 exports.getTemperatureHistory = getTemperatureHistory;
+function getCleaningHistory(userId, cb) {
+    const user = getUser(userId);
+    request(`SELECT * FROM ${util_1.DATABASE_NAMES.CLEANING} WHERE deviceId=@deviceId ORDER BY time`, [{
+            name: 'deviceId',
+            type: tedious_1.TYPES.VarChar,
+            value: user.deviceId
+        }], (err, rowCount, rows) => {
+        if (err) {
+            cb(err, undefined);
+            return;
+        }
+        cb(undefined, rows.map((row) => ({
+            time: parseInt(row.time.value, 10),
+            bioFilterReplaced: row.bioFilterReplaced.value,
+            mechanicalFilterReplaced: row.mechanicalFilterReplaced.value,
+            spongeReplaced: row.spongeReplaced.value
+        })));
+    });
+}
+exports.getCleaningHistory = getCleaningHistory;
+function createCleaningEntry(userId, cleaningEntry, cb) {
+    const user = getUser(userId);
+    request(`INSERT INTO ${util_1.DATABASE_NAMES.CLEANING} (
+  deviceId,
+  time,
+  bioFilterReplaced,
+  mechanicalFilterReplaced,
+  spongeReplaced
+)
+VALUES (
+  @deviceId,
+  ${cleaningEntry.time},
+  ${cleaningEntry.bioFilterReplaced ? 1 : 0},
+  ${cleaningEntry.mechanicalFilterReplaced ? 1 : 0},
+  ${cleaningEntry.spongeReplaced ? 1 : 0}
+)`, [{
+            name: 'deviceId',
+            type: tedious_1.TYPES.VarChar,
+            value: user.deviceId
+        }], (err) => cb(err));
+}
+exports.createCleaningEntry = createCleaningEntry;
 //# sourceMappingURL=db.js.map

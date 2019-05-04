@@ -22,11 +22,24 @@ import { validate } from 'revalidator';
 import * as express from 'express';
 import * as cookieParser from 'cookie-parser';
 import { series } from 'async';
-import { IConfig, configValidationSchema, ITemperature, ITemperatureSample } from './common/common';
-import { isUserRegistered } from './db';
+import {
+  IConfig,
+  configValidationSchema,
+  cleaningValidationSchema,
+  ITemperature,
+  ITemperatureSample
+} from './common/common';
 import { getConfig, setConfig } from './messaging';
 import { getEnvironmentVariable } from './util';
-import { getTemperatureHistory, getDeviceForUserId, getUser, getState } from './db';
+import {
+  isUserRegistered,
+  getTemperatureHistory,
+  getDeviceForUserId,
+  getUser,
+  getState,
+  getCleaningHistory,
+  createCleaningEntry
+} from './db';
 import { Authenticator } from 'express-facebook-auth';
 
 const DEFAULT_PORT = 3001;
@@ -139,6 +152,39 @@ export function init(cb: (err: Error | undefined) => void): void {
         };
         res.send(history);
       }
+    });
+  });
+
+  app.get('/api/cleaning', authenticator.createMiddleware(false), (req, res) => {
+    getCleaningHistory((req as IRequest).userId, (err, history) => {
+      if (err || !history) {
+        res.sendStatus(500);
+      } else {
+        res.send({
+          cleaning: { history }
+        });
+      }
+    });
+  });
+
+  app.post('/api/cleaning', authenticator.createMiddleware(false), (req, res) => {
+    if (!validate(req.body, cleaningValidationSchema).valid) {
+      res.sendStatus(400);
+      return;
+    }
+    createCleaningEntry((req as IRequest).userId, req.body, (err) => {
+      if (err) {
+        res.sendStatus(500);
+      }
+      getCleaningHistory((req as IRequest).userId, (err, history) => {
+        if (err || !history) {
+          res.sendStatus(500);
+        } else {
+          res.send({
+            cleaning: { history }
+          });
+        }
+      });
     });
   });
 

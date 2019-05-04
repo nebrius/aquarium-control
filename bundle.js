@@ -91,7 +91,6 @@ function build(cb) {
 function assemble(cb) {
   const fileList = [
     `${__dirname}/.gitignore`,
-    `${__dirname}/server/bin`,
     `${__dirname}/server/dist`,
     `${__dirname}/server/views`,
     `${__dirname}/server/package.json`,

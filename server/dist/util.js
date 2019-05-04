@@ -20,7 +20,9 @@ const moment = require("moment-timezone");
 exports.DATABASE_NAMES = {
     STATE: 'current_state',
     USERS: 'aquarium_users',
-    TEMPERATURE: 'monthly_temperature'
+    TEMPERATURE: 'monthly_temperature',
+    CLEANING: 'cleaning',
+    TESTING: 'testing'
 };
 function getEnvironmentVariable(variable) {
     const value = process.env[variable];
