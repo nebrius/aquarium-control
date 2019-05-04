@@ -20,18 +20,16 @@ const endpoints_1 = require("./endpoints");
 const db_1 = require("./db");
 const messaging_1 = require("./messaging");
 const async_1 = require("async");
-function run() {
-    async_1.series([
-        db_1.init,
-        endpoints_1.init,
-        messaging_1.init
-    ], (err) => {
-        if (err) {
-            console.error(err.message || err);
-            process.exit(-1);
-        }
-        console.log('Aquarium Control server running');
-    });
-}
-exports.run = run;
+console.log('Starting Aquarium Control server');
+async_1.series([
+    db_1.init,
+    endpoints_1.init,
+    messaging_1.init
+], (err) => {
+    if (err) {
+        console.error(err.message || err);
+        process.exit(-1);
+    }
+    console.log('Aquarium Control server running');
+});
 //# sourceMappingURL=index.js.map

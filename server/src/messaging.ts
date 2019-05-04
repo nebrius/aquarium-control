@@ -24,12 +24,10 @@ import { getEnvironmentVariable } from './util';
 let registry: Registry;
 
 export function init(cb: (err: Error | undefined) => void): void {
-  try {
-    doInit();
-    cb(undefined);
-  } catch(e) {
-    cb(e);
-  }
+  console.debug('Initializing messaging module');
+  doInit()
+    .then(cb as any)
+    .catch(cb);
 }
 
 async function doInit() {

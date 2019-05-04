@@ -53,6 +53,7 @@ function getUser(userId) {
 }
 exports.getUser = getUser;
 function init(cb) {
+    console.debug('Initializing database module');
     request(`SELECT facebookId, deviceId, timezone, userName FROM ${util_1.DATABASE_NAMES.USERS}`, [], (err, rowCount, rows) => {
         if (err) {
             cb(err);
@@ -95,9 +96,14 @@ function requestPump() {
     console.debug(`Connecting to database`);
     requestProcessing = true;
     const connection = new tedious_1.Connection({
-        userName: util_1.getEnvironmentVariable('AZURE_SQL_USERNAME'),
-        password: util_1.getEnvironmentVariable('AZURE_SQL_PASSWORD'),
         server: util_1.getEnvironmentVariable('AZURE_SQL_SERVER'),
+        authentication: {
+            type: 'default',
+            options: {
+                userName: util_1.getEnvironmentVariable('AZURE_SQL_USERNAME'),
+                password: util_1.getEnvironmentVariable('AZURE_SQL_PASSWORD')
+            }
+        },
         options: {
             encrypt: true,
             rowCollectionOnRequestCompletion: true,
@@ -105,7 +111,7 @@ function requestPump() {
             database: util_1.getEnvironmentVariable('AZURE_SQL_DATABASE'),
             requestTimeout: 0
         }
-    });
+    }); // Note: the signature for tedious Request changed recently, but they haven't updated the docs yet apparently
     connection.on('connect', (err) => {
         if (err) {
             cb(err, 0, []);
@@ -113,9 +119,9 @@ function requestPump() {
         }
         console.debug(`Connected...executing query`);
         const req = new tedious_1.Request(query, (err, rowCount, rows) => {
-            cb(err, rowCount, rows);
             console.debug(`Closing conenction`);
             connection.close();
+            cb(err, rowCount, rows);
             setImmediate(requestPump);
         });
         for (const parameter of parameters) {

@@ -65,6 +65,7 @@ export function getUser(userId: string): IUser {
 }
 
 export function init(cb: (err: Error | undefined) => void): void {
+  console.debug('Initializing database module');
   request(
     `SELECT facebookId, deviceId, timezone, userName FROM ${DATABASE_NAMES.USERS}`,
     [],
@@ -131,9 +132,14 @@ function requestPump() {
   console.debug(`Connecting to database`);
   requestProcessing = true;
   const connection = new Connection({
-    userName: getEnvironmentVariable('AZURE_SQL_USERNAME'),
-    password: getEnvironmentVariable('AZURE_SQL_PASSWORD'),
     server: getEnvironmentVariable('AZURE_SQL_SERVER'),
+    authentication: {
+      type: 'default',
+      options: {
+        userName: getEnvironmentVariable('AZURE_SQL_USERNAME'),
+        password: getEnvironmentVariable('AZURE_SQL_PASSWORD')
+      }
+    },
     options: {
       encrypt: true,
       rowCollectionOnRequestCompletion: true,
@@ -141,7 +147,7 @@ function requestPump() {
       database: getEnvironmentVariable('AZURE_SQL_DATABASE'),
       requestTimeout: 0
     }
-  });
+  } as any); // Note: the signature for tedious Request changed recently, but they haven't updated the docs yet apparently
   connection.on('connect', (err) => {
     if (err) {
       cb(err, 0, []);
@@ -149,9 +155,9 @@ function requestPump() {
     }
     console.debug(`Connected...executing query`);
     const req = new Request(query, (err: Error, rowCount: number, rows: any[]) => {
-      cb(err, rowCount, rows);
       console.debug(`Closing conenction`);
       connection.close();
+      cb(err, rowCount, rows);
       setImmediate(requestPump);
     });
     for (const parameter of parameters) {

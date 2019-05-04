@@ -20,16 +20,15 @@ import { init as initDB } from './db';
 import { init as initMessaging } from './messaging';
 import { series } from 'async';
 
-export function run(): void {
-  series([
-    initDB,
-    initEndpoints,
-    initMessaging
-  ] as any, (err: Error | undefined) => {
-    if (err) {
-      console.error(err.message || err);
-      process.exit(-1);
-    }
-    console.log('Aquarium Control server running');
-  });
-}
+console.log('Starting Aquarium Control server');
+series([
+  initDB,
+  initEndpoints,
+  initMessaging
+] as any, (err: Error | undefined) => {
+  if (err) {
+    console.error(err.message || err);
+    process.exit(-1);
+  }
+  console.log('Aquarium Control server running');
+});

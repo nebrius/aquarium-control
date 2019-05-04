@@ -36,6 +36,7 @@ interface IRequest extends express.Request {
 }
 
 export function init(cb: (err: Error | undefined) => void): void {
+  console.debug('Initializing endpoint module');
 
   const port = process.env.PORT || DEFAULT_PORT;
 

@@ -31,6 +31,7 @@ const db_2 = require("./db");
 const express_facebook_auth_1 = require("express-facebook-auth");
 const DEFAULT_PORT = 3001;
 function init(cb) {
+    console.debug('Initializing endpoint module');
     const port = process.env.PORT || DEFAULT_PORT;
     function getRedirectUri() {
         return process.env.NODE_ENV === 'production'

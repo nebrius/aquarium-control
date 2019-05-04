@@ -22,13 +22,10 @@ const db_1 = require("./db");
 const util_1 = require("./util");
 let registry;
 function init(cb) {
-    try {
-        doInit();
-        cb(undefined);
-    }
-    catch (e) {
-        cb(e);
-    }
+    console.debug('Initializing messaging module');
+    doInit()
+        .then(cb)
+        .catch(cb);
 }
 exports.init = init;
 async function doInit() {
