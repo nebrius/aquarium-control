@@ -45,6 +45,6 @@ export const cleaningValidationSchema: any = {
     spongeReplaced: {
       required: true,
       type: 'boolean'
-    },
+    }
   }
 };

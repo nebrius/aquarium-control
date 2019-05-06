@@ -35,7 +35,7 @@ exports.cleaningValidationSchema = {
         spongeReplaced: {
             required: true,
             type: 'boolean'
-        },
+        }
     }
 };
 //# sourceMappingURL=ICleaning.js.map

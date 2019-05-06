@@ -16,4 +16,30 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
+// Force to "any" type, otherwise TypeScript thinks the type is too strict
+exports.testingValidationSchema = {
+    type: 'object',
+    properties: {
+        time: {
+            required: true,
+            type: 'number'
+        },
+        ph: {
+            required: true,
+            type: 'number'
+        },
+        ammonia: {
+            required: true,
+            type: 'number'
+        },
+        nitrites: {
+            required: true,
+            type: 'number'
+        },
+        nitrates: {
+            required: true,
+            type: 'number'
+        }
+    }
+};
 //# sourceMappingURL=ITesting.js.map

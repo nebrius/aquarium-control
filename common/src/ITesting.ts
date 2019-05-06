@@ -26,3 +26,30 @@ export interface ITestingEntry {
 export interface ITesting {
   history: ITestingEntry[];
 }
+
+// Force to "any" type, otherwise TypeScript thinks the type is too strict
+export const testingValidationSchema: any = {
+  type: 'object',
+  properties: {
+    time: {
+      required: true,
+      type: 'number'
+    },
+    ph: {
+      required: true,
+      type: 'number'
+    },
+    ammonia: {
+      required: true,
+      type: 'number'
+    },
+    nitrites: {
+      required: true,
+      type: 'number'
+    },
+    nitrates: {
+      required: true,
+      type: 'number'
+    }
+  }
+};

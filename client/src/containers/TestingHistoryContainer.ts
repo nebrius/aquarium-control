@@ -21,9 +21,17 @@ import { IAction } from '../actions/actions';
 import { TestingHistory, ITestingHistoryProps } from '../components/TestingHistory';
 
 function mapStateToProps(state: IAppState): ITestingHistoryProps {
-  return {
-    testingHistory: undefined
+  const testingState: ITestingHistoryProps = {
+    testingHistory: undefined,
+    user: undefined
   };
+  if (state.aquariumTesting.testing) {
+    testingState.testingHistory = state.aquariumTesting.testing.history;
+  }
+  if (state.aquariumUser.user) {
+    testingState.user = state.aquariumUser;
+  }
+  return testingState;
 }
 
 function mapDispatchToProps(dispatch: (action: IAction) => any) {

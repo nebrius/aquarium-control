@@ -18,23 +18,66 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 import * as React from 'react';
 import { SaveStatus } from './SaveStatus';
 import { SaveStatusState } from '../util/IAppState';
+import { ITestingEntry } from '../common/common';
 
 export interface IRecordTestingProps {
   saveStatus: SaveStatusState;
 }
 
-export function RecordTesting(props: IRecordTestingProps): JSX.Element {
-  return (
-    <div>
-      <div><h2>Record Testing</h2></div>
-      <SaveStatus saveStatus={props.saveStatus} labels={{
+export interface IRecordTestingDispatch {
+  requestCreateTestingRecord: (newRecord: ITestingEntry) => void;
+}
+
+interface IRecordTestingState {
+  ph: number;
+  ammonia: number;
+  nitrites: number;
+  nitrates: number;
+}
+
+export class RecordTesting extends
+  React.Component<IRecordTestingProps & IRecordTestingDispatch, IRecordTestingState> {
+
+  public state = {
+    ph: 0,
+    ammonia: 0,
+    nitrites: 0,
+    nitrates: 0
+  };
+
+  public render() {
+    return (
+      <div>
+        <div><h2>Record Testing</h2></div>
+        <SaveStatus saveStatus={this.props.saveStatus} labels={{
           pending: 'Creating testing record',
           suceeded: 'Testing record created!',
           failed: 'Could not create testing record!'
         }} />
-      <div>
-        New Record
+        <form onSubmit={this._handleSubmit} className="record-cleaning-form">
+          <div className="record-cleaning-form-details">
+            <div className="record-cleaning-form-detail">
+              <label htmlFor="request-cleaning-form-bio">pH</label>
+              <input type="number" id="request-cleaning-form-bio" onChange={this._handlePHChanged} />
+            </div>
+          </div>
+        </form>
       </div>
-    </div>
-  );
+    );
+  }
+
+  private _handlePHChanged = (event: React.FormEvent<HTMLInputElement>) => {
+    const ph = parseFloat(event.currentTarget.value);
+    this.setState((previousState) => {
+      const newState = {
+        ...previousState,
+        ph
+      };
+      return newState;
+    });
+  }
+
+  private _handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+  }
 }

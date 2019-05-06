@@ -8,3 +8,4 @@ export interface ITestingEntry {
 export interface ITesting {
     history: ITestingEntry[];
 }
+export declare const testingValidationSchema: any;

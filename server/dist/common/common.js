@@ -21,4 +21,5 @@ function __export(m) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./src/ICleaning"));
 __export(require("./src/IConfig"));
+__export(require("./src/ITesting"));
 //# sourceMappingURL=common.js.map

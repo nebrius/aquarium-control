@@ -69257,6 +69257,11 @@ exports.ACTIONS = {
     CLEANING_REQUEST_NEW_RECORD: 'CLEANING_REQUEST_NEW_RECORD',
     CLEANING_NEW_RECORD_SUCEEDED: 'CLEANING_NEW_RECORD_SUCEEDED',
     CLEANING_NEW_RECORD_FAILED: 'CLEANING_NEW_RECORD_FAILED',
+    TESTING_FETCH_SUCCEEDED: 'TESTING_FETCH_SUCCEEDED',
+    TESTING_FETCH_FAILED: 'TESTING_FETCH_FAILED',
+    TESTING_REQUEST_NEW_RECORD: 'TESTING_REQUEST_NEW_RECORD',
+    TESTING_NEW_RECORD_SUCEEDED: 'TESTING_NEW_RECORD_SUCEEDED',
+    TESTING_NEW_RECORD_FAILED: 'TESTING_NEW_RECORD_FAILED',
     CONFIG_FETCH_SUCCEEDED: 'CONFIG_FETCH_SUCCEEDED',
     CONFIG_FETCH_FAILED: 'CONFIG_FETCH_FAILED',
     CONFIG_REQUEST_UPDATE: 'CONFIG_REQUEST_UPDATE',
@@ -69337,6 +69342,39 @@ function cleaningCreateRecordFailed() {
     };
 }
 exports.cleaningCreateRecordFailed = cleaningCreateRecordFailed;
+function testingHistoryFetchSucceeded(aquariumTesting) {
+    return {
+        type: exports.ACTIONS.TESTING_FETCH_SUCCEEDED,
+        aquariumTesting: aquariumTesting
+    };
+}
+exports.testingHistoryFetchSucceeded = testingHistoryFetchSucceeded;
+function testingHistoryFetchFailed() {
+    return {
+        type: exports.ACTIONS.TESTING_FETCH_FAILED
+    };
+}
+exports.testingHistoryFetchFailed = testingHistoryFetchFailed;
+function testingRequestCreateRecord(newRecord) {
+    return {
+        type: exports.ACTIONS.TESTING_REQUEST_NEW_RECORD,
+        newRecord: newRecord
+    };
+}
+exports.testingRequestCreateRecord = testingRequestCreateRecord;
+function testingCreateRecordSucceeded(aquariumTesting) {
+    return {
+        type: exports.ACTIONS.TESTING_NEW_RECORD_SUCEEDED,
+        aquariumTesting: aquariumTesting
+    };
+}
+exports.testingCreateRecordSucceeded = testingCreateRecordSucceeded;
+function testingCreateRecordFailed() {
+    return {
+        type: exports.ACTIONS.TESTING_NEW_RECORD_FAILED
+    };
+}
+exports.testingCreateRecordFailed = testingCreateRecordFailed;
 function configFetchSucceeded(aquariumConfig) {
     return {
         type: exports.ACTIONS.CONFIG_FETCH_SUCCEEDED,
@@ -69455,6 +69493,17 @@ api_1.request({
     }
     else {
         store_1.store.dispatch(actions_1.cleaningHistoryFetchSucceeded(result.cleaning));
+    }
+});
+api_1.request({
+    endpoint: 'testing',
+    method: 'GET'
+}, function (err, result) {
+    if (err) {
+        store_1.store.dispatch(actions_1.testingHistoryFetchFailed());
+    }
+    else {
+        store_1.store.dispatch(actions_1.testingHistoryFetchSucceeded(result.testing));
     }
 });
 function updateTemperature() {
@@ -70020,6 +70069,102 @@ exports.RecordCleaning = RecordCleaning;
 
 /***/ }),
 
+/***/ "./src/components/RecordTesting.tsx":
+/*!******************************************!*\
+  !*** ./src/components/RecordTesting.tsx ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/*
+Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
+
+Aquarium Control is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Aquarium Control is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
+*/
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+var SaveStatus_1 = __webpack_require__(/*! ./SaveStatus */ "./src/components/SaveStatus.tsx");
+var RecordTesting = /** @class */ (function (_super) {
+    __extends(RecordTesting, _super);
+    function RecordTesting() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.state = {
+            ph: 0,
+            ammonia: 0,
+            nitrites: 0,
+            nitrates: 0
+        };
+        _this._handlePHChanged = function (event) {
+            var ph = parseFloat(event.currentTarget.value);
+            _this.setState(function (previousState) {
+                var newState = __assign({}, previousState, { ph: ph });
+                return newState;
+            });
+        };
+        _this._handleSubmit = function (event) {
+            event.preventDefault();
+        };
+        return _this;
+    }
+    RecordTesting.prototype.render = function () {
+        return (React.createElement("div", null,
+            React.createElement("div", null,
+                React.createElement("h2", null, "Record Testing")),
+            React.createElement(SaveStatus_1.SaveStatus, { saveStatus: this.props.saveStatus, labels: {
+                    pending: 'Creating testing record',
+                    suceeded: 'Testing record created!',
+                    failed: 'Could not create testing record!'
+                } }),
+            React.createElement("form", { onSubmit: this._handleSubmit, className: "record-cleaning-form" },
+                React.createElement("div", { className: "record-cleaning-form-details" },
+                    React.createElement("div", { className: "record-cleaning-form-detail" },
+                        React.createElement("label", { htmlFor: "request-cleaning-form-bio" }, "pH"),
+                        React.createElement("input", { type: "number", id: "request-cleaning-form-bio", onChange: this._handlePHChanged }))))));
+    };
+    return RecordTesting;
+}(React.Component));
+exports.RecordTesting = RecordTesting;
+
+
+/***/ }),
+
 /***/ "./src/components/Root.tsx":
 /*!*********************************!*\
   !*** ./src/components/Root.tsx ***!
@@ -70076,6 +70221,7 @@ var ConfigurationContainer_1 = __webpack_require__(/*! ../containers/Configurati
 var StateContainer_1 = __webpack_require__(/*! ../containers/StateContainer */ "./src/containers/StateContainer.ts");
 var TemperatureContainer_1 = __webpack_require__(/*! ../containers/TemperatureContainer */ "./src/containers/TemperatureContainer.ts");
 var TestingHistoryContainer_1 = __webpack_require__(/*! ../containers/TestingHistoryContainer */ "./src/containers/TestingHistoryContainer.ts");
+var RecordTestingContainer_1 = __webpack_require__(/*! ../containers/RecordTestingContainer */ "./src/containers/RecordTestingContainer.ts");
 var RecordCleaningContainer_1 = __webpack_require__(/*! ../containers/RecordCleaningContainer */ "./src/containers/RecordCleaningContainer.ts");
 var CleaningHistoryContainer_1 = __webpack_require__(/*! ../containers/CleaningHistoryContainer */ "./src/containers/CleaningHistoryContainer.ts");
 var ButtonBar_1 = __webpack_require__(/*! ./ButtonBar */ "./src/components/ButtonBar.tsx");
@@ -70106,6 +70252,7 @@ var Root = /** @class */ (function (_super) {
             this.state.selectedTab === 'state' && React.createElement(StateContainer_1.StateContainer, null),
             this.state.selectedTab === 'state' && React.createElement(TemperatureContainer_1.TemperatureContainer, null),
             this.state.selectedTab === 'schedule' && React.createElement(ConfigurationContainer_1.ConfigurationContainer, null),
+            this.state.selectedTab === 'testing' && React.createElement(RecordTestingContainer_1.RecordTestingContainer, null),
             this.state.selectedTab === 'testing' && React.createElement(TestingHistoryContainer_1.TestingContainer, null),
             this.state.selectedTab === 'cleaning' && React.createElement(RecordCleaningContainer_1.RecordCleaningContainer, null),
             this.state.selectedTab === 'cleaning' && React.createElement(CleaningHistoryContainer_1.CleaningHistoryContainer, null)));
@@ -70886,6 +71033,66 @@ exports.RecordCleaningContainer = react_redux_1.connect(mapStateToProps, mapDisp
 
 /***/ }),
 
+/***/ "./src/containers/RecordTestingContainer.ts":
+/*!**************************************************!*\
+  !*** ./src/containers/RecordTestingContainer.ts ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/*
+Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
+
+Aquarium Control is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Aquarium Control is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
+*/
+Object.defineProperty(exports, "__esModule", { value: true });
+var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+var api_1 = __webpack_require__(/*! ../util/api */ "./src/util/api.ts");
+var actions_1 = __webpack_require__(/*! ../actions/actions */ "./src/actions/actions.ts");
+var RecordTesting_1 = __webpack_require__(/*! ../components/RecordTesting */ "./src/components/RecordTesting.tsx");
+var clone = __webpack_require__(/*! clone */ "./node_modules/clone/clone.js");
+function mapStateToProps(state) {
+    return {
+        saveStatus: clone(state.aquariumCleaning.saveStatus)
+    };
+}
+function mapDispatchToProps(dispatch) {
+    return {
+        requestCreateTestingRecord: function (newRecord) {
+            dispatch(actions_1.testingRequestCreateRecord(newRecord));
+            api_1.request({
+                endpoint: 'testing',
+                method: 'POST',
+                body: newRecord
+            }, function (err, result) {
+                if (err) {
+                    dispatch(actions_1.testingCreateRecordFailed());
+                }
+                else {
+                    dispatch(actions_1.testingCreateRecordSucceeded(result.testing));
+                }
+            });
+        }
+    };
+}
+exports.RecordTestingContainer = react_redux_1.connect(mapStateToProps, mapDispatchToProps)(RecordTesting_1.RecordTesting);
+
+
+/***/ }),
+
 /***/ "./src/containers/StateContainer.ts":
 /*!******************************************!*\
   !*** ./src/containers/StateContainer.ts ***!
@@ -70999,9 +71206,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 var TestingHistory_1 = __webpack_require__(/*! ../components/TestingHistory */ "./src/components/TestingHistory.tsx");
 function mapStateToProps(state) {
-    return {
-        testingHistory: undefined
+    var testingState = {
+        testingHistory: undefined,
+        user: undefined
     };
+    if (state.aquariumTesting.testing) {
+        testingState.testingHistory = state.aquariumTesting.testing.history;
+    }
+    if (state.aquariumUser.user) {
+        testingState.user = state.aquariumUser;
+    }
+    return testingState;
 }
 function mapDispatchToProps(dispatch) {
     return {};
@@ -71321,7 +71536,19 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+var actions_1 = __webpack_require__(/*! ../actions/actions */ "./src/actions/actions.ts");
 var IAppState_1 = __webpack_require__(/*! ../util/IAppState */ "./src/util/IAppState.ts");
 exports.aquariumTestingReducer = function (state, action) {
     if (!state) {
@@ -71330,8 +71557,31 @@ exports.aquariumTestingReducer = function (state, action) {
             saveStatus: IAppState_1.SaveStatusState.None
         };
     }
-    // TODO:
-    return state;
+    switch (action.type) {
+        case actions_1.ACTIONS.TESTING_REQUEST_NEW_RECORD: {
+            var newState = __assign({}, state, { saveStatus: IAppState_1.SaveStatusState.Pending });
+            return newState;
+        }
+        case actions_1.ACTIONS.TESTING_NEW_RECORD_FAILED: {
+            var newState = __assign({}, state, { saveStatus: IAppState_1.SaveStatusState.Failed });
+            return newState;
+        }
+        case actions_1.ACTIONS.TESTING_NEW_RECORD_SUCEEDED: {
+            var newState = __assign({}, state, { saveStatus: IAppState_1.SaveStatusState.Succeeded, testing: action.aquariumTesting });
+            return newState;
+        }
+        case actions_1.ACTIONS.TESTING_FETCH_FAILED: {
+            var newState = __assign({}, state, { testing: undefined });
+            return newState;
+        }
+        case actions_1.ACTIONS.TESTING_FETCH_SUCCEEDED: {
+            var newState = __assign({}, state, { testing: action.aquariumTesting });
+            return newState;
+        }
+        default: {
+            return state;
+        }
+    }
 };
 
 

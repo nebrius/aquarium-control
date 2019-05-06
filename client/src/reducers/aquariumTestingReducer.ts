@@ -16,7 +16,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { Reducer } from 'redux';
-import { IAction } from '../actions/actions';
+import { ACTIONS, IAction, ITestingHistoryFetchSucceededAction } from '../actions/actions';
 import { IAquariumTesting, SaveStatusState } from '../util/IAppState';
 
 export const aquariumTestingReducer: Reducer<IAquariumTesting> =
@@ -27,6 +27,50 @@ export const aquariumTestingReducer: Reducer<IAquariumTesting> =
       saveStatus: SaveStatusState.None
     };
   }
-  // TODO:
-  return state;
+  switch (action.type) {
+    case ACTIONS.TESTING_REQUEST_NEW_RECORD: {
+      const newState: IAquariumTesting = {
+        ...state,
+        saveStatus: SaveStatusState.Pending
+      };
+      return newState;
+    }
+
+    case ACTIONS.TESTING_NEW_RECORD_FAILED: {
+      const newState: IAquariumTesting = {
+        ...state,
+        saveStatus: SaveStatusState.Failed
+      };
+      return newState;
+    }
+
+    case ACTIONS.TESTING_NEW_RECORD_SUCEEDED: {
+      const newState: IAquariumTesting = {
+        ...state,
+        saveStatus: SaveStatusState.Succeeded,
+        testing: (action as ITestingHistoryFetchSucceededAction).aquariumTesting
+      };
+      return newState;
+    }
+
+    case ACTIONS.TESTING_FETCH_FAILED: {
+      const newState: IAquariumTesting = {
+        ...state,
+        testing: undefined
+      };
+      return newState;
+    }
+
+    case ACTIONS.TESTING_FETCH_SUCCEEDED: {
+      const newState: IAquariumTesting = {
+        ...state,
+        testing: (action as ITestingHistoryFetchSucceededAction).aquariumTesting
+      };
+      return newState;
+    }
+
+    default: {
+      return state;
+    }
+  }
 };

@@ -122,7 +122,6 @@ app.get('/api/temperatures', (req, res) => {
 app.get('/api/ping', (req, res) => {
     res.send('ok');
 });
-// NEW ENDPOINTS
 const cleaning = {
     history: [{
             time: Date.now(),
@@ -144,6 +143,31 @@ app.post('/api/cleaning', (req, res) => {
     cleaning.history.unshift(req.body);
     setTimeout(() => res.send({
         cleaning
+    }), 1000);
+});
+// NEW ENDPOINTS
+const testing = {
+    history: [{
+            time: Date.now(),
+            ph: 8.2,
+            ammonia: 16,
+            nitrites: 0,
+            nitrates: 120
+        }]
+};
+app.get('/api/testing', (req, res) => {
+    res.send({
+        testing
+    });
+});
+app.post('/api/testing', (req, res) => {
+    if (!revalidator_1.validate(req.body, common_1.testingValidationSchema).valid) {
+        res.sendStatus(400);
+        return;
+    }
+    testing.history.unshift(req.body);
+    setTimeout(() => res.send({
+        testing
     }), 1000);
 });
 // END NEW ENDPOINTS

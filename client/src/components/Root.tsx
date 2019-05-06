@@ -21,6 +21,7 @@ import { ConfigurationContainer } from '../containers/ConfigurationContainer';
 import { StateContainer} from '../containers/StateContainer';
 import { TemperatureContainer } from '../containers/TemperatureContainer';
 import { TestingContainer } from '../containers/TestingHistoryContainer';
+import { RecordTestingContainer } from '../containers/RecordTestingContainer';
 import { RecordCleaningContainer } from '../containers/RecordCleaningContainer';
 import { CleaningHistoryContainer } from '../containers/CleaningHistoryContainer';
 import { ButtonBar } from './ButtonBar';
@@ -58,6 +59,7 @@ export class Root extends React.Component<{}, IRootState> {
 
         {this.state.selectedTab === 'schedule' && <ConfigurationContainer />}
 
+        {this.state.selectedTab === 'testing' && <RecordTestingContainer />}
         {this.state.selectedTab === 'testing' && <TestingContainer />}
 
         {this.state.selectedTab === 'cleaning' && <RecordCleaningContainer />}

@@ -15,27 +15,48 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { IConfig, IState, IUser, ITemperature, ICleaning, ICleaningEntry } from '../common/common';
+import {
+  IConfig,
+  IState,
+  IUser,
+  ITemperature,
+  ICleaning,
+  ICleaningEntry,
+  ITesting,
+  ITestingEntry
+} from '../common/common';
 
 export const ACTIONS = {
   USER_FETCH_SUCCEEDED: 'USER_FETCH_SUCCEEDED',
   USER_FETCH_FAILED: 'USER_FETCH_FAILED',
+
   STATE_FETCH_SUCCEEDED: 'STATE_FETCH_SUCCEEDED',
   STATE_FETCH_FAILED: 'STATE_FETCH_FAILED',
+
   CLEANING_FETCH_SUCCEEDED: 'CLEANING_FETCH_SUCCEEDED',
   CLEANING_FETCH_FAILED: 'CLEANING_FETCH_FAILED',
   CLEANING_REQUEST_NEW_RECORD: 'CLEANING_REQUEST_NEW_RECORD',
   CLEANING_NEW_RECORD_SUCEEDED: 'CLEANING_NEW_RECORD_SUCEEDED',
   CLEANING_NEW_RECORD_FAILED: 'CLEANING_NEW_RECORD_FAILED',
+
+  TESTING_FETCH_SUCCEEDED: 'TESTING_FETCH_SUCCEEDED',
+  TESTING_FETCH_FAILED: 'TESTING_FETCH_FAILED',
+  TESTING_REQUEST_NEW_RECORD: 'TESTING_REQUEST_NEW_RECORD',
+  TESTING_NEW_RECORD_SUCEEDED: 'TESTING_NEW_RECORD_SUCEEDED',
+  TESTING_NEW_RECORD_FAILED: 'TESTING_NEW_RECORD_FAILED',
+
   CONFIG_FETCH_SUCCEEDED: 'CONFIG_FETCH_SUCCEEDED',
   CONFIG_FETCH_FAILED: 'CONFIG_FETCH_FAILED',
   CONFIG_REQUEST_UPDATE: 'CONFIG_REQUEST_UPDATE',
   CONFIG_UPDATE_SUCCEEDED: 'CONFIG_UPDATE_SUCCEEDED',
   CONFIG_UPDATE_FAILED: 'CONFIG_UPDATE_FAILED',
+
   TEMPERATURE_FETCH_SUCCEEDED: 'TEMPERATURE_FETCH_SUCCEEDED',
   TEMPERATURE_FETCH_FAILED: 'TEMPERATURE_FETCH_FAILED'
 };
 
+// TODO: change interfaces so the `type` entry is explicitly specified
+// e.g. "CLEANING_FETCH_SUCCEEDED", as opposed to just "string"
 export interface IAction {
   type: string;
 }
@@ -99,9 +120,6 @@ export function temperatureFetchFailed(): IAction {
 
 // Cleaning Actions
 
-// TODO: change interfaces so the `type` entry is explicitly specified
-// e.g. "CLEANING_FETCH_SUCCEEDED", as opposed to just "string"
-
 export interface ICleaningHistoryFetchSucceededAction extends IAction {
   aquariumCleaning: ICleaning;
 }
@@ -148,6 +166,51 @@ export function cleaningCreateRecordFailed(): IAction {
 }
 
 // Testing Actions
+
+export interface ITestingHistoryFetchSucceededAction extends IAction {
+  aquariumTesting: ITesting;
+}
+
+export function testingHistoryFetchSucceeded(aquariumTesting: ITesting): ITestingHistoryFetchSucceededAction {
+  return {
+    type: ACTIONS.TESTING_FETCH_SUCCEEDED,
+    aquariumTesting
+  };
+}
+
+export function testingHistoryFetchFailed(): IAction {
+  return {
+    type: ACTIONS.TESTING_FETCH_FAILED
+  };
+}
+
+export interface ITestingRequestCreateRecordAction extends IAction {
+  newRecord: ITestingEntry;
+}
+
+export function testingRequestCreateRecord(newRecord: ITestingEntry): ITestingRequestCreateRecordAction {
+  return {
+    type: ACTIONS.TESTING_REQUEST_NEW_RECORD,
+    newRecord
+  };
+}
+
+export interface ITestingCreateRecordSucceededAction extends IAction {
+  aquariumTesting: ITesting;
+}
+
+export function testingCreateRecordSucceeded(aquariumTesting: ITesting): ITestingCreateRecordSucceededAction {
+  return {
+    type: ACTIONS.TESTING_NEW_RECORD_SUCEEDED,
+    aquariumTesting
+  };
+}
+
+export function testingCreateRecordFailed(): IAction {
+  return {
+    type: ACTIONS.TESTING_NEW_RECORD_FAILED
+  };
+}
 
 // Config Actions
 

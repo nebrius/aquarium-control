@@ -16,16 +16,12 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-
-interface ITestingEntry {
-  time: number;
-  bioFilterReplaced: boolean;
-  mechanicalFilterReplaced: boolean;
-  spongeReplaced: boolean;
-}
+import { ITestingEntry } from '../common/common';
+import { IAquariumUser } from '../util/IAppState';
 
 export interface ITestingHistoryProps {
   testingHistory: ITestingEntry[] | undefined;
+  user: IAquariumUser | undefined;
 }
 
 export function TestingHistory(props: ITestingHistoryProps): JSX.Element {

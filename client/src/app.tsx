@@ -30,6 +30,8 @@ import {
   configFetchSucceeded,
   cleaningHistoryFetchFailed,
   cleaningHistoryFetchSucceeded,
+  testingHistoryFetchFailed,
+  testingHistoryFetchSucceeded,
   temperatureFetchFailed,
   temperatureFetchSuceeded
 } from './actions/actions';
@@ -82,6 +84,17 @@ request({
     store.dispatch(cleaningHistoryFetchFailed());
   } else {
     store.dispatch(cleaningHistoryFetchSucceeded(result.cleaning));
+  }
+});
+
+request({
+  endpoint: 'testing',
+  method: 'GET'
+}, (err, result) => {
+  if (err) {
+    store.dispatch(testingHistoryFetchFailed());
+  } else {
+    store.dispatch(testingHistoryFetchSucceeded(result.testing));
   }
 });
 

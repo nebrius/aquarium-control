@@ -24,11 +24,13 @@ import * as cookieParser from 'cookie-parser';
 import {
   configValidationSchema,
   cleaningValidationSchema,
+  testingValidationSchema,
   IConfig,
   ITemperature,
   IState,
   IUser,
-  ICleaning
+  ICleaning,
+  ITesting
 } from './common/common';
 
 const DEFAULT_PORT = 3001;
@@ -143,8 +145,6 @@ app.get('/api/ping', (req, res) => {
   res.send('ok');
 });
 
-// NEW ENDPOINTS
-
 const cleaning: ICleaning = {
   history: [{
     time: Date.now(),
@@ -167,6 +167,34 @@ app.post('/api/cleaning', (req, res) => {
   cleaning.history.unshift(req.body);
   setTimeout(() => res.send({
     cleaning
+  }), 1000);
+});
+
+// NEW ENDPOINTS
+
+const testing: ITesting = {
+  history: [{
+    time: Date.now(),
+    ph: 8.2,
+    ammonia: 16,
+    nitrites: 0,
+    nitrates: 120
+  }]
+};
+app.get('/api/testing', (req, res) => {
+  res.send({
+    testing
+  });
+});
+
+app.post('/api/testing', (req, res) => {
+  if (!validate(req.body, testingValidationSchema).valid) {
+    res.sendStatus(400);
+    return;
+  }
+  testing.history.unshift(req.body);
+  setTimeout(() => res.send({
+    testing
   }), 1000);
 });
 
