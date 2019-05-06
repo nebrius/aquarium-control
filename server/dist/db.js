@@ -375,4 +375,49 @@ VALUES (
         }], (err) => cb(err));
 }
 exports.createCleaningEntry = createCleaningEntry;
+function getTestingHistory(userId, cb) {
+    const user = getUser(userId);
+    request(`SELECT * FROM ${util_1.DATABASE_NAMES.TESTING} WHERE deviceId=@deviceId ORDER BY time`, [{
+            name: 'deviceId',
+            type: tedious_1.TYPES.VarChar,
+            value: user.deviceId
+        }], (err, rowCount, rows) => {
+        if (err) {
+            cb(err, undefined);
+            return;
+        }
+        cb(undefined, rows.map((row) => ({
+            time: parseInt(row.time.value, 10),
+            ph: row.ph.value,
+            ammonia: row.ammonia.value,
+            nitrites: row.nitrites.value,
+            nitrates: row.nitrates.value
+        })));
+    });
+}
+exports.getTestingHistory = getTestingHistory;
+function createTestingEntry(userId, cleaningEntry, cb) {
+    const user = getUser(userId);
+    request(`INSERT INTO ${util_1.DATABASE_NAMES.TESTING} (
+  deviceId,
+  time,
+  ph,
+  ammonia,
+  nitrites,
+  nitrates
+)
+VALUES (
+  @deviceId,
+  ${cleaningEntry.time},
+  ${cleaningEntry.ph},
+  ${cleaningEntry.ammonia},
+  ${cleaningEntry.nitrites},
+  ${cleaningEntry.nitrates}
+)`, [{
+            name: 'deviceId',
+            type: tedious_1.TYPES.VarChar,
+            value: user.deviceId
+        }], (err) => cb(err));
+}
+exports.createTestingEntry = createTestingEntry;
 //# sourceMappingURL=db.js.map

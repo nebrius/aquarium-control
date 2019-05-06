@@ -26,6 +26,7 @@ import {
   IConfig,
   configValidationSchema,
   cleaningValidationSchema,
+  testingValidationSchema,
   ITemperature,
   ITemperatureSample
 } from './common/common';
@@ -38,7 +39,9 @@ import {
   getUser,
   getState,
   getCleaningHistory,
-  createCleaningEntry
+  createCleaningEntry,
+  getTestingHistory,
+  createTestingEntry
 } from './db';
 import { Authenticator } from 'express-facebook-auth';
 
@@ -182,6 +185,39 @@ export function init(cb: (err: Error | undefined) => void): void {
         } else {
           res.send({
             cleaning: { history }
+          });
+        }
+      });
+    });
+  });
+
+  app.get('/api/testing', (req, res) => {
+    getTestingHistory((req as IRequest).userId, (err, history) => {
+      if (err || !history) {
+        res.sendStatus(500);
+      } else {
+        res.send({
+          testing: { history }
+        });
+      }
+    });
+  });
+
+  app.post('/api/testing', (req, res) => {
+    if (!validate(req.body, testingValidationSchema).valid) {
+      res.sendStatus(400);
+      return;
+    }
+    createTestingEntry((req as IRequest).userId, req.body, (err) => {
+      if (err) {
+        res.sendStatus(500);
+      }
+      getTestingHistory((req as IRequest).userId, (err, history) => {
+        if (err || !history) {
+          res.sendStatus(500);
+        } else {
+          res.send({
+            testing: { history }
           });
         }
       });

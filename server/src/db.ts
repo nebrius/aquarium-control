@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { IState, IUser, ITemperatureSample, ICleaningEntry } from './common/common';
+import { IState, IUser, ITemperatureSample, ICleaningEntry, ITestingEntry } from './common/common';
 import { getEnvironmentVariable, getStartOfToday, DATABASE_NAMES } from './util';
 import { Connection, Request, TYPES, TediousType } from 'tedious';
 import { waterfall } from 'async';
@@ -454,6 +454,66 @@ VALUES (
   ${cleaningEntry.bioFilterReplaced ? 1 : 0},
   ${cleaningEntry.mechanicalFilterReplaced ? 1 : 0},
   ${cleaningEntry.spongeReplaced ? 1 : 0}
+)`,
+    [{
+      name: 'deviceId',
+      type: TYPES.VarChar,
+      value: user.deviceId
+    }],
+    (err) => cb(err)
+  );
+}
+
+export function getTestingHistory(
+  userId: string,
+  cb: (err: Error | undefined, history: ITestingEntry[] | undefined) => void
+): void {
+  const user = getUser(userId);
+  request(
+    `SELECT * FROM ${DATABASE_NAMES.TESTING} WHERE deviceId=@deviceId ORDER BY time`,
+    [{
+      name: 'deviceId',
+      type: TYPES.VarChar,
+      value: user.deviceId
+    }],
+    (err, rowCount, rows) => {
+      if (err) {
+        cb(err, undefined);
+        return;
+      }
+      cb(undefined, rows.map((row) => ({
+        time: parseInt(row.time.value, 10),
+        ph: row.ph.value,
+        ammonia: row.ammonia.value,
+        nitrites: row.nitrites.value,
+        nitrates: row.nitrates.value
+      })));
+    }
+  );
+}
+
+export function createTestingEntry(
+  userId: string,
+  cleaningEntry: ITestingEntry,
+  cb: (err: Error | undefined) => void
+) {
+  const user = getUser(userId);
+  request(
+`INSERT INTO ${DATABASE_NAMES.TESTING} (
+  deviceId,
+  time,
+  ph,
+  ammonia,
+  nitrites,
+  nitrates
+)
+VALUES (
+  @deviceId,
+  ${cleaningEntry.time},
+  ${cleaningEntry.ph},
+  ${cleaningEntry.ammonia},
+  ${cleaningEntry.nitrites},
+  ${cleaningEntry.nitrates}
 )`,
     [{
       name: 'deviceId',

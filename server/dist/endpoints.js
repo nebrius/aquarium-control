@@ -158,6 +158,39 @@ function init(cb) {
             });
         });
     });
+    app.get('/api/testing', (req, res) => {
+        db_1.getTestingHistory(req.userId, (err, history) => {
+            if (err || !history) {
+                res.sendStatus(500);
+            }
+            else {
+                res.send({
+                    testing: { history }
+                });
+            }
+        });
+    });
+    app.post('/api/testing', (req, res) => {
+        if (!revalidator_1.validate(req.body, common_1.testingValidationSchema).valid) {
+            res.sendStatus(400);
+            return;
+        }
+        db_1.createTestingEntry(req.userId, req.body, (err) => {
+            if (err) {
+                res.sendStatus(500);
+            }
+            db_1.getTestingHistory(req.userId, (err, history) => {
+                if (err || !history) {
+                    res.sendStatus(500);
+                }
+                else {
+                    res.send({
+                        testing: { history }
+                    });
+                }
+            });
+        });
+    });
     app.get('/api/ping', (req, res) => {
         res.send('ok');
     });
