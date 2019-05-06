@@ -191,7 +191,7 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.get('/api/testing', (req, res) => {
+  app.get('/api/testing', authenticator.createMiddleware(false), (req, res) => {
     getTestingHistory((req as IRequest).userId, (err, history) => {
       if (err || !history) {
         res.sendStatus(500);
@@ -203,7 +203,7 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.post('/api/testing', (req, res) => {
+  app.post('/api/testing', authenticator.createMiddleware(false), (req, res) => {
     if (!validate(req.body, testingValidationSchema).valid) {
       res.sendStatus(400);
       return;

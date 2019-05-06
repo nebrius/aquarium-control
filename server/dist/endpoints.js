@@ -158,7 +158,7 @@ function init(cb) {
             });
         });
     });
-    app.get('/api/testing', (req, res) => {
+    app.get('/api/testing', authenticator.createMiddleware(false), (req, res) => {
         db_1.getTestingHistory(req.userId, (err, history) => {
             if (err || !history) {
                 res.sendStatus(500);
@@ -170,7 +170,7 @@ function init(cb) {
             }
         });
     });
-    app.post('/api/testing', (req, res) => {
+    app.post('/api/testing', authenticator.createMiddleware(false), (req, res) => {
         if (!revalidator_1.validate(req.body, common_1.testingValidationSchema).valid) {
             res.sendStatus(400);
             return;
