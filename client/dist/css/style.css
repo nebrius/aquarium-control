@@ -76,6 +76,8 @@ h2 {
   padding: 10px;
 }
 
+/* State */
+
 .state-content {
   margin: 15px;
 }
@@ -106,6 +108,8 @@ h2 {
   margin-right: 10px;
 }
 
+/* Configuration */
+
 .configuration-contents {
   margin: 15px;
 }
@@ -116,21 +120,6 @@ h2 {
 
 .configuration-category > h3 {
   margin-bottom: 15px;
-}
-
-.temperature-content {
-  margin: 15px;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-}
-
-.temperature-section-container {
-  padding: 4px 10px;
-}
-
-.temperature-section-container > h3 {
-  text-align: center;
 }
 
 .schedule-entry-outer-container {
@@ -170,6 +159,25 @@ h2 {
   margin-right: 10px;
 }
 
+/* Temperature */
+
+.temperature-content {
+  margin: 15px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.temperature-section-container {
+  padding: 4px 10px;
+}
+
+.temperature-section-container > h3 {
+  text-align: center;
+}
+
+/* Cleaning */
+
 .record-cleaning-form {
   display: flex;
   flex-direction: column;
@@ -208,4 +216,39 @@ h2 {
 
 .cleaning-history-content-table td {
   text-align: center;
+}
+
+/* Testing */
+
+.record-testing-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.record-testing-form-details {
+  flex-wrap: wrap;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.record-testing-form-submit {
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.record-testing-form-detail {
+  margin: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.record-testing-form-detail > input {
+  margin-left: 5px;
+}
+
+.record-testing-form-detail > label {
+  margin-bottom: .25rem;
 }

@@ -70138,8 +70138,36 @@ var RecordTesting = /** @class */ (function (_super) {
                 return newState;
             });
         };
+        _this._handleAmmoniaChanged = function (event) {
+            var ammonia = parseFloat(event.currentTarget.value);
+            _this.setState(function (previousState) {
+                var newState = __assign({}, previousState, { ammonia: ammonia });
+                return newState;
+            });
+        };
+        _this._handleNitritesChanged = function (event) {
+            var nitrites = parseFloat(event.currentTarget.value);
+            _this.setState(function (previousState) {
+                var newState = __assign({}, previousState, { nitrites: nitrites });
+                return newState;
+            });
+        };
+        _this._handleNitratesChanged = function (event) {
+            var nitrates = parseFloat(event.currentTarget.value);
+            _this.setState(function (previousState) {
+                var newState = __assign({}, previousState, { nitrates: nitrates });
+                return newState;
+            });
+        };
         _this._handleSubmit = function (event) {
             event.preventDefault();
+            _this.props.requestCreateTestingRecord({
+                time: Date.now(),
+                ph: _this.state.ph,
+                ammonia: _this.state.ammonia,
+                nitrites: _this.state.nitrites,
+                nitrates: _this.state.nitrates
+            });
         };
         return _this;
     }
@@ -70152,11 +70180,22 @@ var RecordTesting = /** @class */ (function (_super) {
                     suceeded: 'Testing record created!',
                     failed: 'Could not create testing record!'
                 } }),
-            React.createElement("form", { onSubmit: this._handleSubmit, className: "record-cleaning-form" },
-                React.createElement("div", { className: "record-cleaning-form-details" },
-                    React.createElement("div", { className: "record-cleaning-form-detail" },
-                        React.createElement("label", { htmlFor: "request-cleaning-form-bio" }, "pH"),
-                        React.createElement("input", { type: "number", id: "request-cleaning-form-bio", onChange: this._handlePHChanged }))))));
+            React.createElement("form", { onSubmit: this._handleSubmit, className: "record-testing-form" },
+                React.createElement("div", { className: "record-testing-form-details" },
+                    React.createElement("div", { className: "record-testing-form-detail" },
+                        React.createElement("label", { htmlFor: "request-testing-form-ph" }, "pH"),
+                        React.createElement("input", { type: "number", value: this.state.ph, id: "request-testing-form-ph", onChange: this._handlePHChanged })),
+                    React.createElement("div", { className: "record-testing-form-detail" },
+                        React.createElement("label", { htmlFor: "request-testing-form-ammonia" }, "Ammonia"),
+                        React.createElement("input", { type: "number", value: this.state.ammonia, id: "request-testing-form-ammonia", onChange: this._handleAmmoniaChanged })),
+                    React.createElement("div", { className: "record-testing-form-detail" },
+                        React.createElement("label", { htmlFor: "request-testing-form-nitrites" }, "Nitrites"),
+                        React.createElement("input", { type: "number", value: this.state.nitrites, id: "request-testing-form-nitrites", onChange: this._handleNitritesChanged })),
+                    React.createElement("div", { className: "record-testing-form-detail" },
+                        React.createElement("label", { htmlFor: "request-testing-form-nitrates" }, "Nitrates"),
+                        React.createElement("input", { type: "number", value: this.state.nitrates, id: "request-testing-form-nitrates", onChange: this._handleNitratesChanged }))),
+                React.createElement("div", { className: "record-testing-form-submit" },
+                    React.createElement("input", { className: "btn btn-primary", type: "submit", value: "Create New Record", disabled: false })))));
     };
     return RecordTesting;
 }(React.Component));

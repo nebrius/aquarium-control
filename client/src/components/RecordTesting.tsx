@@ -54,12 +54,43 @@ export class RecordTesting extends
           suceeded: 'Testing record created!',
           failed: 'Could not create testing record!'
         }} />
-        <form onSubmit={this._handleSubmit} className="record-cleaning-form">
-          <div className="record-cleaning-form-details">
-            <div className="record-cleaning-form-detail">
-              <label htmlFor="request-cleaning-form-bio">pH</label>
-              <input type="number" id="request-cleaning-form-bio" onChange={this._handlePHChanged} />
+        <form onSubmit={this._handleSubmit} className="record-testing-form">
+          <div className="record-testing-form-details">
+            <div className="record-testing-form-detail">
+              <label htmlFor="request-testing-form-ph">pH</label>
+              <input
+                type="number"
+                value={this.state.ph}
+                id="request-testing-form-ph"
+                onChange={this._handlePHChanged} />
             </div>
+            <div className="record-testing-form-detail">
+              <label htmlFor="request-testing-form-ammonia">Ammonia</label>
+              <input
+                type="number"
+                value={this.state.ammonia}
+                id="request-testing-form-ammonia"
+                onChange={this._handleAmmoniaChanged} />
+            </div>
+            <div className="record-testing-form-detail">
+              <label htmlFor="request-testing-form-nitrites">Nitrites</label>
+              <input
+                type="number"
+                value={this.state.nitrites}
+                id="request-testing-form-nitrites"
+                onChange={this._handleNitritesChanged} />
+            </div>
+            <div className="record-testing-form-detail">
+              <label htmlFor="request-testing-form-nitrates">Nitrates</label>
+              <input
+                type="number"
+                value={this.state.nitrates}
+                id="request-testing-form-nitrates"
+                onChange={this._handleNitratesChanged} />
+            </div>
+          </div>
+          <div className="record-testing-form-submit">
+            <input className="btn btn-primary" type="submit" value="Create New Record" disabled={false} />
           </div>
         </form>
       </div>
@@ -77,7 +108,47 @@ export class RecordTesting extends
     });
   }
 
+  private _handleAmmoniaChanged = (event: React.FormEvent<HTMLInputElement>) => {
+    const ammonia = parseFloat(event.currentTarget.value);
+    this.setState((previousState) => {
+      const newState = {
+        ...previousState,
+        ammonia
+      };
+      return newState;
+    });
+  }
+
+  private _handleNitritesChanged = (event: React.FormEvent<HTMLInputElement>) => {
+    const nitrites = parseFloat(event.currentTarget.value);
+    this.setState((previousState) => {
+      const newState = {
+        ...previousState,
+        nitrites
+      };
+      return newState;
+    });
+  }
+
+  private _handleNitratesChanged = (event: React.FormEvent<HTMLInputElement>) => {
+    const nitrates = parseFloat(event.currentTarget.value);
+    this.setState((previousState) => {
+      const newState = {
+        ...previousState,
+        nitrates
+      };
+      return newState;
+    });
+  }
+
   private _handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    this.props.requestCreateTestingRecord({
+      time: Date.now(),
+      ph: this.state.ph,
+      ammonia: this.state.ammonia,
+      nitrites: this.state.nitrites,
+      nitrates: this.state.nitrates
+    });
   }
 }
