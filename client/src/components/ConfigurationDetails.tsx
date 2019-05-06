@@ -42,15 +42,6 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
     this.state = {
       unsavedConfig: clone(props.config)
     };
-
-    this._handleModeSelect = this._handleModeSelect.bind(this);
-    this._handleNewScheduleEntryRequested = this._handleNewScheduleEntryRequested.bind(this);
-    this._handleScheduleEntryUpdated = this._handleScheduleEntryUpdated.bind(this);
-    this._handleOverrideStateSelect = this._handleOverrideStateSelect.bind(this);
-    this._handleSubmit = this._handleSubmit.bind(this);
-    this._handleScheduleEntryDeleted = this._handleScheduleEntryDeleted.bind(this);
-    this._handleScheduleEntryMovedUp = this._handleScheduleEntryMovedUp.bind(this);
-    this._handleScheduleEntryMovedDown = this._handleScheduleEntryMovedDown.bind(this);
   }
 
   public render() {
@@ -131,7 +122,7 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
     );
   }
 
-  private _handleModeSelect(newMode: string) {
+  private _handleModeSelect = (newMode: string) => {
     if (newMode !== 'program' && newMode !== 'override') {
       throw new Error(`Internal Error: Unknown mode ${newMode}`);
     }
@@ -142,7 +133,7 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
     });
   }
 
-  private _handleNewScheduleEntryRequested() {
+  private _handleNewScheduleEntryRequested = () => {
     this.setState((previousState) => {
       const newState = clone(previousState);
       newState.unsavedConfig.schedule.push({
@@ -158,7 +149,7 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
     });
   }
 
-  private _handleScheduleEntryUpdated(index: number, newData: IScheduleEntry) {
+  private _handleScheduleEntryUpdated = (index: number, newData: IScheduleEntry) => {
     this.setState((previousState) => {
       const newState = clone(previousState);
       newState.unsavedConfig.schedule[index] = clone(newData);
@@ -166,7 +157,7 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
     });
   }
 
-  private _handleScheduleEntryDeleted(index: number) {
+  private _handleScheduleEntryDeleted = (index: number) => {
     this.setState((previousState) => {
       const newState = clone(previousState);
       newState.unsavedConfig.schedule.splice(index, 1);
@@ -174,7 +165,7 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
     });
   }
 
-  private _handleScheduleEntryMovedUp(index: number) {
+  private _handleScheduleEntryMovedUp = (index: number) => {
     if (index < 1) {
       return;
     }
@@ -187,7 +178,7 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
     });
   }
 
-  private _handleScheduleEntryMovedDown(index: number) {
+  private _handleScheduleEntryMovedDown = (index: number) => {
     if (index > this.state.unsavedConfig.schedule.length - 2) {
       return;
     }
@@ -200,7 +191,7 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
     });
   }
 
-  private _handleOverrideStateSelect(newOverrideState: string) {
+  private _handleOverrideStateSelect = (newOverrideState: string) => {
     if (newOverrideState !== 'day' && newOverrideState !== 'night' && newOverrideState !== 'off') {
       throw new Error(`Internal Error: Unknown override state ${newOverrideState}`);
     }
@@ -211,7 +202,7 @@ export class ConfigurationDetails extends React.Component<IConfigurationDetailsP
     });
   }
 
-  private _handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  private _handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     this.props.requestConfigUpdate(this.state.unsavedConfig);
   }

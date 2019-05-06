@@ -22,10 +22,13 @@ import { ConfigurationDetails } from './ConfigurationDetails';
 
 export interface IConfigurationProps {
   config: IAquariumConfig;
+}
+
+export interface IConfigurationDispatch {
   requestConfigUpdate: (newConfig: IConfig) => void;
 }
 
-export function Configuration(props: IConfigurationProps): JSX.Element {
+export function Configuration(props: IConfigurationProps & IConfigurationDispatch): JSX.Element {
   if (!props.config.config) {
     return (
       <div>

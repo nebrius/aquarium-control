@@ -69572,7 +69572,19 @@ var ButtonBar = /** @class */ (function (_super) {
     __extends(ButtonBar, _super);
     function ButtonBar(props) {
         var _this = _super.call(this, props) || this;
-        _this._handleItemClick = _this._handleItemClick.bind(_this);
+        _this._handleItemClick = function (event) {
+            var newValue = event.currentTarget.name;
+            if (newValue === _this.state.currentValueName) {
+                return;
+            }
+            _this.setState(function (previousState) {
+                _this.props.onItemSelected(newValue);
+                var newState = {
+                    currentValueName: newValue
+                };
+                return newState;
+            });
+        };
         _this.state = {
             currentValueName: _this.props.defaultValueName
         };
@@ -69588,20 +69600,6 @@ var ButtonBar = /** @class */ (function (_super) {
             return (React.createElement("button", { type: "button", className: className, onClick: _this._handleItemClick, name: item.valueName, key: item.valueName }, item.displayName));
         });
         return (React.createElement("div", { className: "btn-group", role: "group", "aria-label": "Mode" }, buttons));
-    };
-    ButtonBar.prototype._handleItemClick = function (event) {
-        var _this = this;
-        var newValue = event.currentTarget.name;
-        if (newValue === this.state.currentValueName) {
-            return;
-        }
-        this.setState(function (previousState) {
-            _this.props.onItemSelected(newValue);
-            var newState = {
-                currentValueName: newValue
-            };
-            return newState;
-        });
     };
     return ButtonBar;
 }(React.Component));
@@ -69766,17 +69764,86 @@ var ConfigurationDetails = /** @class */ (function (_super) {
     __extends(ConfigurationDetails, _super);
     function ConfigurationDetails(props) {
         var _this = _super.call(this, props) || this;
+        _this._handleModeSelect = function (newMode) {
+            if (newMode !== 'program' && newMode !== 'override') {
+                throw new Error("Internal Error: Unknown mode " + newMode);
+            }
+            _this.setState(function (previousState) {
+                var newState = clone(previousState);
+                newState.unsavedConfig.mode = newMode;
+                return newState;
+            });
+        };
+        _this._handleNewScheduleEntryRequested = function () {
+            _this.setState(function (previousState) {
+                var newState = clone(previousState);
+                newState.unsavedConfig.schedule.push({
+                    id: uuid_1.v4(),
+                    name: '',
+                    type: 'dynamic',
+                    state: 'off',
+                    details: {
+                        event: 'sunrise'
+                    }
+                });
+                return newState;
+            });
+        };
+        _this._handleScheduleEntryUpdated = function (index, newData) {
+            _this.setState(function (previousState) {
+                var newState = clone(previousState);
+                newState.unsavedConfig.schedule[index] = clone(newData);
+                return newState;
+            });
+        };
+        _this._handleScheduleEntryDeleted = function (index) {
+            _this.setState(function (previousState) {
+                var newState = clone(previousState);
+                newState.unsavedConfig.schedule.splice(index, 1);
+                return newState;
+            });
+        };
+        _this._handleScheduleEntryMovedUp = function (index) {
+            if (index < 1) {
+                return;
+            }
+            _this.setState(function (previousState) {
+                var newState = clone(previousState);
+                var entryToMove = newState.unsavedConfig.schedule[index];
+                newState.unsavedConfig.schedule.splice(index, 1);
+                newState.unsavedConfig.schedule.splice(index - 1, 0, entryToMove);
+                return newState;
+            });
+        };
+        _this._handleScheduleEntryMovedDown = function (index) {
+            if (index > _this.state.unsavedConfig.schedule.length - 2) {
+                return;
+            }
+            _this.setState(function (previousState) {
+                var newState = clone(previousState);
+                var entryToMove = newState.unsavedConfig.schedule[index];
+                newState.unsavedConfig.schedule.splice(index, 1);
+                newState.unsavedConfig.schedule.splice(index + 1, 0, entryToMove);
+                return newState;
+            });
+        };
+        _this._handleOverrideStateSelect = function (newOverrideState) {
+            if (newOverrideState !== 'day' && newOverrideState !== 'night' && newOverrideState !== 'off') {
+                throw new Error("Internal Error: Unknown override state " + newOverrideState);
+            }
+            _this.setState(function (previousState) {
+                var newState = clone(previousState);
+                newState.unsavedConfig.overrideState = newOverrideState;
+                return newState;
+            });
+        };
+        _this._handleSubmit = function (event) {
+            event.preventDefault();
+            _this.props.requestConfigUpdate(_this.state.unsavedConfig);
+        };
         _this.state = {
             unsavedConfig: clone(props.config)
         };
-        _this._handleModeSelect = _this._handleModeSelect.bind(_this);
-        _this._handleNewScheduleEntryRequested = _this._handleNewScheduleEntryRequested.bind(_this);
-        _this._handleScheduleEntryUpdated = _this._handleScheduleEntryUpdated.bind(_this);
-        _this._handleOverrideStateSelect = _this._handleOverrideStateSelect.bind(_this);
-        _this._handleSubmit = _this._handleSubmit.bind(_this);
-        _this._handleScheduleEntryDeleted = _this._handleScheduleEntryDeleted.bind(_this);
-        _this._handleScheduleEntryMovedUp = _this._handleScheduleEntryMovedUp.bind(_this);
-        _this._handleScheduleEntryMovedDown = _this._handleScheduleEntryMovedDown.bind(_this);
         return _this;
     }
     ConfigurationDetails.prototype.render = function () {
@@ -69822,83 +69889,6 @@ var ConfigurationDetails = /** @class */ (function (_super) {
                         ], onItemSelected: this._handleModeSelect, defaultValueName: this.state.unsavedConfig.mode })),
                 detailedConfig,
                 React.createElement("input", { className: "btn btn-primary", type: "submit", value: "Apply", disabled: !hasUnsavedChanges }))));
-    };
-    ConfigurationDetails.prototype._handleModeSelect = function (newMode) {
-        if (newMode !== 'program' && newMode !== 'override') {
-            throw new Error("Internal Error: Unknown mode " + newMode);
-        }
-        this.setState(function (previousState) {
-            var newState = clone(previousState);
-            newState.unsavedConfig.mode = newMode;
-            return newState;
-        });
-    };
-    ConfigurationDetails.prototype._handleNewScheduleEntryRequested = function () {
-        this.setState(function (previousState) {
-            var newState = clone(previousState);
-            newState.unsavedConfig.schedule.push({
-                id: uuid_1.v4(),
-                name: '',
-                type: 'dynamic',
-                state: 'off',
-                details: {
-                    event: 'sunrise'
-                }
-            });
-            return newState;
-        });
-    };
-    ConfigurationDetails.prototype._handleScheduleEntryUpdated = function (index, newData) {
-        this.setState(function (previousState) {
-            var newState = clone(previousState);
-            newState.unsavedConfig.schedule[index] = clone(newData);
-            return newState;
-        });
-    };
-    ConfigurationDetails.prototype._handleScheduleEntryDeleted = function (index) {
-        this.setState(function (previousState) {
-            var newState = clone(previousState);
-            newState.unsavedConfig.schedule.splice(index, 1);
-            return newState;
-        });
-    };
-    ConfigurationDetails.prototype._handleScheduleEntryMovedUp = function (index) {
-        if (index < 1) {
-            return;
-        }
-        this.setState(function (previousState) {
-            var newState = clone(previousState);
-            var entryToMove = newState.unsavedConfig.schedule[index];
-            newState.unsavedConfig.schedule.splice(index, 1);
-            newState.unsavedConfig.schedule.splice(index - 1, 0, entryToMove);
-            return newState;
-        });
-    };
-    ConfigurationDetails.prototype._handleScheduleEntryMovedDown = function (index) {
-        if (index > this.state.unsavedConfig.schedule.length - 2) {
-            return;
-        }
-        this.setState(function (previousState) {
-            var newState = clone(previousState);
-            var entryToMove = newState.unsavedConfig.schedule[index];
-            newState.unsavedConfig.schedule.splice(index, 1);
-            newState.unsavedConfig.schedule.splice(index + 1, 0, entryToMove);
-            return newState;
-        });
-    };
-    ConfigurationDetails.prototype._handleOverrideStateSelect = function (newOverrideState) {
-        if (newOverrideState !== 'day' && newOverrideState !== 'night' && newOverrideState !== 'off') {
-            throw new Error("Internal Error: Unknown override state " + newOverrideState);
-        }
-        this.setState(function (previousState) {
-            var newState = clone(previousState);
-            newState.unsavedConfig.overrideState = newOverrideState;
-            return newState;
-        });
-    };
-    ConfigurationDetails.prototype._handleSubmit = function (event) {
-        event.preventDefault();
-        this.props.requestConfigUpdate(this.state.unsavedConfig);
     };
     return ConfigurationDetails;
 }(React.Component));

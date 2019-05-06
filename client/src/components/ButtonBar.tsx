@@ -37,7 +37,6 @@ export class ButtonBar extends React.Component<IButtonBarProps, IButtonBarState>
 
   constructor(props: IButtonBarProps) {
     super(props);
-    this._handleItemClick = this._handleItemClick.bind(this);
     this.state = {
       currentValueName: this.props.defaultValueName
     };
@@ -68,7 +67,7 @@ export class ButtonBar extends React.Component<IButtonBarProps, IButtonBarState>
     );
   }
 
-  private _handleItemClick(event: React.MouseEvent<HTMLButtonElement>) {
+  private _handleItemClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     const newValue = event.currentTarget.name;
     if (newValue === this.state.currentValueName) {
       return;

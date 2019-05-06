@@ -20,16 +20,16 @@ import { IAppState } from '../util/IAppState';
 import { IConfig } from '../common/common';
 import { request } from '../util/api';
 import { IAction, configRequestUpdate, configUpdateFailed, configUpdateSucceeded } from '../actions/actions';
-import { Configuration } from '../components/Configuration';
+import { Configuration, IConfigurationProps, IConfigurationDispatch } from '../components/Configuration';
 import * as clone from 'clone';
 
-function mapStateToProps(state: IAppState) {
+function mapStateToProps(state: IAppState): IConfigurationProps {
   return {
     config: clone(state.aquariumConfig)
   };
 }
 
-function mapDispatchToProps(dispatch: (action: IAction) => any) {
+function mapDispatchToProps(dispatch: (action: IAction) => any): IConfigurationDispatch {
   return {
     requestConfigUpdate: (newConfig: IConfig) => {
       dispatch(configRequestUpdate(newConfig));
