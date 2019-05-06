@@ -30,7 +30,7 @@ import * as clone from 'clone';
 
 function mapStateToProps(state: IAppState): IRecordTestingProps {
   return {
-    saveStatus: clone(state.aquariumCleaning.saveStatus)
+    saveStatus: clone(state.aquariumTesting.saveStatus)
   };
 }
 

@@ -252,3 +252,14 @@ h2 {
 .record-testing-form-detail > label {
   margin-bottom: .25rem;
 }
+
+.testing-content {
+  margin: 15px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.testing-section-container {
+  padding: 4px 10px;
+}

@@ -69907,6 +69907,91 @@ exports.ConfigurationDetails = ConfigurationDetails;
 
 /***/ }),
 
+/***/ "./src/components/Graph.tsx":
+/*!**********************************!*\
+  !*** ./src/components/Graph.tsx ***!
+  \**********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/*
+Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
+
+Aquarium Control is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Aquarium Control is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
+*/
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+var react_chartjs_2_1 = __webpack_require__(/*! react-chartjs-2 */ "./node_modules/react-chartjs-2/es/index.js");
+var moment = __webpack_require__(/*! moment-timezone */ "./node_modules/moment-timezone/index.js");
+function Graph(props) {
+    // We only use the first dataset, since the sets always come from unified sources
+    var labels = props.dataSets[0].samples.map(function (sample) { return moment.tz(sample.time, props.timezone).format(props.dateType === 'time' ? 'h:mm a' : 'MM-DD'); });
+    // Create the datasets
+    var datasets = props.dataSets.map(function (dataset) {
+        var formattedDataset = {
+            backgroundColor: dataset.color,
+            borderColor: dataset.color,
+            data: dataset.samples.map(function (sample) { return sample.value; }),
+            fill: false,
+            label: dataset.label
+        };
+        return formattedDataset;
+    });
+    var dailyChartData = {
+        labels: labels,
+        datasets: datasets
+    };
+    var dailyChartOptions = {
+        responsive: true,
+        tooltips: {
+            mode: 'index',
+            intersect: false,
+        },
+        hover: {
+            mode: 'nearest',
+            intersect: true
+        },
+        scales: {
+            xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Date'
+                    }
+                }],
+            yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: props.yAxisLabel
+                    },
+                    ticks: {
+                        suggestedMin: props.suggestedMin,
+                        suggestedMax: props.suggestedMax
+                    }
+                }]
+        }
+    };
+    return (React.createElement(react_chartjs_2_1.Line, { data: dailyChartData, options: dailyChartOptions, width: props.width, height: props.height }));
+}
+exports.Graph = Graph;
+
+
+/***/ }),
+
 /***/ "./src/components/Header.tsx":
 /*!***********************************!*\
   !*** ./src/components/Header.tsx ***!
@@ -70683,7 +70768,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-var TemperatureGraph_1 = __webpack_require__(/*! ./TemperatureGraph */ "./src/components/TemperatureGraph.tsx");
+var Graph_1 = __webpack_require__(/*! ./Graph */ "./src/components/Graph.tsx");
 function Temperature(props) {
     if (!props.temperature.temperature || !props.user.user) {
         return (React.createElement("div", null,
@@ -70698,7 +70783,7 @@ function Temperature(props) {
             samples: temperatures.map(function (sample) {
                 return {
                     time: sample.time,
-                    temperature: sample.low
+                    value: sample.low
                 };
             }),
         }, {
@@ -70707,7 +70792,7 @@ function Temperature(props) {
             samples: temperatures.map(function (sample) {
                 return {
                     time: sample.time,
-                    temperature: sample.high
+                    value: sample.high
                 };
             })
         }];
@@ -70718,93 +70803,9 @@ function Temperature(props) {
             React.createElement("h2", null, "Temperature History")),
         React.createElement("div", { className: "temperature-content" },
             React.createElement("div", { className: "temperature-section-container" },
-                React.createElement(TemperatureGraph_1.TemperatureGraph, { dataSets: monthlyTemperatureData, timezone: props.user.user.timezone, dateType: "day", width: width, height: height })))));
+                React.createElement(Graph_1.Graph, { dataSets: monthlyTemperatureData, yAxisLabel: "Temperature (C)", timezone: props.user.user.timezone, dateType: "day", width: width, height: height, suggestedMin: 23, suggestedMax: 27 })))));
 }
 exports.Temperature = Temperature;
-
-
-/***/ }),
-
-/***/ "./src/components/TemperatureGraph.tsx":
-/*!*********************************************!*\
-  !*** ./src/components/TemperatureGraph.tsx ***!
-  \*********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-/*
-Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
-
-Aquarium Control is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Aquarium Control is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
-*/
-Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-var react_chartjs_2_1 = __webpack_require__(/*! react-chartjs-2 */ "./node_modules/react-chartjs-2/es/index.js");
-var moment = __webpack_require__(/*! moment-timezone */ "./node_modules/moment-timezone/index.js");
-function TemperatureGraph(props) {
-    // We only use the first dataset, since the sets always come from unified sources
-    var labels = props.dataSets[0].samples.map(function (sample) { return moment.tz(sample.time, props.timezone).format(props.dateType === 'time' ? 'h:mm a' : 'MM-DD'); });
-    // Create the datasets
-    var datasets = props.dataSets.map(function (dataset) {
-        return {
-            label: dataset.label,
-            backgroundColor: dataset.color,
-            borderColor: dataset.color,
-            data: dataset.samples.map(function (sample) { return sample.temperature; }),
-            fill: false,
-        };
-    });
-    var dailyChartData = {
-        labels: labels,
-        datasets: datasets
-    };
-    var dailyChartOptions = {
-        responsive: true,
-        tooltips: {
-            mode: 'index',
-            intersect: false,
-        },
-        hover: {
-            mode: 'nearest',
-            intersect: true
-        },
-        scales: {
-            xAxes: [{
-                    display: true,
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Date'
-                    }
-                }],
-            yAxes: [{
-                    display: true,
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Temperature (C)'
-                    },
-                    ticks: {
-                        suggestedMin: 23,
-                        suggestedMax: 27
-                    }
-                }]
-        }
-    };
-    return (React.createElement(react_chartjs_2_1.Line, { data: dailyChartData, options: dailyChartOptions, width: props.width, height: props.height }));
-}
-exports.TemperatureGraph = TemperatureGraph;
 
 
 /***/ }),
@@ -70836,17 +70837,79 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+var Graph_1 = __webpack_require__(/*! ./Graph */ "./src/components/Graph.tsx");
 function TestingHistory(props) {
-    if (!props.testingHistory) {
+    if (!props.testingHistory || !props.user || !props.user.user) {
         return (React.createElement("div", null,
             React.createElement("div", null,
                 React.createElement("h2", null, "Testing History")),
             React.createElement("div", { className: "alert alert-danger" }, "Current testing history is not available")));
     }
+    var phData = [{
+            label: 'pH',
+            color: 'rgb(54, 162, 235)',
+            samples: props.testingHistory.map(function (sample) {
+                return {
+                    time: sample.time,
+                    value: sample.ph
+                };
+            }),
+        }];
+    var ammoniaData = [{
+            label: 'pH',
+            color: 'rgb(54, 162, 235)',
+            samples: props.testingHistory.map(function (sample) {
+                return {
+                    time: sample.time,
+                    value: sample.ammonia
+                };
+            }),
+        }];
+    var nitritesData = [{
+            label: 'pH',
+            color: 'rgb(54, 162, 235)',
+            samples: props.testingHistory.map(function (sample) {
+                return {
+                    time: sample.time,
+                    value: sample.nitrites
+                };
+            }),
+        }];
+    var nitratesData = [{
+            label: 'pH',
+            color: 'rgb(54, 162, 235)',
+            samples: props.testingHistory.map(function (sample) {
+                return {
+                    time: sample.time,
+                    value: sample.nitrates
+                };
+            }),
+        }];
+    var width = Math.max(window.innerWidth - 100);
+    var height = window.innerHeight / 4;
     return (React.createElement("div", null,
         React.createElement("div", null,
             React.createElement("h2", null, "Testing History")),
-        React.createElement("div", { className: "Testing-content" }, "Testing History")));
+        React.createElement("div", { className: "testing-content" },
+            React.createElement("div", null,
+                React.createElement("h3", null, "pH")),
+            React.createElement("div", { className: "testing-section-container" },
+                React.createElement(Graph_1.Graph, { dataSets: phData, yAxisLabel: "pH", timezone: props.user.user.timezone, dateType: "day", width: width, height: height, suggestedMin: 6, suggestedMax: 9 }))),
+        React.createElement("div", { className: "testing-content" },
+            React.createElement("div", null,
+                React.createElement("h3", null, "Ammonia")),
+            React.createElement("div", { className: "testing-section-container" },
+                React.createElement(Graph_1.Graph, { dataSets: ammoniaData, yAxisLabel: "Ammonia (ppm)", timezone: props.user.user.timezone, dateType: "day", width: width, height: height, suggestedMin: 0, suggestedMax: 36 }))),
+        React.createElement("div", { className: "testing-content" },
+            React.createElement("div", null,
+                React.createElement("h3", null, "Nitrites")),
+            React.createElement("div", { className: "testing-section-container" },
+                React.createElement(Graph_1.Graph, { dataSets: nitritesData, yAxisLabel: "Nitrites (ppm)", timezone: props.user.user.timezone, dateType: "day", width: width, height: height, suggestedMin: 0, suggestedMax: 10 }))),
+        React.createElement("div", { className: "testing-content" },
+            React.createElement("div", null,
+                React.createElement("h3", null, "Nitrates")),
+            React.createElement("div", { className: "testing-section-container" },
+                React.createElement(Graph_1.Graph, { dataSets: nitratesData, yAxisLabel: "Nitrates", timezone: props.user.user.timezone, dateType: "day", width: width, height: height, suggestedMin: 0, suggestedMax: 160 })))));
 }
 exports.TestingHistory = TestingHistory;
 
@@ -71105,7 +71168,7 @@ var RecordTesting_1 = __webpack_require__(/*! ../components/RecordTesting */ "./
 var clone = __webpack_require__(/*! clone */ "./node_modules/clone/clone.js");
 function mapStateToProps(state) {
     return {
-        saveStatus: clone(state.aquariumCleaning.saveStatus)
+        saveStatus: clone(state.aquariumTesting.saveStatus)
     };
 }
 function mapDispatchToProps(dispatch) {

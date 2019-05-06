@@ -18,6 +18,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 import * as React from 'react';
 import { ITestingEntry } from '../common/common';
 import { IAquariumUser } from '../util/IAppState';
+import { Graph, ISampleSet } from './Graph';
 
 export interface ITestingHistoryProps {
   testingHistory: ITestingEntry[] | undefined;
@@ -25,7 +26,7 @@ export interface ITestingHistoryProps {
 }
 
 export function TestingHistory(props: ITestingHistoryProps): JSX.Element {
-  if (!props.testingHistory) {
+  if (!props.testingHistory || !props.user || !props.user.user) {
     return (
       <div>
         <div><h2>Testing History</h2></div>
@@ -33,11 +34,119 @@ export function TestingHistory(props: ITestingHistoryProps): JSX.Element {
       </div>
     );
   }
+
+  const phData: ISampleSet[] = [{
+    label: 'pH',
+    color: 'rgb(54, 162, 235)',
+    samples: props.testingHistory.map((sample) => {
+      return {
+        time: sample.time,
+        value: sample.ph
+      };
+    }),
+  }];
+
+  const ammoniaData: ISampleSet[] = [{
+    label: 'pH',
+    color: 'rgb(54, 162, 235)',
+    samples: props.testingHistory.map((sample) => {
+      return {
+        time: sample.time,
+        value: sample.ammonia
+      };
+    }),
+  }];
+
+  const nitritesData: ISampleSet[] = [{
+    label: 'pH',
+    color: 'rgb(54, 162, 235)',
+    samples: props.testingHistory.map((sample) => {
+      return {
+        time: sample.time,
+        value: sample.nitrites
+      };
+    }),
+  }];
+
+  const nitratesData: ISampleSet[] = [{
+    label: 'pH',
+    color: 'rgb(54, 162, 235)',
+    samples: props.testingHistory.map((sample) => {
+      return {
+        time: sample.time,
+        value: sample.nitrates
+      };
+    }),
+  }];
+
+  const width = Math.max(window.innerWidth - 100);
+  const height = window.innerHeight / 4;
   return (
     <div>
       <div><h2>Testing History</h2></div>
-      <div className="Testing-content">
-        Testing History
+
+      <div className="testing-content">
+        <div><h3>pH</h3></div>
+        <div className="testing-section-container">
+          <Graph
+            dataSets={phData}
+            yAxisLabel="pH"
+            timezone={props.user.user.timezone}
+            dateType="day"
+            width={width}
+            height={height}
+            suggestedMin={6}
+            suggestedMax={9}
+          />
+        </div>
+      </div>
+
+      <div className="testing-content">
+        <div><h3>Ammonia</h3></div>
+        <div className="testing-section-container">
+          <Graph
+            dataSets={ammoniaData}
+            yAxisLabel="Ammonia (ppm)"
+            timezone={props.user.user.timezone}
+            dateType="day"
+            width={width}
+            height={height}
+            suggestedMin={0}
+            suggestedMax={36}
+          />
+        </div>
+      </div>
+
+      <div className="testing-content">
+        <div><h3>Nitrites</h3></div>
+        <div className="testing-section-container">
+          <Graph
+            dataSets={nitritesData}
+            yAxisLabel="Nitrites (ppm)"
+            timezone={props.user.user.timezone}
+            dateType="day"
+            width={width}
+            height={height}
+            suggestedMin={0}
+            suggestedMax={10}
+          />
+        </div>
+      </div>
+
+      <div className="testing-content">
+        <div><h3>Nitrates</h3></div>
+        <div className="testing-section-container">
+          <Graph
+            dataSets={nitratesData}
+            yAxisLabel="Nitrates"
+            timezone={props.user.user.timezone}
+            dateType="day"
+            width={width}
+            height={height}
+            suggestedMin={0}
+            suggestedMax={160}
+          />
+        </div>
       </div>
     </div>
   );

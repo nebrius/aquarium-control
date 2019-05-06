@@ -22,7 +22,7 @@ import * as moment from 'moment-timezone';
 
 export interface ISample {
   time: number;
-  temperature: number;
+  value: number;
 }
 
 export interface ISampleSet {
@@ -31,15 +31,18 @@ export interface ISampleSet {
   samples: ISample[];
 }
 
-export interface ITemperatureGraphOptions {
+export interface IGraphOptions {
   dataSets: ISampleSet[];
+  yAxisLabel: string;
   timezone: string;
   dateType: 'time' | 'day';
   width: number;
   height: number;
+  suggestedMin: number;
+  suggestedMax: number;
 }
 
-export function TemperatureGraph(props: ITemperatureGraphOptions): JSX.Element {
+export function Graph(props: IGraphOptions): JSX.Element {
 
   // We only use the first dataset, since the sets always come from unified sources
   const labels = props.dataSets[0].samples.map(
@@ -47,13 +50,14 @@ export function TemperatureGraph(props: ITemperatureGraphOptions): JSX.Element {
 
   // Create the datasets
   const datasets = props.dataSets.map((dataset) => {
-    return {
-      label: dataset.label,
+    const formattedDataset: Chart.ChartDataSets = {
       backgroundColor: dataset.color,
       borderColor: dataset.color,
-      data: dataset.samples.map((sample) => sample.temperature),
+      data: dataset.samples.map((sample) => sample.value),
       fill: false,
+      label: dataset.label
     };
+    return formattedDataset;
   });
 
   const dailyChartData: ReactChartData<ChartData> = {
@@ -82,11 +86,11 @@ export function TemperatureGraph(props: ITemperatureGraphOptions): JSX.Element {
         display: true,
         scaleLabel: {
           display: true,
-          labelString: 'Temperature (C)'
+          labelString: props.yAxisLabel
         },
         ticks: {
-          suggestedMin: 23,
-          suggestedMax: 27
+          suggestedMin: props.suggestedMin,
+          suggestedMax: props.suggestedMax
         } as any
       }]
     }
