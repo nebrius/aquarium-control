@@ -19,35 +19,35 @@
   },
   "homepage": "https://github.com/nebrius/aquarium-control#readme",
   "devDependencies": {
-    "@types/async": "^2.0.47",
-    "@types/bluebird": "^3.5.19",
+    "@types/async": "^2.4.2",
+    "@types/bluebird": "^3.5.27",
     "@types/body-parser": "^1.16.8",
     "@types/cookie-parser": "^1.4.1",
-    "@types/express": "^4.11.0",
+    "@types/express": "^4.17.0",
     "@types/mkdirp": "^0.5.2",
     "@types/moment-timezone": "^0.5.3",
-    "@types/node": "^11.13.8",
+    "@types/node": "^11.13.14",
     "@types/request": "^2.0.11",
     "@types/revalidator": "^0.3.5",
     "@types/tedious": "^3.0.0",
     "rimraf": "^2.6.2",
-    "tslint": "^5.9.1",
-    "typescript": "^3.4.5"
+    "tslint": "^5.17.0",
+    "typescript": "^3.5.1"
   },
   "dependencies": {
-    "@azure/event-hubs": "^2.0.0",
+    "@azure/event-hubs": "^2.1.0",
     "async": "^2.6.0",
-    "azure-iothub": "^1.2.3",
+    "azure-iothub": "^1.9.9",
     "babel-runtime": "^6.26.0",
     "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",
-    "express": "^4.16.2",
+    "express": "^4.17.1",
     "express-facebook-auth": "^1.0.0",
     "mkdirp": "^0.5.1",
     "moment-timezone": "^0.5.14",
     "pug": "^2.0.0-rc.4",
     "request": "^2.83.0",
     "revalidator": "^0.3.1",
-    "tedious": "^6.1.1"
+    "tedious": "^6.1.2"
   }
 }

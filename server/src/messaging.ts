@@ -40,7 +40,7 @@ async function doInit() {
 
   client.receive(
     '1',
-    (eventData) => { // on 'message
+    (eventData) => { // on 'message'
       if (eventData.annotations) {
         const enqueuedTime = eventData.annotations['x-opt-enqueued-time'];
         console.debug(`Received message from IoT Hub, enqueued at ${enqueuedTime}`);
