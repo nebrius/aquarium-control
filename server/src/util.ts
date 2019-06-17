@@ -18,11 +18,11 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 import * as moment from 'moment-timezone';
 
 export const DATABASE_NAMES = {
-  STATE: 'current_state',
-  USERS: 'aquarium_users',
-  TEMPERATURE: 'monthly_temperature',
+  STATE: 'state',
+  TEMPERATURE: 'temperature_history',
   CLEANING: 'cleaning',
-  TESTING: 'testing'
+  TESTING: 'testing',
+  CONFIG: 'config'
 };
 
 export function getEnvironmentVariable(variable: string): string {

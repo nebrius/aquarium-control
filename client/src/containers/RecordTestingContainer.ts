@@ -25,7 +25,7 @@ import {
   testingCreateRecordSucceeded
 } from '../actions/actions';
 import { RecordTesting, IRecordTestingDispatch, IRecordTestingProps } from '../components/RecordTesting';
-import { ITesting, ITestingEntry } from '../common/common';
+import { ITestingEntry } from '../common/common';
 import * as clone from 'clone';
 
 function mapStateToProps(state: IAppState): IRecordTestingProps {
@@ -36,19 +36,18 @@ function mapStateToProps(state: IAppState): IRecordTestingProps {
 
 function mapDispatchToProps(dispatch: (action: IAction) => any): IRecordTestingDispatch {
   return {
-    requestCreateTestingRecord: (newRecord: ITestingEntry) => {
+    requestCreateTestingRecord: async (newRecord: ITestingEntry) => {
       dispatch(testingRequestCreateRecord(newRecord));
-      request({
-        endpoint: 'testing',
-        method: 'POST',
-        body: newRecord
-      }, (err, result: { testing: ITesting }) => {
-        if (err) {
-          dispatch(testingCreateRecordFailed());
-        } else {
-          dispatch(testingCreateRecordSucceeded(result.testing));
-        }
-      });
+      try {
+        const result = await request({
+          endpoint: 'testing',
+          method: 'POST',
+          body: newRecord
+        });
+        dispatch(testingCreateRecordSucceeded(result.testing));
+      } catch {
+        dispatch(testingCreateRecordFailed());
+      }
     }
   };
 }

@@ -1,13 +1,9 @@
-import { IState, IUser, ITemperatureSample, ICleaningEntry, ITestingEntry } from './common/common';
-export declare function getUsernameForUserId(userId: string): string;
-export declare function getDeviceForUserId(userId: string): string;
-export declare function getUserIdForDeviceId(deviceId: string): string | undefined;
-export declare function getTimezoneForUserId(userId: string): string;
-export declare function getUser(userId: string): IUser;
+import { IState, ITemperatureSample, ICleaningEntry, ITestingEntry, IConfig } from './common/common';
 export declare function init(cb: (err: Error | undefined) => void): void;
-export declare function isUserRegistered(userId: string): boolean;
-export declare function getState(deviceId: string, cb: (err: Error | undefined, state: IState | undefined) => void): void;
+export declare function getState(cb: (err: Error | undefined, state: IState | undefined) => void): void;
 export declare function updateState(newState: IState, cb?: (err: Error | undefined) => void): void;
+export declare function getConfig(cb: (err: Error | undefined, config: IConfig | undefined) => void): void;
+export declare function updateConfig(config: IConfig, cb: (err: Error | undefined) => void): void;
 export declare function getTemperatureHistory(userId: string, cb: (err: Error | undefined, history: ITemperatureSample[] | undefined) => void): void;
 export declare function getCleaningHistory(userId: string, cb: (err: Error | undefined, history: ICleaningEntry[] | undefined) => void): void;
 export declare function createCleaningEntry(userId: string, cleaningEntry: ICleaningEntry, cb: (err: Error | undefined) => void): void;

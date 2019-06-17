@@ -21,10 +21,7 @@ export interface IRequestOptions {
   body?: object;
 }
 
-export function request(
-  { endpoint, method, body }: IRequestOptions,
-  cb: (err: Error | string | undefined, result?: any) => void
-): void {
+export async function request({ endpoint, method, body }: IRequestOptions) {
   const options: RequestInit = { method, credentials: 'same-origin' };
   if (body) {
     const headers = new Headers();
@@ -32,13 +29,9 @@ export function request(
     options.headers = headers;
     options.body = JSON.stringify(body);
   }
-  fetch(`/api/${endpoint}`, options)
-    .then((res) => {
-      if (!res.ok) {
-        throw new Error(`Server returned ${res.statusText || res.status}`);
-      }
-      return res.json();
-    })
-    .then((data) => cb(undefined, data))
-    .catch((err) => cb(err));
+  const res = await fetch(`/api/${endpoint}`, options);
+  if (!res.ok) {
+    throw new Error(`Server returned ${res.statusText || res.status}`);
+  }
+  return await res.json();
 }

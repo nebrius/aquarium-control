@@ -18,11 +18,11 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 Object.defineProperty(exports, "__esModule", { value: true });
 const moment = require("moment-timezone");
 exports.DATABASE_NAMES = {
-    STATE: 'current_state',
-    USERS: 'aquarium_users',
-    TEMPERATURE: 'monthly_temperature',
+    STATE: 'state',
+    TEMPERATURE: 'temperature_history',
     CLEANING: 'cleaning',
-    TESTING: 'testing'
+    TESTING: 'testing',
+    CONFIG: 'config'
 };
 function getEnvironmentVariable(variable) {
     const value = process.env[variable];

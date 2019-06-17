@@ -17,14 +17,12 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import { init as initEndpoints } from './endpoints';
 import { init as initDB } from './db';
-import { init as initMessaging } from './messaging';
 import { series } from 'async';
 
 console.log('Starting Aquarium Control server');
 series([
   initDB,
-  initEndpoints,
-  initMessaging
+  initEndpoints
 ] as any, (err: Error | undefined) => {
   if (err) {
     console.error(err.message || err);

@@ -31,19 +31,18 @@ function mapStateToProps(state: IAppState): IConfigurationProps {
 
 function mapDispatchToProps(dispatch: (action: IAction) => any): IConfigurationDispatch {
   return {
-    requestConfigUpdate: (newConfig: IConfig) => {
+    requestConfigUpdate: async (newConfig: IConfig) => {
       dispatch(configRequestUpdate(newConfig));
-      request({
-        endpoint: 'config',
-        method: 'POST',
-        body: newConfig
-      }, (err, result) => {
-        if (err) {
-          dispatch(configUpdateFailed());
-        } else {
-          dispatch(configUpdateSucceeded(newConfig));
-        }
-      });
+      try {
+        await request({
+          endpoint: 'config',
+          method: 'POST',
+          body: newConfig
+        });
+        dispatch(configUpdateSucceeded(newConfig));
+      } catch {
+        dispatch(configUpdateFailed());
+      }
     }
   };
 }

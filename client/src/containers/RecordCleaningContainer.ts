@@ -25,7 +25,7 @@ import {
   cleaningCreateRecordSucceeded
 } from '../actions/actions';
 import { RecordCleaning, IRecordCleaningDispatch, IRecordCleaningProps } from '../components/RecordCleaning';
-import { ICleaning, ICleaningEntry } from '../common/common';
+import { ICleaningEntry } from '../common/common';
 import * as clone from 'clone';
 
 function mapStateToProps(state: IAppState): IRecordCleaningProps {
@@ -36,19 +36,18 @@ function mapStateToProps(state: IAppState): IRecordCleaningProps {
 
 function mapDispatchToProps(dispatch: (action: IAction) => any): IRecordCleaningDispatch {
   return {
-    requestCreateCleaningRecord: (newRecord: ICleaningEntry) => {
+    requestCreateCleaningRecord: async (newRecord: ICleaningEntry) => {
       dispatch(cleaningRequestCreateRecord(newRecord));
-      request({
-        endpoint: 'cleaning',
-        method: 'POST',
-        body: newRecord
-      }, (err, result: { cleaning: ICleaning }) => {
-        if (err) {
-          dispatch(cleaningCreateRecordFailed());
-        } else {
-          dispatch(cleaningCreateRecordSucceeded(result.cleaning));
-        }
-      });
+      try {
+        const result = await request({
+          endpoint: 'cleaning',
+          method: 'POST',
+          body: newRecord
+        });
+        dispatch(cleaningCreateRecordSucceeded(result.cleaning));
+      } catch {
+        dispatch(cleaningCreateRecordFailed());
+      }
     }
   };
 }

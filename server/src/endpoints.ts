@@ -30,20 +30,16 @@ import {
   ITemperature,
   ITemperatureSample
 } from './common/common';
-import { getConfig, setConfig } from './messaging';
-import { getEnvironmentVariable } from './util';
 import {
-  isUserRegistered,
   getTemperatureHistory,
-  getDeviceForUserId,
-  getUser,
   getState,
+  getConfig,
+  updateConfig,
   getCleaningHistory,
   createCleaningEntry,
   getTestingHistory,
   createTestingEntry
 } from './db';
-import { Authenticator } from 'express-facebook-auth';
 
 const DEFAULT_PORT = 3001;
 
@@ -56,21 +52,7 @@ export function init(cb: (err: Error | undefined) => void): void {
 
   const port = process.env.PORT || DEFAULT_PORT;
 
-  function getRedirectUri(): string {
-    return process.env.NODE_ENV === 'production'
-      ? `${getEnvironmentVariable('SERVER_HOST')}/login-success/`
-      : `http://localhost:${port}/login-success/`;
-  }
-
   const app = express();
-
-  const authenticator = new Authenticator({
-    facebookAppId: getEnvironmentVariable('FACEBOOK_APP_ID'),
-    facebookAppSecret: getEnvironmentVariable('FACEBOOK_APP_SECRET'),
-    isUserRegistered,
-    loginUri: '/login',
-    redirectUri: getRedirectUri()
-  });
 
   app.use(json());
   app.use(cookieParser());
@@ -86,25 +68,12 @@ export function init(cb: (err: Error | undefined) => void): void {
   app.set('view engine', 'pug');
   app.set('views', join(__dirname, '..', 'views'));
 
-  app.get('/login', (req, res) => {
-    res.render('login', {
-      facebookAppId: getEnvironmentVariable('FACEBOOK_APP_ID'),
-      redirectUri: getRedirectUri()
-    });
-  });
-
-  authenticator.createLoginSuccessEndpoint(app);
-
-  app.get('/', authenticator.createMiddleware(true), (req, res) => {
+  app.get('/', (req, res) => {
     res.render('index');
   });
 
-  app.get('/api/user', authenticator.createMiddleware(false), (req, res) => {
-    res.send(getUser((req as IRequest).userId));
-  });
-
-  app.get('/api/state', authenticator.createMiddleware(false), (req, res) => {
-    getState(getDeviceForUserId((req as IRequest).userId), (err, state) => {
+  app.get('/api/state', (req, res) => {
+    getState((err, state) => {
       if (err) {
         console.error(err);
         res.sendStatus(500);
@@ -114,26 +83,25 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.get('/api/config', authenticator.createMiddleware(false), (req, res) => {
-    getConfig(getDeviceForUserId((req as IRequest).userId), (err, config, isConfigUpToDate) => {
+  app.get('/api/config', (req, res) => {
+    getConfig((err, config) => {
       if (err) {
         console.error(err);
         res.sendStatus(500);
       } else {
         res.send({
-          config,
-          isConfigUpToDate
+          config
         });
       }
     });
   });
 
-  app.post('/api/config', authenticator.createMiddleware(false), (req, res) => {
+  app.post('/api/config', (req, res) => {
     if (!validate(req.body, configValidationSchema).valid) {
       res.sendStatus(400);
       return;
     }
-    setConfig(getDeviceForUserId((req as IRequest).userId), (req.body as IConfig), (err) => {
+    updateConfig((req.body as IConfig), (err) => {
       if (err) {
         console.error(err);
         res.sendStatus(500);
@@ -143,7 +111,7 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.get('/api/temperatures', authenticator.createMiddleware(false), (req, res) => {
+  app.get('/api/temperatures', (req, res) => {
     series([
       (done) => getTemperatureHistory((req as IRequest).userId, done),
     ], (err, results) => {
@@ -158,7 +126,7 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.get('/api/cleaning', authenticator.createMiddleware(false), (req, res) => {
+  app.get('/api/cleaning', (req, res) => {
     getCleaningHistory((req as IRequest).userId, (err, history) => {
       if (err || !history) {
         res.sendStatus(500);
@@ -170,7 +138,7 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.post('/api/cleaning', authenticator.createMiddleware(false), (req, res) => {
+  app.post('/api/cleaning', (req, res) => {
     if (!validate(req.body, cleaningValidationSchema).valid) {
       res.sendStatus(400);
       return;
@@ -191,7 +159,7 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.get('/api/testing', authenticator.createMiddleware(false), (req, res) => {
+  app.get('/api/testing', (req, res) => {
     getTestingHistory((req as IRequest).userId, (err, history) => {
       if (err || !history) {
         res.sendStatus(500);
@@ -203,7 +171,7 @@ export function init(cb: (err: Error | undefined) => void): void {
     });
   });
 
-  app.post('/api/testing', authenticator.createMiddleware(false), (req, res) => {
+  app.post('/api/testing', (req, res) => {
     if (!validate(req.body, testingValidationSchema).valid) {
       res.sendStatus(400);
       return;

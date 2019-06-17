@@ -63946,19 +63946,19 @@ var initStateUpdates = function initStateUpdates() {
 // a render is actually committed to the DOM.
 
 
-var useIsomorphicLayoutEffect = typeof window !== 'undefined' ? react__WEBPACK_IMPORTED_MODULE_4__["useLayoutEffect"] : react__WEBPACK_IMPORTED_MODULE_4__["useEffect"];
+var useIsomorphicLayoutEffect = typeof window !== 'undefined' && typeof window.document !== 'undefined' && typeof window.document.createElement !== 'undefined' ? react__WEBPACK_IMPORTED_MODULE_4__["useLayoutEffect"] : react__WEBPACK_IMPORTED_MODULE_4__["useEffect"];
 function connectAdvanced(
 /*
   selectorFactory is a func that is responsible for returning the selector function used to
   compute new props from state, props, and dispatch. For example:
-      export default connectAdvanced((dispatch, options) => (state, props) => ({
+     export default connectAdvanced((dispatch, options) => (state, props) => ({
       thing: state.things[props.thingId],
       saveThing: fields => dispatch(actionCreators.saveThing(props.thingId, fields)),
     }))(YourComponent)
-    Access to dispatch is provided to the factory so selectorFactories can bind actionCreators
+   Access to dispatch is provided to the factory so selectorFactories can bind actionCreators
   outside of their selector as an optimization. Options passed to connectAdvanced are passed to
   the selectorFactory, along with displayName and WrappedComponent, as the second argument.
-    Note that selectorFactory is responsible for all caching/memoization of inbound and outbound
+   Note that selectorFactory is responsible for all caching/memoization of inbound and outbound
   props. Do not use connectAdvanced directly without memoizing results between calls to your
   selector, otherwise the Connect component will re-render on every state or props change.
 */
@@ -64031,11 +64031,10 @@ _ref) {
         // Distinguish between actual "data" props that were passed to the wrapper component,
         // and values needed to control behavior (forwarded refs, alternate context instances).
         // To maintain the wrapperProps object reference, memoize this destructuring.
-        var context = props.context,
-            forwardedRef = props.forwardedRef,
-            wrapperProps = Object(_babel_runtime_helpers_esm_objectWithoutPropertiesLoose__WEBPACK_IMPORTED_MODULE_1__["default"])(props, ["context", "forwardedRef"]);
+        var forwardedRef = props.forwardedRef,
+            wrapperProps = Object(_babel_runtime_helpers_esm_objectWithoutPropertiesLoose__WEBPACK_IMPORTED_MODULE_1__["default"])(props, ["forwardedRef"]);
 
-        return [context, forwardedRef, wrapperProps];
+        return [props.context, forwardedRef, wrapperProps];
       }, [props]),
           propsContext = _useMemo[0],
           forwardedRef = _useMemo[1],
@@ -64710,11 +64709,270 @@ function wrapMapToPropsFunc(mapToProps, methodName) {
 
 /***/ }),
 
+/***/ "./node_modules/react-redux/es/hooks/useDispatch.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/react-redux/es/hooks/useDispatch.js ***!
+  \**********************************************************/
+/*! exports provided: useDispatch */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "useDispatch", function() { return useDispatch; });
+/* harmony import */ var _useStore__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./useStore */ "./node_modules/react-redux/es/hooks/useStore.js");
+
+/**
+ * A hook to access the redux `dispatch` function. Note that in most cases where you
+ * might want to use this hook it is recommended to use `useActions` instead to bind
+ * action creators to the `dispatch` function.
+ *
+ * @returns {any|function} redux store's `dispatch` function
+ *
+ * @example
+ *
+ * import React, { useCallback } from 'react'
+ * import { useReduxDispatch } from 'react-redux'
+ *
+ * export const CounterComponent = ({ value }) => {
+ *   const dispatch = useDispatch()
+ *   const increaseCounter = useCallback(() => dispatch({ type: 'increase-counter' }), [])
+ *   return (
+ *     <div>
+ *       <span>{value}</span>
+ *       <button onClick={increaseCounter}>Increase counter</button>
+ *     </div>
+ *   )
+ * }
+ */
+
+function useDispatch() {
+  var store = Object(_useStore__WEBPACK_IMPORTED_MODULE_0__["useStore"])();
+  return store.dispatch;
+}
+
+/***/ }),
+
+/***/ "./node_modules/react-redux/es/hooks/useReduxContext.js":
+/*!**************************************************************!*\
+  !*** ./node_modules/react-redux/es/hooks/useReduxContext.js ***!
+  \**************************************************************/
+/*! exports provided: useReduxContext */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "useReduxContext", function() { return useReduxContext; });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var invariant__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! invariant */ "./node_modules/invariant/browser.js");
+/* harmony import */ var invariant__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(invariant__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _components_Context__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../components/Context */ "./node_modules/react-redux/es/components/Context.js");
+
+
+
+/**
+ * A hook to access the value of the `ReactReduxContext`. This is a low-level
+ * hook that you should usually not need to call directly.
+ *
+ * @returns {any} the value of the `ReactReduxContext`
+ *
+ * @example
+ *
+ * import React from 'react'
+ * import { useReduxContext } from 'react-redux'
+ *
+ * export const CounterComponent = ({ value }) => {
+ *   const { store } = useReduxContext()
+ *   return <div>{store.getState()}</div>
+ * }
+ */
+
+function useReduxContext() {
+  var contextValue = Object(react__WEBPACK_IMPORTED_MODULE_0__["useContext"])(_components_Context__WEBPACK_IMPORTED_MODULE_2__["ReactReduxContext"]);
+  invariant__WEBPACK_IMPORTED_MODULE_1___default()(contextValue, 'could not find react-redux context value; please ensure the component is wrapped in a <Provider>');
+  return contextValue;
+}
+
+/***/ }),
+
+/***/ "./node_modules/react-redux/es/hooks/useSelector.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/react-redux/es/hooks/useSelector.js ***!
+  \**********************************************************/
+/*! exports provided: useSelector */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "useSelector", function() { return useSelector; });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var invariant__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! invariant */ "./node_modules/invariant/browser.js");
+/* harmony import */ var invariant__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(invariant__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _useReduxContext__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./useReduxContext */ "./node_modules/react-redux/es/hooks/useReduxContext.js");
+/* harmony import */ var _utils_Subscription__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils/Subscription */ "./node_modules/react-redux/es/utils/Subscription.js");
+
+
+
+ // React currently throws a warning when using useLayoutEffect on the server.
+// To get around it, we can conditionally useEffect on the server (no-op) and
+// useLayoutEffect in the browser. We need useLayoutEffect to ensure the store
+// subscription callback always has the selector from the latest render commit
+// available, otherwise a store update may happen between render and the effect,
+// which may cause missed updates; we also must ensure the store subscription
+// is created synchronously, otherwise a store update may occur before the
+// subscription is created and an inconsistent state may be observed
+
+var useIsomorphicLayoutEffect = typeof window !== 'undefined' ? react__WEBPACK_IMPORTED_MODULE_0__["useLayoutEffect"] : react__WEBPACK_IMPORTED_MODULE_0__["useEffect"];
+
+var refEquality = function refEquality(a, b) {
+  return a === b;
+};
+/**
+ * A hook to access the redux store's state. This hook takes a selector function
+ * as an argument. The selector is called with the store state.
+ *
+ * This hook takes an optional equality comparison function as the second parameter
+ * that allows you to customize the way the selected state is compared to determine
+ * whether the component needs to be re-rendered.
+ *
+ * @param {Function} selector the selector function
+ * @param {Function=} equalityFn the function that will be used to determine equality
+ *
+ * @returns {any} the selected state
+ *
+ * @example
+ *
+ * import React from 'react'
+ * import { useSelector } from 'react-redux'
+ *
+ * export const CounterComponent = () => {
+ *   const counter = useSelector(state => state.counter)
+ *   return <div>{counter}</div>
+ * }
+ */
+
+
+function useSelector(selector, equalityFn) {
+  if (equalityFn === void 0) {
+    equalityFn = refEquality;
+  }
+
+  invariant__WEBPACK_IMPORTED_MODULE_1___default()(selector, "You must pass a selector to useSelectors");
+
+  var _useReduxContext = Object(_useReduxContext__WEBPACK_IMPORTED_MODULE_2__["useReduxContext"])(),
+      store = _useReduxContext.store,
+      contextSub = _useReduxContext.subscription;
+
+  var _useReducer = Object(react__WEBPACK_IMPORTED_MODULE_0__["useReducer"])(function (s) {
+    return s + 1;
+  }, 0),
+      forceRender = _useReducer[1];
+
+  var subscription = Object(react__WEBPACK_IMPORTED_MODULE_0__["useMemo"])(function () {
+    return new _utils_Subscription__WEBPACK_IMPORTED_MODULE_3__["default"](store, contextSub);
+  }, [store, contextSub]);
+  var latestSubscriptionCallbackError = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])();
+  var latestSelector = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])();
+  var latestSelectedState = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])();
+  var selectedState;
+
+  try {
+    if (selector !== latestSelector.current || latestSubscriptionCallbackError.current) {
+      selectedState = selector(store.getState());
+    } else {
+      selectedState = latestSelectedState.current;
+    }
+  } catch (err) {
+    var errorMessage = "An error occured while selecting the store state: " + err.message + ".";
+
+    if (latestSubscriptionCallbackError.current) {
+      errorMessage += "\nThe error may be correlated with this previous error:\n" + latestSubscriptionCallbackError.current.stack + "\n\nOriginal stack trace:";
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  useIsomorphicLayoutEffect(function () {
+    latestSelector.current = selector;
+    latestSelectedState.current = selectedState;
+    latestSubscriptionCallbackError.current = undefined;
+  });
+  useIsomorphicLayoutEffect(function () {
+    function checkForUpdates() {
+      try {
+        var newSelectedState = latestSelector.current(store.getState());
+
+        if (equalityFn(newSelectedState, latestSelectedState.current)) {
+          return;
+        }
+
+        latestSelectedState.current = newSelectedState;
+      } catch (err) {
+        // we ignore all errors here, since when the component
+        // is re-rendered, the selectors are called again, and
+        // will throw again, if neither props nor store state
+        // changed
+        latestSubscriptionCallbackError.current = err;
+      }
+
+      forceRender({});
+    }
+
+    subscription.onStateChange = checkForUpdates;
+    subscription.trySubscribe();
+    checkForUpdates();
+    return function () {
+      return subscription.tryUnsubscribe();
+    };
+  }, [store, subscription]);
+  return selectedState;
+}
+
+/***/ }),
+
+/***/ "./node_modules/react-redux/es/hooks/useStore.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/react-redux/es/hooks/useStore.js ***!
+  \*******************************************************/
+/*! exports provided: useStore */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "useStore", function() { return useStore; });
+/* harmony import */ var _useReduxContext__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./useReduxContext */ "./node_modules/react-redux/es/hooks/useReduxContext.js");
+
+/**
+ * A hook to access the redux store.
+ *
+ * @returns {any} the redux store
+ *
+ * @example
+ *
+ * import React from 'react'
+ * import { useStore } from 'react-redux'
+ *
+ * export const ExampleComponent = () => {
+ *   const store = useStore()
+ *   return <div>{store.getState()}</div>
+ * }
+ */
+
+function useStore() {
+  var _useReduxContext = Object(_useReduxContext__WEBPACK_IMPORTED_MODULE_0__["useReduxContext"])(),
+      store = _useReduxContext.store;
+
+  return store;
+}
+
+/***/ }),
+
 /***/ "./node_modules/react-redux/es/index.js":
 /*!**********************************************!*\
   !*** ./node_modules/react-redux/es/index.js ***!
   \**********************************************/
-/*! exports provided: Provider, connectAdvanced, ReactReduxContext, connect, batch */
+/*! exports provided: Provider, connectAdvanced, ReactReduxContext, connect, batch, useDispatch, useSelector, useStore, shallowEqual */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -64731,9 +64989,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _connect_connect__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./connect/connect */ "./node_modules/react-redux/es/connect/connect.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "connect", function() { return _connect_connect__WEBPACK_IMPORTED_MODULE_3__["default"]; });
 
-/* harmony import */ var _utils_batch__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./utils/batch */ "./node_modules/react-redux/es/utils/batch.js");
-/* harmony import */ var _utils_reactBatchedUpdates__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./utils/reactBatchedUpdates */ "./node_modules/react-redux/es/utils/reactBatchedUpdates.js");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "batch", function() { return _utils_reactBatchedUpdates__WEBPACK_IMPORTED_MODULE_5__["unstable_batchedUpdates"]; });
+/* harmony import */ var _hooks_useDispatch__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./hooks/useDispatch */ "./node_modules/react-redux/es/hooks/useDispatch.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "useDispatch", function() { return _hooks_useDispatch__WEBPACK_IMPORTED_MODULE_4__["useDispatch"]; });
+
+/* harmony import */ var _hooks_useSelector__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./hooks/useSelector */ "./node_modules/react-redux/es/hooks/useSelector.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "useSelector", function() { return _hooks_useSelector__WEBPACK_IMPORTED_MODULE_5__["useSelector"]; });
+
+/* harmony import */ var _hooks_useStore__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./hooks/useStore */ "./node_modules/react-redux/es/hooks/useStore.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "useStore", function() { return _hooks_useStore__WEBPACK_IMPORTED_MODULE_6__["useStore"]; });
+
+/* harmony import */ var _utils_batch__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./utils/batch */ "./node_modules/react-redux/es/utils/batch.js");
+/* harmony import */ var _utils_reactBatchedUpdates__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./utils/reactBatchedUpdates */ "./node_modules/react-redux/es/utils/reactBatchedUpdates.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "batch", function() { return _utils_reactBatchedUpdates__WEBPACK_IMPORTED_MODULE_8__["unstable_batchedUpdates"]; });
+
+/* harmony import */ var _utils_shallowEqual__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./utils/shallowEqual */ "./node_modules/react-redux/es/utils/shallowEqual.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "shallowEqual", function() { return _utils_shallowEqual__WEBPACK_IMPORTED_MODULE_9__["default"]; });
 
 
 
@@ -64741,7 +65011,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-Object(_utils_batch__WEBPACK_IMPORTED_MODULE_4__["setBatch"])(_utils_reactBatchedUpdates__WEBPACK_IMPORTED_MODULE_5__["unstable_batchedUpdates"]);
+
+
+
+
+Object(_utils_batch__WEBPACK_IMPORTED_MODULE_7__["setBatch"])(_utils_reactBatchedUpdates__WEBPACK_IMPORTED_MODULE_8__["unstable_batchedUpdates"]);
 
 
 /***/ }),
@@ -69437,6 +69711,41 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 var react_dom_1 = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js");
@@ -69447,82 +69756,132 @@ var api_1 = __webpack_require__(/*! ./util/api */ "./src/util/api.ts");
 var actions_1 = __webpack_require__(/*! ./actions/actions */ "./src/actions/actions.ts");
 var STATE_UPDATE_RATE = 60 * 1000;
 var TEMPERATURE_UPDATE_RATE = 60 * 1000;
-function updateState() {
-    api_1.request({
-        endpoint: 'state',
-        method: 'GET',
-    }, function (err, result) {
-        if (err) {
-            store_1.store.dispatch(actions_1.stateFetchFailed());
+function run() {
+    return __awaiter(this, void 0, void 0, function () {
+        function updateState() {
+            return __awaiter(this, void 0, void 0, function () {
+                var result, _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            _b.trys.push([0, 2, , 3]);
+                            return [4 /*yield*/, api_1.request({
+                                    endpoint: 'state',
+                                    method: 'GET',
+                                })];
+                        case 1:
+                            result = _b.sent();
+                            store_1.store.dispatch(actions_1.stateFetchSucceeded(result));
+                            return [3 /*break*/, 3];
+                        case 2:
+                            _a = _b.sent();
+                            store_1.store.dispatch(actions_1.stateFetchFailed());
+                            return [3 /*break*/, 3];
+                        case 3:
+                            setTimeout(updateState, STATE_UPDATE_RATE);
+                            return [2 /*return*/];
+                    }
+                });
+            });
         }
-        else {
-            store_1.store.dispatch(actions_1.stateFetchSucceeded(result));
+        function updateTemperature() {
+            return __awaiter(this, void 0, void 0, function () {
+                var result, _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            _b.trys.push([0, 2, , 3]);
+                            return [4 /*yield*/, api_1.request({
+                                    endpoint: 'temperatures',
+                                    method: 'GET'
+                                })];
+                        case 1:
+                            result = _b.sent();
+                            store_1.store.dispatch(actions_1.temperatureFetchSuceeded(result));
+                            return [3 /*break*/, 3];
+                        case 2:
+                            _a = _b.sent();
+                            store_1.store.dispatch(actions_1.temperatureFetchFailed());
+                            return [3 /*break*/, 3];
+                        case 3:
+                            setTimeout(updateTemperature, TEMPERATURE_UPDATE_RATE);
+                            return [2 /*return*/];
+                    }
+                });
+            });
         }
-        setTimeout(updateState, STATE_UPDATE_RATE);
+        var result, _a, result, _b, result, _c, result, _d;
+        return __generator(this, function (_e) {
+            switch (_e.label) {
+                case 0:
+                    updateState();
+                    _e.label = 1;
+                case 1:
+                    _e.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, api_1.request({
+                            endpoint: 'user',
+                            method: 'GET'
+                        })];
+                case 2:
+                    result = _e.sent();
+                    store_1.store.dispatch(actions_1.userFetchSucceeded(result));
+                    return [3 /*break*/, 4];
+                case 3:
+                    _a = _e.sent();
+                    store_1.store.dispatch(actions_1.userFetchFailed());
+                    return [3 /*break*/, 4];
+                case 4:
+                    _e.trys.push([4, 6, , 7]);
+                    return [4 /*yield*/, api_1.request({
+                            endpoint: 'config',
+                            method: 'GET'
+                        })];
+                case 5:
+                    result = _e.sent();
+                    store_1.store.dispatch(actions_1.configFetchSucceeded(result.config));
+                    return [3 /*break*/, 7];
+                case 6:
+                    _b = _e.sent();
+                    store_1.store.dispatch(actions_1.configFetchFailed());
+                    return [3 /*break*/, 7];
+                case 7:
+                    _e.trys.push([7, 9, , 10]);
+                    return [4 /*yield*/, api_1.request({
+                            endpoint: 'cleaning',
+                            method: 'GET'
+                        })];
+                case 8:
+                    result = _e.sent();
+                    store_1.store.dispatch(actions_1.cleaningHistoryFetchSucceeded(result.cleaning));
+                    return [3 /*break*/, 10];
+                case 9:
+                    _c = _e.sent();
+                    store_1.store.dispatch(actions_1.cleaningHistoryFetchFailed());
+                    return [3 /*break*/, 10];
+                case 10:
+                    _e.trys.push([10, 12, , 13]);
+                    return [4 /*yield*/, api_1.request({
+                            endpoint: 'testing',
+                            method: 'GET'
+                        })];
+                case 11:
+                    result = _e.sent();
+                    store_1.store.dispatch(actions_1.testingHistoryFetchSucceeded(result.testing));
+                    return [3 /*break*/, 13];
+                case 12:
+                    _d = _e.sent();
+                    store_1.store.dispatch(actions_1.testingHistoryFetchFailed());
+                    return [3 /*break*/, 13];
+                case 13:
+                    updateTemperature();
+                    react_dom_1.render((React.createElement(react_redux_1.Provider, { store: store_1.store },
+                        React.createElement(Root_1.Root, null))), document.getElementById('root'));
+                    return [2 /*return*/];
+            }
+        });
     });
 }
-updateState();
-api_1.request({
-    endpoint: 'user',
-    method: 'GET'
-}, function (err, result) {
-    if (err) {
-        store_1.store.dispatch(actions_1.userFetchFailed());
-    }
-    else {
-        store_1.store.dispatch(actions_1.userFetchSucceeded(result));
-    }
-});
-api_1.request({
-    endpoint: 'config',
-    method: 'GET'
-}, function (err, result) {
-    if (err) {
-        store_1.store.dispatch(actions_1.configFetchFailed());
-    }
-    else {
-        store_1.store.dispatch(actions_1.configFetchSucceeded(result.config));
-    }
-});
-api_1.request({
-    endpoint: 'cleaning',
-    method: 'GET'
-}, function (err, result) {
-    if (err) {
-        store_1.store.dispatch(actions_1.cleaningHistoryFetchFailed());
-    }
-    else {
-        store_1.store.dispatch(actions_1.cleaningHistoryFetchSucceeded(result.cleaning));
-    }
-});
-api_1.request({
-    endpoint: 'testing',
-    method: 'GET'
-}, function (err, result) {
-    if (err) {
-        store_1.store.dispatch(actions_1.testingHistoryFetchFailed());
-    }
-    else {
-        store_1.store.dispatch(actions_1.testingHistoryFetchSucceeded(result.testing));
-    }
-});
-function updateTemperature() {
-    api_1.request({
-        endpoint: 'temperatures',
-        method: 'GET'
-    }, function (err, result) {
-        if (err) {
-            store_1.store.dispatch(actions_1.temperatureFetchFailed());
-        }
-        else {
-            store_1.store.dispatch(actions_1.temperatureFetchSuceeded(result));
-        }
-        setTimeout(updateTemperature, TEMPERATURE_UPDATE_RATE);
-    });
-}
-updateTemperature();
-react_dom_1.render((React.createElement(react_redux_1.Provider, { store: store_1.store },
-    React.createElement(Root_1.Root, null))), document.getElementById('root'));
+run();
 
 
 /***/ }),
@@ -70980,6 +71339,41 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 var api_1 = __webpack_require__(/*! ../util/api */ "./src/util/api.ts");
@@ -70992,22 +71386,34 @@ function mapStateToProps(state) {
     };
 }
 function mapDispatchToProps(dispatch) {
+    var _this = this;
     return {
-        requestConfigUpdate: function (newConfig) {
-            dispatch(actions_1.configRequestUpdate(newConfig));
-            api_1.request({
-                endpoint: 'config',
-                method: 'POST',
-                body: newConfig
-            }, function (err, result) {
-                if (err) {
-                    dispatch(actions_1.configUpdateFailed());
-                }
-                else {
-                    dispatch(actions_1.configUpdateSucceeded(newConfig));
+        requestConfigUpdate: function (newConfig) { return __awaiter(_this, void 0, void 0, function () {
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        dispatch(actions_1.configRequestUpdate(newConfig));
+                        _b.label = 1;
+                    case 1:
+                        _b.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, api_1.request({
+                                endpoint: 'config',
+                                method: 'POST',
+                                body: newConfig
+                            })];
+                    case 2:
+                        _b.sent();
+                        dispatch(actions_1.configUpdateSucceeded(newConfig));
+                        return [3 /*break*/, 4];
+                    case 3:
+                        _a = _b.sent();
+                        dispatch(actions_1.configUpdateFailed());
+                        return [3 /*break*/, 4];
+                    case 4: return [2 /*return*/];
                 }
             });
-        }
+        }); }
     };
 }
 exports.ConfigurationContainer = react_redux_1.connect(mapStateToProps, mapDispatchToProps)(Configuration_1.Configuration);
@@ -71090,6 +71496,41 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 var api_1 = __webpack_require__(/*! ../util/api */ "./src/util/api.ts");
@@ -71102,22 +71543,34 @@ function mapStateToProps(state) {
     };
 }
 function mapDispatchToProps(dispatch) {
+    var _this = this;
     return {
-        requestCreateCleaningRecord: function (newRecord) {
-            dispatch(actions_1.cleaningRequestCreateRecord(newRecord));
-            api_1.request({
-                endpoint: 'cleaning',
-                method: 'POST',
-                body: newRecord
-            }, function (err, result) {
-                if (err) {
-                    dispatch(actions_1.cleaningCreateRecordFailed());
-                }
-                else {
-                    dispatch(actions_1.cleaningCreateRecordSucceeded(result.cleaning));
+        requestCreateCleaningRecord: function (newRecord) { return __awaiter(_this, void 0, void 0, function () {
+            var result, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        dispatch(actions_1.cleaningRequestCreateRecord(newRecord));
+                        _b.label = 1;
+                    case 1:
+                        _b.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, api_1.request({
+                                endpoint: 'cleaning',
+                                method: 'POST',
+                                body: newRecord
+                            })];
+                    case 2:
+                        result = _b.sent();
+                        dispatch(actions_1.cleaningCreateRecordSucceeded(result.cleaning));
+                        return [3 /*break*/, 4];
+                    case 3:
+                        _a = _b.sent();
+                        dispatch(actions_1.cleaningCreateRecordFailed());
+                        return [3 /*break*/, 4];
+                    case 4: return [2 /*return*/];
                 }
             });
-        }
+        }); }
     };
 }
 exports.RecordCleaningContainer = react_redux_1.connect(mapStateToProps, mapDispatchToProps)(RecordCleaning_1.RecordCleaning);
@@ -71150,6 +71603,41 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 var api_1 = __webpack_require__(/*! ../util/api */ "./src/util/api.ts");
@@ -71162,22 +71650,34 @@ function mapStateToProps(state) {
     };
 }
 function mapDispatchToProps(dispatch) {
+    var _this = this;
     return {
-        requestCreateTestingRecord: function (newRecord) {
-            dispatch(actions_1.testingRequestCreateRecord(newRecord));
-            api_1.request({
-                endpoint: 'testing',
-                method: 'POST',
-                body: newRecord
-            }, function (err, result) {
-                if (err) {
-                    dispatch(actions_1.testingCreateRecordFailed());
-                }
-                else {
-                    dispatch(actions_1.testingCreateRecordSucceeded(result.testing));
+        requestCreateTestingRecord: function (newRecord) { return __awaiter(_this, void 0, void 0, function () {
+            var result, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        dispatch(actions_1.testingRequestCreateRecord(newRecord));
+                        _b.label = 1;
+                    case 1:
+                        _b.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, api_1.request({
+                                endpoint: 'testing',
+                                method: 'POST',
+                                body: newRecord
+                            })];
+                    case 2:
+                        result = _b.sent();
+                        dispatch(actions_1.testingCreateRecordSucceeded(result.testing));
+                        return [3 /*break*/, 4];
+                    case 3:
+                        _a = _b.sent();
+                        dispatch(actions_1.testingCreateRecordFailed());
+                        return [3 /*break*/, 4];
+                    case 4: return [2 /*return*/];
                 }
             });
-        }
+        }); }
     };
 }
 exports.RecordTestingContainer = react_redux_1.connect(mapStateToProps, mapDispatchToProps)(RecordTesting_1.RecordTesting);
@@ -71842,25 +72342,67 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
-Object.defineProperty(exports, "__esModule", { value: true });
-function request(_a, cb) {
-    var endpoint = _a.endpoint, method = _a.method, body = _a.body;
-    var options = { method: method, credentials: 'same-origin' };
-    if (body) {
-        var headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        options.headers = headers;
-        options.body = JSON.stringify(body);
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
-    fetch("/api/" + endpoint, options)
-        .then(function (res) {
-        if (!res.ok) {
-            throw new Error("Server returned " + (res.statusText || res.status));
-        }
-        return res.json();
-    })
-        .then(function (data) { return cb(undefined, data); })
-        .catch(function (err) { return cb(err); });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+function request(_a) {
+    var endpoint = _a.endpoint, method = _a.method, body = _a.body;
+    return __awaiter(this, void 0, void 0, function () {
+        var options, headers, res;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    options = { method: method, credentials: 'same-origin' };
+                    if (body) {
+                        headers = new Headers();
+                        headers.append('Content-Type', 'application/json');
+                        options.headers = headers;
+                        options.body = JSON.stringify(body);
+                    }
+                    return [4 /*yield*/, fetch("/api/" + endpoint, options)];
+                case 1:
+                    res = _b.sent();
+                    if (!res.ok) {
+                        throw new Error("Server returned " + (res.statusText || res.status));
+                    }
+                    return [4 /*yield*/, res.json()];
+                case 2: return [2 /*return*/, _b.sent()];
+            }
+        });
+    });
 }
 exports.request = request;
 

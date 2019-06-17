@@ -19,71 +19,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const util_1 = require("./util");
 const tedious_1 = require("tedious");
 const async_1 = require("async");
-const userInfoCache = {};
-const dailyTemperatureCache = {};
+let dailyTemperatureCache;
 const HOUR_IN_MS = 60 * 60 * 1000;
 const DAY_IN_MS = 24 * HOUR_IN_MS;
 const MONTH_IN_MS = 30 * DAY_IN_MS;
-function getUsernameForUserId(userId) {
-    return userInfoCache[userId].userName;
-}
-exports.getUsernameForUserId = getUsernameForUserId;
-function getDeviceForUserId(userId) {
-    return userInfoCache[userId].deviceId;
-}
-exports.getDeviceForUserId = getDeviceForUserId;
-function getUserIdForDeviceId(deviceId) {
-    for (const userId in userInfoCache) {
-        if (!userInfoCache.hasOwnProperty(userId)) {
-            continue;
-        }
-        if (userInfoCache[userId].deviceId === deviceId) {
-            return userId;
-        }
-    }
-    return undefined; // User is missing for some reason
-}
-exports.getUserIdForDeviceId = getUserIdForDeviceId;
-function getTimezoneForUserId(userId) {
-    return userInfoCache[userId].timezone;
-}
-exports.getTimezoneForUserId = getTimezoneForUserId;
-function getUser(userId) {
-    return userInfoCache[userId];
-}
-exports.getUser = getUser;
+const SQL_SERVER = util_1.getEnvironmentVariable('SQL_SERVER');
+const SQL_USERNAME = util_1.getEnvironmentVariable('SQL_USERNAME');
+const SQL_PASSWORD = util_1.getEnvironmentVariable('SQL_PASSWORD');
+const SQL_DATABASE = util_1.getEnvironmentVariable('SQL_DATABASE');
+const SQL_PORT = parseInt(util_1.getEnvironmentVariable('SQL_PORT'), 10);
+const TIMEZONE = util_1.getEnvironmentVariable('TIMEZONE');
 function init(cb) {
     console.debug('Initializing database module');
-    request(`SELECT facebookId, deviceId, timezone, userName FROM ${util_1.DATABASE_NAMES.USERS}`, [], (err, rowCount, rows) => {
-        if (err) {
-            cb(err);
-            return;
-        }
-        for (const row of rows) {
-            if (!row.hasOwnProperty('facebookId') ||
-                !row.hasOwnProperty('deviceId') ||
-                !row.hasOwnProperty('timezone') ||
-                !row.hasOwnProperty('userName')) {
-                cb(new Error(`Received result without facebookId, deviceId, userName, or timezone property`));
-                return;
-            }
-            userInfoCache[row.facebookId.value] = {
-                userId: row.facebookId.value,
-                userName: row.userName.value,
-                deviceId: row.deviceId.value,
-                timezone: row.timezone.value
-            };
-        }
-        cb(undefined);
-    });
+    cb(undefined);
 }
 exports.init = init;
 const requestQueue = [];
 let requestProcessing = false;
-function request(query, parameters, cb) {
+function request(query, cb) {
     requestQueue.push({
         query,
-        parameters,
         cb
     });
     requestPump();
@@ -92,24 +47,25 @@ function requestPump() {
     if (requestProcessing || !requestQueue.length) {
         return;
     }
-    const { query, parameters, cb } = requestQueue.shift();
+    const { query, cb } = requestQueue.shift();
     console.debug(`Connecting to database`);
     requestProcessing = true;
     const connection = new tedious_1.Connection({
-        server: util_1.getEnvironmentVariable('AZURE_SQL_SERVER'),
+        server: SQL_SERVER,
         authentication: {
             type: 'default',
             options: {
-                userName: util_1.getEnvironmentVariable('AZURE_SQL_USERNAME'),
-                password: util_1.getEnvironmentVariable('AZURE_SQL_PASSWORD')
+                userName: SQL_USERNAME,
+                password: SQL_PASSWORD
             }
         },
         options: {
             encrypt: true,
             rowCollectionOnRequestCompletion: true,
             useColumnNames: true,
-            database: util_1.getEnvironmentVariable('AZURE_SQL_DATABASE'),
-            requestTimeout: 0
+            database: SQL_DATABASE,
+            requestTimeout: 0,
+            port: SQL_PORT
         }
     }); // Note: the signature for tedious Request changed recently, but they haven't updated the docs yet apparently
     connection.on('connect', (err) => {
@@ -125,22 +81,14 @@ function requestPump() {
             requestProcessing = false;
             setImmediate(requestPump);
         });
-        for (const parameter of parameters) {
-            req.addParameter(parameter.name, parameter.type, parameter.value);
-        }
         connection.execSql(req);
     });
+    connection.on('error', (err) => {
+        console.error(err);
+    });
 }
-function isUserRegistered(userId) {
-    return !!userInfoCache[userId];
-}
-exports.isUserRegistered = isUserRegistered;
-function getState(deviceId, cb) {
-    request(`SELECT * FROM ${util_1.DATABASE_NAMES.STATE} WHERE deviceId=@deviceId`, [{
-            name: 'deviceId',
-            type: tedious_1.TYPES.VarChar,
-            value: deviceId
-        }], (err, rowCount, rows) => {
+function getState(cb) {
+    request(`SELECT * FROM ${util_1.DATABASE_NAMES.STATE}`, (err, rowCount, rows) => {
         if (err) {
             cb(err, undefined);
         }
@@ -149,7 +97,6 @@ function getState(deviceId, cb) {
         }
         else if (rowCount === 1) {
             const state = {
-                deviceId,
                 currentTime: parseInt(rows[0].currentTime.value, 10),
                 currentTemperature: rows[0].currentTemperature.value,
                 currentState: rows[0].currentState.value,
@@ -166,11 +113,10 @@ function getState(deviceId, cb) {
 }
 exports.getState = getState;
 function updateState(newState, cb) {
-    console.log(`Updating state for ${newState.deviceId}`);
-    request(`IF NOT EXISTS(SELECT * FROM current_state WHERE deviceId=@deviceId)
+    console.log(`Updating state`);
+    request(`IF NOT EXISTS(SELECT * FROM current_state)
 BEGIN
   INSERT INTO ${util_1.DATABASE_NAMES.STATE}(
-    deviceId,
     currentTime,
     currentTemperature,
     currentState,
@@ -179,7 +125,6 @@ BEGIN
     nextTransitionState
   )
   VALUES(
-    @deviceId,
     ${newState.currentTime},
     ${newState.currentTemperature},
     '${newState.currentState}',
@@ -197,30 +142,20 @@ BEGIN
     currentMode='${newState.currentMode}',
     nextTransitionTime=${newState.nextTransitionTime},
     nextTransitionState='${newState.nextTransitionState}'
-  WHERE deviceId=@deviceId
-END`, [{
-            name: 'deviceId',
-            type: tedious_1.TYPES.VarChar,
-            value: newState.deviceId
-        }], (stateErr) => {
+END`, (stateErr) => {
         if (stateErr) {
             if (cb) {
                 cb(stateErr);
             }
             return;
         }
-        const userId = getUserIdForDeviceId(newState.deviceId);
-        if (!userId) {
-            throw new Error(`Internal Error: unknown user ID ${userId}`);
-        }
-        const startOfToday = util_1.getStartOfToday(getUser(userId).timezone);
+        const startOfToday = util_1.getStartOfToday(TIMEZONE);
         const monthBegin = startOfToday - MONTH_IN_MS;
-        const dailyCache = dailyTemperatureCache[newState.deviceId];
         // Skip updating if possible
-        if (dailyCache &&
-            dailyCache.time === startOfToday &&
-            dailyCache.low < newState.currentTemperature &&
-            dailyCache.high > newState.currentTemperature) {
+        if (dailyTemperatureCache &&
+            dailyTemperatureCache.time === startOfToday &&
+            dailyTemperatureCache.low < newState.currentTemperature &&
+            dailyTemperatureCache.high > newState.currentTemperature) {
             if (cb) {
                 cb(stateErr);
             }
@@ -228,11 +163,7 @@ END`, [{
         }
         async_1.waterfall([
             // Fetch the data from the DB
-            (next) => request(`SELECT * FROM ${util_1.DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId ORDER BY time DESC`, [{
-                    name: 'deviceId',
-                    type: tedious_1.TYPES.VarChar,
-                    value: newState.deviceId
-                }], (err, rowCount, rows) => {
+            (next) => request(`SELECT * FROM ${util_1.DATABASE_NAMES.TEMPERATURE} ORDER BY time DESC`, (err, rowCount, rows) => {
                 if (err) {
                     next(err, undefined);
                     return;
@@ -249,61 +180,45 @@ END`, [{
                 const latestEntry = data[0];
                 // Check if we need to create a new entry
                 if (latestEntry.time !== startOfToday) {
-                    dailyTemperatureCache[newState.deviceId] = {
+                    dailyTemperatureCache = {
                         time: startOfToday,
                         low: newState.currentTemperature,
                         high: newState.currentTemperature
                     };
                     async_1.waterfall([
-                        (deleteNext) => request(`DELETE FROM ${util_1.DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId AND time <= ${monthBegin}`, [{
-                                name: 'deviceId',
-                                type: tedious_1.TYPES.VarChar,
-                                value: newState.deviceId
-                            }], (err, rowCount, rows) => deleteNext(err)),
-                        (insertNext) => request(`INSERT INTO ${util_1.DATABASE_NAMES.TEMPERATURE} (deviceId, time, low, high) ` +
-                            `VALUES (@deviceId, ${startOfToday}, ${newState.currentTemperature}, ${newState.currentTemperature})`, [{
-                                name: 'deviceId',
-                                type: tedious_1.TYPES.VarChar,
-                                value: newState.deviceId
-                            }], (err, rowCount, rows) => insertNext(err))
+                        (deleteNext) => request(`DELETE FROM ${util_1.DATABASE_NAMES.TEMPERATURE} WHERE time <= ${monthBegin}`, (err, rowCount, rows) => deleteNext(err)),
+                        (insertNext) => request(`INSERT INTO ${util_1.DATABASE_NAMES.TEMPERATURE} (time, low, high) ` +
+                            `VALUES (${startOfToday}, ${newState.currentTemperature}, ${newState.currentTemperature})`, (err, rowCount, rows) => insertNext(err))
                     ], next);
                     // Create the new entry
                     // Else check if we need to update the high temperature
                 }
                 else if (latestEntry.high < newState.currentTemperature) {
-                    if (!dailyTemperatureCache[newState.deviceId]) {
-                        dailyTemperatureCache[newState.deviceId] = {
+                    if (!dailyTemperatureCache) {
+                        dailyTemperatureCache = {
                             time: startOfToday,
                             low: newState.currentTemperature,
                             high: newState.currentTemperature
                         };
                     }
-                    dailyTemperatureCache[newState.deviceId].high = newState.currentTemperature;
+                    dailyTemperatureCache.high = newState.currentTemperature;
                     request(`UPDATE ${util_1.DATABASE_NAMES.TEMPERATURE} ` +
                         `SET high=${newState.currentTemperature} ` +
-                        `WHERE deviceId=@deviceId AND time=${startOfToday}`, [{
-                            name: 'deviceId',
-                            type: tedious_1.TYPES.VarChar,
-                            value: newState.deviceId
-                        }], (updateErr) => next(updateErr));
+                        `WHERE time=${startOfToday}`, (updateErr) => next(updateErr));
                     // Else check if we need to update the low temperature
                 }
                 else if (latestEntry.low > newState.currentTemperature) {
-                    if (!dailyTemperatureCache[newState.deviceId]) {
-                        dailyTemperatureCache[newState.deviceId] = {
+                    if (!dailyTemperatureCache) {
+                        dailyTemperatureCache = {
                             time: startOfToday,
                             low: newState.currentTemperature,
                             high: newState.currentTemperature
                         };
                     }
-                    dailyTemperatureCache[newState.deviceId].low = newState.currentTemperature;
+                    dailyTemperatureCache.low = newState.currentTemperature;
                     request(`UPDATE ${util_1.DATABASE_NAMES.TEMPERATURE} ` +
                         `SET low=${newState.currentTemperature} ` +
-                        `WHERE deviceId=@deviceId AND time=${startOfToday}`, [{
-                            name: 'deviceId',
-                            type: tedious_1.TYPES.VarChar,
-                            value: newState.deviceId
-                        }], (updateErr) => next(updateErr));
+                        `WHERE time=${startOfToday}`, (updateErr) => next(updateErr));
                 }
                 else {
                     next(undefined);
@@ -313,19 +228,51 @@ END`, [{
     });
 }
 exports.updateState = updateState;
+function getConfig(cb) {
+    request(`SELECT * FROM ${util_1.DATABASE_NAMES.CONFIG}`, (err, rowCount, rows) => {
+        if (err) {
+            cb(err, undefined);
+            return;
+        }
+        else if (rowCount === 0) {
+            cb(undefined, undefined);
+        }
+        else if (rowCount === 1) {
+            let config;
+            try {
+                config = JSON.parse(rows[0].config);
+                cb(undefined, config);
+            }
+            catch (e) {
+                cb(e, undefined);
+            }
+        }
+        else {
+            cb(new Error(`Internal Error: more than one config entry returned.`), undefined);
+        }
+    });
+}
+exports.getConfig = getConfig;
+function updateConfig(config, cb) {
+    // const patch = {
+    //   properties: {
+    //     desired: {
+    //       config: JSON.stringify(config)
+    //     }
+    //   }
+    // };
+    // registry.updateTwin(deviceId, patch, '*', cb);
+    // TODO
+    cb(new Error('Not implemented'));
+}
+exports.updateConfig = updateConfig;
 function getTemperatureHistory(userId, cb) {
-    const user = getUser(userId);
-    request(`SELECT * FROM ${util_1.DATABASE_NAMES.TEMPERATURE} WHERE deviceId=@deviceId ORDER BY time`, [{
-            name: 'deviceId',
-            type: tedious_1.TYPES.VarChar,
-            value: user.deviceId
-        }], (err, rowCount, rows) => {
+    request(`SELECT * FROM ${util_1.DATABASE_NAMES.TEMPERATURE} ORDER BY time`, (err, rowCount, rows) => {
         if (err) {
             cb(err, undefined);
             return;
         }
         cb(undefined, rows.map((row) => ({
-            deviceId: row.deviceId.value,
             time: parseInt(row.time.value, 10),
             high: parseFloat(row.high.value),
             low: parseFloat(row.low.value)
@@ -334,12 +281,7 @@ function getTemperatureHistory(userId, cb) {
 }
 exports.getTemperatureHistory = getTemperatureHistory;
 function getCleaningHistory(userId, cb) {
-    const user = getUser(userId);
-    request(`SELECT * FROM ${util_1.DATABASE_NAMES.CLEANING} WHERE deviceId=@deviceId ORDER BY time`, [{
-            name: 'deviceId',
-            type: tedious_1.TYPES.VarChar,
-            value: user.deviceId
-        }], (err, rowCount, rows) => {
+    request(`SELECT * FROM ${util_1.DATABASE_NAMES.CLEANING} ORDER BY time`, (err, rowCount, rows) => {
         if (err) {
             cb(err, undefined);
             return;
@@ -354,34 +296,22 @@ function getCleaningHistory(userId, cb) {
 }
 exports.getCleaningHistory = getCleaningHistory;
 function createCleaningEntry(userId, cleaningEntry, cb) {
-    const user = getUser(userId);
     request(`INSERT INTO ${util_1.DATABASE_NAMES.CLEANING} (
-  deviceId,
   time,
   bioFilterReplaced,
   mechanicalFilterReplaced,
   spongeReplaced
 )
 VALUES (
-  @deviceId,
   ${cleaningEntry.time},
   ${cleaningEntry.bioFilterReplaced ? 1 : 0},
   ${cleaningEntry.mechanicalFilterReplaced ? 1 : 0},
   ${cleaningEntry.spongeReplaced ? 1 : 0}
-)`, [{
-            name: 'deviceId',
-            type: tedious_1.TYPES.VarChar,
-            value: user.deviceId
-        }], (err) => cb(err));
+)`, (err) => cb(err));
 }
 exports.createCleaningEntry = createCleaningEntry;
 function getTestingHistory(userId, cb) {
-    const user = getUser(userId);
-    request(`SELECT * FROM ${util_1.DATABASE_NAMES.TESTING} WHERE deviceId=@deviceId ORDER BY time`, [{
-            name: 'deviceId',
-            type: tedious_1.TYPES.VarChar,
-            value: user.deviceId
-        }], (err, rowCount, rows) => {
+    request(`SELECT * FROM ${util_1.DATABASE_NAMES.TESTING} ORDER BY time`, (err, rowCount, rows) => {
         if (err) {
             cb(err, undefined);
             return;
@@ -397,9 +327,7 @@ function getTestingHistory(userId, cb) {
 }
 exports.getTestingHistory = getTestingHistory;
 function createTestingEntry(userId, cleaningEntry, cb) {
-    const user = getUser(userId);
     request(`INSERT INTO ${util_1.DATABASE_NAMES.TESTING} (
-  deviceId,
   time,
   ph,
   ammonia,
@@ -407,17 +335,12 @@ function createTestingEntry(userId, cleaningEntry, cb) {
   nitrates
 )
 VALUES (
-  @deviceId,
   ${cleaningEntry.time},
   ${cleaningEntry.ph},
   ${cleaningEntry.ammonia},
   ${cleaningEntry.nitrites},
   ${cleaningEntry.nitrates}
-)`, [{
-            name: 'deviceId',
-            type: tedious_1.TYPES.VarChar,
-            value: user.deviceId
-        }], (err) => cb(err));
+)`, (err) => cb(err));
 }
 exports.createTestingEntry = createTestingEntry;
 //# sourceMappingURL=db.js.map

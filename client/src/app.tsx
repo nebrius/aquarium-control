@@ -39,85 +39,82 @@ import {
 const STATE_UPDATE_RATE = 60 * 1000;
 const TEMPERATURE_UPDATE_RATE = 60 * 1000;
 
-function updateState() {
-  request({
-    endpoint: 'state',
-    method: 'GET',
-  }, (err, result) => {
-    if (err) {
-      store.dispatch(stateFetchFailed());
-    } else {
+async function run() {
+  async function updateState() {
+    try {
+      const result = await request({
+        endpoint: 'state',
+        method: 'GET',
+      });
       store.dispatch(stateFetchSucceeded(result));
+    } catch {
+      store.dispatch(stateFetchFailed());
     }
     setTimeout(updateState, STATE_UPDATE_RATE);
-  });
-}
-updateState();
+  }
+  updateState();
 
-request({
-  endpoint: 'user',
-  method: 'GET'
-}, (err, result) => {
-  if (err) {
-    store.dispatch(userFetchFailed());
-  } else {
+  try {
+    const result = await request({
+      endpoint: 'user',
+      method: 'GET'
+    });
     store.dispatch(userFetchSucceeded(result));
+  } catch {
+    store.dispatch(userFetchFailed());
   }
-});
 
-request({
-  endpoint: 'config',
-  method: 'GET'
-}, (err, result) => {
-  if (err) {
-    store.dispatch(configFetchFailed());
-  } else {
+  try {
+    const result = await request({
+      endpoint: 'config',
+      method: 'GET'
+    });
     store.dispatch(configFetchSucceeded(result.config));
+  } catch {
+    store.dispatch(configFetchFailed());
   }
-});
 
-request({
-  endpoint: 'cleaning',
-  method: 'GET'
-}, (err, result) => {
-  if (err) {
-    store.dispatch(cleaningHistoryFetchFailed());
-  } else {
+  try {
+    const result = await request({
+      endpoint: 'cleaning',
+      method: 'GET'
+    });
     store.dispatch(cleaningHistoryFetchSucceeded(result.cleaning));
+  } catch {
+    store.dispatch(cleaningHistoryFetchFailed());
   }
-});
 
-request({
-  endpoint: 'testing',
-  method: 'GET'
-}, (err, result) => {
-  if (err) {
-    store.dispatch(testingHistoryFetchFailed());
-  } else {
+  try {
+    const result = await request({
+      endpoint: 'testing',
+      method: 'GET'
+    });
     store.dispatch(testingHistoryFetchSucceeded(result.testing));
+  } catch {
+    store.dispatch(testingHistoryFetchFailed());
   }
-});
 
-function updateTemperature() {
-  request({
-    endpoint: 'temperatures',
-    method: 'GET'
-  }, (err, result) => {
-    if (err) {
-      store.dispatch(temperatureFetchFailed());
-    } else {
+  async function updateTemperature() {
+    try {
+      const result = await request({
+        endpoint: 'temperatures',
+        method: 'GET'
+      });
       store.dispatch(temperatureFetchSuceeded(result));
+    } catch {
+      store.dispatch(temperatureFetchFailed());
     }
     setTimeout(updateTemperature, TEMPERATURE_UPDATE_RATE);
-  });
-}
-updateTemperature();
+  }
+  updateTemperature();
 
-render(
-  (
-    <Provider store={store}>
-      <Root />
-    </Provider>
-  ),
-  document.getElementById('root')
-);
+  render(
+    (
+      <Provider store={store}>
+        <Root />
+      </Provider>
+    ),
+    document.getElementById('root')
+  );
+}
+run();

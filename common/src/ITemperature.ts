@@ -16,7 +16,6 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 export interface ITemperatureSample {
-  deviceId: string;
   low: number;
   high: number;
   time: number;

@@ -16,7 +16,6 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 export interface IState {
-  deviceId: string;
   currentTime: number; // UNIX timestamp, e.g. Date.now()
   currentTemperature: number; // in Celcius
   currentState: 'day' | 'night' | 'off';

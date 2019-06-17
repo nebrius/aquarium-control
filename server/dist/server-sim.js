@@ -24,10 +24,6 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const common_1 = require("./common/common");
 const DEFAULT_PORT = 3001;
-const USER_ID = '129897358';
-const USER_NAME = 'nebrius';
-const USER_TIMEZONE = 'America/Los_Angeles';
-const DEVICE_ID = 'nebrius-rpi';
 const port = process.env.PORT || DEFAULT_PORT;
 const app = express();
 app.use(body_parser_1.json());
@@ -45,18 +41,8 @@ app.set('views', path_1.join(__dirname, '..', 'views'));
 app.get('/', (req, res) => {
     res.render('index');
 });
-app.get('/api/user', (req, res) => {
-    const userInfo = {
-        userId: USER_ID,
-        userName: USER_NAME,
-        deviceId: DEVICE_ID,
-        timezone: USER_TIMEZONE
-    };
-    res.send(userInfo);
-});
 app.get('/api/state', (req, res) => {
     const state = {
-        deviceId: DEVICE_ID,
         currentTime: Date.now(),
         currentTemperature: 26,
         currentState: 'day',
@@ -111,7 +97,6 @@ app.post('/api/config', (req, res) => {
 app.get('/api/temperatures', (req, res) => {
     const history = {
         temperatures: [{
-                deviceId: DEVICE_ID,
                 low: 25,
                 high: 26,
                 time: (new Date(2019, 4, 28, 0, 0, 0, 0)).getTime()
