@@ -62,3 +62,6 @@ _autosave-*
 
 # IDE
 .vscode
+
+# Misc
+server/db.sqlite

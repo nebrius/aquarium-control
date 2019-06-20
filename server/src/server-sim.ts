@@ -115,7 +115,7 @@ app.post('/api/config', (req, res) => {
 
 app.get('/api/temperatures', (req, res) => {
   const history: ITemperature = {
-    temperatures: [{
+    history: [{
       low: 25,
       high: 26,
       time: (new Date(2019, 4, 28, 0, 0, 0, 0)).getTime()

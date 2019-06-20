@@ -19,7 +19,6 @@
   },
   "homepage": "https://github.com/nebrius/aquarium-control#readme",
   "devDependencies": {
-    "@types/async": "^2.4.2",
     "@types/bluebird": "^3.5.27",
     "@types/body-parser": "^1.16.8",
     "@types/cookie-parser": "^1.4.1",
@@ -29,14 +28,13 @@
     "@types/node": "^11.13.14",
     "@types/request": "^2.0.11",
     "@types/revalidator": "^0.3.5",
-    "@types/tedious": "^3.0.0",
+    "@types/sqlite3": "^3.1.5",
     "rimraf": "^2.6.2",
     "tslint": "^5.17.0",
     "typescript": "^3.5.1"
   },
   "dependencies": {
     "@azure/event-hubs": "^2.1.0",
-    "async": "^2.6.0",
     "azure-iothub": "^1.9.9",
     "babel-runtime": "^6.26.0",
     "body-parser": "^1.18.2",
@@ -47,6 +45,6 @@
     "pug": "^2.0.0-rc.4",
     "request": "^2.83.0",
     "revalidator": "^0.3.1",
-    "tedious": "^6.1.2"
+    "sqlite3": "^4.0.9"
   }
 }

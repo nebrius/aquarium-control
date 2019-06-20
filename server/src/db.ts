@@ -15,10 +15,21 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { IState, ITemperatureSample, ICleaningEntry, ITestingEntry, IConfig } from './common/common';
-import { getEnvironmentVariable, getStartOfToday, DATABASE_NAMES } from './util';
-import { Connection, Request } from 'tedious';
-import { waterfall } from 'async';
+import { IState, ITemperatureEntry, ICleaningEntry, ITestingEntry, IConfig } from './common/common';
+import { getEnvironmentVariable, getStartOfToday } from './util';
+import { verbose, Database } from 'sqlite3';
+import { exists } from 'fs';
+import { promisify } from 'util';
+import { dirname } from 'path';
+import * as mkdirp from 'mkdirp';
+
+enum Table {
+  STATE = 'state',
+  TEMPERATURE = 'temperature_history',
+  CLEANING = 'cleaning',
+  TESTING = 'testing',
+  CONFIG = 'config'
+}
 
 interface ITemperatureCacheEntry {
   time: number;
@@ -27,396 +38,300 @@ interface ITemperatureCacheEntry {
 }
 let dailyTemperatureCache: ITemperatureCacheEntry | undefined;
 
-type CB = (err: Error | undefined) => void;
-type CBWithValue<T> = (err: Error | undefined, value: T | undefined) => void;
-
 const HOUR_IN_MS = 60 * 60 * 1000;
 const DAY_IN_MS = 24 * HOUR_IN_MS;
 const MONTH_IN_MS = 30 * DAY_IN_MS;
 
-const SQL_SERVER = getEnvironmentVariable('SQL_SERVER');
-const SQL_USERNAME = getEnvironmentVariable('SQL_USERNAME');
-const SQL_PASSWORD = getEnvironmentVariable('SQL_PASSWORD');
-const SQL_DATABASE = getEnvironmentVariable('SQL_DATABASE');
-const SQL_PORT = parseInt(getEnvironmentVariable('SQL_PORT'), 10);
 const TIMEZONE = getEnvironmentVariable('TIMEZONE');
+const SQLITE_DATABASE_PATH = getEnvironmentVariable('SQLITE_DATABASE_PATH');
 
-export function init(cb: (err: Error | undefined) => void): void {
-  console.debug('Initializing database module');
-  cb(undefined);
-}
+let db: Database | undefined;
 
-interface IRequestQueueEntry {
-  query: string;
-  cb: (err: Error, rowCount: number, rows: any[]) => void;
-}
-const requestQueue: Array<IRequestQueueEntry> = [];
-let requestProcessing = false;
-
-function request(
-  query: string,
-  cb: (err: Error, rowCount: number, rows: any[]) => void
-): void {
-  requestQueue.push({
-    query,
-    cb
-  });
-  requestPump();
-}
-
-function requestPump() {
-  if (requestProcessing || !requestQueue.length) {
-    return;
+async function createDB(): Promise<void> {
+  console.debug('Database does not currently exist, creating...');
+  if (!db) {
+    throw new Error('Internal Error: query called without being initialized');
   }
-  const { query, cb } = requestQueue.shift() as IRequestQueueEntry;
-  console.debug(`Connecting to database`);
-  requestProcessing = true;
-  const connection = new Connection({
-    server: SQL_SERVER,
-    authentication: {
-      type: 'default',
-      options: {
-        userName: SQL_USERNAME,
-        password: SQL_PASSWORD
-      }
-    },
-    options: {
-      encrypt: true,
-      rowCollectionOnRequestCompletion: true,
-      useColumnNames: true,
-      database: SQL_DATABASE,
-      requestTimeout: 0,
-      port: SQL_PORT
-    }
-  } as any); // Note: the signature for tedious Request changed recently, but they haven't updated the docs yet apparently
-  connection.on('connect', (err) => {
-    if (err) {
-      cb(err, 0, []);
-      return;
-    }
-    console.debug(`Connected...executing query`);
-    const req = new Request(query, (err: Error, rowCount: number, rows: any[]) => {
-      console.debug(`Closing conenction`);
-      connection.close();
-      cb(err, rowCount, rows);
-      requestProcessing = false;
-      setImmediate(requestPump);
-    });
-    connection.execSql(req);
-  });
-  connection.on('error', (err) => {
-    console.error(err);
-  });
+  const run = promisify(db.run.bind(db));
+
+  await run(
+`CREATE TABLE ${Table.CONFIG} (
+  config varchar(2048) not null
+)`);
+
+  await run(
+`CREATE TABLE ${Table.STATE} (
+  currentTime bigint not null,
+  currentTemperature float not null,
+  currentState varchar(255) not null,
+  currentMode varchar(255) not null,
+  nextTransitionTime bigint not null,
+  nextTransitionState varchar(255) not null
+)`);
+
+await run(
+`CREATE TABLE ${Table.TEMPERATURE} (
+  time bigint not null,
+  low float not null,
+  high float not null
+)`);
+
+await run(
+`CREATE TABLE ${Table.CLEANING} (
+  time bigint not null,
+  bioFilterReplaced bit not null,
+  mechanicalFilterReplaced bit not null,
+  spongeReplaced bit not null
+)`);
+
+await run(
+`CREATE TABLE ${Table.TESTING} (
+  time bigint not null,
+  ph float not null,
+  ammonia int not null,
+  nitrites int not null,
+  nitrate int not null
+)`);
 }
 
-export function getState(cb: (err: Error | undefined, state: IState | undefined) => void): void {
-  request(
-    `SELECT * FROM ${DATABASE_NAMES.STATE}`,
-    (err, rowCount, rows) => {
+export async function init(): Promise<void> {
+  console.debug('Initializing database module');
+  const dbExists = await promisify(exists)(SQLITE_DATABASE_PATH);
+  return new Promise(async (resolve, reject) => {
+    if (!dbExists) {
+      await promisify(mkdirp)(dirname(SQLITE_DATABASE_PATH));
+    }
+    db = new (verbose().Database)(SQLITE_DATABASE_PATH, async (err) => {
       if (err) {
-        cb(err, undefined);
-      } else if (rowCount === 0) {
-        cb(undefined, undefined);
-      } else if (rowCount === 1) {
-        const state: IState = {
-          currentTime: parseInt(rows[0].currentTime.value, 10),
-          currentTemperature: rows[0].currentTemperature.value, // in Celcius
-          currentState: rows[0].currentState.value,
-          currentMode: rows[0].currentMode.value,
-          nextTransitionTime: parseInt(rows[0].nextTransitionTime.value, 10), // UNIX timestamp, e.g. Date.now()
-          nextTransitionState: rows[0].nextTransitionState.value
-        };
-        cb(undefined, state);
+        reject(err);
       } else {
-        cb(new Error(`Internal Error: more than one state entry returned.`), undefined);
+        if (!dbExists) {
+          await createDB();
+        }
+        console.debug('Database module initalized');
+        resolve();
       }
-    }
-  );
+    });
+  });
 }
 
-export function updateState(newState: IState, cb?: (err: Error | undefined) => void): void {
-  console.log(`Updating state`);
-  request(
-`IF NOT EXISTS(SELECT * FROM current_state)
+async function selectAll(table: Table, orderBy?: string): Promise<any[]> {
+  return new Promise((resolve, reject) => {
+    if (!db) {
+      throw new Error('Internal Error: query called without being initialized');
+    }
+    let query = `SELECT * FROM ${table}`;
+    if (orderBy) {
+      query += ` ORDER BY ${orderBy}`
+    }
+    db.all(query, (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+    })
+  });
+}
+
+async function updateEntry(table: Table, values: { [ key: string ]: any }, where?: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!db) {
+      throw new Error('Internal Error: query called without being initialized');
+    }
+    const arrayValues = [];
+    for (const key in values) {
+      arrayValues.push({
+        key,
+        value: values[key]
+      });
+    }
+    const query =
+`IF NOT EXISTS(SELECT * FROM ${table} ${where ? `WHERE ${where}` : ''})
 BEGIN
-  INSERT INTO ${DATABASE_NAMES.STATE}(
-    currentTime,
-    currentTemperature,
-    currentState,
-    currentMode,
-    nextTransitionTime,
-    nextTransitionState
+  INSERT INTO ${table}(
+    ${arrayValues.map((entry) => entry.key).join(',\n    ')}
   )
   VALUES(
-    ${newState.currentTime},
-    ${newState.currentTemperature},
-    '${newState.currentState}',
-    '${newState.currentMode}',
-    ${newState.nextTransitionTime},
-    '${newState.nextTransitionState}'
+    ${arrayValues.map(() => '?').join(',\n    ')}
   )
 END
 ELSE
 BEGIN
-  UPDATE ${DATABASE_NAMES.STATE} SET
-    currentTime=${newState.currentTime},
-    currentTemperature=${newState.currentTemperature},
-    currentState='${newState.currentState}',
-    currentMode='${newState.currentMode}',
-    nextTransitionTime=${newState.nextTransitionTime},
-    nextTransitionState='${newState.nextTransitionState}'
-END`,
-    (stateErr) => {
-      if (stateErr) {
-        if (cb) {
-          cb(stateErr);
-        }
-        return;
-      }
-      const startOfToday = getStartOfToday(TIMEZONE);
-      const monthBegin = startOfToday - MONTH_IN_MS;
-
-      // Skip updating if possible
-      if (dailyTemperatureCache &&
-        dailyTemperatureCache.time === startOfToday &&
-        dailyTemperatureCache.low < newState.currentTemperature &&
-        dailyTemperatureCache.high > newState.currentTemperature
-      ) {
-        if (cb) {
-          cb(stateErr);
-        }
-        return;
-      }
-
-      waterfall([
-        // Fetch the data from the DB
-        (next: CBWithValue<ITemperatureCacheEntry[]>) => request(
-          `SELECT * FROM ${DATABASE_NAMES.TEMPERATURE} ORDER BY time DESC`,
-          (err, rowCount, rows) => {
-            if (err) {
-              next(err, undefined);
-              return;
-            }
-            const temperatureHistory: ITemperatureCacheEntry[] = rows.map((row) => ({
-              time: parseInt(row.time.value, 10),
-              high: parseFloat(row.high.value),
-              low: parseFloat(row.low.value)
-            }));
-            next(undefined, temperatureHistory);
-          }
-        ),
-
-        // Update the data in the DB
-        (data: ITemperatureCacheEntry[], next: CB) => {
-          const latestEntry = data[0];
-
-          // Check if we need to create a new entry
-          if (latestEntry.time !== startOfToday) {
-            dailyTemperatureCache = {
-              time: startOfToday,
-              low: newState.currentTemperature,
-              high: newState.currentTemperature
-            };
-            waterfall([
-              (deleteNext: CB) => request(
-                `DELETE FROM ${DATABASE_NAMES.TEMPERATURE} WHERE time <= ${monthBegin}`,
-                (err, rowCount, rows) => deleteNext(err)
-              ),
-              (insertNext: CB) => request(
-                `INSERT INTO ${DATABASE_NAMES.TEMPERATURE} (time, low, high) ` +
-                  `VALUES (${startOfToday}, ${newState.currentTemperature}, ${newState.currentTemperature})`,
-                (err, rowCount, rows) => insertNext(err)
-              )
-            ], next as any);
-            // Create the new entry
-
-          // Else check if we need to update the high temperature
-          } else if (latestEntry.high < newState.currentTemperature) {
-            if (!dailyTemperatureCache) {
-              dailyTemperatureCache = {
-                time: startOfToday,
-                low: newState.currentTemperature,
-                high: newState.currentTemperature
-              };
-            }
-            dailyTemperatureCache.high = newState.currentTemperature;
-            request(
-              `UPDATE ${DATABASE_NAMES.TEMPERATURE} ` +
-              `SET high=${newState.currentTemperature} ` +
-              `WHERE time=${startOfToday}`,
-              (updateErr) => next(updateErr)
-            );
-
-          // Else check if we need to update the low temperature
-          } else if (latestEntry.low > newState.currentTemperature) {
-            if (!dailyTemperatureCache) {
-              dailyTemperatureCache = {
-                time: startOfToday,
-                low: newState.currentTemperature,
-                high: newState.currentTemperature
-              };
-            }
-            dailyTemperatureCache.low = newState.currentTemperature;
-            request(
-              `UPDATE ${DATABASE_NAMES.TEMPERATURE} ` +
-              `SET low=${newState.currentTemperature} ` +
-              `WHERE time=${startOfToday}`,
-              (updateErr) => next(updateErr)
-            );
-          } else {
-            next(undefined);
-          }
-        }
-
-      ], cb as any);
-    }
-  );
-}
-
-export function getConfig(
-  cb: (err: Error | undefined, config: IConfig | undefined) => void
-): void {
-  request(
-    `SELECT * FROM ${DATABASE_NAMES.CONFIG}`,
-    (err, rowCount, rows) => {
+  UPDATE ${table} SET
+    ${arrayValues.map((entry) => `${entry.key} = ?`).join(',\n    ')}
+  ${where ? `WHERE ${where}` : ''}
+END`;
+    db.run(query, arrayValues.map((entry) => entry.value), (err) => {
       if (err) {
-        cb(err, undefined);
-        return;
-      } else if (rowCount === 0) {
-        cb(undefined, undefined);
-      } else if (rowCount === 1) {
-        let config: IConfig;
-        try {
-          config = JSON.parse(rows[0].config);
-          cb(undefined, config);
-        } catch (e) {
-          cb(e, undefined);
-        }
+        reject(err);
       } else {
-        cb(new Error(`Internal Error: more than one config entry returned.`), undefined);
+        resolve();
       }
+    })
+  });
+}
+
+async function insertEntry(table: Table, values: { [ key: string ]: any }): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!db) {
+      throw new Error('Internal Error: query called without being initialized');
     }
-  );
-}
-
-export function updateConfig(config: IConfig, cb: (err: Error | undefined) => void): void {
-  // const patch = {
-  //   properties: {
-  //     desired: {
-  //       config: JSON.stringify(config)
-  //     }
-  //   }
-  // };
-  // registry.updateTwin(deviceId, patch, '*', cb);
-  // TODO
-  cb(new Error('Not implemented'));
-}
-
-export function getTemperatureHistory(
-  userId: string,
-  cb: (err: Error | undefined, history: ITemperatureSample[] | undefined) => void
-): void {
-  request(
-    `SELECT * FROM ${DATABASE_NAMES.TEMPERATURE} ORDER BY time`,
-    (err, rowCount, rows) => {
+    const arrayValues = [];
+    for (const key in values) {
+      arrayValues.push({
+        key,
+        value: values[key]
+      });
+    }
+    const query =
+`INSERT INTO ${table}(
+    ${arrayValues.map((entry) => entry.key).join(',\n    ')}
+  )
+  VALUES(
+    ${arrayValues.map(() => '?').join(',\n    ')}
+  )`;
+    db.run(query, arrayValues.map((entry) => entry.value), (err) => {
       if (err) {
-        cb(err, undefined);
-        return;
+        reject(err);
+      } else {
+        resolve();
       }
-      cb(undefined, rows.map((row) => ({
-        time: parseInt(row.time.value, 10),
-        high: parseFloat(row.high.value),
-        low: parseFloat(row.low.value)
-      })));
-    }
-  );
+    })
+  });
 }
 
-export function getCleaningHistory(
-  userId: string,
-  cb: (err: Error | undefined, history: ICleaningEntry[] | undefined) => void
-): void {
-  request(
-    `SELECT * FROM ${DATABASE_NAMES.CLEANING} ORDER BY time`,
-    (err, rowCount, rows) => {
+async function deleteEntry(table: Table, where?: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!db) {
+      throw new Error('Internal Error: query called without being initialized');
+    }
+    let query = `DELETE FROM ${table}`;
+    if (where) {
+      query += ` WHERE ${where}`;
+    }
+    db.run(query, (err) => {
       if (err) {
-        cb(err, undefined);
-        return;
+        reject(err);
+      } else {
+        resolve();
       }
-      cb(undefined, rows.map((row) => ({
-        time: parseInt(row.time.value, 10),
-        bioFilterReplaced: row.bioFilterReplaced.value,
-        mechanicalFilterReplaced: row.mechanicalFilterReplaced.value,
-        spongeReplaced: row.spongeReplaced.value
-      })));
+    })
+  });
+}
+
+export async function getState(): Promise<IState | undefined> {
+  console.log(`Getting state`);
+  const res = await selectAll(Table.STATE);
+  if (res.length === 0) {
+    return undefined;
+  } else if (res.length > 1) {
+    throw new Error(`Internal Error: more than one state entry returned`);
+  }
+  return res[0];
+}
+
+export async function updateState(newState: IState): Promise<void> {
+  console.log(`Updating state`);
+  await updateEntry(Table.STATE, newState);
+
+  const startOfToday = getStartOfToday(TIMEZONE);
+  const monthBegin = startOfToday - MONTH_IN_MS;
+
+  // Skip updating if possible
+  if (dailyTemperatureCache &&
+    dailyTemperatureCache.time === startOfToday &&
+    dailyTemperatureCache.low < newState.currentTemperature &&
+    dailyTemperatureCache.high > newState.currentTemperature
+  ) {
+    return;
+  }
+
+  const temperatureHistory: ITemperatureCacheEntry[] = await selectAll(Table.TEMPERATURE, 'time DESC');
+
+  // Check if we need to create a new entry
+  const latestEntry = temperatureHistory[0];
+  if (latestEntry.time !== startOfToday) {
+    dailyTemperatureCache = {
+      time: startOfToday,
+      low: newState.currentTemperature,
+      high: newState.currentTemperature
+    };
+    await deleteEntry(Table.TEMPERATURE, `time <= ${monthBegin}`);
+    await insertEntry(Table.TEMPERATURE, {
+      time: startOfToday,
+      low: newState.currentTemperature,
+      high: newState.currentTemperature
+    })
+
+  // Else check if we need to update the high temperature
+  } else if (latestEntry.high < newState.currentTemperature) {
+    if (!dailyTemperatureCache) {
+      dailyTemperatureCache = {
+        time: startOfToday,
+        low: newState.currentTemperature,
+        high: newState.currentTemperature
+      };
     }
-  );
-}
+    dailyTemperatureCache.high = newState.currentTemperature;
+    await updateEntry(Table.TEMPERATURE, {
+      high: newState.currentTemperature
+    }, `time=${startOfToday}`);
 
-export function createCleaningEntry(
-  userId: string,
-  cleaningEntry: ICleaningEntry,
-  cb: (err: Error | undefined) => void
-) {
-  request(
-`INSERT INTO ${DATABASE_NAMES.CLEANING} (
-  time,
-  bioFilterReplaced,
-  mechanicalFilterReplaced,
-  spongeReplaced
-)
-VALUES (
-  ${cleaningEntry.time},
-  ${cleaningEntry.bioFilterReplaced ? 1 : 0},
-  ${cleaningEntry.mechanicalFilterReplaced ? 1 : 0},
-  ${cleaningEntry.spongeReplaced ? 1 : 0}
-)`,
-    (err) => cb(err)
-  );
-}
-
-export function getTestingHistory(
-  userId: string,
-  cb: (err: Error | undefined, history: ITestingEntry[] | undefined) => void
-): void {
-  request(
-    `SELECT * FROM ${DATABASE_NAMES.TESTING} ORDER BY time`,
-    (err, rowCount, rows) => {
-      if (err) {
-        cb(err, undefined);
-        return;
-      }
-      cb(undefined, rows.map((row) => ({
-        time: parseInt(row.time.value, 10),
-        ph: row.ph.value,
-        ammonia: row.ammonia.value,
-        nitrites: row.nitrites.value,
-        nitrates: row.nitrates.value
-      })));
+  // Else check if we need to update the low temperature
+  } else if (latestEntry.low > newState.currentTemperature) {
+    if (!dailyTemperatureCache) {
+      dailyTemperatureCache = {
+        time: startOfToday,
+        low: newState.currentTemperature,
+        high: newState.currentTemperature
+      };
     }
-  );
+    dailyTemperatureCache.low = newState.currentTemperature;
+    await updateEntry(Table.TEMPERATURE, {
+      high: newState.currentTemperature
+    }, `time=${startOfToday}`);
+  }
 }
 
-export function createTestingEntry(
-  userId: string,
-  cleaningEntry: ITestingEntry,
-  cb: (err: Error | undefined) => void
-) {
-  request(
-`INSERT INTO ${DATABASE_NAMES.TESTING} (
-  time,
-  ph,
-  ammonia,
-  nitrites,
-  nitrates
-)
-VALUES (
-  ${cleaningEntry.time},
-  ${cleaningEntry.ph},
-  ${cleaningEntry.ammonia},
-  ${cleaningEntry.nitrites},
-  ${cleaningEntry.nitrates}
-)`,
-    (err) => cb(err)
-  );
+export async function getConfig(): Promise<IConfig | undefined> {
+  const rows = await selectAll(Table.CONFIG);
+  if (rows.length === 0) {
+    return undefined;
+  } else if (rows.length === 1) {
+    return JSON.parse(rows[0].config);
+  } else {
+    throw new Error(`Internal Error: more than one config entry returned.`);
+  }
+}
+
+export async function updateConfig(config: IConfig): Promise<void> {
+  await updateEntry(Table.CONFIG, {
+    config: JSON.stringify(config)
+  });
+}
+
+export async function getTemperatureHistory(): Promise<ITemperatureEntry[]> {
+  return await selectAll(Table.TEMPERATURE, 'time');
+}
+
+export async function getCleaningHistory(): Promise<ICleaningEntry[]> {
+  return await selectAll(Table.CLEANING, 'time');
+}
+
+export async function createCleaningEntry(cleaningEntry: ICleaningEntry): Promise<void> {
+  await insertEntry(Table.CLEANING, {
+    time: cleaningEntry.time,
+    bioFilterReplaced: cleaningEntry.bioFilterReplaced ? 1 : 0,
+    mechanicalFilterReplaced: cleaningEntry.mechanicalFilterReplaced ? 1 : 0,
+    spongeReplaced: cleaningEntry.spongeReplaced ? 1 : 0
+  });
+}
+
+export async function getTestingHistory(): Promise<ITestingEntry[]> {
+  return await selectAll(Table.TESTING, 'time');
+}
+
+export async function createTestingEntry(cleaningEntry: ITestingEntry): Promise<void> {
+  await insertEntry(Table.TESTING, cleaningEntry);
 }

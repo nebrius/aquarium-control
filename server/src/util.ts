@@ -17,14 +17,6 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import * as moment from 'moment-timezone';
 
-export const DATABASE_NAMES = {
-  STATE: 'state',
-  TEMPERATURE: 'temperature_history',
-  CLEANING: 'cleaning',
-  TESTING: 'testing',
-  CONFIG: 'config'
-};
-
 export function getEnvironmentVariable(variable: string): string {
   const value = process.env[variable];
   if (typeof value !== 'string') {

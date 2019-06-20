@@ -17,16 +17,11 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import { init as initEndpoints } from './endpoints';
 import { init as initDB } from './db';
-import { series } from 'async';
 
-console.log('Starting Aquarium Control server');
-series([
-  initDB,
-  initEndpoints
-] as any, (err: Error | undefined) => {
-  if (err) {
-    console.error(err.message || err);
-    process.exit(-1);
-  }
+async function run() {
+  console.log('Starting Aquarium Control server');
+  await initDB();
+  await initEndpoints();
   console.log('Aquarium Control server running');
-});
+}
+run();

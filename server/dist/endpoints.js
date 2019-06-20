@@ -22,11 +22,10 @@ const body_parser_1 = require("body-parser");
 const revalidator_1 = require("revalidator");
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const async_1 = require("async");
 const common_1 = require("./common/common");
 const db_1 = require("./db");
 const DEFAULT_PORT = 3001;
-function init(cb) {
+async function init() {
     console.debug('Initializing endpoint module');
     const port = process.env.PORT || DEFAULT_PORT;
     const app = express();
@@ -45,144 +44,130 @@ function init(cb) {
     app.get('/', (req, res) => {
         res.render('index');
     });
-    app.get('/api/state', (req, res) => {
-        db_1.getState((err, state) => {
-            if (err) {
-                console.error(err);
-                res.sendStatus(500);
-            }
-            else {
-                res.send(state);
-            }
-        });
+    app.get('/api/state', async (req, res) => {
+        try {
+            const state = await db_1.getState();
+            res.send({ result: state });
+        }
+        catch (e) {
+            console.error(e);
+            res.sendStatus(500);
+        }
     });
-    app.get('/api/config', (req, res) => {
-        db_1.getConfig((err, config) => {
-            if (err) {
-                console.error(err);
-                res.sendStatus(500);
-            }
-            else {
-                res.send({
-                    config
-                });
-            }
-        });
+    app.get('/api/config', async (req, res) => {
+        try {
+            const config = await db_1.getConfig();
+            res.send({ result: config });
+        }
+        catch (e) {
+            console.error(e);
+            res.sendStatus(500);
+        }
     });
-    app.post('/api/config', (req, res) => {
+    app.post('/api/config', async (req, res) => {
         if (!revalidator_1.validate(req.body, common_1.configValidationSchema).valid) {
             res.sendStatus(400);
             return;
         }
-        db_1.updateConfig(req.body, (err) => {
-            if (err) {
-                console.error(err);
-                res.sendStatus(500);
-            }
-            else {
-                res.send({ result: 'ok' });
-            }
-        });
+        try {
+            await db_1.updateConfig(req.body);
+            res.send({ result: 'ok' });
+        }
+        catch (e) {
+            console.error(e);
+            res.sendStatus(500);
+        }
     });
-    app.get('/api/temperatures', (req, res) => {
-        async_1.series([
-            (done) => db_1.getTemperatureHistory(req.userId, done),
-        ], (err, results) => {
-            if (err || !results) {
-                res.sendStatus(500);
-            }
-            else {
-                const history = {
-                    temperatures: results[0]
-                };
-                res.send(history);
-            }
-        });
+    app.get('/api/temperatures', async (req, res) => {
+        try {
+            const temperatures = {
+                history: await db_1.getTemperatureHistory()
+            };
+            res.send({ result: temperatures });
+        }
+        catch (e) {
+            console.error(e);
+            res.sendStatus(500);
+        }
     });
-    app.get('/api/cleaning', (req, res) => {
-        db_1.getCleaningHistory(req.userId, (err, history) => {
-            if (err || !history) {
-                res.sendStatus(500);
-            }
-            else {
-                res.send({
-                    cleaning: { history }
-                });
-            }
-        });
+    app.get('/api/cleaning', async (req, res) => {
+        try {
+            const cleaning = {
+                history: await db_1.getCleaningHistory()
+            };
+            res.send({ result: cleaning });
+        }
+        catch (e) {
+            console.error(e);
+            res.sendStatus(500);
+        }
     });
-    app.post('/api/cleaning', (req, res) => {
+    app.post('/api/cleaning', async (req, res) => {
         if (!revalidator_1.validate(req.body, common_1.cleaningValidationSchema).valid) {
             res.sendStatus(400);
             return;
         }
-        db_1.createCleaningEntry(req.userId, req.body, (err) => {
-            if (err) {
-                res.sendStatus(500);
-            }
-            db_1.getCleaningHistory(req.userId, (err, history) => {
-                if (err || !history) {
-                    res.sendStatus(500);
-                }
-                else {
-                    res.send({
-                        cleaning: { history }
-                    });
-                }
-            });
-        });
+        try {
+            await db_1.createCleaningEntry(req.body);
+            const cleaning = {
+                history: await db_1.getCleaningHistory()
+            };
+            res.send({ result: cleaning });
+        }
+        catch (e) {
+            console.error(e);
+            res.sendStatus(500);
+        }
     });
-    app.get('/api/testing', (req, res) => {
-        db_1.getTestingHistory(req.userId, (err, history) => {
-            if (err || !history) {
-                res.sendStatus(500);
-            }
-            else {
-                res.send({
-                    testing: { history }
-                });
-            }
-        });
+    app.get('/api/testing', async (req, res) => {
+        try {
+            const testing = {
+                history: await db_1.getTestingHistory()
+            };
+            res.send({ result: testing });
+        }
+        catch (e) {
+            console.error(e);
+            res.sendStatus(500);
+        }
     });
-    app.post('/api/testing', (req, res) => {
+    app.post('/api/testing', async (req, res) => {
         if (!revalidator_1.validate(req.body, common_1.testingValidationSchema).valid) {
             res.sendStatus(400);
             return;
         }
-        db_1.createTestingEntry(req.userId, req.body, (err) => {
-            if (err) {
-                res.sendStatus(500);
-            }
-            db_1.getTestingHistory(req.userId, (err, history) => {
-                if (err || !history) {
-                    res.sendStatus(500);
-                }
-                else {
-                    res.send({
-                        testing: { history }
-                    });
-                }
-            });
-        });
+        try {
+            await db_1.createTestingEntry(req.body);
+            const testing = {
+                history: await db_1.getTestingHistory()
+            };
+            res.send({ result: testing });
+        }
+        catch (e) {
+            console.error(e);
+            res.sendStatus(500);
+        }
     });
     app.get('/api/ping', (req, res) => {
         res.send('ok');
     });
     const server = http_1.createServer();
     server.on('request', app);
-    server.listen(port, () => {
-        const address = server.address();
-        if (!address) {
-            throw new Error(`server address is unexpectedly null`);
-        }
-        if (typeof address === 'string') {
-            console.log(`API server listening on ${address}.`);
-        }
-        else {
-            console.log(`API server listening on ${address.address}:${address.port}.`);
-        }
-        cb(undefined);
+    return new Promise((resolve) => {
+        server.listen(port, () => {
+            const address = server.address();
+            if (!address) {
+                throw new Error(`server address is unexpectedly null`);
+            }
+            if (typeof address === 'string') {
+                console.log(`API server listening on ${address}.`);
+            }
+            else {
+                console.log(`API server listening on ${address.address}:${address.port}.`);
+            }
+            resolve();
+        });
     });
 }
 exports.init = init;
-//# sourceMappingURL=endpoints.js.map
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZW5kcG9pbnRzLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vc3JjL2VuZHBvaW50cy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7Ozs7Ozs7Ozs7Ozs7OztFQWVFOztBQUVGLCtCQUFvQztBQUNwQywrQkFBNEI7QUFDNUIsNkNBQW1DO0FBQ25DLDZDQUF1QztBQUN2QyxtQ0FBbUM7QUFDbkMsOENBQThDO0FBQzlDLDRDQVN5QjtBQUN6Qiw2QkFTYztBQUVkLE1BQU0sWUFBWSxHQUFHLElBQUksQ0FBQztBQUVuQixLQUFLLFVBQVUsSUFBSTtJQUN4QixPQUFPLENBQUMsS0FBSyxDQUFDLDhCQUE4QixDQUFDLENBQUM7SUFFOUMsTUFBTSxJQUFJLEdBQUcsT0FBTyxDQUFDLEdBQUcsQ0FBQyxJQUFJLElBQUksWUFBWSxDQUFDO0lBRTlDLE1BQU0sR0FBRyxHQUFHLE9BQU8sRUFBRSxDQUFDO0lBRXRCLEdBQUcsQ0FBQyxHQUFHLENBQUMsa0JBQUksRUFBRSxDQUFDLENBQUM7SUFDaEIsR0FBRyxDQUFDLEdBQUcsQ0FBQyxZQUFZLEVBQUUsQ0FBQyxDQUFDO0lBRXhCLElBQUksT0FBTyxDQUFDLEdBQUcsQ0FBQyxXQUFXLEtBQUssTUFBTSxFQUFFO1FBQ3RDLElBQUksT0FBTyxDQUFDLEdBQUcsQ0FBQyxRQUFRLEtBQUssWUFBWSxFQUFFO1lBQ3pDLEdBQUcsQ0FBQyxHQUFHLENBQUMsT0FBTyxDQUFDLE1BQU0sQ0FBQyxXQUFJLENBQUMsU0FBUyxFQUFFLElBQUksRUFBRSxRQUFRLENBQUMsQ0FBQyxDQUFDLENBQUM7U0FDMUQ7YUFBTTtZQUNMLEdBQUcsQ0FBQyxHQUFHLENBQUMsT0FBTyxDQUFDLE1BQU0sQ0FBQyxXQUFJLENBQUMsU0FBUyxFQUFFLElBQUksRUFBRSxJQUFJLEVBQUUsUUFBUSxFQUFFLE1BQU0sQ0FBQyxDQUFDLENBQUMsQ0FBQztTQUN4RTtLQUNGO0lBRUQsR0FBRyxDQUFDLEdBQUcsQ0FBQyxhQUFhLEVBQUUs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

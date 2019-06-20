@@ -21,14 +21,15 @@ import { json } from 'body-parser';
 import { validate } from 'revalidator';
 import * as express from 'express';
 import * as cookieParser from 'cookie-parser';
-import { series } from 'async';
 import {
   IConfig,
   configValidationSchema,
   cleaningValidationSchema,
   testingValidationSchema,
   ITemperature,
-  ITemperatureSample
+  ICleaning,
+  IState,
+  ITesting
 } from './common/common';
 import {
   getTemperatureHistory,
@@ -43,11 +44,7 @@ import {
 
 const DEFAULT_PORT = 3001;
 
-interface IRequest extends express.Request {
-  userId: string;
-}
-
-export function init(cb: (err: Error | undefined) => void): void {
+export async function init(): Promise<void> {
   console.debug('Initializing endpoint module');
 
   const port = process.env.PORT || DEFAULT_PORT;
@@ -72,124 +69,108 @@ export function init(cb: (err: Error | undefined) => void): void {
     res.render('index');
   });
 
-  app.get('/api/state', (req, res) => {
-    getState((err, state) => {
-      if (err) {
-        console.error(err);
-        res.sendStatus(500);
-      } else {
-        res.send(state);
-      }
-    });
+  app.get('/api/state', async (req, res) => {
+    try {
+      const state: IState | undefined = await getState();
+      res.send({ result: state });
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(500);
+    }
   });
 
-  app.get('/api/config', (req, res) => {
-    getConfig((err, config) => {
-      if (err) {
-        console.error(err);
-        res.sendStatus(500);
-      } else {
-        res.send({
-          config
-        });
-      }
-    });
+  app.get('/api/config', async (req, res) => {
+    try {
+      const config: IConfig | undefined = await getConfig();
+      res.send({ result: config });
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(500);
+    }
   });
 
-  app.post('/api/config', (req, res) => {
+  app.post('/api/config', async (req, res) => {
     if (!validate(req.body, configValidationSchema).valid) {
       res.sendStatus(400);
       return;
     }
-    updateConfig((req.body as IConfig), (err) => {
-      if (err) {
-        console.error(err);
-        res.sendStatus(500);
-      } else {
-        res.send({ result: 'ok' });
-      }
-    });
+    try {
+      await updateConfig(req.body as IConfig);
+      res.send({ result: 'ok' });
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(500);
+    }
   });
 
-  app.get('/api/temperatures', (req, res) => {
-    series([
-      (done) => getTemperatureHistory((req as IRequest).userId, done),
-    ], (err, results) => {
-      if (err || !results) {
-        res.sendStatus(500);
-      } else {
-        const history: ITemperature = {
-          temperatures: results[0] as ITemperatureSample[]
-        };
-        res.send(history);
-      }
-    });
+  app.get('/api/temperatures', async (req, res) => {
+    try {
+      const temperatures: ITemperature = {
+        history: await getTemperatureHistory()
+      };
+      res.send({ result: temperatures });
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(500);
+    }
   });
 
-  app.get('/api/cleaning', (req, res) => {
-    getCleaningHistory((req as IRequest).userId, (err, history) => {
-      if (err || !history) {
-        res.sendStatus(500);
-      } else {
-        res.send({
-          cleaning: { history }
-        });
-      }
-    });
+  app.get('/api/cleaning', async (req, res) => {
+    try {
+      const cleaning: ICleaning = {
+        history: await getCleaningHistory()
+      };
+      res.send({ result: cleaning });
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(500);
+    }
   });
 
-  app.post('/api/cleaning', (req, res) => {
+  app.post('/api/cleaning', async (req, res) => {
     if (!validate(req.body, cleaningValidationSchema).valid) {
       res.sendStatus(400);
       return;
     }
-    createCleaningEntry((req as IRequest).userId, req.body, (err) => {
-      if (err) {
-        res.sendStatus(500);
-      }
-      getCleaningHistory((req as IRequest).userId, (err, history) => {
-        if (err || !history) {
-          res.sendStatus(500);
-        } else {
-          res.send({
-            cleaning: { history }
-          });
-        }
-      });
-    });
+    try {
+      await createCleaningEntry(req.body);
+      const cleaning: ICleaning = {
+        history: await getCleaningHistory()
+      };
+      res.send({ result: cleaning });
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(500);
+    }
   });
 
-  app.get('/api/testing', (req, res) => {
-    getTestingHistory((req as IRequest).userId, (err, history) => {
-      if (err || !history) {
-        res.sendStatus(500);
-      } else {
-        res.send({
-          testing: { history }
-        });
-      }
-    });
+  app.get('/api/testing', async (req, res) => {
+    try {
+      const testing: ITesting = {
+        history: await getTestingHistory()
+      };
+      res.send({ result: testing });
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(500);
+    }
   });
 
-  app.post('/api/testing', (req, res) => {
+  app.post('/api/testing', async (req, res) => {
     if (!validate(req.body, testingValidationSchema).valid) {
       res.sendStatus(400);
       return;
     }
-    createTestingEntry((req as IRequest).userId, req.body, (err) => {
-      if (err) {
-        res.sendStatus(500);
-      }
-      getTestingHistory((req as IRequest).userId, (err, history) => {
-        if (err || !history) {
-          res.sendStatus(500);
-        } else {
-          res.send({
-            testing: { history }
-          });
-        }
-      });
-    });
+    try {
+      await createTestingEntry(req.body);
+      const testing: ITesting = {
+        history: await getTestingHistory()
+      };
+      res.send({ result: testing });
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(500);
+    }
   });
 
   app.get('/api/ping', (req, res) => {
@@ -200,16 +181,19 @@ export function init(cb: (err: Error | undefined) => void): void {
 
   server.on('request', app);
 
-  server.listen(port, () => {
-    const address = server.address();
-    if (!address) {
-      throw new Error(`server address is unexpectedly null`);
-    }
-    if (typeof address === 'string') {
-      console.log(`API server listening on ${address}.`);
-    } else {
-      console.log(`API server listening on ${address.address}:${address.port}.`);
-    }
-    cb(undefined);
+  return new Promise((resolve) => {
+    server.listen(port, () => {
+      const address = server.address();
+      if (!address) {
+        throw new Error(`server address is unexpectedly null`);
+      }
+      if (typeof address === 'string') {
+        console.log(`API server listening on ${address}.`);
+      } else {
+        console.log(`API server listening on ${address.address}:${address.port}.`);
+      }
+      resolve();
+    });
   });
+
 }

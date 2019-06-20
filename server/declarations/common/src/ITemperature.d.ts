@@ -1,8 +1,8 @@
-export interface ITemperatureSample {
+export interface ITemperatureEntry {
     low: number;
     high: number;
     time: number;
 }
 export interface ITemperature {
-    temperatures: ITemperatureSample[];
+    history: ITemperatureEntry[];
 }

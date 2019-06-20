@@ -18,16 +18,11 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 Object.defineProperty(exports, "__esModule", { value: true });
 const endpoints_1 = require("./endpoints");
 const db_1 = require("./db");
-const async_1 = require("async");
-console.log('Starting Aquarium Control server');
-async_1.series([
-    db_1.init,
-    endpoints_1.init
-], (err) => {
-    if (err) {
-        console.error(err.message || err);
-        process.exit(-1);
-    }
+async function run() {
+    console.log('Starting Aquarium Control server');
+    await db_1.init();
+    await endpoints_1.init();
     console.log('Aquarium Control server running');
-});
-//# sourceMappingURL=index.js.map
+}
+run();
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBOzs7Ozs7Ozs7Ozs7Ozs7RUFlRTs7QUFFRiwyQ0FBb0Q7QUFDcEQsNkJBQXNDO0FBRXRDLEtBQUssVUFBVSxHQUFHO0lBQ2hCLE9BQU8sQ0FBQyxHQUFHLENBQUMsa0NBQWtDLENBQUMsQ0FBQztJQUNoRCxNQUFNLFNBQU0sRUFBRSxDQUFDO0lBQ2YsTUFBTSxnQkFBYSxFQUFFLENBQUM7SUFDdEIsT0FBTyxDQUFDLEdBQUcsQ0FBQyxpQ0FBaUMsQ0FBQyxDQUFDO0FBQ2pELENBQUM7QUFDRCxHQUFHLEVBQUUsQ0FBQyJ9
