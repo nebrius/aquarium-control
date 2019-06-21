@@ -58,6 +58,37 @@ async function createDB(): Promise<void> {
 `CREATE TABLE ${Table.CONFIG} (
   config varchar(2048) not null
 )`);
+  const config = JSON.stringify({
+    mode: 'program',
+    overrideState: 'off',
+    schedule: [{
+      name: 'Sunrise',
+      type: 'dynamic',
+      state: 'day',
+      details: {
+        event: 'sunrise'
+      },
+      id: 'c6b32451-5c4f-4a45-9577-aab3c10915d1'
+    }, {
+      name: 'Sunset',
+      type: 'dynamic',
+      state: 'night',
+      details: {
+        event: 'sunset'
+      },
+      id: '8abb6bab-fc7b-49da-97fc-a494d79801fd'
+    }, {
+      name: 'Night',
+      type: 'manual',
+      state: 'off',
+      details: {
+        hour: 23,
+        minute: 0
+      },
+      id: '75e4c852-bae1-4112-84c9-aac6df44964c'
+    }]
+  });
+  await (run as any)(`INSERT INTO ${Table.CONFIG} (config) VALUES (?)`, [ config ]);
 
   await run(
 `CREATE TABLE ${Table.STATE} (
