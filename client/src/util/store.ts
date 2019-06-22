@@ -20,9 +20,6 @@ import { IAppState, SaveStatusState } from './IAppState';
 import { reducers } from '../reducers/reducers';
 
 const preloadedState: IAppState = {
-  aquariumUser: {
-    user: undefined
-  },
   aquariumConfig: {
     config: undefined,
     saveStatus: SaveStatusState.None

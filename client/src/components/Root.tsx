@@ -16,7 +16,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-import { HeaderContainer } from '../containers/HeaderContainer';
+import { Header } from '../components/Header';
 import { ConfigurationContainer } from '../containers/ConfigurationContainer';
 import { StateContainer} from '../containers/StateContainer';
 import { TemperatureContainer } from '../containers/TemperatureContainer';
@@ -41,7 +41,7 @@ export class Root extends React.Component<{}, IRootState> {
   public render() {
     return (
       <div className="root-container">
-        <HeaderContainer />
+        <Header />
         <div className="navBar">
           <ButtonBar
               items={[

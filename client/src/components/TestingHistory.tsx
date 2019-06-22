@@ -17,16 +17,15 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import * as React from 'react';
 import { ITestingEntry } from '../common/common';
-import { IAquariumUser } from '../util/IAppState';
 import { Graph, ISampleSet } from './Graph';
 
 export interface ITestingHistoryProps {
   testingHistory: ITestingEntry[] | undefined;
-  user: IAquariumUser | undefined;
+  timezone: string;
 }
 
 export function TestingHistory(props: ITestingHistoryProps): JSX.Element {
-  if (!props.testingHistory || !props.user || !props.user.user) {
+  if (!props.testingHistory) {
     return (
       <div>
         <div><h2>Testing History</h2></div>
@@ -91,7 +90,7 @@ export function TestingHistory(props: ITestingHistoryProps): JSX.Element {
           <Graph
             dataSets={phData}
             yAxisLabel="pH"
-            timezone={props.user.user.timezone}
+            timezone={props.timezone}
             dateType="day"
             width={width}
             height={height}
@@ -107,7 +106,7 @@ export function TestingHistory(props: ITestingHistoryProps): JSX.Element {
           <Graph
             dataSets={ammoniaData}
             yAxisLabel="Ammonia (ppm)"
-            timezone={props.user.user.timezone}
+            timezone={props.timezone}
             dateType="day"
             width={width}
             height={height}
@@ -123,7 +122,7 @@ export function TestingHistory(props: ITestingHistoryProps): JSX.Element {
           <Graph
             dataSets={nitritesData}
             yAxisLabel="Nitrites (ppm)"
-            timezone={props.user.user.timezone}
+            timezone={props.timezone}
             dateType="day"
             width={width}
             height={height}
@@ -139,7 +138,7 @@ export function TestingHistory(props: ITestingHistoryProps): JSX.Element {
           <Graph
             dataSets={nitratesData}
             yAxisLabel="Nitrates"
-            timezone={props.user.user.timezone}
+            timezone={props.timezone}
             dateType="day"
             width={width}
             height={height}

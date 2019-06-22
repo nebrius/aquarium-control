@@ -39,12 +39,12 @@ function mapDispatchToProps(dispatch: (action: IAction) => any): IRecordTestingD
     requestCreateTestingRecord: async (newRecord: ITestingEntry) => {
       dispatch(testingRequestCreateRecord(newRecord));
       try {
-        const result = await request({
+        const { result } = await request({
           endpoint: 'testing',
           method: 'POST',
           body: newRecord
         });
-        dispatch(testingCreateRecordSucceeded(result.testing));
+        dispatch(testingCreateRecordSucceeded(result));
       } catch {
         dispatch(testingCreateRecordFailed());
       }

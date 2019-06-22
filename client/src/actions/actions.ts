@@ -18,7 +18,6 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 import {
   IConfig,
   IState,
-  IUser,
   ITemperature,
   ICleaning,
   ICleaningEntry,
@@ -27,9 +26,6 @@ import {
 } from '../common/common';
 
 export const ACTIONS = {
-  USER_FETCH_SUCCEEDED: 'USER_FETCH_SUCCEEDED',
-  USER_FETCH_FAILED: 'USER_FETCH_FAILED',
-
   STATE_FETCH_SUCCEEDED: 'STATE_FETCH_SUCCEEDED',
   STATE_FETCH_FAILED: 'STATE_FETCH_FAILED',
 
@@ -59,25 +55,6 @@ export const ACTIONS = {
 // e.g. "CLEANING_FETCH_SUCCEEDED", as opposed to just "string"
 export interface IAction {
   type: string;
-}
-
-// User Actions
-
-export interface IUserFetchSeucceededAction extends IAction {
-  userInfo: IUser;
-}
-
-export function userFetchSucceeded(userInfo: IUser): IUserFetchSeucceededAction {
-  return {
-    type: ACTIONS.USER_FETCH_SUCCEEDED,
-    userInfo
-  };
-}
-
-export function userFetchFailed(): IAction {
-  return {
-    type: ACTIONS.USER_FETCH_FAILED
-  };
 }
 
 // State Actions

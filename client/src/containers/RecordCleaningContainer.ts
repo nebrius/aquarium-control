@@ -39,12 +39,12 @@ function mapDispatchToProps(dispatch: (action: IAction) => any): IRecordCleaning
     requestCreateCleaningRecord: async (newRecord: ICleaningEntry) => {
       dispatch(cleaningRequestCreateRecord(newRecord));
       try {
-        const result = await request({
+        const { result } = await request({
           endpoint: 'cleaning',
           method: 'POST',
           body: newRecord
         });
-        dispatch(cleaningCreateRecordSucceeded(result.cleaning));
+        dispatch(cleaningCreateRecordSucceeded(result));
       } catch {
         dispatch(cleaningCreateRecordFailed());
       }

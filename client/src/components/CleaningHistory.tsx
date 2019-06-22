@@ -17,12 +17,11 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import * as React from 'react';
 import { ICleaningEntry } from '../common/common';
-import { IAquariumUser } from '../util/IAppState';
 import { formatDate } from '../util/format';
 
 export interface ICleaningHistoryProps {
   cleaningHistory: ICleaningEntry[] | undefined;
-  user: IAquariumUser | undefined;
+  timezone: string;
 }
 
 export function CleaningHistory(props: ICleaningHistoryProps): JSX.Element {
@@ -33,12 +32,6 @@ export function CleaningHistory(props: ICleaningHistoryProps): JSX.Element {
         <div className="alert alert-danger">Current cleaning history is not available</div>
       </div>
     );
-  }
-  let timezone: string;
-  if (props.user && props.user.user) {
-    timezone = props.user.user.timezone;
-  } else {
-    timezone = 'Etc/UTC';
   }
   return (
     <div>
@@ -56,7 +49,7 @@ export function CleaningHistory(props: ICleaningHistoryProps): JSX.Element {
           <tbody>
             {props.cleaningHistory.map((entry) => (
               <tr key={entry.time}>
-                <td>{formatDate(entry.time, timezone)}</td>
+                <td>{formatDate(entry.time, props.timezone)}</td>
                 <td>{entry.bioFilterReplaced ? '✔' : ''}</td>
                 <td>{entry.mechanicalFilterReplaced ? '✔' : ''}</td>
                 <td>{entry.spongeReplaced ? '✔' : ''}</td>

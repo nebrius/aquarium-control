@@ -173,10 +173,6 @@ export async function init(): Promise<void> {
     }
   });
 
-  app.get('/api/ping', (req, res) => {
-    res.send('ok');
-  });
-
   const server = createServer();
 
   server.on('request', app);

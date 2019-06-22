@@ -19,17 +19,15 @@ import { connect } from 'react-redux';
 import { IAppState } from '../util/IAppState';
 import { IAction } from '../actions/actions';
 import { CleaningHistory, ICleaningHistoryProps } from '../components/CleaningHistory';
+import * as moment from 'moment-timezone';
 
 function mapStateToProps(state: IAppState): ICleaningHistoryProps {
   const cleaningState: ICleaningHistoryProps = {
     cleaningHistory: undefined,
-    user: undefined
+    timezone: moment.tz.guess()
   };
   if (state.aquariumCleaning.cleaning) {
     cleaningState.cleaningHistory = state.aquariumCleaning.cleaning.history;
-  }
-  if (state.aquariumUser.user) {
-    cleaningState.user = state.aquariumUser;
   }
   return cleaningState;
 }

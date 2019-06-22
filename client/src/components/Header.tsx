@@ -17,17 +17,10 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 
 import * as React from 'react';
 
-export interface IHeaderProps {
-  userName: string;
-  deviceName: string;
-}
-
-export function Header(props: IHeaderProps): JSX.Element {
+export function Header(): JSX.Element {
   return (
     <header className="header">
-      <div className="header-side-left-content">{props.deviceName}</div>
       <div className="header-title"><h1>Aquarium Control</h1></div>
-      <div className="header-side-right-content">{props.userName}</div>
     </header>
   );
 }

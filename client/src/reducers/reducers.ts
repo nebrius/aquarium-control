@@ -18,7 +18,6 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 import { combineReducers } from 'redux';
 import { aquariumStateReducer } from './aquariumStateReducer';
 import { aquariumConfigReducer } from './aquariumConfigReducer';
-import { aquariumUserReducer } from './aquariumUserReducer';
 import { aquariumTemperatureReducer } from './aquariumTemperatureReducer';
 import { aquariumTestingReducer } from './aquariumTestingReducer';
 import { aquariumCleaningReducer } from './aquariumCleaningReducer';
@@ -26,7 +25,6 @@ import { aquariumCleaningReducer } from './aquariumCleaningReducer';
 export const reducers = combineReducers({
   aquariumState: aquariumStateReducer,
   aquariumConfig: aquariumConfigReducer,
-  aquariumUser: aquariumUserReducer,
   aquariumTemperature: aquariumTemperatureReducer,
   aquariumTesting: aquariumTestingReducer,
   aquariumCleaning: aquariumCleaningReducer

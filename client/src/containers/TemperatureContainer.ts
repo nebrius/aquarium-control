@@ -19,11 +19,12 @@ import { connect } from 'react-redux';
 import { IAppState } from '../util/IAppState';
 import { IAction } from '../actions/actions';
 import { Temperature, ITemperatureProps } from '../components/Temperature';
+import * as moment from 'moment-timezone';
 
 function mapStateToProps(state: IAppState): ITemperatureProps {
   return {
     temperature: state.aquariumTemperature,
-    user: state.aquariumUser
+    timezone: moment.tz.guess()
   };
 }
 

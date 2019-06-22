@@ -19,17 +19,15 @@ import { connect } from 'react-redux';
 import { IAppState } from '../util/IAppState';
 import { IAction } from '../actions/actions';
 import { TestingHistory, ITestingHistoryProps } from '../components/TestingHistory';
+import * as moment from 'moment-timezone';
 
 function mapStateToProps(state: IAppState): ITestingHistoryProps {
   const testingState: ITestingHistoryProps = {
     testingHistory: undefined,
-    user: undefined
+    timezone: moment.tz.guess()
   };
   if (state.aquariumTesting.testing) {
     testingState.testingHistory = state.aquariumTesting.testing.history;
-  }
-  if (state.aquariumUser.user) {
-    testingState.user = state.aquariumUser;
   }
   return testingState;
 }

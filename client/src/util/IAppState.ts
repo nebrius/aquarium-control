@@ -15,8 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import {
-  IUser, IState, IConfig, ITemperature, ICleaning, ITesting } from '../common/common';
+import { IState, IConfig, ITemperature, ICleaning, ITesting } from '../common/common';
 
 export enum SaveStatusState {
   Pending,
@@ -33,10 +32,6 @@ export interface IAquariumState {
 export interface IAquariumConfig {
   config: IConfig | undefined;
   saveStatus: SaveStatusState;
-}
-
-export interface IAquariumUser {
-  user: IUser | undefined;
 }
 
 export interface IAquariumTemperature {
@@ -56,7 +51,6 @@ export interface IAquariumTesting {
 export interface IAppState {
   aquariumState: IAquariumState;
   aquariumConfig: IAquariumConfig;
-  aquariumUser: IAquariumUser;
   aquariumTemperature: IAquariumTemperature;
   aquariumCleaning: IAquariumCleaning;
   aquariumTesting: IAquariumTesting;

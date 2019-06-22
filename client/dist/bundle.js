@@ -69522,8 +69522,6 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ACTIONS = {
-    USER_FETCH_SUCCEEDED: 'USER_FETCH_SUCCEEDED',
-    USER_FETCH_FAILED: 'USER_FETCH_FAILED',
     STATE_FETCH_SUCCEEDED: 'STATE_FETCH_SUCCEEDED',
     STATE_FETCH_FAILED: 'STATE_FETCH_FAILED',
     CLEANING_FETCH_SUCCEEDED: 'CLEANING_FETCH_SUCCEEDED',
@@ -69544,19 +69542,6 @@ exports.ACTIONS = {
     TEMPERATURE_FETCH_SUCCEEDED: 'TEMPERATURE_FETCH_SUCCEEDED',
     TEMPERATURE_FETCH_FAILED: 'TEMPERATURE_FETCH_FAILED'
 };
-function userFetchSucceeded(userInfo) {
-    return {
-        type: exports.ACTIONS.USER_FETCH_SUCCEEDED,
-        userInfo: userInfo
-    };
-}
-exports.userFetchSucceeded = userFetchSucceeded;
-function userFetchFailed() {
-    return {
-        type: exports.ACTIONS.USER_FETCH_FAILED
-    };
-}
-exports.userFetchFailed = userFetchFailed;
 function stateFetchSucceeded(aquariumState) {
     return {
         type: exports.ACTIONS.STATE_FETCH_SUCCEEDED,
@@ -69770,7 +69755,7 @@ function run() {
                                     method: 'GET',
                                 })];
                         case 1:
-                            result = _b.sent();
+                            result = (_b.sent()).result;
                             store_1.store.dispatch(actions_1.stateFetchSucceeded(result));
                             return [3 /*break*/, 3];
                         case 2:
@@ -69796,7 +69781,7 @@ function run() {
                                     method: 'GET'
                                 })];
                         case 1:
-                            result = _b.sent();
+                            result = (_b.sent()).result;
                             store_1.store.dispatch(actions_1.temperatureFetchSuceeded(result));
                             return [3 /*break*/, 3];
                         case 2:
@@ -69810,69 +69795,55 @@ function run() {
                 });
             });
         }
-        var result, _a, result, _b, result, _c, result, _d;
-        return __generator(this, function (_e) {
-            switch (_e.label) {
+        var result, _a, result, _b, result, _c;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
                 case 0:
                     updateState();
-                    _e.label = 1;
+                    _d.label = 1;
                 case 1:
-                    _e.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, api_1.request({
-                            endpoint: 'user',
-                            method: 'GET'
-                        })];
-                case 2:
-                    result = _e.sent();
-                    store_1.store.dispatch(actions_1.userFetchSucceeded(result));
-                    return [3 /*break*/, 4];
-                case 3:
-                    _a = _e.sent();
-                    store_1.store.dispatch(actions_1.userFetchFailed());
-                    return [3 /*break*/, 4];
-                case 4:
-                    _e.trys.push([4, 6, , 7]);
+                    _d.trys.push([1, 3, , 4]);
                     return [4 /*yield*/, api_1.request({
                             endpoint: 'config',
                             method: 'GET'
                         })];
-                case 5:
-                    result = _e.sent();
-                    store_1.store.dispatch(actions_1.configFetchSucceeded(result.config));
-                    return [3 /*break*/, 7];
-                case 6:
-                    _b = _e.sent();
+                case 2:
+                    result = (_d.sent()).result;
+                    store_1.store.dispatch(actions_1.configFetchSucceeded(result));
+                    return [3 /*break*/, 4];
+                case 3:
+                    _a = _d.sent();
                     store_1.store.dispatch(actions_1.configFetchFailed());
-                    return [3 /*break*/, 7];
-                case 7:
-                    _e.trys.push([7, 9, , 10]);
+                    return [3 /*break*/, 4];
+                case 4:
+                    _d.trys.push([4, 6, , 7]);
                     return [4 /*yield*/, api_1.request({
                             endpoint: 'cleaning',
                             method: 'GET'
                         })];
-                case 8:
-                    result = _e.sent();
-                    store_1.store.dispatch(actions_1.cleaningHistoryFetchSucceeded(result.cleaning));
-                    return [3 /*break*/, 10];
-                case 9:
-                    _c = _e.sent();
+                case 5:
+                    result = (_d.sent()).result;
+                    store_1.store.dispatch(actions_1.cleaningHistoryFetchSucceeded(result));
+                    return [3 /*break*/, 7];
+                case 6:
+                    _b = _d.sent();
                     store_1.store.dispatch(actions_1.cleaningHistoryFetchFailed());
-                    return [3 /*break*/, 10];
-                case 10:
-                    _e.trys.push([10, 12, , 13]);
+                    return [3 /*break*/, 7];
+                case 7:
+                    _d.trys.push([7, 9, , 10]);
                     return [4 /*yield*/, api_1.request({
                             endpoint: 'testing',
                             method: 'GET'
                         })];
-                case 11:
-                    result = _e.sent();
-                    store_1.store.dispatch(actions_1.testingHistoryFetchSucceeded(result.testing));
-                    return [3 /*break*/, 13];
-                case 12:
-                    _d = _e.sent();
+                case 8:
+                    result = (_d.sent()).result;
+                    store_1.store.dispatch(actions_1.testingHistoryFetchSucceeded(result));
+                    return [3 /*break*/, 10];
+                case 9:
+                    _c = _d.sent();
                     store_1.store.dispatch(actions_1.testingHistoryFetchFailed());
-                    return [3 /*break*/, 13];
-                case 13:
+                    return [3 /*break*/, 10];
+                case 10:
                     updateTemperature();
                     react_dom_1.render((React.createElement(react_redux_1.Provider, { store: store_1.store },
                         React.createElement(Root_1.Root, null))), document.getElementById('root'));
@@ -70002,13 +69973,6 @@ function CleaningHistory(props) {
                 React.createElement("h2", null, "Cleaning History")),
             React.createElement("div", { className: "alert alert-danger" }, "Current cleaning history is not available")));
     }
-    var timezone;
-    if (props.user && props.user.user) {
-        timezone = props.user.user.timezone;
-    }
-    else {
-        timezone = 'Etc/UTC';
-    }
     return (React.createElement("div", null,
         React.createElement("div", null,
             React.createElement("h2", null, "Cleaning History")),
@@ -70021,7 +69985,7 @@ function CleaningHistory(props) {
                         React.createElement("th", { scope: "col" }, "Mechanical Filter"),
                         React.createElement("th", { scope: "col" }, "Sponge"))),
                 React.createElement("tbody", null, props.cleaningHistory.map(function (entry) { return (React.createElement("tr", { key: entry.time },
-                    React.createElement("td", null, format_1.formatDate(entry.time, timezone)),
+                    React.createElement("td", null, format_1.formatDate(entry.time, props.timezone)),
                     React.createElement("td", null, entry.bioFilterReplaced ? '✔' : ''),
                     React.createElement("td", null, entry.mechanicalFilterReplaced ? '✔' : ''),
                     React.createElement("td", null, entry.spongeReplaced ? '✔' : ''))); }))))));
@@ -70368,12 +70332,10 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-function Header(props) {
+function Header() {
     return (React.createElement("header", { className: "header" },
-        React.createElement("div", { className: "header-side-left-content" }, props.deviceName),
         React.createElement("div", { className: "header-title" },
-            React.createElement("h1", null, "Aquarium Control")),
-        React.createElement("div", { className: "header-side-right-content" }, props.userName)));
+            React.createElement("h1", null, "Aquarium Control"))));
 }
 exports.Header = Header;
 
@@ -70689,7 +70651,7 @@ var __assign = (this && this.__assign) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-var HeaderContainer_1 = __webpack_require__(/*! ../containers/HeaderContainer */ "./src/containers/HeaderContainer.ts");
+var Header_1 = __webpack_require__(/*! ../components/Header */ "./src/components/Header.tsx");
 var ConfigurationContainer_1 = __webpack_require__(/*! ../containers/ConfigurationContainer */ "./src/containers/ConfigurationContainer.ts");
 var StateContainer_1 = __webpack_require__(/*! ../containers/StateContainer */ "./src/containers/StateContainer.ts");
 var TemperatureContainer_1 = __webpack_require__(/*! ../containers/TemperatureContainer */ "./src/containers/TemperatureContainer.ts");
@@ -70714,7 +70676,7 @@ var Root = /** @class */ (function (_super) {
     }
     Root.prototype.render = function () {
         return (React.createElement("div", { className: "root-container" },
-            React.createElement(HeaderContainer_1.HeaderContainer, null),
+            React.createElement(Header_1.Header, null),
             React.createElement("div", { className: "navBar" },
                 React.createElement(ButtonBar_1.ButtonBar, { items: [
                         { displayName: 'State', valueName: 'state' },
@@ -71018,7 +70980,7 @@ var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 var format_1 = __webpack_require__(/*! ../util/format */ "./src/util/format.ts");
 var StateEntry_1 = __webpack_require__(/*! ./StateEntry */ "./src/components/StateEntry.tsx");
 function State(props) {
-    if (!props.state || !props.state.state || !props.user || !props.user.user) {
+    if (!props.state || !props.state.state) {
         return (React.createElement("div", null,
             React.createElement("div", null,
                 React.createElement("h2", null, "Current State")),
@@ -71029,7 +70991,6 @@ function State(props) {
         banner = (React.createElement("div", { className: "alert alert-warning" }, "Current state information is outdated. Is the Raspberry Pi offline?"));
     }
     var state = props.state.state;
-    var timezone = props.user.user.timezone;
     return (React.createElement("div", null,
         React.createElement("div", null,
             React.createElement("h2", null, "Current State")),
@@ -71038,10 +70999,10 @@ function State(props) {
             React.createElement("div", { className: "state-current-container" },
                 React.createElement("div", { className: "state-current-group-container" },
                     React.createElement(StateEntry_1.StateEntry, { label: "Current Mode", value: format_1.capitalizeFirstLetter(state.currentMode) }),
-                    React.createElement(StateEntry_1.StateEntry, { label: "Current Time", value: format_1.formatDate(state.currentTime, timezone) }),
+                    React.createElement(StateEntry_1.StateEntry, { label: "Current Time", value: format_1.formatDate(state.currentTime, props.timezone) }),
                     React.createElement(StateEntry_1.StateEntry, { label: "Current State", value: format_1.capitalizeFirstLetter(state.currentState) })),
                 React.createElement("div", { className: "state-current-group-container" },
-                    React.createElement(StateEntry_1.StateEntry, { label: "Next Transition Time", value: format_1.formatDate(state.nextTransitionTime, timezone) }),
+                    React.createElement(StateEntry_1.StateEntry, { label: "Next Transition Time", value: format_1.formatDate(state.nextTransitionTime, props.timezone) }),
                     React.createElement(StateEntry_1.StateEntry, { label: "Next Transitition State", value: format_1.capitalizeFirstLetter(state.nextTransitionState) })),
                 React.createElement("div", { className: "state-current-group-container" },
                     React.createElement(StateEntry_1.StateEntry, { label: "Current Temperature", value: state.currentTemperature + ' C' }))))));
@@ -71119,13 +71080,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 var Graph_1 = __webpack_require__(/*! ./Graph */ "./src/components/Graph.tsx");
 function Temperature(props) {
-    if (!props.temperature.temperature || !props.user.user) {
+    if (!props.temperature.temperature) {
         return (React.createElement("div", null,
             React.createElement("div", null,
                 React.createElement("h2", null, "Temperature History")),
             React.createElement("div", { className: "alert alert-danger" }, "Current temperature history not available")));
     }
-    var temperatures = props.temperature.temperature.temperatures;
+    var temperatures = props.temperature.temperature.history;
     var monthlyTemperatureData = [{
             label: 'Low',
             color: 'rgb(54, 162, 235)',
@@ -71152,7 +71113,7 @@ function Temperature(props) {
             React.createElement("h2", null, "Temperature History")),
         React.createElement("div", { className: "temperature-content" },
             React.createElement("div", { className: "temperature-section-container" },
-                React.createElement(Graph_1.Graph, { dataSets: monthlyTemperatureData, yAxisLabel: "Temperature (C)", timezone: props.user.user.timezone, dateType: "day", width: width, height: height, suggestedMin: 23, suggestedMax: 27 })))));
+                React.createElement(Graph_1.Graph, { dataSets: monthlyTemperatureData, yAxisLabel: "Temperature (C)", timezone: props.timezone, dateType: "day", width: width, height: height, suggestedMin: 23, suggestedMax: 27 })))));
 }
 exports.Temperature = Temperature;
 
@@ -71188,7 +71149,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 var Graph_1 = __webpack_require__(/*! ./Graph */ "./src/components/Graph.tsx");
 function TestingHistory(props) {
-    if (!props.testingHistory || !props.user || !props.user.user) {
+    if (!props.testingHistory) {
         return (React.createElement("div", null,
             React.createElement("div", null,
                 React.createElement("h2", null, "Testing History")),
@@ -71243,22 +71204,22 @@ function TestingHistory(props) {
             React.createElement("div", null,
                 React.createElement("h3", null, "pH")),
             React.createElement("div", { className: "testing-section-container" },
-                React.createElement(Graph_1.Graph, { dataSets: phData, yAxisLabel: "pH", timezone: props.user.user.timezone, dateType: "day", width: width, height: height, suggestedMin: 6, suggestedMax: 9 }))),
+                React.createElement(Graph_1.Graph, { dataSets: phData, yAxisLabel: "pH", timezone: props.timezone, dateType: "day", width: width, height: height, suggestedMin: 6, suggestedMax: 9 }))),
         React.createElement("div", { className: "testing-content" },
             React.createElement("div", null,
                 React.createElement("h3", null, "Ammonia")),
             React.createElement("div", { className: "testing-section-container" },
-                React.createElement(Graph_1.Graph, { dataSets: ammoniaData, yAxisLabel: "Ammonia (ppm)", timezone: props.user.user.timezone, dateType: "day", width: width, height: height, suggestedMin: 0, suggestedMax: 36 }))),
+                React.createElement(Graph_1.Graph, { dataSets: ammoniaData, yAxisLabel: "Ammonia (ppm)", timezone: props.timezone, dateType: "day", width: width, height: height, suggestedMin: 0, suggestedMax: 36 }))),
         React.createElement("div", { className: "testing-content" },
             React.createElement("div", null,
                 React.createElement("h3", null, "Nitrites")),
             React.createElement("div", { className: "testing-section-container" },
-                React.createElement(Graph_1.Graph, { dataSets: nitritesData, yAxisLabel: "Nitrites (ppm)", timezone: props.user.user.timezone, dateType: "day", width: width, height: height, suggestedMin: 0, suggestedMax: 10 }))),
+                React.createElement(Graph_1.Graph, { dataSets: nitritesData, yAxisLabel: "Nitrites (ppm)", timezone: props.timezone, dateType: "day", width: width, height: height, suggestedMin: 0, suggestedMax: 10 }))),
         React.createElement("div", { className: "testing-content" },
             React.createElement("div", null,
                 React.createElement("h3", null, "Nitrates")),
             React.createElement("div", { className: "testing-section-container" },
-                React.createElement(Graph_1.Graph, { dataSets: nitratesData, yAxisLabel: "Nitrates", timezone: props.user.user.timezone, dateType: "day", width: width, height: height, suggestedMin: 0, suggestedMax: 160 })))));
+                React.createElement(Graph_1.Graph, { dataSets: nitratesData, yAxisLabel: "Nitrates", timezone: props.timezone, dateType: "day", width: width, height: height, suggestedMin: 0, suggestedMax: 160 })))));
 }
 exports.TestingHistory = TestingHistory;
 
@@ -71293,16 +71254,14 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 var CleaningHistory_1 = __webpack_require__(/*! ../components/CleaningHistory */ "./src/components/CleaningHistory.tsx");
+var moment = __webpack_require__(/*! moment-timezone */ "./node_modules/moment-timezone/index.js");
 function mapStateToProps(state) {
     var cleaningState = {
         cleaningHistory: undefined,
-        user: undefined
+        timezone: moment.tz.guess()
     };
     if (state.aquariumCleaning.cleaning) {
         cleaningState.cleaningHistory = state.aquariumCleaning.cleaning.history;
-    }
-    if (state.aquariumUser.user) {
-        cleaningState.user = state.aquariumUser;
     }
     return cleaningState;
 }
@@ -71421,56 +71380,6 @@ exports.ConfigurationContainer = react_redux_1.connect(mapStateToProps, mapDispa
 
 /***/ }),
 
-/***/ "./src/containers/HeaderContainer.ts":
-/*!*******************************************!*\
-  !*** ./src/containers/HeaderContainer.ts ***!
-  \*******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-/*
-Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
-
-Aquarium Control is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Aquarium Control is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
-*/
-Object.defineProperty(exports, "__esModule", { value: true });
-var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
-var Header_1 = __webpack_require__(/*! ../components/Header */ "./src/components/Header.tsx");
-function mapStateToProps(state) {
-    if (state.aquariumUser.user) {
-        return {
-            userName: state.aquariumUser.user.userName,
-            deviceName: state.aquariumUser.user.deviceId
-        };
-    }
-    else {
-        return {
-            userName: 'loading...',
-            deviceName: 'loading...'
-        };
-    }
-}
-function mapDispatchToProps(dispatch) {
-    return {};
-}
-exports.HeaderContainer = react_redux_1.connect(mapStateToProps, mapDispatchToProps)(Header_1.Header);
-
-
-/***/ }),
-
 /***/ "./src/containers/RecordCleaningContainer.ts":
 /*!***************************************************!*\
   !*** ./src/containers/RecordCleaningContainer.ts ***!
@@ -71560,8 +71469,8 @@ function mapDispatchToProps(dispatch) {
                                 body: newRecord
                             })];
                     case 2:
-                        result = _b.sent();
-                        dispatch(actions_1.cleaningCreateRecordSucceeded(result.cleaning));
+                        result = (_b.sent()).result;
+                        dispatch(actions_1.cleaningCreateRecordSucceeded(result));
                         return [3 /*break*/, 4];
                     case 3:
                         _a = _b.sent();
@@ -71667,8 +71576,8 @@ function mapDispatchToProps(dispatch) {
                                 body: newRecord
                             })];
                     case 2:
-                        result = _b.sent();
-                        dispatch(actions_1.testingCreateRecordSucceeded(result.testing));
+                        result = (_b.sent()).result;
+                        dispatch(actions_1.testingCreateRecordSucceeded(result));
                         return [3 /*break*/, 4];
                     case 3:
                         _a = _b.sent();
@@ -71713,10 +71622,11 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 var State_1 = __webpack_require__(/*! ../components/State */ "./src/components/State.tsx");
+var moment = __webpack_require__(/*! moment-timezone */ "./node_modules/moment-timezone/index.js");
 function mapStateToProps(state) {
     return {
         state: state.aquariumState,
-        user: state.aquariumUser
+        timezone: moment.tz.guess()
     };
 }
 function mapDispatchToProps(dispatch) {
@@ -71755,10 +71665,11 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 var Temperature_1 = __webpack_require__(/*! ../components/Temperature */ "./src/components/Temperature.tsx");
+var moment = __webpack_require__(/*! moment-timezone */ "./node_modules/moment-timezone/index.js");
 function mapStateToProps(state) {
     return {
         temperature: state.aquariumTemperature,
-        user: state.aquariumUser
+        timezone: moment.tz.guess()
     };
 }
 function mapDispatchToProps(dispatch) {
@@ -71797,16 +71708,14 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 var TestingHistory_1 = __webpack_require__(/*! ../components/TestingHistory */ "./src/components/TestingHistory.tsx");
+var moment = __webpack_require__(/*! moment-timezone */ "./node_modules/moment-timezone/index.js");
 function mapStateToProps(state) {
     var testingState = {
         testingHistory: undefined,
-        user: undefined
+        timezone: moment.tz.guess()
     };
     if (state.aquariumTesting.testing) {
         testingState.testingHistory = state.aquariumTesting.testing.history;
-    }
-    if (state.aquariumUser.user) {
-        testingState.user = state.aquariumUser;
     }
     return testingState;
 }
@@ -72179,62 +72088,6 @@ exports.aquariumTestingReducer = function (state, action) {
 
 /***/ }),
 
-/***/ "./src/reducers/aquariumUserReducer.ts":
-/*!*********************************************!*\
-  !*** ./src/reducers/aquariumUserReducer.ts ***!
-  \*********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-/*
-Copyright (C) 2013-2017 Bryan Hughes <bryan@nebri.us>
-
-Aquarium Control is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Aquarium Control is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
-*/
-Object.defineProperty(exports, "__esModule", { value: true });
-var actions_1 = __webpack_require__(/*! ../actions/actions */ "./src/actions/actions.ts");
-exports.aquariumUserReducer = function (state, action) {
-    switch (action.type) {
-        case actions_1.ACTIONS.USER_FETCH_FAILED: {
-            var newState = {
-                user: undefined
-            };
-            return newState;
-        }
-        case actions_1.ACTIONS.USER_FETCH_SUCCEEDED: {
-            var newState = {
-                user: action.userInfo
-            };
-            return newState;
-        }
-        default: {
-            if (state) {
-                return state;
-            }
-            var newState = {
-                user: undefined
-            };
-            return newState;
-        }
-    }
-};
-
-
-/***/ }),
-
 /***/ "./src/reducers/reducers.ts":
 /*!**********************************!*\
   !*** ./src/reducers/reducers.ts ***!
@@ -72264,14 +72117,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var redux_1 = __webpack_require__(/*! redux */ "./node_modules/redux/es/redux.js");
 var aquariumStateReducer_1 = __webpack_require__(/*! ./aquariumStateReducer */ "./src/reducers/aquariumStateReducer.ts");
 var aquariumConfigReducer_1 = __webpack_require__(/*! ./aquariumConfigReducer */ "./src/reducers/aquariumConfigReducer.ts");
-var aquariumUserReducer_1 = __webpack_require__(/*! ./aquariumUserReducer */ "./src/reducers/aquariumUserReducer.ts");
 var aquariumTemperatureReducer_1 = __webpack_require__(/*! ./aquariumTemperatureReducer */ "./src/reducers/aquariumTemperatureReducer.ts");
 var aquariumTestingReducer_1 = __webpack_require__(/*! ./aquariumTestingReducer */ "./src/reducers/aquariumTestingReducer.ts");
 var aquariumCleaningReducer_1 = __webpack_require__(/*! ./aquariumCleaningReducer */ "./src/reducers/aquariumCleaningReducer.ts");
 exports.reducers = redux_1.combineReducers({
     aquariumState: aquariumStateReducer_1.aquariumStateReducer,
     aquariumConfig: aquariumConfigReducer_1.aquariumConfigReducer,
-    aquariumUser: aquariumUserReducer_1.aquariumUserReducer,
     aquariumTemperature: aquariumTemperatureReducer_1.aquariumTemperatureReducer,
     aquariumTesting: aquariumTestingReducer_1.aquariumTestingReducer,
     aquariumCleaning: aquariumCleaningReducer_1.aquariumCleaningReducer
@@ -72478,9 +72329,6 @@ var redux_1 = __webpack_require__(/*! redux */ "./node_modules/redux/es/redux.js
 var IAppState_1 = __webpack_require__(/*! ./IAppState */ "./src/util/IAppState.ts");
 var reducers_1 = __webpack_require__(/*! ../reducers/reducers */ "./src/reducers/reducers.ts");
 var preloadedState = {
-    aquariumUser: {
-        user: undefined
-    },
     aquariumConfig: {
         config: undefined,
         saveStatus: IAppState_1.SaveStatusState.None

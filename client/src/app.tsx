@@ -24,8 +24,6 @@ import { request } from './util/api';
 import {
   stateFetchFailed,
   stateFetchSucceeded,
-  userFetchFailed,
-  userFetchSucceeded,
   configFetchFailed,
   configFetchSucceeded,
   cleaningHistoryFetchFailed,
@@ -42,7 +40,7 @@ const TEMPERATURE_UPDATE_RATE = 60 * 1000;
 async function run() {
   async function updateState() {
     try {
-      const result = await request({
+      const { result } = await request({
         endpoint: 'state',
         method: 'GET',
       });
@@ -55,48 +53,38 @@ async function run() {
   updateState();
 
   try {
-    const result = await request({
-      endpoint: 'user',
-      method: 'GET'
-    });
-    store.dispatch(userFetchSucceeded(result));
-  } catch {
-    store.dispatch(userFetchFailed());
-  }
-
-  try {
-    const result = await request({
+    const { result } = await request({
       endpoint: 'config',
       method: 'GET'
     });
-    store.dispatch(configFetchSucceeded(result.config));
+    store.dispatch(configFetchSucceeded(result));
   } catch {
     store.dispatch(configFetchFailed());
   }
 
   try {
-    const result = await request({
+    const { result } = await request({
       endpoint: 'cleaning',
       method: 'GET'
     });
-    store.dispatch(cleaningHistoryFetchSucceeded(result.cleaning));
+    store.dispatch(cleaningHistoryFetchSucceeded(result));
   } catch {
     store.dispatch(cleaningHistoryFetchFailed());
   }
 
   try {
-    const result = await request({
+    const { result } = await request({
       endpoint: 'testing',
       method: 'GET'
     });
-    store.dispatch(testingHistoryFetchSucceeded(result.testing));
+    store.dispatch(testingHistoryFetchSucceeded(result));
   } catch {
     store.dispatch(testingHistoryFetchFailed());
   }
 
   async function updateTemperature() {
     try {
-      const result = await request({
+      const { result } = await request({
         endpoint: 'temperatures',
         method: 'GET'
       });

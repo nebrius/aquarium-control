@@ -44,6 +44,7 @@ const MONTH_IN_MS = 30 * DAY_IN_MS;
 
 const TIMEZONE = getEnvironmentVariable('TIMEZONE');
 const SQLITE_DATABASE_PATH = getEnvironmentVariable('SQLITE_DATABASE_PATH');
+const CONFIG_ID = 1;
 
 let db: Database | undefined;
 
@@ -56,6 +57,7 @@ async function createDB(): Promise<void> {
 
   await run(
 `CREATE TABLE ${Table.CONFIG} (
+  id smallint primary key,
   config varchar(2048) not null
 )`);
   const config = JSON.stringify({
@@ -88,7 +90,8 @@ async function createDB(): Promise<void> {
       id: '75e4c852-bae1-4112-84c9-aac6df44964c'
     }]
   });
-  await (run as any)(`INSERT INTO ${Table.CONFIG} (config) VALUES (?)`, [ config ]);
+   // We use this ID so that REPLACE will always replace the old entry with new ones, instead of adding new rows
+  await (run as any)(`INSERT INTO ${Table.CONFIG} (id, config) VALUES (?, ?)`, [ CONFIG_ID, config ]);
 
   await run(
 `CREATE TABLE ${Table.STATE} (
@@ -121,7 +124,7 @@ await run(
   ph float not null,
   ammonia int not null,
   nitrites int not null,
-  nitrate int not null
+  nitrates int not null
 )`);
 }
 
@@ -178,21 +181,12 @@ async function updateEntry(table: Table, values: { [ key: string ]: any }, where
       });
     }
     const query =
-`IF NOT EXISTS(SELECT * FROM ${table} ${where ? `WHERE ${where}` : ''})
-BEGIN
-  INSERT INTO ${table}(
-    ${arrayValues.map((entry) => entry.key).join(',\n    ')}
-  )
-  VALUES(
-    ${arrayValues.map(() => '?').join(',\n    ')}
-  )
-END
-ELSE
-BEGIN
-  UPDATE ${table} SET
-    ${arrayValues.map((entry) => `${entry.key} = ?`).join(',\n    ')}
-  ${where ? `WHERE ${where}` : ''}
-END`;
+`REPLACE INTO ${table}(
+  ${arrayValues.map((entry) => entry.key).join(',\n  ')}
+)
+VALUES(
+  ${arrayValues.map(() => '?').join(',\n  ')}
+)`;
     db.run(query, arrayValues.map((entry) => entry.value), (err) => {
       if (err) {
         reject(err);
@@ -338,6 +332,7 @@ export async function getConfig(): Promise<IConfig | undefined> {
 
 export async function updateConfig(config: IConfig): Promise<void> {
   await updateEntry(Table.CONFIG, {
+    id: CONFIG_ID, // We use this so that REPLACE will always replace the old entry with this use
     config: JSON.stringify(config)
   });
 }

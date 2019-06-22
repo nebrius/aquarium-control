@@ -16,16 +16,16 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import * as React from 'react';
-import { IAquariumTemperature, IAquariumUser } from '../util/IAppState';
+import { IAquariumTemperature } from '../util/IAppState';
 import { Graph, ISampleSet } from './Graph';
 
 export interface ITemperatureProps {
   temperature: IAquariumTemperature;
-  user: IAquariumUser;
+  timezone: string;
 }
 
 export function Temperature(props: ITemperatureProps): JSX.Element {
-  if (!props.temperature.temperature || !props.user.user) {
+  if (!props.temperature.temperature) {
     return (
       <div>
         <div><h2>Temperature History</h2></div>
@@ -33,7 +33,7 @@ export function Temperature(props: ITemperatureProps): JSX.Element {
       </div>
     );
   }
-  const temperatures = props.temperature.temperature.temperatures;
+  const temperatures = props.temperature.temperature.history;
   const monthlyTemperatureData: ISampleSet[] = [{
     label: 'Low',
     color: 'rgb(54, 162, 235)',
@@ -63,7 +63,7 @@ export function Temperature(props: ITemperatureProps): JSX.Element {
           <Graph
             dataSets={monthlyTemperatureData}
             yAxisLabel="Temperature (C)"
-            timezone={props.user.user.timezone}
+            timezone={props.timezone}
             dateType="day"
             width={width}
             height={height}
