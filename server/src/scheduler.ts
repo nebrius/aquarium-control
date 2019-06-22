@@ -16,9 +16,13 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { getTimes } from 'suncalc';
+import { IDynamicScheduleEntry, IManualScheduleEntry } from './common/common';
 import { state } from './state';
-import { LATITUDE, LONGITUDE } from './config';
-import { IDynamicScheduleEntry, IManualScheduleEntry } from './common/IConfig';
+import { getConfig } from './db';
+import { getEnvironmentVariable } from './util';
+
+const LATITUDE = parseFloat(getEnvironmentVariable('LATITUDE'));
+const LONGITUDE = parseFloat(getEnvironmentVariable('LONGITUDE'));
 
 interface IScheduleEntry {
   date: Date;
@@ -67,15 +71,17 @@ function scheduleNextTransition() {
   }, nextScheduleEntry.date.getTime() - Date.now());
 }
 
-export function init(cb: (err: Error | undefined) => void): void {
-  updateSchedule();
+export async function init(): Promise<void> {
+  await updateSchedule();
   state.on('change-config', updateSchedule);
-  setImmediate(cb);
 }
 
-export function updateSchedule() {
+export async function updateSchedule(): Promise<void> {
 
-  const currentSchedule = state.getConfig();
+  const currentSchedule = await getConfig();
+  if (!currentSchedule) {
+    throw new Error('Internal Error: currentSchedule is undefined');
+  }
 
   // Cancel the previous schedule, if it was running
   if (scheduleTimeout) {

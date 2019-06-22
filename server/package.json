@@ -29,6 +29,7 @@
     "@types/request": "^2.0.11",
     "@types/revalidator": "^0.3.5",
     "@types/sqlite3": "^3.1.5",
+    "@types/suncalc": "^1.8.0",
     "rimraf": "^2.6.2",
     "tslint": "^5.17.0",
     "typescript": "^3.5.1"
@@ -43,8 +44,12 @@
     "mkdirp": "^0.5.1",
     "moment-timezone": "^0.5.14",
     "pug": "^2.0.0-rc.4",
+    "raspi": "^6.0.1",
+    "raspi-gpio": "^6.2.1",
+    "raspi-onewire": "^1.0.1",
     "request": "^2.83.0",
     "revalidator": "^0.3.1",
-    "sqlite3": "^4.0.9"
+    "sqlite3": "^4.0.9",
+    "suncalc": "^1.8.0"
   }
 }

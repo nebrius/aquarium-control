@@ -15,25 +15,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
-Object.defineProperty(exports, "__esModule", { value: true });
-const async_1 = require("async");
-const messaging_1 = require("./messaging");
-const device_1 = require("./device");
-const scheduler_1 = require("./scheduler");
-const state_1 = require("./state");
-function run() {
-    async_1.series([
-        state_1.init,
-        scheduler_1.init,
-        device_1.init,
-        messaging_1.init
-    ], (err) => {
-        if (err) {
-            console.error(err);
-            process.exit(-1);
-        }
-        console.log('Controller running');
-    });
-}
-exports.run = run;
-//# sourceMappingURL=index.js.map
+const DAY_PIN = 'GPIO27';
+const NIGHT_PIN = 'GPIO17';
+const LATITUDE = 37.546267;
+const LONGITUDE = -121.971132;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uZmlnLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vc3JjL2NvbmZpZy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7Ozs7Ozs7Ozs7Ozs7OztFQWVFO0FBRUYsTUFBTSxPQUFPLEdBQUcsUUFBUSxDQUFDO0FBQ3pCLE1BQU0sU0FBUyxHQUFHLFFBQVEsQ0FBQztBQUMzQixNQUFNLFFBQVEsR0FBRyxTQUFTLENBQUM7QUFDM0IsTUFBTSxTQUFTLEdBQUcsQ0FBQyxVQUFVLENBQUMifQ==
