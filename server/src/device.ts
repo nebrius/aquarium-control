@@ -35,51 +35,43 @@ export async function init(): Promise<void> {
           if (typeof searchErr === 'string') {
             searchErr = new Error(searchErr);
           }
-          reject(searchErr);
-          return;
+          console.warn(`Error searching for 1-wire devices, temperature logging will be disabled: ${searchErr}`);
+        } else if (devices.length === 0) {
+          console.warn('No 1-Wire sensors found, temperature logging will be disabled');
+        } else if (devices.length > 1) {
+          console.warn('Multiple 1-Wire sensors found, did you connect more than one accidentally? Temperature logging will be disabled');
+        } else if (devices[0][0] !== 40) {
+          console.warn('The connected 1-Wire device does not appear to be a DS18B20 temperature sensor, temperature logging will be disabled');
+        } else {
+          const temperatureSensorId = devices[0];
+          let temperatureSamples: number[] = [];
+          let hasReportedFirstTemperature = false;
+          setInterval(() => {
+            oneWire.readAllAvailable(temperatureSensorId, (err, data) => {
+              if (err || !data) {
+                console.error(err);
+                return;
+              }
+              const match = TEMPERATURE_REGEX.exec(data.toString());
+              if (!match) {
+                console.error(`Invalid data received from sensor: ${data.toString()}`);
+                return;
+              }
+              const newTemperature = parseInt(match[1], 10) / 1000;
+              temperatureSamples.push(newTemperature);
+              if (!hasReportedFirstTemperature) {
+                hasReportedFirstTemperature = true;
+                state.setCurrentTemperature(newTemperature);
+              } else if (temperatureSamples.length >= TEMPERATURE_SAMPLE_SIZE) {
+                // Take the median temperature and throw the rest away.
+                temperatureSamples.sort();
+                const currentTemperature = temperatureSamples[Math.floor(TEMPERATURE_SAMPLE_SIZE / 2)];
+                state.setCurrentTemperature(currentTemperature);
+                temperatureSamples = [];
+              }
+            });
+          }, TEMPERATURE_UPDATE_RATE);
         }
-
-        if (devices.length === 0) {
-          reject(new Error('No 1-Wire sensors found'));
-          return;
-        }
-        if (devices.length > 1) {
-          reject(new Error('Multiple 1-Wire sensors found, did you connect more than one accidentally?'));
-          return;
-        }
-        if (devices[0][0] !== 40) {
-          reject(new Error('The connected 1-Wire device does not appear to be a DS18B20 temperature sensor'));
-          return;
-        }
-
-        const temperatureSensorId = devices[0];
-        let temperatureSamples: number[] = [];
-        let hasReportedFirstTemperature = false;
-        setInterval(() => {
-          oneWire.readAllAvailable(temperatureSensorId, (err, data) => {
-            if (err || !data) {
-              console.error(err);
-              return;
-            }
-            const match = TEMPERATURE_REGEX.exec(data.toString());
-            if (!match) {
-              console.error(`Invalid data received from sensor: ${data.toString()}`);
-              return;
-            }
-            const newTemperature = parseInt(match[1], 10) / 1000;
-            temperatureSamples.push(newTemperature);
-            if (!hasReportedFirstTemperature) {
-              hasReportedFirstTemperature = true;
-              state.setCurrentTemperature(newTemperature);
-            } else if (temperatureSamples.length >= TEMPERATURE_SAMPLE_SIZE) {
-              // Take the median temperature and throw the rest away.
-              temperatureSamples.sort();
-              const currentTemperature = temperatureSamples[Math.floor(TEMPERATURE_SAMPLE_SIZE / 2)];
-              state.setCurrentTemperature(currentTemperature);
-              temperatureSamples = [];
-            }
-          });
-        }, TEMPERATURE_UPDATE_RATE);
 
         const dayLed = new DigitalOutput(getServerConfig().dayPin);
         const nightLed = new DigitalOutput(getServerConfig().nightPin);
