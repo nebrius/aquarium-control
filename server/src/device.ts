@@ -20,10 +20,7 @@ import { DigitalOutput, LOW, HIGH } from 'raspi-gpio';
 import { OneWire } from 'raspi-onewire';
 import { IState } from './common/common';
 import { state } from './state';
-import { getEnvironmentVariable } from './util';
-
-const DAY_PIN = getEnvironmentVariable('DAY_PIN');
-const NIGHT_PIN = getEnvironmentVariable('NIGHT_PIN');
+import { getServerConfig } from './config';
 
 const TEMPERATURE_REGEX = /t=([0-9]*)/;
 const TEMPERATURE_UPDATE_RATE = 10000;
@@ -84,8 +81,8 @@ export async function init(): Promise<void> {
           });
         }, TEMPERATURE_UPDATE_RATE);
 
-        const dayLed = new DigitalOutput(DAY_PIN);
-        const nightLed = new DigitalOutput(NIGHT_PIN);
+        const dayLed = new DigitalOutput(getServerConfig().dayPin);
+        const nightLed = new DigitalOutput(getServerConfig().nightPin);
 
         function setState(newState: IState): void {
           switch (newState.currentState) {

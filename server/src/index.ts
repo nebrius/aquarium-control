@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { init as initConfig } from './config';
 import { init as initEndpoints } from './endpoints';
 import { init as initDB } from './db';
 import { init as initDevice } from './device';
@@ -22,6 +23,7 @@ import { init as initScheduler } from './scheduler';
 
 async function run() {
   console.log('Starting Aquarium Control server');
+  await initConfig();
   await initDB();
   await initEndpoints();
   await initDevice();

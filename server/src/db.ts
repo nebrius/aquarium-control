@@ -16,12 +16,12 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { IState, ITemperatureEntry, ICleaningEntry, ITestingEntry, IConfig } from './common/common';
-import { getEnvironmentVariable, getStartOfToday } from './util';
+import { getStartOfToday } from './util';
+import { APP_DIR, getServerConfig } from './config';
 import { verbose, Database } from 'sqlite3';
 import { exists } from 'fs';
 import { promisify } from 'util';
-import { dirname } from 'path';
-import * as mkdirp from 'mkdirp';
+import { join } from 'path';
 
 enum Table {
   STATE = 'state',
@@ -42,8 +42,8 @@ const HOUR_IN_MS = 60 * 60 * 1000;
 const DAY_IN_MS = 24 * HOUR_IN_MS;
 const MONTH_IN_MS = 30 * DAY_IN_MS;
 
-const TIMEZONE = getEnvironmentVariable('TIMEZONE');
-const SQLITE_DATABASE_PATH = getEnvironmentVariable('SQLITE_DATABASE_PATH');
+const SQLITE_DATABASE_PATH = join(APP_DIR, 'db.sqlite');
+
 const CONFIG_ID = 1;
 
 let db: Database | undefined;
@@ -132,9 +132,6 @@ export async function init(): Promise<void> {
   console.debug('Initializing database module');
   const dbExists = await promisify(exists)(SQLITE_DATABASE_PATH);
   return new Promise(async (resolve, reject) => {
-    if (!dbExists) {
-      await promisify(mkdirp)(dirname(SQLITE_DATABASE_PATH));
-    }
     db = new (verbose().Database)(SQLITE_DATABASE_PATH, async (err) => {
       if (err) {
         reject(err);
@@ -260,7 +257,7 @@ export async function updateState(newState: IState): Promise<void> {
   console.log(`Updating state`);
   await updateEntry(Table.STATE, newState);
 
-  const startOfToday = getStartOfToday(TIMEZONE);
+  const startOfToday = getStartOfToday(getServerConfig().timezone);
   const monthBegin = startOfToday - MONTH_IN_MS;
 
   // Skip updating if possible

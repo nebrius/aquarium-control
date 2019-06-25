@@ -19,10 +19,7 @@ import { getTimes } from 'suncalc';
 import { IDynamicScheduleEntry, IManualScheduleEntry } from './common/common';
 import { state } from './state';
 import { getConfig } from './db';
-import { getEnvironmentVariable } from './util';
-
-const LATITUDE = parseFloat(getEnvironmentVariable('LATITUDE'));
-const LONGITUDE = parseFloat(getEnvironmentVariable('LONGITUDE'));
+import { getServerConfig } from './config';
 
 interface IScheduleEntry {
   date: Date;
@@ -114,7 +111,7 @@ export async function updateSchedule(): Promise<void> {
 
     // If we're dynamic, use suncalc to figure out the time
     const dynamicDetails: IDynamicScheduleEntry = entry.details as IDynamicScheduleEntry;
-    const times = getTimes(createDate(12, 0, 0), LATITUDE, LONGITUDE);
+    const times = getTimes(createDate(12, 0, 0), getServerConfig().latitude, getServerConfig().longitude);
     const date = times[dynamicDetails.event];
     if (!date) {
       const eventNames = Object.keys(times).join(', ');

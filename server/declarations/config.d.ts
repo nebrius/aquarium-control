@@ -1,4 +1,10 @@
-declare const DAY_PIN = "GPIO27";
-declare const NIGHT_PIN = "GPIO17";
-declare const LATITUDE = 37.546267;
-declare const LONGITUDE = -121.971132;
+export interface IServerConfig {
+    latitude: number;
+    longitude: number;
+    timezone: string;
+    dayPin: number | string;
+    nightPin: number | string;
+}
+export declare const APP_DIR = "/home/pi/.aquarium-control";
+export declare function init(): Promise<void>;
+export declare function getServerConfig(): IServerConfig;

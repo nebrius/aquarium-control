@@ -42,7 +42,7 @@ import {
   createTestingEntry
 } from './db';
 
-const DEFAULT_PORT = 3001;
+const DEFAULT_PORT = 80;
 
 export async function init(): Promise<void> {
   console.debug('Initializing endpoint module');
