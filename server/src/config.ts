@@ -51,7 +51,7 @@ export async function init() {
       latitude: 37.546267,
       longitude: -121.97113
     };
-    await promisify(writeFile)(CONFIG_PATH, JSON.stringify(defaultConfig));
+    await promisify(writeFile)(CONFIG_PATH, JSON.stringify(defaultConfig, null, '  '));
   }
 }
 
