@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { exists, writeFile } from 'fs';
+import { exists, readFile, writeFile } from 'fs';
 import { promisify } from 'util';
 import { join } from 'path';
 import * as mkdirp from 'mkdirp';
@@ -53,6 +53,7 @@ export async function init() {
     };
     await promisify(writeFile)(CONFIG_PATH, JSON.stringify(defaultConfig, null, '  '));
   }
+  config = JSON.parse((await promisify(readFile)(CONFIG_PATH)).toString());
 }
 
 export function getServerConfig(): IServerConfig {
