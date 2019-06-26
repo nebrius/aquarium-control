@@ -45,11 +45,12 @@ const MONTH_IN_MS = 30 * DAY_IN_MS;
 const SQLITE_DATABASE_PATH = join(APP_DIR, 'db.sqlite');
 
 const CONFIG_ID = 1;
+const STATE_ID = 1;
 
 let db: Database | undefined;
 
 async function createDB(): Promise<void> {
-  console.debug('Database does not currently exist, creating...');
+  console.debug('[Database]: database does not currently exist, creating...');
   if (!db) {
     throw new Error('Internal Error: query called without being initialized');
   }
@@ -95,6 +96,7 @@ async function createDB(): Promise<void> {
 
   await run(
 `CREATE TABLE ${Table.STATE} (
+  id smallint primary key,
   currentTime bigint not null,
   currentTemperature float not null,
   currentState varchar(255) not null,
@@ -129,7 +131,7 @@ await run(
 }
 
 export async function init(): Promise<void> {
-  console.debug('Initializing database module');
+  console.debug('[Database]: initializing module');
   const dbExists = await promisify(exists)(SQLITE_DATABASE_PATH);
   return new Promise(async (resolve, reject) => {
     db = new (verbose().Database)(SQLITE_DATABASE_PATH, async (err) => {
@@ -139,7 +141,7 @@ export async function init(): Promise<void> {
         if (!dbExists) {
           await createDB();
         }
-        console.debug('Database module initalized');
+        console.debug('[Database]: module initalized');
         resolve();
       }
     });
@@ -242,11 +244,20 @@ async function deleteEntry(table: Table, where?: string): Promise<void> {
   });
 }
 
-export async function getState(): Promise<IState | undefined> {
-  console.log(`Getting state`);
+export async function getState(): Promise<IState> {
+  console.debug('[Database]: getting state');
   const res = await selectAll(Table.STATE);
   if (res.length === 0) {
-    return undefined;
+    const state: IState = {
+      currentTime: Date.now(),
+      currentTemperature: 25,
+      currentState: 'off',
+      currentMode: 'override',
+      nextTransitionState: 'off',
+      nextTransitionTime: Date.now() + 1000
+    };
+    await updateState(state);
+    return state;
   } else if (res.length > 1) {
     throw new Error(`Internal Error: more than one state entry returned`);
   }
@@ -254,8 +265,11 @@ export async function getState(): Promise<IState | undefined> {
 }
 
 export async function updateState(newState: IState): Promise<void> {
-  console.log(`Updating state`);
-  await updateEntry(Table.STATE, newState);
+  console.debug('[Database]: updating state');
+  await updateEntry(Table.STATE, {
+    id: STATE_ID,
+    ...newState
+  });
 
   const startOfToday = getStartOfToday(getServerConfig().timezone);
   const monthBegin = startOfToday - MONTH_IN_MS;
@@ -273,7 +287,7 @@ export async function updateState(newState: IState): Promise<void> {
 
   // Check if we need to create a new entry
   const latestEntry = temperatureHistory[0];
-  if (latestEntry.time !== startOfToday) {
+  if (!latestEntry || latestEntry.time !== startOfToday) {
     dailyTemperatureCache = {
       time: startOfToday,
       low: newState.currentTemperature,
@@ -317,6 +331,7 @@ export async function updateState(newState: IState): Promise<void> {
 }
 
 export async function getConfig(): Promise<IConfig | undefined> {
+  console.debug('[Database]: getting config');
   const rows = await selectAll(Table.CONFIG);
   if (rows.length === 0) {
     return undefined;
@@ -328,6 +343,7 @@ export async function getConfig(): Promise<IConfig | undefined> {
 }
 
 export async function updateConfig(config: IConfig): Promise<void> {
+  console.debug('[Database]: updating config');
   await updateEntry(Table.CONFIG, {
     id: CONFIG_ID, // We use this so that REPLACE will always replace the old entry with this use
     config: JSON.stringify(config)
@@ -335,14 +351,17 @@ export async function updateConfig(config: IConfig): Promise<void> {
 }
 
 export async function getTemperatureHistory(): Promise<ITemperatureEntry[]> {
+  console.debug('[Database]: getting temperature history');
   return await selectAll(Table.TEMPERATURE, 'time');
 }
 
 export async function getCleaningHistory(): Promise<ICleaningEntry[]> {
+  console.debug('[Database]: getting history');
   return await selectAll(Table.CLEANING, 'time');
 }
 
 export async function createCleaningEntry(cleaningEntry: ICleaningEntry): Promise<void> {
+  console.debug('[Database]: creating cleaning entry');
   await insertEntry(Table.CLEANING, {
     time: cleaningEntry.time,
     bioFilterReplaced: cleaningEntry.bioFilterReplaced ? 1 : 0,
@@ -352,9 +371,11 @@ export async function createCleaningEntry(cleaningEntry: ICleaningEntry): Promis
 }
 
 export async function getTestingHistory(): Promise<ITestingEntry[]> {
+  console.debug('[Database]: getting testing history');
   return await selectAll(Table.TESTING, 'time');
 }
 
 export async function createTestingEntry(cleaningEntry: ITestingEntry): Promise<void> {
+  console.debug('[Database]: creating testing entry');
   await insertEntry(Table.TESTING, cleaningEntry);
 }

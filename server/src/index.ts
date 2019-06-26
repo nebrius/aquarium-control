@@ -16,6 +16,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import { init as initConfig } from './config';
+import { state } from './state';
 import { init as initEndpoints } from './endpoints';
 import { init as initDB } from './db';
 import { init as initDevice } from './device';
@@ -25,6 +26,7 @@ async function run() {
   console.log('Starting Aquarium Control server');
   await initConfig();
   await initDB();
+  await state.init();
   await initEndpoints();
   await initDevice();
   await initScheduler();

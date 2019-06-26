@@ -24,7 +24,9 @@ class State extends EventEmitter {
   private _state: IState | undefined;
 
   public async init() {
+    console.debug('[State]: Initializing state module');
     this._state = await getState();
+    console.debug('[State]: State module initalized');
   }
 
   public getState(): IState {

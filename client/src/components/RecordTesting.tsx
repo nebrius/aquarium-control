@@ -99,6 +99,9 @@ export class RecordTesting extends
 
   private _handlePHChanged = (event: React.FormEvent<HTMLInputElement>) => {
     const ph = parseFloat(event.currentTarget.value);
+    if (isNaN(ph)) {
+      return;
+    }
     this.setState((previousState) => {
       const newState = {
         ...previousState,
@@ -110,6 +113,9 @@ export class RecordTesting extends
 
   private _handleAmmoniaChanged = (event: React.FormEvent<HTMLInputElement>) => {
     const ammonia = parseFloat(event.currentTarget.value);
+    if (isNaN(ammonia)) {
+      return;
+    }
     this.setState((previousState) => {
       const newState = {
         ...previousState,
@@ -121,6 +127,9 @@ export class RecordTesting extends
 
   private _handleNitritesChanged = (event: React.FormEvent<HTMLInputElement>) => {
     const nitrites = parseFloat(event.currentTarget.value);
+    if (isNaN(nitrites)) {
+      return;
+    }
     this.setState((previousState) => {
       const newState = {
         ...previousState,
@@ -132,6 +141,9 @@ export class RecordTesting extends
 
   private _handleNitratesChanged = (event: React.FormEvent<HTMLInputElement>) => {
     const nitrates = parseFloat(event.currentTarget.value);
+    if (isNaN(nitrates)) {
+      return;
+    }
     this.setState((previousState) => {
       const newState = {
         ...previousState,

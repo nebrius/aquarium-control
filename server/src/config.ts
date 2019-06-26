@@ -34,15 +34,16 @@ const CONFIG_PATH = join(APP_DIR, 'config.json');
 let config: IServerConfig | undefined;
 
 export async function init() {
+  console.debug('[Config]: initializing config module');
   const appDirExists = await promisify(exists)(APP_DIR);
   if (!appDirExists) {
-    console.log(`Application directory does not exist, creating it at ${APP_DIR}`);
+    console.log(`[Config]: application directory does not exist, creating it at ${APP_DIR}`);
     await promisify(mkdirp)(APP_DIR);
   }
 
   const configExists = await promisify(exists)(CONFIG_PATH);
   if (!configExists) {
-    console.log(`Application configuration does not exist, creating default configuration at ${CONFIG_PATH}.` +
+    console.log(`[Config]: application configuration does not exist, creating default configuration at ${CONFIG_PATH}.` +
       ` Please review this to make sure the information is correct. The app may not function correctly until you do`);
     const defaultConfig: IServerConfig = {
       timezone: 'America/Los_Angeles',
@@ -54,6 +55,7 @@ export async function init() {
     await promisify(writeFile)(CONFIG_PATH, JSON.stringify(defaultConfig, null, '  '));
   }
   config = JSON.parse((await promisify(readFile)(CONFIG_PATH)).toString());
+  console.debug('[Config]: config module initalized');
 }
 
 export function getServerConfig(): IServerConfig {

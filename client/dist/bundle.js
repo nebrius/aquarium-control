@@ -70529,6 +70529,9 @@ var RecordTesting = /** @class */ (function (_super) {
         };
         _this._handlePHChanged = function (event) {
             var ph = parseFloat(event.currentTarget.value);
+            if (isNaN(ph)) {
+                return;
+            }
             _this.setState(function (previousState) {
                 var newState = __assign({}, previousState, { ph: ph });
                 return newState;
@@ -70536,6 +70539,9 @@ var RecordTesting = /** @class */ (function (_super) {
         };
         _this._handleAmmoniaChanged = function (event) {
             var ammonia = parseFloat(event.currentTarget.value);
+            if (isNaN(ammonia)) {
+                return;
+            }
             _this.setState(function (previousState) {
                 var newState = __assign({}, previousState, { ammonia: ammonia });
                 return newState;
@@ -70543,6 +70549,9 @@ var RecordTesting = /** @class */ (function (_super) {
         };
         _this._handleNitritesChanged = function (event) {
             var nitrites = parseFloat(event.currentTarget.value);
+            if (isNaN(nitrites)) {
+                return;
+            }
             _this.setState(function (previousState) {
                 var newState = __assign({}, previousState, { nitrites: nitrites });
                 return newState;
@@ -70550,6 +70559,9 @@ var RecordTesting = /** @class */ (function (_super) {
         };
         _this._handleNitratesChanged = function (event) {
             var nitrates = parseFloat(event.currentTarget.value);
+            if (isNaN(nitrates)) {
+                return;
+            }
             _this.setState(function (previousState) {
                 var newState = __assign({}, previousState, { nitrates: nitrates });
                 return newState;

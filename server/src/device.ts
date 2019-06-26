@@ -27,6 +27,7 @@ const TEMPERATURE_UPDATE_RATE = 10000;
 const TEMPERATURE_SAMPLE_SIZE = (5 * 60 * 1000) / TEMPERATURE_UPDATE_RATE;
 
 export async function init(): Promise<void> {
+  console.debug('[Device]: initializing module');
   return new Promise((resolve, reject) => {
     initRaspi(() => {
       const oneWire = new OneWire();
@@ -35,13 +36,13 @@ export async function init(): Promise<void> {
           if (typeof searchErr === 'string') {
             searchErr = new Error(searchErr);
           }
-          console.warn(`Error searching for 1-wire devices, temperature logging will be disabled: ${searchErr}`);
+          console.warn(`[Device]: error searching for 1-wire devices, temperature logging will be disabled: ${searchErr}`);
         } else if (devices.length === 0) {
-          console.warn('No 1-Wire sensors found, temperature logging will be disabled');
+          console.warn('[Device]: no 1-Wire sensors found, temperature logging will be disabled');
         } else if (devices.length > 1) {
-          console.warn('Multiple 1-Wire sensors found, did you connect more than one accidentally? Temperature logging will be disabled');
+          console.warn('[Device]: multiple 1-Wire sensors found, did you connect more than one accidentally? Temperature logging will be disabled');
         } else if (devices[0][0] !== 40) {
-          console.warn('The connected 1-Wire device does not appear to be a DS18B20 temperature sensor, temperature logging will be disabled');
+          console.warn('[Device]: the connected 1-Wire device does not appear to be a DS18B20 temperature sensor, temperature logging will be disabled');
         } else {
           const temperatureSensorId = devices[0];
           let temperatureSamples: number[] = [];
@@ -49,12 +50,12 @@ export async function init(): Promise<void> {
           setInterval(() => {
             oneWire.readAllAvailable(temperatureSensorId, (err, data) => {
               if (err || !data) {
-                console.error(err);
+                console.error(`[Device]: ${err}`);
                 return;
               }
               const match = TEMPERATURE_REGEX.exec(data.toString());
               if (!match) {
-                console.error(`Invalid data received from sensor: ${data.toString()}`);
+                console.error(`[Device]: invalid data received from sensor: ${data.toString()}`);
                 return;
               }
               const newTemperature = parseInt(match[1], 10) / 1000;
@@ -79,18 +80,18 @@ export async function init(): Promise<void> {
         function setState(newState: IState): void {
           switch (newState.currentState) {
             case 'day':
-              console.log('Setting the state to "day"');
+              console.log('[Device]: setting the state to "day"');
               dayLed.write(HIGH);
               nightLed.write(LOW);
               break;
             case 'night':
-              console.log('Setting the state to "night"');
+              console.log('[Device]: setting the state to "night"');
               dayLed.write(LOW);
               nightLed.write(HIGH);
               break;
             case 'off':
               dayLed.write(LOW);
-              console.log('Setting the state to "off"');
+              console.log('[Device]: setting the state to "off"');
               nightLed.write(LOW);
               break;
           }
@@ -98,6 +99,7 @@ export async function init(): Promise<void> {
         state.on('change-state', setState);
         setState(state.getState());
 
+        console.debug('[Device]: module initalized');
         resolve();
       });
     });

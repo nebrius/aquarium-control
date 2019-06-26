@@ -69,8 +69,10 @@ function scheduleNextTransition() {
 }
 
 export async function init(): Promise<void> {
+  console.debug('[Scheduler]: initializing module');
   await updateSchedule();
   state.on('change-config', updateSchedule);
+  console.debug('[Scheduler]: module initalized');
 }
 
 export async function updateSchedule(): Promise<void> {
@@ -88,14 +90,14 @@ export async function updateSchedule(): Promise<void> {
 
   // If we're in override mode, set that mode and exit early
   if (currentSchedule.mode === 'override') {
-    console.log('Setting override mode and skipping daily schedule creation');
+    console.log('[Scheduler]: setting override mode and skipping daily schedule creation');
     state.setCurrentState(currentSchedule.overrideState);
     state.setCurrentMode('override');
     return;
   }
 
   // Calculate the daily schedule
-  console.log('Creating the daily schedule');
+  console.log('[Scheduler]: creating the daily schedule');
   state.setCurrentMode('program');
   let entries = currentSchedule.schedule.map((entry) => {
 
@@ -132,7 +134,7 @@ export async function updateSchedule(): Promise<void> {
     }
     const isValid = entry.date.getTime() < entries[i + 1].date.getTime();
     if (!isValid) {
-      console.warn(`Entry ${entry.name} occurs after the next entry and will be ignored`);
+      console.warn(`[Scheduler]: entry ${entry.name} occurs after the next entry and will be ignored`);
     }
     return isValid;
   });
@@ -158,7 +160,7 @@ export async function updateSchedule(): Promise<void> {
 
   // Store the entries to the global state for use by scheduleNextTransition
   dailySchedule = entries;
-  console.log('The daily schedule is as follows: ');
+  console.log('[Scheduler]: the daily schedule is as follows: ');
   entries.forEach((entry) => console.log('  ' + entry.state + ': ' + entry.date));
 
   // If there are no entries left, we are done with the schedule for today and just

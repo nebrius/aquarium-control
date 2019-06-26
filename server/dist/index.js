@@ -17,6 +17,7 @@ along with Aquarium Control.  If not, see <http://www.gnu.org/licenses/>.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = require("./config");
+const state_1 = require("./state");
 const endpoints_1 = require("./endpoints");
 const db_1 = require("./db");
 const device_1 = require("./device");
@@ -25,10 +26,11 @@ async function run() {
     console.log('Starting Aquarium Control server');
     await config_1.init();
     await db_1.init();
+    await state_1.state.init();
     await endpoints_1.init();
     await device_1.init();
     await scheduler_1.init();
     console.log('Aquarium Control server running');
 }
 run();
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBOzs7Ozs7Ozs7Ozs7Ozs7RUFlRTs7QUFFRixxQ0FBOEM7QUFDOUMsMkNBQW9EO0FBQ3BELDZCQUFzQztBQUN0QyxxQ0FBOEM7QUFDOUMsMkNBQW9EO0FBRXBELEtBQUssVUFBVSxHQUFHO0lBQ2hCLE9BQU8sQ0FBQyxHQUFHLENBQUMsa0NBQWtDLENBQUMsQ0FBQztJQUNoRCxNQUFNLGFBQVUsRUFBRSxDQUFDO0lBQ25CLE1BQU0sU0FBTSxFQUFFLENBQUM7SUFDZixNQUFNLGdCQUFhLEVBQUUsQ0FBQztJQUN0QixNQUFNLGFBQVUsRUFBRSxDQUFDO0lBQ25CLE1BQU0sZ0JBQWEsRUFBRSxDQUFDO0lBQ3RCLE9BQU8sQ0FBQyxHQUFHLENBQUMsaUNBQWlDLENBQUMsQ0FBQztBQUNqRCxDQUFDO0FBQ0QsR0FBRyxFQUFFLENBQUMifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBOzs7Ozs7Ozs7Ozs7Ozs7RUFlRTs7QUFFRixxQ0FBOEM7QUFDOUMsbUNBQWdDO0FBQ2hDLDJDQUFvRDtBQUNwRCw2QkFBc0M7QUFDdEMscUNBQThDO0FBQzlDLDJDQUFvRDtBQUVwRCxLQUFLLFVBQVUsR0FBRztJQUNoQixPQUFPLENBQUMsR0FBRyxDQUFDLGtDQUFrQyxDQUFDLENBQUM7SUFDaEQsTUFBTSxhQUFVLEVBQUUsQ0FBQztJQUNuQixNQUFNLFNBQU0sRUFBRSxDQUFDO0lBQ2YsTUFBTSxhQUFLLENBQUMsSUFBSSxFQUFFLENBQUM7SUFDbkIsTUFBTSxnQkFBYSxFQUFFLENBQUM7SUFDdEIsTUFBTSxhQUFVLEVBQUUsQ0FBQztJQUNuQixNQUFNLGdCQUFhLEVBQUUsQ0FBQztJQUN0QixPQUFPLENBQUMsR0FBRyxDQUFDLGlDQUFpQyxDQUFDLENBQUM7QUFDakQsQ0FBQztBQUNELEdBQUcsRUFBRSxDQUFDIn0=

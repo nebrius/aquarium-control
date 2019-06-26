@@ -1,6 +1,6 @@
 import { IState, ITemperatureEntry, ICleaningEntry, ITestingEntry, IConfig } from './common/common';
 export declare function init(): Promise<void>;
-export declare function getState(): Promise<IState | undefined>;
+export declare function getState(): Promise<IState>;
 export declare function updateState(newState: IState): Promise<void>;
 export declare function getConfig(): Promise<IConfig | undefined>;
 export declare function updateConfig(config: IConfig): Promise<void>;

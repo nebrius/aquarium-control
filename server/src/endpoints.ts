@@ -41,11 +41,14 @@ import {
   getTestingHistory,
   createTestingEntry
 } from './db';
+import {
+  updateSchedule
+} from './scheduler';
 
 const DEFAULT_PORT = 80;
 
 export async function init(): Promise<void> {
-  console.debug('Initializing endpoint module');
+  console.debug('[Endpoint]: initializing module');
 
   const port = process.env.PORT || DEFAULT_PORT;
 
@@ -53,14 +56,7 @@ export async function init(): Promise<void> {
 
   app.use(json());
   app.use(cookieParser());
-
-  if (process.env.HOST_CLIENT === 'true') {
-    if (process.env.NODE_ENV === 'production') {
-      app.use(express.static(join(__dirname, '..', 'client')));
-    } else {
-      app.use(express.static(join(__dirname, '..', '..', 'client', 'dist')));
-    }
-  }
+  app.use(express.static(join(__dirname, '..', '..', 'client', 'dist')));
 
   app.set('view engine', 'pug');
   app.set('views', join(__dirname, '..', 'views'));
@@ -74,7 +70,7 @@ export async function init(): Promise<void> {
       const state: IState | undefined = await getState();
       res.send({ result: state });
     } catch (e) {
-      console.error(e);
+      console.error(`[Endpoint]: ${e}`);
       res.sendStatus(500);
     }
   });
@@ -84,7 +80,7 @@ export async function init(): Promise<void> {
       const config: IConfig | undefined = await getConfig();
       res.send({ result: config });
     } catch (e) {
-      console.error(e);
+      console.error(`[Endpoint]: ${e}`);
       res.sendStatus(500);
     }
   });
@@ -96,9 +92,10 @@ export async function init(): Promise<void> {
     }
     try {
       await updateConfig(req.body as IConfig);
+      await updateSchedule();
       res.send({ result: 'ok' });
     } catch (e) {
-      console.error(e);
+      console.error(`[Endpoint]: ${e}`);
       res.sendStatus(500);
     }
   });
@@ -110,7 +107,7 @@ export async function init(): Promise<void> {
       };
       res.send({ result: temperatures });
     } catch (e) {
-      console.error(e);
+      console.error(`[Endpoint]: ${e}`);
       res.sendStatus(500);
     }
   });
@@ -122,7 +119,7 @@ export async function init(): Promise<void> {
       };
       res.send({ result: cleaning });
     } catch (e) {
-      console.error(e);
+      console.error(`[Endpoint]: ${e}`);
       res.sendStatus(500);
     }
   });
@@ -139,7 +136,7 @@ export async function init(): Promise<void> {
       };
       res.send({ result: cleaning });
     } catch (e) {
-      console.error(e);
+      console.error(`[Endpoint]: ${e}`);
       res.sendStatus(500);
     }
   });
@@ -151,7 +148,7 @@ export async function init(): Promise<void> {
       };
       res.send({ result: testing });
     } catch (e) {
-      console.error(e);
+      console.error(`[Endpoint]: ${e}`);
       res.sendStatus(500);
     }
   });
@@ -168,7 +165,7 @@ export async function init(): Promise<void> {
       };
       res.send({ result: testing });
     } catch (e) {
-      console.error(e);
+      console.error(`[Endpoint]: ${e}`);
       res.sendStatus(500);
     }
   });
@@ -184,9 +181,9 @@ export async function init(): Promise<void> {
         throw new Error(`server address is unexpectedly null`);
       }
       if (typeof address === 'string') {
-        console.log(`API server listening on ${address}.`);
+        console.log(`[Endpoint]: API server listening on ${address}.`);
       } else {
-        console.log(`API server listening on ${address.address}:${address.port}.`);
+        console.log(`[Endpoint]: API server listening on ${address.address}:${address.port}.`);
       }
       resolve();
     });
