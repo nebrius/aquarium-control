@@ -24,12 +24,13 @@ class State extends EventEmitter {
   private _state: IState | undefined;
 
   public async init() {
-    console.debug('[State]: Initializing state module');
+    console.debug('[State]: initializing module');
     this._state = await getState();
-    console.debug('[State]: State module initalized');
+    console.debug('[State]: module initalized');
   }
 
   public getState(): IState {
+    console.debug('[State]: getting state');
     if (!this._state) {
       throw new Error('Internal Error: this._state is undefined');
     }
@@ -37,6 +38,7 @@ class State extends EventEmitter {
   }
 
   public setCurrentState(newState: 'day' | 'night' | 'off'): void {
+    console.debug('[State]: setting current lighting state');
     if (!this._state) {
       throw new Error('Internal Error: this._state is undefined');
     }
@@ -48,6 +50,7 @@ class State extends EventEmitter {
   }
 
   public setCurrentMode(newMode: 'program' | 'override'): void {
+    console.debug('[State]: setting current mode');
     if (!this._state) {
       throw new Error('Internal Error: this._state is undefined');
     }
@@ -59,6 +62,7 @@ class State extends EventEmitter {
   }
 
   public setNextTransitionTime(date: Date): void {
+    console.debug('[State]: setting next transition time');
     if (!this._state) {
       throw new Error('Internal Error: this._state is undefined');
     }
@@ -67,6 +71,7 @@ class State extends EventEmitter {
   }
 
   public setNextTransitionState(newTransitionState: 'day' | 'night' | 'off'): void {
+    console.debug('[State]: setting next transition state');
     if (!this._state) {
       throw new Error('Internal Error: this._state is undefined');
     }
@@ -75,6 +80,7 @@ class State extends EventEmitter {
   }
 
   public setCurrentTemperature(newTemperature: number): void {
+    console.debug('[State]: setting current temperature');
     if (!this._state) {
       throw new Error('Internal Error: this._state is undefined');
     }

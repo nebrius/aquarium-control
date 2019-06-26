@@ -70998,20 +70998,14 @@ function State(props) {
                 React.createElement("h2", null, "Current State")),
             React.createElement("div", { className: "alert alert-danger" }, "Current state not available")));
     }
-    var banner;
-    if (props.state.currentStateStale) {
-        banner = (React.createElement("div", { className: "alert alert-warning" }, "Current state information is outdated. Is the Raspberry Pi offline?"));
-    }
     var state = props.state.state;
     return (React.createElement("div", null,
         React.createElement("div", null,
             React.createElement("h2", null, "Current State")),
         React.createElement("div", { className: "state-content" },
-            banner,
             React.createElement("div", { className: "state-current-container" },
                 React.createElement("div", { className: "state-current-group-container" },
                     React.createElement(StateEntry_1.StateEntry, { label: "Current Mode", value: format_1.capitalizeFirstLetter(state.currentMode) }),
-                    React.createElement(StateEntry_1.StateEntry, { label: "Current Time", value: format_1.formatDate(state.currentTime, props.timezone) }),
                     React.createElement(StateEntry_1.StateEntry, { label: "Current State", value: format_1.capitalizeFirstLetter(state.currentState) })),
                 React.createElement("div", { className: "state-current-group-container" },
                     React.createElement(StateEntry_1.StateEntry, { label: "Next Transition Time", value: format_1.formatDate(state.nextTransitionTime, props.timezone) }),

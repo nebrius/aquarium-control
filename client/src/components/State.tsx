@@ -34,22 +34,14 @@ export function State(props: IStateProps): JSX.Element {
       </div>
     );
   }
-  let banner: JSX.Element | undefined;
-  if (props.state.currentStateStale) {
-    banner = (
-      <div className="alert alert-warning">Current state information is outdated. Is the Raspberry Pi offline?</div>
-    );
-  }
   const state = props.state.state;
   return (
     <div>
       <div><h2>Current State</h2></div>
       <div className="state-content">
-        {banner}
         <div className="state-current-container">
           <div className="state-current-group-container">
             <StateEntry label="Current Mode" value={capitalizeFirstLetter(state.currentMode)} />
-            <StateEntry label="Current Time" value={formatDate(state.currentTime, props.timezone)} />
             <StateEntry label="Current State" value={capitalizeFirstLetter(state.currentState)} />
           </div>
           <div className="state-current-group-container">
