@@ -310,9 +310,7 @@ export async function updateState(newState: IState): Promise<void> {
       };
     }
     dailyTemperatureCache.high = newState.currentTemperature;
-    await updateEntry(Table.TEMPERATURE, {
-      high: newState.currentTemperature
-    }, `time=${startOfToday}`);
+    await updateEntry(Table.TEMPERATURE, dailyTemperatureCache, `time=${startOfToday}`);
 
   // Else check if we need to update the low temperature
   } else if (latestEntry.low > newState.currentTemperature) {
