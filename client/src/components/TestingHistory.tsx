@@ -111,7 +111,7 @@ export function TestingHistory(props: ITestingHistoryProps): JSX.Element {
             width={width}
             height={height}
             suggestedMin={0}
-            suggestedMax={36}
+            suggestedMax={8}
           />
         </div>
       </div>
@@ -127,7 +127,7 @@ export function TestingHistory(props: ITestingHistoryProps): JSX.Element {
             width={width}
             height={height}
             suggestedMin={0}
-            suggestedMax={10}
+            suggestedMax={5}
           />
         </div>
       </div>

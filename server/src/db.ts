@@ -287,7 +287,7 @@ export async function updateState(newState: IState): Promise<void> {
 
   // Check if we need to create a new entry
   const latestEntry = temperatureHistory[0];
-  if (!latestEntry || latestEntry.time !== startOfToday) {
+  if (!latestEntry || latestEntry.time < startOfToday) {
     dailyTemperatureCache = {
       time: startOfToday,
       low: newState.currentTemperature,
