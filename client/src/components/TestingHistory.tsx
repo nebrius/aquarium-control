@@ -46,7 +46,7 @@ export function TestingHistory(props: ITestingHistoryProps): JSX.Element {
   }];
 
   const ammoniaData: ISampleSet[] = [{
-    label: 'pH',
+    label: 'ammonia',
     color: 'rgb(54, 162, 235)',
     samples: props.testingHistory.map((sample) => {
       return {
@@ -57,7 +57,7 @@ export function TestingHistory(props: ITestingHistoryProps): JSX.Element {
   }];
 
   const nitritesData: ISampleSet[] = [{
-    label: 'pH',
+    label: 'nitrites',
     color: 'rgb(54, 162, 235)',
     samples: props.testingHistory.map((sample) => {
       return {
@@ -68,7 +68,7 @@ export function TestingHistory(props: ITestingHistoryProps): JSX.Element {
   }];
 
   const nitratesData: ISampleSet[] = [{
-    label: 'pH',
+    label: 'nitrates',
     color: 'rgb(54, 162, 235)',
     samples: props.testingHistory.map((sample) => {
       return {

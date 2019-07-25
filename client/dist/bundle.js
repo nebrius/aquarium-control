@@ -71172,7 +71172,7 @@ function TestingHistory(props) {
             }),
         }];
     var ammoniaData = [{
-            label: 'pH',
+            label: 'ammonia',
             color: 'rgb(54, 162, 235)',
             samples: props.testingHistory.map(function (sample) {
                 return {
@@ -71182,7 +71182,7 @@ function TestingHistory(props) {
             }),
         }];
     var nitritesData = [{
-            label: 'pH',
+            label: 'nitrites',
             color: 'rgb(54, 162, 235)',
             samples: props.testingHistory.map(function (sample) {
                 return {
@@ -71192,7 +71192,7 @@ function TestingHistory(props) {
             }),
         }];
     var nitratesData = [{
-            label: 'pH',
+            label: 'nitrates',
             color: 'rgb(54, 162, 235)',
             samples: props.testingHistory.map(function (sample) {
                 return {
