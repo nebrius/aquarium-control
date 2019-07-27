@@ -90,18 +90,18 @@ async function createDB() {
   nextTransitionState varchar(255) not null
 )`);
     await run(`CREATE TABLE ${Table.TEMPERATURE} (
-  time bigint not null,
+  time bigint not null UNIQUE,
   low float not null,
   high float not null
 )`);
     await run(`CREATE TABLE ${Table.CLEANING} (
-  time bigint not null,
+  time bigint not null UNIQUE,
   bioFilterReplaced bit not null,
   mechanicalFilterReplaced bit not null,
   spongeReplaced bit not null
 )`);
     await run(`CREATE TABLE ${Table.TESTING} (
-  time bigint not null,
+  time bigint not null UNIQUE,
   ph float not null,
   ammonia int not null,
   nitrites int not null,
