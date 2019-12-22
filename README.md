@@ -1,6 +1,6 @@
 # Aquarium Control
 
-Automated lighting control and temperature monitoring software for an aquarium using a Raspberry Pi. Lighting can be run on a schedule, configurable by the user, that can change lights at a set time, or based on a solar event such as sunrise and sunset. This systems makes use of several services from [Azure](https://azure.microsoft.com) to handle and store aquarium data.
+Automated lighting control and temperature monitoring software for an aquarium using a Raspberry Pi. Lighting can be run on a schedule, configurable by the user, that can change lights at a set time, or based on a solar event such as sunrise and sunset.
 
 Note: figuring out how to connect the Pi to the lighting hardware is left as an exercise for the reader since there are so many different lighting systems out there.
 
