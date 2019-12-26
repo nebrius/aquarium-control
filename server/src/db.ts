@@ -322,9 +322,7 @@ export async function updateState(newState: IState): Promise<void> {
       };
     }
     dailyTemperatureCache.low = newState.currentTemperature;
-    await updateEntry(Table.TEMPERATURE, {
-      high: newState.currentTemperature
-    }, `time=${startOfToday}`);
+    await updateEntry(Table.TEMPERATURE, dailyTemperatureCache, `time=${startOfToday}`);
   }
 }
 
