@@ -39,7 +39,7 @@
     "cookie-parser": "^1.4.3",
     "express": "^4.17.1",
     "mkdirp": "^0.5.1",
-    "moment-timezone": "^0.5.27",
+    "moment-timezone": "^0.5.35",
     "pug": "^3.0.1",
     "raspi": "^6.0.1",
     "raspi-gpio": "^6.2.2",
