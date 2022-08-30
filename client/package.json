@@ -28,7 +28,7 @@
     "clone": "^2.1.2",
     "deep-equal": "^1.0.1",
     "js-cookie": "^2.2.0",
-    "moment-timezone": "^0.5.23",
+    "moment-timezone": "^0.5.35",
     "react": "^16.8.1",
     "react-chartjs-2": "^2.7.4",
     "react-dom": "^16.8.1",
