@@ -1,63 +1,96 @@
 "use client";
 
-import { useState } from "react";
+import equal from "fast-deep-equal";
+import { useMemo, useState } from "react";
+
+import {
+  type Override,
+  type Schedule,
+  type ScheduleEntry,
+} from "@/types/lights.ts";
 
 import { Button } from "../ui/Button.tsx";
 import { Entry } from "./Entry.tsx";
-import { Override } from "./Override.tsx";
+import { OverrideEntry } from "./OverrideEntry.tsx";
 
-export function LightsContent() {
-  const [blue1, setBlue1] = useState({ hour: 6, minute: 0, fade: 0 });
-  const [white, setWhite] = useState({ hour: 8, minute: 0, fade: 0 });
-  const [blue2, setBlue2] = useState({ hour: 18, minute: 0, fade: 0 });
-  const [off, setOff] = useState({ hour: 22, minute: 0, fade: 0 });
+type LightsContentProps = {
+  runningSchedule: Schedule;
+  runningOverride: Override;
+};
+
+export function LightsContent({
+  runningSchedule,
+  runningOverride,
+}: LightsContentProps) {
+  const [offToBlue, setOffToBlue] = useState<ScheduleEntry>(
+    runningSchedule.offToBlue,
+  );
+  const [blueToWhite, setBlueToWhite] = useState<ScheduleEntry>(
+    runningSchedule.blueToWhite,
+  );
+  const [whiteToBlue, setWhiteToBlue] = useState<ScheduleEntry>(
+    runningSchedule.whiteToBlue,
+  );
+  const [blueToOff, setBlueToOff] = useState<ScheduleEntry>(
+    runningSchedule.blueToOff,
+  );
+  const [override, setOverride] = useState<Override>({
+    enabled: runningOverride.enabled,
+    state: runningOverride.state,
+  });
+
+  const hasUnsavedChanges = useMemo(() => {
+    return (
+      !equal(offToBlue, runningSchedule.offToBlue) ||
+      !equal(blueToWhite, runningSchedule.blueToWhite) ||
+      !equal(whiteToBlue, runningSchedule.whiteToBlue) ||
+      !equal(blueToOff, runningSchedule.blueToOff) ||
+      !equal(override, runningOverride)
+    );
+  }, [offToBlue, blueToWhite, whiteToBlue, blueToOff, override]);
 
   return (
     <div className="grow h-full flex flex-col">
       <div className="flex flex-col gap-4 overflow-scroll grow basis-0 px-2 pt-4">
-        <Override />
+        <OverrideEntry
+          override={override}
+          setOverride={(override) => {
+            setOverride(override);
+          }}
+        />
         <Entry
           name="Off → Blue"
-          hour={blue1.hour}
-          minute={blue1.minute}
-          fade={blue1.fade}
-          setTime={(hour, minute, fade) => {
-            setBlue1({ hour, minute, fade });
+          schedule={offToBlue}
+          setSchedule={(schedule) => {
+            setOffToBlue(schedule);
           }}
         />
         <Entry
           name="Blue → White"
-          hour={white.hour}
-          minute={white.minute}
-          fade={white.fade}
-          setTime={(hour, minute, fade) => {
-            console.log(hour, minute, fade);
-            setWhite({ hour, minute, fade });
+          schedule={blueToWhite}
+          setSchedule={(schedule) => {
+            setBlueToWhite(schedule);
           }}
         />
         <Entry
           name="White → Blue"
-          hour={blue2.hour}
-          minute={blue2.minute}
-          fade={blue2.fade}
-          setTime={(hour, minute, fade) => {
-            console.log(hour, minute, fade);
-            setBlue2({ hour, minute, fade });
+          schedule={whiteToBlue}
+          setSchedule={(schedule) => {
+            setWhiteToBlue(schedule);
           }}
         />
         <Entry
           name="Blue → Off"
-          hour={off.hour}
-          minute={off.minute}
-          fade={off.fade}
-          setTime={(hour, minute, fade) => {
-            console.log(hour, minute, fade);
-            setOff({ hour, minute, fade });
+          schedule={blueToOff}
+          setSchedule={(schedule) => {
+            setBlueToOff(schedule);
           }}
         />
       </div>
       <div className="w-full p-4 bg-color border-t border-zinc-700">
-        <Button className="text-xl py-6 w-full">Save</Button>
+        <Button className="text-xl py-6 w-full" disabled={!hasUnsavedChanges}>
+          Save
+        </Button>
       </div>
     </div>
   );

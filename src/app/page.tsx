@@ -21,7 +21,34 @@ export default function Home() {
         </TabsList>
       </header>
       <TabsContent className="grow" value="lights">
-        <LightsContent />
+        <LightsContent
+          runningSchedule={{
+            offToBlue: {
+              hour: 0,
+              minute: 0,
+              fade: 0,
+            },
+            blueToWhite: {
+              hour: 0,
+              minute: 0,
+              fade: 0,
+            },
+            whiteToBlue: {
+              hour: 0,
+              minute: 0,
+              fade: 0,
+            },
+            blueToOff: {
+              hour: 0,
+              minute: 0,
+              fade: 0,
+            },
+          }}
+          runningOverride={{
+            enabled: false,
+            state: "off",
+          }}
+        />
       </TabsContent>
       <TabsContent className="grow" value="cleaning">
         <CleaningContent />

@@ -1,3 +1,5 @@
+import { type ScheduleEntry } from "@/types/lights.ts";
+
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card.tsx";
 import { Label } from "../ui/Label.tsx";
 import { NativeSelect, NativeSelectOption } from "../ui/NativeSelect.tsx";
@@ -37,13 +39,11 @@ function IntegerSelect({
 
 type EntryProps = {
   name: string;
-  hour: number;
-  minute: number;
-  fade: number;
-  setTime: (hour: number, minute: number, fade: number) => void;
+  schedule: ScheduleEntry;
+  setSchedule: (schedule: ScheduleEntry) => void;
 };
 
-export function Entry({ name, hour, minute, fade, setTime }: EntryProps) {
+export function Entry({ name, schedule, setSchedule }: EntryProps) {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
@@ -53,30 +53,30 @@ export function Entry({ name, hour, minute, fade, setTime }: EntryProps) {
         <div className="flex gap-2 align-center">
           <IntegerSelect
             id="hour"
-            value={hour}
+            value={schedule.hour}
             min={0}
             max={23}
             setValue={(hour) => {
-              setTime(hour, minute, fade);
+              setSchedule({ ...schedule, hour });
             }}
           />
           <IntegerSelect
             id="minute"
-            value={minute}
+            value={schedule.minute}
             min={0}
             max={59}
             setValue={(minute) => {
-              setTime(hour, minute, fade);
+              setSchedule({ ...schedule, minute });
             }}
           />
           <div className="grow"></div>
           <IntegerSelect
             id="fade"
-            value={fade}
+            value={schedule.fade}
             min={0}
             max={59}
             setValue={(fade) => {
-              setTime(hour, minute, fade);
+              setSchedule({ ...schedule, fade });
             }}
           />
         </div>
