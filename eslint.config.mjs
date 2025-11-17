@@ -66,4 +66,10 @@ export default defineConfig([
     files: ["**/*.{jsx,mjs}"],
     extends: [tseslint.configs.disableTypeChecked],
   },
+  {
+    files: ["src/components/ui/**/*.{ts,tsx,mts}"],
+    rules: {
+      "fast-import/no-unused-exports": "off",
+    },
+  },
 ]);
