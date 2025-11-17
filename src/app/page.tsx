@@ -12,10 +12,10 @@ export default function Home() {
     <Tabs className="absolute inset-[0]" defaultValue="lights">
       <header className="container flex items-center justify-center w-full">
         <TabsList className="m-4">
-          <TabsTrigger className="text-3xl px-4" value="lights">
+          <TabsTrigger className="text-2xl px-4" value="lights">
             Lights
           </TabsTrigger>
-          <TabsTrigger className="text-3xl px-4" value="cleaning">
+          <TabsTrigger className="text-2xl px-4" value="cleaning">
             Cleaning
           </TabsTrigger>
         </TabsList>
