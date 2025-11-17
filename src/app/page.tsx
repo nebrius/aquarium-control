@@ -12,7 +12,6 @@ export default function Home() {
   const schedule = getSchedule();
   const override = getOverride();
   const cleaningRecords = getCleaningRecords();
-  console.log(cleaningRecords);
   return (
     <Tabs className="absolute inset-[0]" defaultValue="lights">
       <header className="container flex items-center justify-center w-full bg-color border-b border-zinc-700 py-2">
@@ -29,7 +28,7 @@ export default function Home() {
         <LightsContent runningSchedule={schedule} runningOverride={override} />
       </TabsContent>
       <TabsContent className="grow" value="cleaning">
-        <CleaningContent />
+        <CleaningContent cleaningRecords={cleaningRecords} />
       </TabsContent>
     </Tabs>
   );
