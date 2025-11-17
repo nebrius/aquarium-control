@@ -1,5 +1,5 @@
 import { CleaningContent } from "@/components/cleaning/CleaningContent.tsx";
-import { LightsContent } from "@/components/lights/LightsContent.tsx";
+import { LightsPage } from "@/components/lights/LightsPage.tsx";
 import {
   Tabs,
   TabsContent,
@@ -25,7 +25,7 @@ export default function Home() {
         </TabsList>
       </header>
       <TabsContent className="grow" value="lights">
-        <LightsContent runningSchedule={schedule} runningOverride={override} />
+        <LightsPage initialSchedule={schedule} initialOverride={override} />
       </TabsContent>
       <TabsContent className="grow" value="cleaning">
         <CleaningContent cleaningRecords={cleaningRecords} />
