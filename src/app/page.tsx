@@ -6,11 +6,13 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/Tabs.tsx";
-import { getOverride, getSchedule } from "@/db/db.ts";
+import { getCleaningRecords, getOverride, getSchedule } from "@/db/db.ts";
 
 export default function Home() {
   const schedule = getSchedule();
   const override = getOverride();
+  const cleaningRecords = getCleaningRecords();
+  console.log(cleaningRecords);
   return (
     <Tabs className="absolute inset-[0]" defaultValue="lights">
       <header className="container flex items-center justify-center w-full bg-color border-b border-zinc-700 py-2">

@@ -161,7 +161,7 @@ export function getCleaningRecords(): CleaningRecordEntry[] {
   }[];
 
   return rows.map((row) => ({
-    date: new Date(row.date),
+    date: row.date,
     sponge: row.sponge === 1,
     nitrazorb: row.nitrazorb === 1,
     organic: row.organic === 1,
@@ -174,7 +174,7 @@ export function addCleaningRecord(record: CleaningRecordEntry) {
       "INSERT INTO cleaning_records (date, sponge, nitrazorb, organic) VALUES (?, ?, ?, ?)",
     )
     .run(
-      record.date.toISOString(),
+      new Date(record.date).toISOString(),
       record.sponge ? 1 : 0,
       record.nitrazorb ? 1 : 0,
       record.organic ? 1 : 0,
