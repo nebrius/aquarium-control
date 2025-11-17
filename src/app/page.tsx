@@ -1,3 +1,5 @@
+import { CleaningContent } from "@/components/cleaning/CleaningContent.tsx";
+import { LightsContent } from "@/components/lights/LightsContent.tsx";
 import {
   Tabs,
   TabsContent,
@@ -7,7 +9,7 @@ import {
 
 export default function Home() {
   return (
-    <Tabs defaultValue="lights">
+    <Tabs className="absolute inset-[0]" defaultValue="lights">
       <header className="container flex items-center justify-center w-full">
         <TabsList className="m-4">
           <TabsTrigger className="text-3xl px-4" value="lights">
@@ -18,11 +20,11 @@ export default function Home() {
           </TabsTrigger>
         </TabsList>
       </header>
-      <TabsContent value="lights">
-        <p>Account content</p>
+      <TabsContent className="grow" value="lights">
+        <LightsContent />
       </TabsContent>
-      <TabsContent value="cleaning">
-        <p>Password content</p>
+      <TabsContent className="grow" value="cleaning">
+        <CleaningContent />
       </TabsContent>
     </Tabs>
   );
