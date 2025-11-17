@@ -36,6 +36,7 @@ export default defineConfig([
     entryPoints: {
       "src/app/**/page.tsx": ["default"],
       "src/app/**/layout.tsx": ["default", "metadata"],
+      "src/app/**/route.ts": ["GET", "POST"],
       "*config*": ["default"],
     },
     rootDir: getDirname(),

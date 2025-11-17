@@ -6,8 +6,11 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/Tabs.tsx";
+import { getOverride, getSchedule } from "@/db/db.ts";
 
 export default function Home() {
+  const schedule = getSchedule();
+  const override = getOverride();
   return (
     <Tabs className="absolute inset-[0]" defaultValue="lights">
       <header className="container flex items-center justify-center w-full bg-color border-b border-zinc-700 py-2">
@@ -21,34 +24,7 @@ export default function Home() {
         </TabsList>
       </header>
       <TabsContent className="grow" value="lights">
-        <LightsContent
-          runningSchedule={{
-            offToBlue: {
-              hour: 0,
-              minute: 0,
-              fade: 0,
-            },
-            blueToWhite: {
-              hour: 0,
-              minute: 0,
-              fade: 0,
-            },
-            whiteToBlue: {
-              hour: 0,
-              minute: 0,
-              fade: 0,
-            },
-            blueToOff: {
-              hour: 0,
-              minute: 0,
-              fade: 0,
-            },
-          }}
-          runningOverride={{
-            enabled: false,
-            state: "off",
-          }}
-        />
+        <LightsContent runningSchedule={schedule} runningOverride={override} />
       </TabsContent>
       <TabsContent className="grow" value="cleaning">
         <CleaningContent />

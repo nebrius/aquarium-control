@@ -17,3 +17,10 @@ export type Override = {
   enabled: boolean;
   state: LightState;
 };
+
+export type CleaningRecordEntry = {
+  date: Date;
+  sponge: boolean;
+  nitrazorb: boolean;
+  organic: boolean;
+};
