@@ -60,15 +60,12 @@ function LightsContent() {
     state: runningOverride.state,
   });
 
-  const hasUnsavedChanges = useMemo(() => {
-    return (
-      !equal(offToBlue, runningSchedule.offToBlue) ||
-      !equal(blueToWhite, runningSchedule.blueToWhite) ||
-      !equal(whiteToBlue, runningSchedule.whiteToBlue) ||
-      !equal(blueToOff, runningSchedule.blueToOff) ||
-      !equal(override, runningOverride)
-    );
-  }, [offToBlue, blueToWhite, whiteToBlue, blueToOff, override]);
+  const hasUnsavedChanges =
+    !equal(offToBlue, runningSchedule.offToBlue) ||
+    !equal(blueToWhite, runningSchedule.blueToWhite) ||
+    !equal(whiteToBlue, runningSchedule.whiteToBlue) ||
+    !equal(blueToOff, runningSchedule.blueToOff) ||
+    !equal(override, runningOverride);
 
   const onSave = useCallback(() => {
     const scheduleChanged =
