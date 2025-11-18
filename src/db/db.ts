@@ -5,11 +5,8 @@ import { fileURLToPath } from "node:url";
 
 import Database from "better-sqlite3";
 
-import {
-  type CleaningRecordEntry,
-  type Override,
-  type Schedule,
-} from "@/types/lights.ts";
+import { type CleaningRecordEntry } from "@/types/cleaning.ts";
+import { type Override, type Schedule } from "@/types/lights.ts";
 
 const DB_DIR = join(homedir(), ".aquarium-control");
 const DB_FILE = join(DB_DIR, "db.sqlite");
@@ -149,23 +146,11 @@ export function setOverride(override: Override) {
 }
 
 export function getCleaningRecords(): CleaningRecordEntry[] {
-  const rows = getDb()
+  return getDb()
     .prepare(
       "SELECT date, sponge, nitrazorb, organic FROM cleaning_records ORDER BY date DESC, id DESC",
     )
-    .all() as {
-    date: string;
-    sponge: number;
-    nitrazorb: number;
-    organic: number;
-  }[];
-
-  return rows.map((row) => ({
-    date: row.date,
-    sponge: row.sponge === 1,
-    nitrazorb: row.nitrazorb === 1,
-    organic: row.organic === 1,
-  }));
+    .all() as CleaningRecordEntry[];
 }
 
 export function addCleaningRecord(record: CleaningRecordEntry) {
@@ -175,8 +160,8 @@ export function addCleaningRecord(record: CleaningRecordEntry) {
     )
     .run(
       new Date(record.date).toISOString(),
-      record.sponge ? 1 : 0,
-      record.nitrazorb ? 1 : 0,
-      record.organic ? 1 : 0,
+      record.sponge,
+      record.nitrazorb,
+      record.organic,
     );
 }

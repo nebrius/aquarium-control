@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { type CleaningRecordEntry } from "@/types/lights.ts";
+import { type CleaningRecordEntry } from "@/types/cleaning.ts";
 
 import { CleaningContext } from "./context.ts";
 import { CreateRecord } from "./CreateRecord.tsx";

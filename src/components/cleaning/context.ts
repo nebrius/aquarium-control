@@ -5,7 +5,7 @@ import {
   useContext,
 } from "react";
 
-import { type CleaningRecordEntry } from "@/types/lights.ts";
+import { type CleaningRecordEntry } from "@/types/cleaning.ts";
 
 type CleaningContextValue = {
   cleaningRecords: CleaningRecordEntry[];

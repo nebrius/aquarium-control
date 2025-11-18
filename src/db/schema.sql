@@ -23,7 +23,7 @@ INSERT INTO override (id, enabled, state) VALUES (1, 0, 'off');
 CREATE TABLE cleaning_records (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   date TEXT NOT NULL,
-  sponge INTEGER NOT NULL CHECK (sponge IN (0, 1)),
-  nitrazorb INTEGER NOT NULL CHECK (nitrazorb IN (0, 1)),
-  organic INTEGER NOT NULL CHECK (organic IN (0, 1))
+  sponge TEXT NOT NULL CHECK (sponge IN ('none', 'clean', 'replace')),
+  nitrazorb TEXT NOT NULL CHECK (nitrazorb IN ('none', 'clean', 'replace')),
+  organic TEXT NOT NULL CHECK (organic IN ('none', 'clean', 'replace'))
 );

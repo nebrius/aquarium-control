@@ -1,4 +1,4 @@
-import { type CleaningRecordEntry } from "@/types/lights.ts";
+import { type CleaningRecordEntry } from "@/types/cleaning.ts";
 
 import { useCleaningContext } from "./context.ts";
 
@@ -8,13 +8,25 @@ function Record({ record }: { record: CleaningRecordEntry }) {
     <>
       <div className="border-t border-r border-zinc-700 px-2 py-1">{date}</div>
       <div className="border-t border-zinc-700 pl-4 pr-2 py-1 text-center">
-        {record.sponge ? "✔" : ""}
+        {record.sponge === "replace"
+          ? "🗑️"
+          : record.sponge === "clean"
+            ? "💦"
+            : ""}
       </div>
       <div className="border-t border-zinc-700 px-2 py-1 text-center">
-        {record.nitrazorb ? "✔" : ""}
+        {record.nitrazorb === "replace"
+          ? "🗑️"
+          : record.nitrazorb === "clean"
+            ? "💦"
+            : ""}
       </div>
       <div className="border-t border-zinc-700 px-2 py-1 text-center">
-        {record.organic ? "✔" : ""}
+        {record.organic === "replace"
+          ? "🗑️"
+          : record.organic === "clean"
+            ? "💦"
+            : ""}
       </div>
     </>
   );
