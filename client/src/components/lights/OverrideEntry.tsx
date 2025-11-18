@@ -1,4 +1,4 @@
-import { type LightState, type Override } from "@/types/lights.ts";
+import { type LightState, type Override } from "@aquarium/shared";
 
 import {
   Card,

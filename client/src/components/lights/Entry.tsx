@@ -1,4 +1,4 @@
-import { type ScheduleEntry } from "@/types/lights.ts";
+import { type ScheduleEntry } from "@aquarium/shared";
 
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card.tsx";
 import { Label } from "../ui/Label.tsx";

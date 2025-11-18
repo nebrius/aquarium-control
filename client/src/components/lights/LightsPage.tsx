@@ -7,7 +7,7 @@ import {
   type Override,
   type Schedule,
   type ScheduleEntry,
-} from "@/types/lights.ts";
+} from "@aquarium/shared";
 
 import { Button } from "../ui/Button.tsx";
 import { Entry } from "./Entry.tsx";

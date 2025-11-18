@@ -1,7 +1,7 @@
 import { Value } from "typebox/value";
 
 import { setOverride } from "@/db/db.ts";
-import { type Override, OverrideSchema } from "@/types/lights.ts";
+import { type Override, OverrideSchema } from "@aquarium/shared";
 
 export async function PUT(req: Request) {
   let body: unknown;

@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 
-import { type CleaningType } from "@/types/cleaning.ts";
+import { type CleaningType } from "@aquarium/shared";
 
 import { Button } from "../ui/Button.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card.tsx";

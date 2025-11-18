@@ -4,7 +4,7 @@ import { addCleaningRecord } from "@/db/db.ts";
 import {
   type CleaningRecordEntry,
   CleaningRecordSchema,
-} from "@/types/cleaning.ts";
+} from "@aquarium/shared";
 
 export async function POST(req: Request) {
   let body: unknown;

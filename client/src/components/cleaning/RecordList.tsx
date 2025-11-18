@@ -1,4 +1,4 @@
-import { type CleaningRecordEntry } from "@/types/cleaning.ts";
+import { type CleaningRecordEntry } from "@aquarium/shared";
 
 import { useCleaningContext } from "./context.ts";
 

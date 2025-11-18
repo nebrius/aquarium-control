@@ -1,0 +1,9 @@
+{
+  "name": "@aquarium/shared",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "typebox": "^1.0.53"
+  }
+}

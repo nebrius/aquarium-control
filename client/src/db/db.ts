@@ -5,8 +5,8 @@ import { fileURLToPath } from "node:url";
 
 import Database from "better-sqlite3";
 
-import { type CleaningRecordEntry } from "@/types/cleaning.ts";
-import { type Override, type Schedule } from "@/types/lights.ts";
+import { type CleaningRecordEntry } from "@aquarium/shared";
+import { type Override, type Schedule } from "@aquarium/shared";
 
 const DB_DIR = join(homedir(), ".aquarium-control");
 const DB_FILE = join(DB_DIR, "db.sqlite");
