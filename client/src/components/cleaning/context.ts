@@ -1,11 +1,10 @@
+import { type CleaningRecordEntry } from "@aquarium/shared";
 import {
   createContext,
   type Dispatch,
   type SetStateAction,
   useContext,
 } from "react";
-
-import { type CleaningRecordEntry } from "@aquarium/shared";
 
 type CleaningContextValue = {
   cleaningRecords: CleaningRecordEntry[];

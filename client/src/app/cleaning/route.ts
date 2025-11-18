@@ -1,10 +1,10 @@
-import { Value } from "typebox/value";
-
-import { addCleaningRecord } from "@/db/db.ts";
 import {
   type CleaningRecordEntry,
   CleaningRecordSchema,
 } from "@aquarium/shared";
+import { Value } from "typebox/value";
+
+import { addCleaningRecord } from "@/db/db.ts";
 
 export async function POST(req: Request) {
   let body: unknown;

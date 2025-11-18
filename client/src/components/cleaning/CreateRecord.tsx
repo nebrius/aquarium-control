@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback, useState } from "react";
-
 import { type CleaningType } from "@aquarium/shared";
+import { useCallback, useState } from "react";
 
 import { Button } from "../ui/Button.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card.tsx";

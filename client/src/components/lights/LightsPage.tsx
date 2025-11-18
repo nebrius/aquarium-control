@@ -1,13 +1,12 @@
 "use client";
 
-import equal from "fast-deep-equal";
-import { createContext, useCallback, useContext, useState } from "react";
-
 import {
   type Override,
   type Schedule,
   type ScheduleEntry,
 } from "@aquarium/shared";
+import equal from "fast-deep-equal";
+import { createContext, useCallback, useContext, useState } from "react";
 
 import { Button } from "../ui/Button.tsx";
 import { Entry } from "./Entry.tsx";

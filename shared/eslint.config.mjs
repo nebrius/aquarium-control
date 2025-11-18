@@ -4,7 +4,6 @@ import { includeIgnoreFile } from "@eslint/compat";
 import js from "@eslint/js";
 import { getDirname } from "cross-dirname";
 import { defineConfig } from "eslint/config";
-import { all } from "eslint-plugin-fast-import";
 import importPlugin from "eslint-plugin-import";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
@@ -32,19 +31,6 @@ export default defineConfig([
       "no-unused-vars": "off",
     },
   },
-  all({
-    entryPoints: {
-      "src/types.ts": ["*"],
-      "src/app/**/page.tsx": ["default"],
-      "src/app/**/layout.tsx": ["default", "metadata"],
-      "src/app/**/route.ts": ["GET", "PUT", "POST"],
-      "*config*": ["default"],
-    },
-    rootDir: getDirname(),
-    alias: {
-      "@/*": "src/*",
-    },
-  }),
   eslintPluginPrettierRecommended,
   tseslint.configs.strictTypeChecked,
   {

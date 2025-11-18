@@ -1,7 +1,7 @@
+import { type Schedule, ScheduleSchema } from "@aquarium/shared";
 import { Value } from "typebox/value";
 
 import { setSchedule } from "@/db/db.ts";
-import { type Schedule, ScheduleSchema } from "@aquarium/shared";
 
 export async function PUT(req: Request) {
   let body: unknown;
