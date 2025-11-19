@@ -151,7 +151,7 @@ function LightsContent() {
 
   return (
     <div className="grow h-full flex flex-col">
-      <div className="flex flex-col gap-4 overflow-scroll grow basis-0 px-2 pt-4">
+      <div className="flex flex-col gap-4 overflow-scroll grow basis-0 px-2 py-4">
         <OverrideEntry
           override={override}
           setOverride={(override) => {
@@ -185,6 +185,7 @@ function LightsContent() {
           setSchedule={(schedule) => {
             setBlueToOff(schedule);
           }}
+          hideColorPicker
         />
       </div>
       <div className="w-full p-4 bg-color border-t border-zinc-700">

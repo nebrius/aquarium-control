@@ -53,9 +53,15 @@ type EntryProps = {
   name: string;
   schedule: ScheduleEntry;
   setSchedule: (schedule: ScheduleEntry) => void;
+  hideColorPicker?: boolean;
 };
 
-export function Entry({ name, schedule, setSchedule }: EntryProps) {
+export function Entry({
+  name,
+  schedule,
+  setSchedule,
+  hideColorPicker,
+}: EntryProps) {
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -128,38 +134,32 @@ export function Entry({ name, schedule, setSchedule }: EntryProps) {
             }}
           />
         </div>
-        <Collapsible
-          open={isColorPickerOpen}
-          onOpenChange={setIsColorPickerOpen}
-        >
-          <CollapsibleTrigger asChild className="mt-4 w-full">
-            <Button variant="ghost">
-              Choose Color
-              <ChevronDown
-                className={`transition-transform duration-200 ${
-                  isColorPickerOpen ? 'rotate-180' : ''
-                }`}
-              />
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="mt-4">
-            <div
-              className="flex justify-center"
-              onTouchStart={(e) => {
-                e.stopPropagation();
-              }}
-              onTouchMove={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              <ColorPicker
-                value={value}
-                onChange={handleColorChange}
-                disabledAlpha
-              />
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+        {!hideColorPicker && (
+          <Collapsible
+            open={isColorPickerOpen}
+            onOpenChange={setIsColorPickerOpen}
+          >
+            <CollapsibleTrigger asChild className="mt-4 w-full">
+              <Button variant="ghost">
+                Choose Color
+                <ChevronDown
+                  className={`transition-transform duration-200 ${
+                    isColorPickerOpen ? 'rotate-180' : ''
+                  }`}
+                />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-4">
+              <div className="flex justify-center touch-none">
+                <ColorPicker
+                  value={value}
+                  onChange={handleColorChange}
+                  disabledAlpha
+                />
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
       </CardContent>
     </Card>
   );
