@@ -1,4 +1,4 @@
-import { type LightState, type Override } from "@aquarium/shared";
+import { type LightState, type Override } from '@aquarium/shared';
 
 import {
   Card,
@@ -6,9 +6,9 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "../ui/Card.tsx";
-import { NativeSelect, NativeSelectOption } from "../ui/NativeSelect.tsx";
-import { Switch } from "../ui/Switch.tsx";
+} from '../ui/Card.tsx';
+import { NativeSelect, NativeSelectOption } from '../ui/NativeSelect.tsx';
+import { Switch } from '../ui/Switch.tsx';
 
 type OverrideEntryProps = {
   override: Override;

@@ -1,8 +1,8 @@
-import { type ScheduleEntry } from "@aquarium/shared";
+import { type ScheduleEntry } from '@aquarium/shared';
 
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card.tsx";
-import { Label } from "../ui/Label.tsx";
-import { NativeSelect, NativeSelectOption } from "../ui/NativeSelect.tsx";
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card.tsx';
+import { Label } from '../ui/Label.tsx';
+import { NativeSelect, NativeSelectOption } from '../ui/NativeSelect.tsx';
 
 function IntegerSelect({
   id,

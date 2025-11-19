@@ -1,32 +1,32 @@
-import { type CleaningRecordEntry } from "@aquarium/shared";
+import { type CleaningRecordEntry } from '@aquarium/shared';
 
-import { useCleaningContext } from "./context.ts";
+import { useCleaningContext } from './context.ts';
 
 function Record({ record }: { record: CleaningRecordEntry }) {
-  const date = new Date(record.date).toLocaleDateString("en-US");
+  const date = new Date(record.date).toLocaleDateString('en-US');
   return (
     <>
       <div className="border-t border-r border-zinc-700 px-2 py-1">{date}</div>
       <div className="border-t border-zinc-700 pl-4 pr-2 py-1 text-center">
-        {record.sponge === "replace"
-          ? "🗑️"
-          : record.sponge === "clean"
-            ? "💦"
-            : ""}
+        {record.sponge === 'replace'
+          ? '🗑️'
+          : record.sponge === 'clean'
+            ? '💦'
+            : ''}
       </div>
       <div className="border-t border-zinc-700 px-2 py-1 text-center">
-        {record.nitrazorb === "replace"
-          ? "🗑️"
-          : record.nitrazorb === "clean"
-            ? "💦"
-            : ""}
+        {record.nitrazorb === 'replace'
+          ? '🗑️'
+          : record.nitrazorb === 'clean'
+            ? '💦'
+            : ''}
       </div>
       <div className="border-t border-zinc-700 px-2 py-1 text-center">
-        {record.organic === "replace"
-          ? "🗑️"
-          : record.organic === "clean"
-            ? "💦"
-            : ""}
+        {record.organic === 'replace'
+          ? '🗑️'
+          : record.organic === 'clean'
+            ? '💦'
+            : ''}
       </div>
     </>
   );

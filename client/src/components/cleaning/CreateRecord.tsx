@@ -1,36 +1,36 @@
-"use client";
+'use client';
 
-import { type CleaningType } from "@aquarium/shared";
-import { useCallback, useState } from "react";
+import { type CleaningType } from '@aquarium/shared';
+import { useCallback, useState } from 'react';
 
-import { post } from "@/lib/request.ts";
+import { post } from '@/lib/request.ts';
 
-import { Button } from "../ui/Button.tsx";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card.tsx";
+import { Button } from '../ui/Button.tsx';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card.tsx';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "../ui/Dialog.tsx";
-import { Label } from "../ui/Label.tsx";
-import { RadioGroup, RadioGroupItem } from "../ui/RadioGroup.tsx";
-import { useCleaningContext } from "./context.ts";
+} from '../ui/Dialog.tsx';
+import { Label } from '../ui/Label.tsx';
+import { RadioGroup, RadioGroupItem } from '../ui/RadioGroup.tsx';
+import { useCleaningContext } from './context.ts';
 
 export function CreateRecord() {
   const { setCleaningRecords } = useCleaningContext();
-  const [bio, setBio] = useState<CleaningType>("none");
-  const [nitraZorb, setNitraZorb] = useState<CleaningType>("none");
-  const [sponge, setSponge] = useState<CleaningType>("none");
+  const [bio, setBio] = useState<CleaningType>('none');
+  const [nitraZorb, setNitraZorb] = useState<CleaningType>('none');
+  const [sponge, setSponge] = useState<CleaningType>('none');
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState('');
 
   const onSave = useCallback(() => {
     void (async () => {
       try {
         const response = await post({
-          endpoint: "/cleaning",
+          endpoint: '/cleaning',
           body: {
             date: new Date().toISOString(),
             organic: bio,
@@ -40,7 +40,7 @@ export function CreateRecord() {
         });
 
         if (!response.ok) {
-          setErrorMessage("Failed to save cleaning record");
+          setErrorMessage('Failed to save cleaning record');
           setErrorDialogOpen(true);
           return;
         }
@@ -58,7 +58,7 @@ export function CreateRecord() {
         setErrorMessage(
           error instanceof Error
             ? error.message
-            : "Error saving cleaning record",
+            : 'Error saving cleaning record'
         );
         setErrorDialogOpen(true);
       }

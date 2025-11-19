@@ -1,15 +1,15 @@
-import { type Static, Type } from "typebox";
+import { type Static, Type } from 'typebox';
 
 const cleaningTypeSchema = Type.Union([
-  Type.Literal("none"),
-  Type.Literal("clean"),
-  Type.Literal("replace"),
+  Type.Literal('none'),
+  Type.Literal('clean'),
+  Type.Literal('replace'),
 ]);
 
 export type CleaningType = Static<typeof cleaningTypeSchema>;
 
 export const CleaningRecordSchema = Type.Object({
-  date: Type.String({ format: "date-time" }),
+  date: Type.String({ format: 'date-time' }),
   sponge: cleaningTypeSchema,
   nitrazorb: cleaningTypeSchema,
   organic: cleaningTypeSchema,
@@ -18,9 +18,9 @@ export const CleaningRecordSchema = Type.Object({
 export type CleaningRecordEntry = Static<typeof CleaningRecordSchema>;
 
 const LightStateSchema = Type.Union([
-  Type.Literal("off"),
-  Type.Literal("blue"),
-  Type.Literal("white"),
+  Type.Literal('off'),
+  Type.Literal('blue'),
+  Type.Literal('white'),
 ]);
 
 export type LightState = Static<typeof LightStateSchema>;

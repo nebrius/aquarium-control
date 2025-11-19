@@ -1,10 +1,10 @@
-const BASE_URL = "http://localhost:3001";
+const BASE_URL = 'http://localhost:3001';
 
 export async function get<T>(endpoint: string) {
   const response = await fetch(`${BASE_URL}${endpoint}`, {
-    method: "GET",
+    method: 'GET',
     headers: {
-      "content-type": "application/json",
+      'content-type': 'application/json',
     },
   });
   if (!response.ok) {
@@ -21,9 +21,9 @@ export function put({
   body: Record<string, unknown>;
 }) {
   return fetch(`${BASE_URL}${endpoint}`, {
-    method: "PUT",
+    method: 'PUT',
     headers: {
-      "content-type": "application/json",
+      'content-type': 'application/json',
     },
     body: JSON.stringify(body),
   });
@@ -37,9 +37,9 @@ export function post({
   body: Record<string, unknown>;
 }) {
   return fetch(`${BASE_URL}${endpoint}`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "content-type": "application/json",
+      'content-type': 'application/json',
     },
     body: JSON.stringify(body),
   });

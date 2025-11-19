@@ -2,22 +2,22 @@ import {
   type CleaningRecordEntry,
   type Override,
   type Schedule,
-} from "@aquarium/shared";
+} from '@aquarium/shared';
 
-import { CleaningPage } from "@/components/cleaning/CleaningPage.tsx";
-import { LightsPage } from "@/components/lights/LightsPage.tsx";
+import { CleaningPage } from '@/components/cleaning/CleaningPage.tsx';
+import { LightsPage } from '@/components/lights/LightsPage.tsx';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/ui/Tabs.tsx";
-import { get } from "@/lib/request.ts";
+} from '@/components/ui/Tabs.tsx';
+import { get } from '@/lib/request.ts';
 
 export default async function Home() {
-  const schedule = await get<Schedule>("/schedule");
-  const override = await get<Override>("/override");
-  const cleaningRecords = await get<CleaningRecordEntry[]>("/cleaning");
+  const schedule = await get<Schedule>('/schedule');
+  const override = await get<Override>('/override');
+  const cleaningRecords = await get<CleaningRecordEntry[]>('/cleaning');
   return (
     <Tabs className="absolute inset-[0]" defaultValue="lights">
       <header className="container flex items-center justify-center w-full bg-color border-b border-zinc-700 py-2">

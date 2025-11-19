@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
 import {
   type Override,
   type Schedule,
   type ScheduleEntry,
-} from "@aquarium/shared";
-import equal from "fast-deep-equal";
-import { createContext, useCallback, useContext, useState } from "react";
+} from '@aquarium/shared';
+import equal from 'fast-deep-equal';
+import { createContext, useCallback, useContext, useState } from 'react';
 
-import { put } from "@/lib/request.ts";
+import { put } from '@/lib/request.ts';
 
-import { Button } from "../ui/Button.tsx";
+import { Button } from '../ui/Button.tsx';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "../ui/Dialog.tsx";
-import { Entry } from "./Entry.tsx";
-import { OverrideEntry } from "./OverrideEntry.tsx";
+} from '../ui/Dialog.tsx';
+import { Entry } from './Entry.tsx';
+import { OverrideEntry } from './OverrideEntry.tsx';
 
 type LightsContextValue = {
   runningSchedule: Schedule;
@@ -33,7 +33,7 @@ const LightsContext = createContext<LightsContextValue | undefined>(undefined);
 function useLightsContext() {
   const ctx = useContext(LightsContext);
   if (!ctx) {
-    throw new Error("useLightsContext must be used within a LightsPage");
+    throw new Error('useLightsContext must be used within a LightsPage');
   }
   return ctx;
 }
@@ -46,23 +46,23 @@ function LightsContent() {
     setRunningOverride,
   } = useLightsContext();
   const [offToBlue, setOffToBlue] = useState<ScheduleEntry>(
-    runningSchedule.offToBlue,
+    runningSchedule.offToBlue
   );
   const [blueToWhite, setBlueToWhite] = useState<ScheduleEntry>(
-    runningSchedule.blueToWhite,
+    runningSchedule.blueToWhite
   );
   const [whiteToBlue, setWhiteToBlue] = useState<ScheduleEntry>(
-    runningSchedule.whiteToBlue,
+    runningSchedule.whiteToBlue
   );
   const [blueToOff, setBlueToOff] = useState<ScheduleEntry>(
-    runningSchedule.blueToOff,
+    runningSchedule.blueToOff
   );
   const [override, setOverride] = useState<Override>({
     enabled: runningOverride.enabled,
     state: runningOverride.state,
   });
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState('');
 
   const hasUnsavedChanges =
     !equal(offToBlue, runningSchedule.offToBlue) ||
@@ -88,7 +88,7 @@ function LightsContent() {
       try {
         if (scheduleChanged) {
           const response = await put({
-            endpoint: "/schedule",
+            endpoint: '/schedule',
             body: {
               offToBlue,
               blueToWhite,
@@ -98,7 +98,7 @@ function LightsContent() {
           });
 
           if (!response.ok) {
-            setErrorMessage("Failed to update schedule");
+            setErrorMessage('Failed to update schedule');
             setErrorDialogOpen(true);
             return;
           }
@@ -113,12 +113,12 @@ function LightsContent() {
 
         if (overrideChanged) {
           const response = await put({
-            endpoint: "/override",
+            endpoint: '/override',
             body: override,
           });
 
           if (!response.ok) {
-            setErrorMessage("Failed to update override");
+            setErrorMessage('Failed to update override');
             setErrorDialogOpen(true);
             return;
           }
@@ -129,7 +129,7 @@ function LightsContent() {
         setErrorMessage(
           error instanceof Error
             ? error.message
-            : "Error saving lights configuration",
+            : 'Error saving lights configuration'
         );
         setErrorDialogOpen(true);
       }

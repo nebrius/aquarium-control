@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { type CleaningRecordEntry } from "@aquarium/shared";
-import { useState } from "react";
+import { type CleaningRecordEntry } from '@aquarium/shared';
+import { useState } from 'react';
 
-import { CleaningContext } from "./context.ts";
-import { CreateRecord } from "./CreateRecord.tsx";
-import { RecordList } from "./RecordList.tsx";
+import { CleaningContext } from './context.ts';
+import { CreateRecord } from './CreateRecord.tsx';
+import { RecordList } from './RecordList.tsx';
 
 function CleaningContent() {
   return (
@@ -22,7 +22,7 @@ export function CleaningPage({
   initialCleaningRecords: CleaningRecordEntry[];
 }) {
   const [cleaningRecords, setCleaningRecords] = useState<CleaningRecordEntry[]>(
-    initialCleaningRecords,
+    initialCleaningRecords
   );
 
   return (

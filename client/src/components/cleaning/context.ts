@@ -1,10 +1,10 @@
-import { type CleaningRecordEntry } from "@aquarium/shared";
+import { type CleaningRecordEntry } from '@aquarium/shared';
 import {
   createContext,
   type Dispatch,
   type SetStateAction,
   useContext,
-} from "react";
+} from 'react';
 
 type CleaningContextValue = {
   cleaningRecords: CleaningRecordEntry[];
@@ -12,13 +12,13 @@ type CleaningContextValue = {
 };
 
 export const CleaningContext = createContext<CleaningContextValue | undefined>(
-  undefined,
+  undefined
 );
 
 export function useCleaningContext() {
   const ctx = useContext(CleaningContext);
   if (!ctx) {
-    throw new Error("useCleaningContext must be used within a CleaningPage");
+    throw new Error('useCleaningContext must be used within a CleaningPage');
   }
   return ctx;
 }

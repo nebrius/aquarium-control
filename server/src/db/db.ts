@@ -1,16 +1,16 @@
-import { existsSync, mkdirSync, readFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-import { type CleaningRecordEntry } from "@aquarium/shared";
-import { type Override, type Schedule } from "@aquarium/shared";
-import Database from "better-sqlite3";
+import { type CleaningRecordEntry } from '@aquarium/shared';
+import { type Override, type Schedule } from '@aquarium/shared';
+import Database from 'better-sqlite3';
 
-const DB_DIR = join(homedir(), ".aquarium-control");
-const DB_FILE = join(DB_DIR, "db.sqlite");
+const DB_DIR = join(homedir(), '.aquarium-control');
+const DB_FILE = join(DB_DIR, 'db.sqlite');
 
-const SCHEMA_FILE = join(dirname(fileURLToPath(import.meta.url)), "schema.sql");
+const SCHEMA_FILE = join(dirname(fileURLToPath(import.meta.url)), 'schema.sql');
 
 let db: Database.Database | undefined;
 
@@ -24,11 +24,11 @@ function getDb() {
     mkdirSync(DB_DIR, { recursive: true });
   }
 
-  console.log(isNew ? "Creating database" : "Opening database");
+  console.log(isNew ? 'Creating database' : 'Opening database');
   db = new Database(DB_FILE);
 
   if (isNew) {
-    const schema = readFileSync(SCHEMA_FILE, "utf8");
+    const schema = readFileSync(SCHEMA_FILE, 'utf8');
     db.exec(schema);
   }
 
@@ -37,19 +37,19 @@ function getDb() {
 
 export function getSchedule(): Schedule {
   const rows = getDb()
-    .prepare("SELECT name, hour, minute, fade FROM schedule ORDER BY name ASC")
+    .prepare('SELECT name, hour, minute, fade FROM schedule ORDER BY name ASC')
     .all() as { name: string; hour: number; minute: number; fade: number }[];
 
   const expectedNames = [
-    "offToBlue",
-    "blueToWhite",
-    "whiteToBlue",
-    "blueToOff",
+    'offToBlue',
+    'blueToWhite',
+    'whiteToBlue',
+    'blueToOff',
   ] as const;
 
   if (rows.length !== expectedNames.length) {
     throw new Error(
-      `schedule table must contain exactly ${String(expectedNames.length)} rows`,
+      `schedule table must contain exactly ${String(expectedNames.length)} rows`
     );
   }
 
@@ -64,24 +64,24 @@ export function getSchedule(): Schedule {
   const schedule: Schedule = {
     offToBlue: {
       /* eslint-disable @typescript-eslint/no-non-null-assertion */
-      hour: byName.get("offToBlue")!.hour,
-      minute: byName.get("offToBlue")!.minute,
-      fade: byName.get("offToBlue")!.fade,
+      hour: byName.get('offToBlue')!.hour,
+      minute: byName.get('offToBlue')!.minute,
+      fade: byName.get('offToBlue')!.fade,
     },
     blueToWhite: {
-      hour: byName.get("blueToWhite")!.hour,
-      minute: byName.get("blueToWhite")!.minute,
-      fade: byName.get("blueToWhite")!.fade,
+      hour: byName.get('blueToWhite')!.hour,
+      minute: byName.get('blueToWhite')!.minute,
+      fade: byName.get('blueToWhite')!.fade,
     },
     whiteToBlue: {
-      hour: byName.get("whiteToBlue")!.hour,
-      minute: byName.get("whiteToBlue")!.minute,
-      fade: byName.get("whiteToBlue")!.fade,
+      hour: byName.get('whiteToBlue')!.hour,
+      minute: byName.get('whiteToBlue')!.minute,
+      fade: byName.get('whiteToBlue')!.fade,
     },
     blueToOff: {
-      hour: byName.get("blueToOff")!.hour,
-      minute: byName.get("blueToOff")!.minute,
-      fade: byName.get("blueToOff")!.fade,
+      hour: byName.get('blueToOff')!.hour,
+      minute: byName.get('blueToOff')!.minute,
+      fade: byName.get('blueToOff')!.fade,
     },
     /* eslint-enable @typescript-eslint/no-non-null-assertion */
   };
@@ -91,42 +91,42 @@ export function getSchedule(): Schedule {
 
 export function setSchedule(schedule: Schedule) {
   const stmt = getDb().prepare(
-    "UPDATE schedule SET hour = ?, minute = ?, fade = ? WHERE name = ?",
+    'UPDATE schedule SET hour = ?, minute = ?, fade = ? WHERE name = ?'
   );
 
   stmt.run(
     schedule.offToBlue.hour,
     schedule.offToBlue.minute,
     schedule.offToBlue.fade,
-    "offToBlue",
+    'offToBlue'
   );
   stmt.run(
     schedule.blueToWhite.hour,
     schedule.blueToWhite.minute,
     schedule.blueToWhite.fade,
-    "blueToWhite",
+    'blueToWhite'
   );
   stmt.run(
     schedule.whiteToBlue.hour,
     schedule.whiteToBlue.minute,
     schedule.whiteToBlue.fade,
-    "whiteToBlue",
+    'whiteToBlue'
   );
   stmt.run(
     schedule.blueToOff.hour,
     schedule.blueToOff.minute,
     schedule.blueToOff.fade,
-    "blueToOff",
+    'blueToOff'
   );
 }
 
 export function getOverride(): Override {
   const row = getDb()
-    .prepare("SELECT enabled, state FROM override WHERE id = 1")
-    .get() as { enabled: number; state: "off" | "blue" | "white" } | undefined;
+    .prepare('SELECT enabled, state FROM override WHERE id = 1')
+    .get() as { enabled: number; state: 'off' | 'blue' | 'white' } | undefined;
 
   if (!row) {
-    throw new Error("override row is missing from the database");
+    throw new Error('override row is missing from the database');
   }
 
   return {
@@ -138,8 +138,8 @@ export function getOverride(): Override {
 export function setOverride(override: Override) {
   getDb()
     .prepare(
-      "INSERT INTO override (id, enabled, state) VALUES (1, ?, ?) " +
-        "ON CONFLICT(id) DO UPDATE SET enabled = excluded.enabled, state = excluded.state",
+      'INSERT INTO override (id, enabled, state) VALUES (1, ?, ?) ' +
+        'ON CONFLICT(id) DO UPDATE SET enabled = excluded.enabled, state = excluded.state'
     )
     .run(override.enabled ? 1 : 0, override.state);
 }
@@ -147,7 +147,7 @@ export function setOverride(override: Override) {
 export function getCleaningRecords(): CleaningRecordEntry[] {
   return getDb()
     .prepare(
-      "SELECT date, sponge, nitrazorb, organic FROM cleaning_records ORDER BY date DESC, id DESC",
+      'SELECT date, sponge, nitrazorb, organic FROM cleaning_records ORDER BY date DESC, id DESC'
     )
     .all() as CleaningRecordEntry[];
 }
@@ -155,12 +155,12 @@ export function getCleaningRecords(): CleaningRecordEntry[] {
 export function addCleaningRecord(record: CleaningRecordEntry) {
   getDb()
     .prepare(
-      "INSERT INTO cleaning_records (date, sponge, nitrazorb, organic) VALUES (?, ?, ?, ?)",
+      'INSERT INTO cleaning_records (date, sponge, nitrazorb, organic) VALUES (?, ?, ?, ?)'
     )
     .run(
       new Date(record.date).toISOString(),
       record.sponge,
       record.nitrazorb,
-      record.organic,
+      record.organic
     );
 }

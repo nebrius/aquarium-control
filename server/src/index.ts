@@ -2,10 +2,10 @@ import {
   CleaningRecordSchema,
   OverrideSchema,
   ScheduleSchema,
-} from "@aquarium/shared";
-import cors from "@fastify/cors";
-import { type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
-import Fastify from "fastify";
+} from '@aquarium/shared';
+import cors from '@fastify/cors';
+import { type TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
+import Fastify from 'fastify';
 
 import {
   addCleaningRecord,
@@ -14,7 +14,7 @@ import {
   getSchedule,
   setOverride,
   setSchedule,
-} from "./db/db.ts";
+} from './db/db.ts';
 
 const fastify = Fastify({
   logger: true,
@@ -22,19 +22,19 @@ const fastify = Fastify({
 
 // Configure CORS
 await fastify.register(cors, {
-  origin: ["http://localhost:3000", "http://localhost:80"],
+  origin: ['http://localhost:3000', 'http://localhost:80'],
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 });
 
 // GET /cleaning - Get all cleaning records
-fastify.get("/cleaning", () => {
+fastify.get('/cleaning', () => {
   return getCleaningRecords();
 });
 
 // POST /cleaning - Add a cleaning record
 fastify.post(
-  "/cleaning",
+  '/cleaning',
   {
     schema: {
       body: CleaningRecordSchema,
@@ -42,18 +42,18 @@ fastify.post(
   },
   (request) => {
     addCleaningRecord(request.body);
-    return { message: "OK" };
-  },
+    return { message: 'OK' };
+  }
 );
 
 // GET /override - Get the current override state
-fastify.get("/override", () => {
+fastify.get('/override', () => {
   return getOverride();
 });
 
 // PUT /override - Set the override state
 fastify.put(
-  "/override",
+  '/override',
   {
     schema: {
       body: OverrideSchema,
@@ -61,18 +61,18 @@ fastify.put(
   },
   (request) => {
     setOverride(request.body);
-    return { message: "OK" };
-  },
+    return { message: 'OK' };
+  }
 );
 
 // GET /schedule - Get the current schedule
-fastify.get("/schedule", () => {
+fastify.get('/schedule', () => {
   return getSchedule();
 });
 
 // PUT /schedule - Set the schedule
 fastify.put(
-  "/schedule",
+  '/schedule',
   {
     schema: {
       body: ScheduleSchema,
@@ -80,8 +80,8 @@ fastify.put(
   },
   (request) => {
     setSchedule(request.body);
-    return { message: "OK" };
-  },
+    return { message: 'OK' };
+  }
 );
 
 // Run the server!
