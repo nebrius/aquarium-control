@@ -159,28 +159,28 @@ function LightsContent() {
           }}
         />
         <Entry
-          name="Off → Blue"
+          name="Off → Night"
           schedule={offToBlue}
           setSchedule={(schedule) => {
             setOffToBlue(schedule);
           }}
         />
         <Entry
-          name="Blue → White"
+          name="Night → Day"
           schedule={blueToWhite}
           setSchedule={(schedule) => {
             setBlueToWhite(schedule);
           }}
         />
         <Entry
-          name="White → Blue"
+          name="Day → Night"
           schedule={whiteToBlue}
           setSchedule={(schedule) => {
             setWhiteToBlue(schedule);
           }}
         />
         <Entry
-          name="Blue → Off"
+          name="Night → Off"
           schedule={blueToOff}
           setSchedule={(schedule) => {
             setBlueToOff(schedule);
