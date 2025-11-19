@@ -17,7 +17,15 @@ import {
 } from './db/db.ts';
 
 const fastify = Fastify({
-  logger: true,
+  logger: {
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        translateTime: 'HH:MM:ss Z',
+        ignore: 'pid,hostname',
+      },
+    },
+  },
 }).withTypeProvider<TypeBoxTypeProvider>();
 
 // Configure CORS

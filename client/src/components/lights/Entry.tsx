@@ -2,8 +2,9 @@ import '@rc-component/color-picker/assets/index.css';
 
 import { type ScheduleEntry } from '@aquarium/shared';
 import ColorPicker, { Color } from '@rc-component/color-picker';
+import convert from 'color-convert';
 import { ChevronDown } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button } from '../ui/Button.tsx';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card.tsx';
@@ -57,7 +58,30 @@ type EntryProps = {
 export function Entry({ name, schedule, setSchedule }: EntryProps) {
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  const [value, setValue] = useState(new Color('#163cff'));
+
+  // Convert HSV from schedule to RGB for color picker
+  const initialColor = useMemo(() => {
+    const [r, g, b] = convert.hsv.rgb([schedule.h, schedule.s, schedule.v]);
+    return new Color({ r, g, b });
+  }, [schedule.h, schedule.s, schedule.v]);
+
+  const [value, setValue] = useState(initialColor);
+
+  // Update color when schedule changes
+  useEffect(() => {
+    setValue(initialColor);
+  }, [initialColor]);
+
+  // Update schedule when color changes
+  const handleColorChange = (newColor: Color) => {
+    setValue(newColor);
+    const hex = newColor.toHexString();
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    const [h, s, v] = convert.rgb.hsv([r, g, b]);
+    setSchedule({ ...schedule, h, s, v });
+  };
 
   useEffect(() => {
     if (isColorPickerOpen && cardRef.current) {
@@ -128,7 +152,11 @@ export function Entry({ name, schedule, setSchedule }: EntryProps) {
                 e.stopPropagation();
               }}
             >
-              <ColorPicker value={value} onChange={setValue} disabledAlpha />
+              <ColorPicker
+                value={value}
+                onChange={handleColorChange}
+                disabledAlpha
+              />
             </div>
           </CollapsibleContent>
         </Collapsible>

@@ -37,8 +37,18 @@ function getDb() {
 
 export function getSchedule(): Schedule {
   const rows = getDb()
-    .prepare('SELECT name, hour, minute, fade FROM schedule ORDER BY name ASC')
-    .all() as { name: string; hour: number; minute: number; fade: number }[];
+    .prepare(
+      'SELECT name, hour, minute, fade, h, s, v FROM schedule ORDER BY name ASC'
+    )
+    .all() as {
+    name: string;
+    hour: number;
+    minute: number;
+    fade: number;
+    h: number;
+    s: number;
+    v: number;
+  }[];
 
   const expectedNames = [
     'offToBlue',
@@ -67,21 +77,33 @@ export function getSchedule(): Schedule {
       hour: byName.get('offToBlue')!.hour,
       minute: byName.get('offToBlue')!.minute,
       fade: byName.get('offToBlue')!.fade,
+      h: byName.get('offToBlue')!.h,
+      s: byName.get('offToBlue')!.s,
+      v: byName.get('offToBlue')!.v,
     },
     blueToWhite: {
       hour: byName.get('blueToWhite')!.hour,
       minute: byName.get('blueToWhite')!.minute,
       fade: byName.get('blueToWhite')!.fade,
+      h: byName.get('blueToWhite')!.h,
+      s: byName.get('blueToWhite')!.s,
+      v: byName.get('blueToWhite')!.v,
     },
     whiteToBlue: {
       hour: byName.get('whiteToBlue')!.hour,
       minute: byName.get('whiteToBlue')!.minute,
       fade: byName.get('whiteToBlue')!.fade,
+      h: byName.get('whiteToBlue')!.h,
+      s: byName.get('whiteToBlue')!.s,
+      v: byName.get('whiteToBlue')!.v,
     },
     blueToOff: {
       hour: byName.get('blueToOff')!.hour,
       minute: byName.get('blueToOff')!.minute,
       fade: byName.get('blueToOff')!.fade,
+      h: byName.get('blueToOff')!.h,
+      s: byName.get('blueToOff')!.s,
+      v: byName.get('blueToOff')!.v,
     },
     /* eslint-enable @typescript-eslint/no-non-null-assertion */
   };
@@ -91,31 +113,43 @@ export function getSchedule(): Schedule {
 
 export function setSchedule(schedule: Schedule) {
   const stmt = getDb().prepare(
-    'UPDATE schedule SET hour = ?, minute = ?, fade = ? WHERE name = ?'
+    'UPDATE schedule SET hour = ?, minute = ?, fade = ?, h = ?, s = ?, v = ? WHERE name = ?'
   );
 
   stmt.run(
     schedule.offToBlue.hour,
     schedule.offToBlue.minute,
     schedule.offToBlue.fade,
+    schedule.offToBlue.h,
+    schedule.offToBlue.s,
+    schedule.offToBlue.v,
     'offToBlue'
   );
   stmt.run(
     schedule.blueToWhite.hour,
     schedule.blueToWhite.minute,
     schedule.blueToWhite.fade,
+    schedule.blueToWhite.h,
+    schedule.blueToWhite.s,
+    schedule.blueToWhite.v,
     'blueToWhite'
   );
   stmt.run(
     schedule.whiteToBlue.hour,
     schedule.whiteToBlue.minute,
     schedule.whiteToBlue.fade,
+    schedule.whiteToBlue.h,
+    schedule.whiteToBlue.s,
+    schedule.whiteToBlue.v,
     'whiteToBlue'
   );
   stmt.run(
     schedule.blueToOff.hour,
     schedule.blueToOff.minute,
     schedule.blueToOff.fade,
+    schedule.blueToOff.h,
+    schedule.blueToOff.s,
+    schedule.blueToOff.v,
     'blueToOff'
   );
 }

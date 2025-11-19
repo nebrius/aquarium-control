@@ -29,6 +29,9 @@ const ScheduleEntrySchema = Type.Object({
   hour: Type.Integer({ minimum: 0, maximum: 255 }),
   minute: Type.Integer({ minimum: 0, maximum: 255 }),
   fade: Type.Integer({ minimum: 0, maximum: 255 }),
+  h: Type.Integer({ minimum: 0, maximum: 255 }),
+  s: Type.Integer({ minimum: 0, maximum: 255 }),
+  v: Type.Integer({ minimum: 0, maximum: 255 }),
 });
 
 export type ScheduleEntry = Static<typeof ScheduleEntrySchema>;

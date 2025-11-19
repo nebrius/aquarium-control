@@ -3,14 +3,17 @@ CREATE TABLE schedule (
   name TEXT NOT NULL UNIQUE,
   hour INTEGER NOT NULL CHECK (hour BETWEEN 0 AND 255),
   minute INTEGER NOT NULL CHECK (minute BETWEEN 0 AND 255),
-  fade INTEGER NOT NULL CHECK (fade BETWEEN 0 AND 255)
+  fade INTEGER NOT NULL CHECK (fade BETWEEN 0 AND 255),
+  h INTEGER NOT NULL CHECK (h BETWEEN 0 AND 360),
+  s INTEGER NOT NULL CHECK (s BETWEEN 0 AND 100),
+  v INTEGER NOT NULL CHECK (v BETWEEN 0 AND 100)
 );
 
-INSERT INTO schedule (name, hour, minute, fade) VALUES
-  ('offToBlue', 6, 0, 10),
-  ('blueToWhite', 10, 0, 10),
-  ('whiteToBlue', 18, 0, 10),
-  ('blueToOff', 23, 0, 10);
+INSERT INTO schedule (name, hour, minute, fade, h, s, v) VALUES
+  ('offToBlue', 6, 0, 10, 240, 100, 100),
+  ('blueToWhite', 10, 0, 10, 240, 0, 100),
+  ('whiteToBlue', 18, 0, 10, 240, 100, 100),
+  ('blueToOff', 23, 0, 10, 240, 100, 0);
 
 CREATE TABLE override (
   id INTEGER PRIMARY KEY CHECK (id = 1),
