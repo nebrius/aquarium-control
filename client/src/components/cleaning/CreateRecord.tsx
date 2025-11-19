@@ -3,6 +3,8 @@
 import { type CleaningType } from "@aquarium/shared";
 import { useCallback, useState } from "react";
 
+import { post } from "@/lib/request.ts";
+
 import { Button } from "../ui/Button.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card.tsx";
 import { Label } from "../ui/Label.tsx";
@@ -18,17 +20,14 @@ export function CreateRecord() {
   const onSave = useCallback(() => {
     void (async () => {
       try {
-        const response = await fetch("/cleaning", {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
+        const response = await post({
+          endpoint: "/cleaning",
+          body: {
             date: new Date().toISOString(),
             organic: bio,
             nitrazorb: nitraZorb,
             sponge,
-          }),
+          },
         });
 
         if (!response.ok) {

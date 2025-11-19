@@ -8,6 +8,8 @@ import {
 import equal from "fast-deep-equal";
 import { createContext, useCallback, useContext, useState } from "react";
 
+import { put } from "@/lib/request.ts";
+
 import { Button } from "../ui/Button.tsx";
 import { Entry } from "./Entry.tsx";
 import { OverrideEntry } from "./OverrideEntry.tsx";
@@ -76,17 +78,14 @@ function LightsContent() {
     void (async () => {
       try {
         if (scheduleChanged) {
-          const response = await fetch("/schedule", {
-            method: "PUT",
-            headers: {
-              "content-type": "application/json",
-            },
-            body: JSON.stringify({
+          const response = await put({
+            endpoint: "/schedule",
+            body: {
               offToBlue,
               blueToWhite,
               whiteToBlue,
               blueToOff,
-            }),
+            },
           });
 
           if (!response.ok) {
@@ -103,12 +102,9 @@ function LightsContent() {
         }
 
         if (overrideChanged) {
-          const response = await fetch("/override", {
-            method: "PUT",
-            headers: {
-              "content-type": "application/json",
-            },
-            body: JSON.stringify(override),
+          const response = await put({
+            endpoint: "/override",
+            body: override,
           });
 
           if (!response.ok) {
