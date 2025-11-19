@@ -52,6 +52,7 @@ function IntegerSelect({
 type EntryProps = {
   name: string;
   schedule: ScheduleEntry;
+  savedSchedule: ScheduleEntry;
   setSchedule: (schedule: ScheduleEntry) => void;
   hideColorPicker?: boolean;
 };
@@ -59,6 +60,7 @@ type EntryProps = {
 export function Entry({
   name,
   schedule,
+  savedSchedule,
   setSchedule,
   hideColorPicker,
 }: EntryProps) {
@@ -66,21 +68,23 @@ export function Entry({
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Convert HSV from schedule to RGB for color picker
-  const initialColor = useMemo(() => {
+  const color = useMemo(() => {
     const [r, g, b] = convert.hsv.rgb([schedule.h, schedule.s, schedule.v]);
     return new Color({ r, g, b });
   }, [schedule.h, schedule.s, schedule.v]);
 
-  const [value, setValue] = useState(initialColor);
-
-  // Update color when schedule changes
-  useEffect(() => {
-    setValue(initialColor);
-  }, [initialColor]);
+  // Convert saved HSV to RGB for color indicator
+  const savedColor = useMemo(() => {
+    const [r, g, b] = convert.hsv.rgb([
+      savedSchedule.h,
+      savedSchedule.s,
+      savedSchedule.v,
+    ]);
+    return new Color({ r, g, b });
+  }, [savedSchedule.h, savedSchedule.s, savedSchedule.v]);
 
   // Update schedule when color changes
   const handleColorChange = (newColor: Color) => {
-    setValue(newColor);
     const hex = newColor.toHexString();
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
@@ -140,19 +144,29 @@ export function Entry({
             onOpenChange={setIsColorPickerOpen}
           >
             <CollapsibleTrigger asChild className="mt-4 w-full">
-              <Button variant="ghost">
-                Choose Color
-                <ChevronDown
-                  className={`transition-transform duration-200 ${
-                    isColorPickerOpen ? 'rotate-180' : ''
-                  }`}
-                />
-              </Button>
+              <div className="flex items-center gap-2">
+                <div className="grow">
+                  <div
+                    style={{ backgroundColor: savedColor.toHexString() }}
+                    className="size-6 w-[124px] rounded-full"
+                  ></div>
+                </div>
+                <div>
+                  <Button variant="outline">
+                    Choose Color
+                    <ChevronDown
+                      className={`transition-transform duration-200 ${
+                        isColorPickerOpen ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </Button>
+                </div>
+              </div>
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-4">
               <div className="flex justify-center touch-none">
                 <ColorPicker
-                  value={value}
+                  value={color}
                   onChange={handleColorChange}
                   disabledAlpha
                 />

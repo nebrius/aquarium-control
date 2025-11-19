@@ -161,6 +161,7 @@ function LightsContent() {
         <Entry
           name="Off → Night"
           schedule={offToBlue}
+          savedSchedule={runningSchedule.offToBlue}
           setSchedule={(schedule) => {
             setOffToBlue(schedule);
           }}
@@ -168,6 +169,7 @@ function LightsContent() {
         <Entry
           name="Night → Day"
           schedule={blueToWhite}
+          savedSchedule={runningSchedule.blueToWhite}
           setSchedule={(schedule) => {
             setBlueToWhite(schedule);
           }}
@@ -175,6 +177,7 @@ function LightsContent() {
         <Entry
           name="Day → Night"
           schedule={whiteToBlue}
+          savedSchedule={runningSchedule.whiteToBlue}
           setSchedule={(schedule) => {
             setWhiteToBlue(schedule);
           }}
@@ -182,6 +185,7 @@ function LightsContent() {
         <Entry
           name="Night → Off"
           schedule={blueToOff}
+          savedSchedule={runningSchedule.blueToOff}
           setSchedule={(schedule) => {
             setBlueToOff(schedule);
           }}
