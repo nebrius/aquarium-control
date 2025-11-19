@@ -1,6 +1,17 @@
-import { type ScheduleEntry } from '@aquarium/shared';
+import '@rc-component/color-picker/assets/index.css';
 
+import { type ScheduleEntry } from '@aquarium/shared';
+import ColorPicker, { Color } from '@rc-component/color-picker';
+import { ChevronDown } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+
+import { Button } from '../ui/Button.tsx';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card.tsx';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '../ui/Collapsible.tsx';
 import { Label } from '../ui/Label.tsx';
 import { NativeSelect, NativeSelectOption } from '../ui/NativeSelect.tsx';
 
@@ -44,8 +55,21 @@ type EntryProps = {
 };
 
 export function Entry({ name, schedule, setSchedule }: EntryProps) {
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [value, setValue] = useState(new Color('#163cff'));
+
+  useEffect(() => {
+    if (isColorPickerOpen && cardRef.current) {
+      cardRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  }, [isColorPickerOpen]);
+
   return (
-    <Card className="w-full max-w-sm">
+    <Card ref={cardRef} className="w-full max-w-sm">
       <CardHeader>
         <CardTitle>{name}</CardTitle>
       </CardHeader>
@@ -80,6 +104,34 @@ export function Entry({ name, schedule, setSchedule }: EntryProps) {
             }}
           />
         </div>
+        <Collapsible
+          open={isColorPickerOpen}
+          onOpenChange={setIsColorPickerOpen}
+        >
+          <CollapsibleTrigger asChild className="mt-4 w-full">
+            <Button variant="ghost">
+              Choose Color
+              <ChevronDown
+                className={`transition-transform duration-200 ${
+                  isColorPickerOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-4">
+            <div
+              className="flex justify-center"
+              onTouchStart={(e) => {
+                e.stopPropagation();
+              }}
+              onTouchMove={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <ColorPicker value={value} onChange={setValue} disabledAlpha />
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </CardContent>
     </Card>
   );
