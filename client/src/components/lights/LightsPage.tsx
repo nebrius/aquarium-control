@@ -11,6 +11,13 @@ import { createContext, useCallback, useContext, useState } from "react";
 import { put } from "@/lib/request.ts";
 
 import { Button } from "../ui/Button.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/Dialog.tsx";
 import { Entry } from "./Entry.tsx";
 import { OverrideEntry } from "./OverrideEntry.tsx";
 
@@ -54,6 +61,8 @@ function LightsContent() {
     enabled: runningOverride.enabled,
     state: runningOverride.state,
   });
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const hasUnsavedChanges =
     !equal(offToBlue, runningSchedule.offToBlue) ||
@@ -89,7 +98,8 @@ function LightsContent() {
           });
 
           if (!response.ok) {
-            console.error("Failed to update schedule", await response.text());
+            setErrorMessage("Failed to update schedule");
+            setErrorDialogOpen(true);
             return;
           }
 
@@ -108,14 +118,20 @@ function LightsContent() {
           });
 
           if (!response.ok) {
-            console.error("Failed to update override", await response.text());
+            setErrorMessage("Failed to update override");
+            setErrorDialogOpen(true);
             return;
           }
 
           setRunningOverride(override);
         }
       } catch (error) {
-        console.error("Error saving lights configuration", error);
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Error saving lights configuration",
+        );
+        setErrorDialogOpen(true);
       }
     })();
   }, [
@@ -180,6 +196,14 @@ function LightsContent() {
           Save
         </Button>
       </div>
+      <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Error saving lights</DialogTitle>
+            <DialogDescription>{errorMessage}</DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

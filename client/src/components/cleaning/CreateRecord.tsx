@@ -7,6 +7,13 @@ import { post } from "@/lib/request.ts";
 
 import { Button } from "../ui/Button.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/Dialog.tsx";
 import { Label } from "../ui/Label.tsx";
 import { RadioGroup, RadioGroupItem } from "../ui/RadioGroup.tsx";
 import { useCleaningContext } from "./context.ts";
@@ -16,6 +23,8 @@ export function CreateRecord() {
   const [bio, setBio] = useState<CleaningType>("none");
   const [nitraZorb, setNitraZorb] = useState<CleaningType>("none");
   const [sponge, setSponge] = useState<CleaningType>("none");
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const onSave = useCallback(() => {
     void (async () => {
@@ -31,10 +40,8 @@ export function CreateRecord() {
         });
 
         if (!response.ok) {
-          console.error(
-            "Failed to save cleaning record",
-            await response.text(),
-          );
+          setErrorMessage("Failed to save cleaning record");
+          setErrorDialogOpen(true);
           return;
         }
 
@@ -48,7 +55,12 @@ export function CreateRecord() {
           ...prev,
         ]);
       } catch (error) {
-        console.error("Error saving cleaning record", error);
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Error saving cleaning record",
+        );
+        setErrorDialogOpen(true);
       }
     })();
   }, [bio, nitraZorb, setCleaningRecords, sponge]);
@@ -140,6 +152,14 @@ export function CreateRecord() {
           Create
         </Button>
       </CardContent>
+      <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Error saving cleaning record</DialogTitle>
+            <DialogDescription>{errorMessage}</DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
