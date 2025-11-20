@@ -1,5 +1,6 @@
 import {
   CleaningRecordSchema,
+  ColorSetSchema,
   OverrideSchema,
   ScheduleSchema,
 } from '@aquarium/shared';
@@ -10,12 +11,19 @@ import Fastify from 'fastify';
 import {
   addCleaningRecord,
   getCleaningRecords,
+  getColorSet,
   getOverride,
   getSchedule,
+  setColorSet,
   setOverride,
   setSchedule,
 } from './db/db.ts';
-import { handleOverrideUpdate, handleScheduleUpdate } from './lights.ts';
+import {
+  getCurrentColor,
+  handleColorUpdate,
+  handleOverrideUpdate,
+  handleScheduleUpdate,
+} from './lights.ts';
 
 const fastify = Fastify({
   logger: {
@@ -94,6 +102,31 @@ fastify.put(
     return { message: 'OK' };
   }
 );
+
+// GET /color-set - Get the current color set
+fastify.get('/color-set', () => {
+  return getColorSet();
+});
+
+// PUT /color-set - Set the color set
+fastify.put(
+  '/color-set',
+  {
+    schema: {
+      body: ColorSetSchema,
+    },
+  },
+  (request) => {
+    setColorSet(request.body);
+    handleColorUpdate(request.body);
+    return { message: 'OK' };
+  }
+);
+
+// GET /currentColor - Get the current color
+fastify.get('/current-color', () => {
+  return getCurrentColor();
+});
 
 // Run the server!
 fastify.listen({ port: 3001 }, (err, address) => {

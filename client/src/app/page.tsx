@@ -1,5 +1,6 @@
 import {
   type CleaningRecordEntry,
+  type ColorSet,
   type Override,
   type Schedule,
 } from '@aquarium/shared';
@@ -18,6 +19,7 @@ export default async function Home() {
   const schedule = await get<Schedule>('/schedule');
   const override = await get<Override>('/override');
   const cleaningRecords = await get<CleaningRecordEntry[]>('/cleaning');
+  const colors = await get<ColorSet>('/color-set');
   return (
     <Tabs className="absolute inset-[0]" defaultValue="lights">
       <header className="container flex items-center justify-center w-full bg-color border-b border-zinc-700 py-2">
@@ -31,7 +33,11 @@ export default async function Home() {
         </TabsList>
       </header>
       <TabsContent className="grow" value="lights">
-        <LightsPage initialSchedule={schedule} initialOverride={override} />
+        <LightsPage
+          initialSchedule={schedule}
+          initialOverride={override}
+          initialColors={colors}
+        />
       </TabsContent>
       <TabsContent className="grow" value="cleaning">
         <CleaningPage initialCleaningRecords={cleaningRecords} />

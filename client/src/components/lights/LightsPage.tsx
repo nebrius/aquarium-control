@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  type ColorSet,
   type Override,
   type Schedule,
   type ScheduleEntry,
@@ -18,14 +19,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../ui/Dialog.tsx';
+import { Colors } from './Colors.tsx';
 import { Entry } from './Entry.tsx';
 import { OverrideEntry } from './OverrideEntry.tsx';
 
 type LightsContextValue = {
   runningSchedule: Schedule;
   runningOverride: Override;
+  runningColors: ColorSet;
   setRunningSchedule: (schedule: Schedule) => void;
   setRunningOverride: (override: Override) => void;
+  setRunningColors: (colors: ColorSet) => void;
 };
 
 const LightsContext = createContext<LightsContextValue | undefined>(undefined);
@@ -42,8 +46,10 @@ function LightsContent() {
   const {
     runningSchedule,
     runningOverride,
+    runningColors,
     setRunningSchedule,
     setRunningOverride,
+    setRunningColors,
   } = useLightsContext();
   const [offToNight, setOffToNight] = useState<ScheduleEntry>(
     runningSchedule.offToNight
@@ -61,6 +67,7 @@ function LightsContent() {
     enabled: runningOverride.enabled,
     state: runningOverride.state,
   });
+  const [colors, setColors] = useState<ColorSet>(runningColors);
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -69,7 +76,8 @@ function LightsContent() {
     !equal(nightToDay, runningSchedule.nightToDay) ||
     !equal(dayToNight, runningSchedule.dayToNight) ||
     !equal(nightToOff, runningSchedule.nightToOff) ||
-    !equal(override, runningOverride);
+    !equal(override, runningOverride) ||
+    !equal(colors, runningColors);
 
   const onSave = useCallback(() => {
     const scheduleChanged =
@@ -80,7 +88,9 @@ function LightsContent() {
 
     const overrideChanged = !equal(override, runningOverride);
 
-    if (!scheduleChanged && !overrideChanged) {
+    const colorsChanged = !equal(colors, runningColors);
+
+    if (!scheduleChanged && !overrideChanged && !colorsChanged) {
       return;
     }
 
@@ -125,6 +135,21 @@ function LightsContent() {
 
           setRunningOverride(override);
         }
+
+        if (colorsChanged) {
+          const response = await put({
+            endpoint: '/color-set',
+            body: colors,
+          });
+
+          if (!response.ok) {
+            setErrorMessage('Failed to update colors');
+            setErrorDialogOpen(true);
+            return;
+          }
+
+          setRunningColors(colors);
+        }
       } catch (error) {
         setErrorMessage(
           error instanceof Error
@@ -145,13 +170,20 @@ function LightsContent() {
     runningSchedule.nightToDay,
     runningSchedule.nightToOff,
     runningSchedule.offToNight,
+    colors,
     setRunningOverride,
     setRunningSchedule,
+    setRunningColors,
   ]);
 
   return (
     <div className="grow h-full flex flex-col">
       <div className="flex flex-col gap-4 overflow-scroll grow basis-0 px-2 py-4">
+        <Colors
+          colors={colors}
+          setColors={setColors}
+          savedColors={runningColors}
+        />
         <OverrideEntry
           override={override}
           setOverride={(override) => {
@@ -161,7 +193,6 @@ function LightsContent() {
         <Entry
           name="Off → Night"
           schedule={offToNight}
-          savedSchedule={runningSchedule.offToNight}
           setSchedule={(schedule) => {
             setOffToNight(schedule);
           }}
@@ -169,7 +200,6 @@ function LightsContent() {
         <Entry
           name="Night → Day"
           schedule={nightToDay}
-          savedSchedule={runningSchedule.nightToDay}
           setSchedule={(schedule) => {
             setNightToDay(schedule);
           }}
@@ -177,7 +207,6 @@ function LightsContent() {
         <Entry
           name="Day → Night"
           schedule={dayToNight}
-          savedSchedule={runningSchedule.dayToNight}
           setSchedule={(schedule) => {
             setDayToNight(schedule);
           }}
@@ -185,11 +214,9 @@ function LightsContent() {
         <Entry
           name="Night → Off"
           schedule={nightToOff}
-          savedSchedule={runningSchedule.nightToOff}
           setSchedule={(schedule) => {
             setNightToOff(schedule);
           }}
-          hideColorPicker
         />
       </div>
       <div className="w-full p-4 bg-color border-t border-zinc-700">
@@ -216,24 +243,29 @@ function LightsContent() {
 type LightsPageProps = {
   initialSchedule: Schedule;
   initialOverride: Override;
+  initialColors: ColorSet;
 };
 
 export function LightsPage({
   initialSchedule,
   initialOverride,
+  initialColors,
 }: LightsPageProps) {
   const [runningSchedule, setRunningSchedule] =
     useState<Schedule>(initialSchedule);
   const [runningOverride, setRunningOverride] =
     useState<Override>(initialOverride);
+  const [runningColors, setRunningColors] = useState<ColorSet>(initialColors);
 
   return (
     <LightsContext.Provider
       value={{
         runningSchedule,
         runningOverride,
+        runningColors,
         setRunningSchedule,
         setRunningOverride,
+        setRunningColors,
       }}
     >
       <LightsContent />
