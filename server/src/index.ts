@@ -34,7 +34,22 @@ const fastify = Fastify({
         ignore: 'pid,hostname',
       },
     },
+    level: 'info',
+    serializers: {
+      req(request) {
+        return {
+          method: request.method,
+          url: request.url,
+        };
+      },
+      res(reply) {
+        return {
+          statusCode: reply.statusCode,
+        };
+      },
+    },
   },
+  disableRequestLogging: true,
 }).withTypeProvider<TypeBoxTypeProvider>();
 
 // Configure CORS

@@ -10,12 +10,12 @@ import {
 import { NativeSelect, NativeSelectOption } from '../ui/NativeSelect.tsx';
 import { Switch } from '../ui/Switch.tsx';
 
-type OverrideEntryProps = {
+type OverrideCardProps = {
   override: Override;
   setOverride: (override: Override) => void;
 };
 
-export function OverrideEntry({ override, setOverride }: OverrideEntryProps) {
+export function OverrideCard({ override, setOverride }: OverrideCardProps) {
   return (
     <Card className="w-full max-w-sm mb-4">
       <CardHeader>
@@ -36,9 +36,15 @@ export function OverrideEntry({ override, setOverride }: OverrideEntryProps) {
             setOverride({ ...override, state: e.target.value as LightState });
           }}
         >
-          <NativeSelectOption value="off">Off</NativeSelectOption>
-          <NativeSelectOption value="white">White</NativeSelectOption>
-          <NativeSelectOption value="blue">Blue</NativeSelectOption>
+          <NativeSelectOption value={'off' satisfies LightState}>
+            Off
+          </NativeSelectOption>
+          <NativeSelectOption value={'day' satisfies LightState}>
+            Day
+          </NativeSelectOption>
+          <NativeSelectOption value={'night' satisfies LightState}>
+            Night
+          </NativeSelectOption>
         </NativeSelect>
       </CardContent>
     </Card>

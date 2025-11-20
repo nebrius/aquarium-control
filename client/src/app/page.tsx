@@ -1,5 +1,6 @@
 import {
   type CleaningRecordEntry,
+  type Color,
   type ColorSet,
   type Override,
   type Schedule,
@@ -20,6 +21,7 @@ export default async function Home() {
   const override = await get<Override>('/override');
   const cleaningRecords = await get<CleaningRecordEntry[]>('/cleaning');
   const colors = await get<ColorSet>('/color-set');
+  const currentColor = await get<Color>('/current-color');
   return (
     <Tabs className="absolute inset-[0]" defaultValue="lights">
       <header className="container flex items-center justify-center w-full bg-color border-b border-zinc-700 py-2">
@@ -37,6 +39,7 @@ export default async function Home() {
           initialSchedule={schedule}
           initialOverride={override}
           initialColors={colors}
+          initialCurrentColor={currentColor}
         />
       </TabsContent>
       <TabsContent className="grow" value="cleaning">

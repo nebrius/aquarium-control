@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  type Color,
   type ColorSet,
   type Override,
   type Schedule,
@@ -21,9 +22,10 @@ import {
 } from '../ui/Dialog.tsx';
 import { Colors } from './Colors.tsx';
 import { Entry } from './Entry.tsx';
-import { OverrideEntry } from './OverrideEntry.tsx';
+import { OverrideCard } from './OverrideCard.tsx';
 
 type LightsContextValue = {
+  initialCurrentColor: Color;
   runningSchedule: Schedule;
   runningOverride: Override;
   runningColors: ColorSet;
@@ -44,6 +46,7 @@ function useLightsContext() {
 
 function LightsContent() {
   const {
+    initialCurrentColor,
     runningSchedule,
     runningOverride,
     runningColors,
@@ -180,11 +183,12 @@ function LightsContent() {
     <div className="grow h-full flex flex-col">
       <div className="flex flex-col gap-4 overflow-scroll grow basis-0 px-2 py-4">
         <Colors
+          initialColor={initialCurrentColor}
           colors={colors}
           setColors={setColors}
           savedColors={runningColors}
         />
-        <OverrideEntry
+        <OverrideCard
           override={override}
           setOverride={(override) => {
             setOverride(override);
@@ -244,12 +248,14 @@ type LightsPageProps = {
   initialSchedule: Schedule;
   initialOverride: Override;
   initialColors: ColorSet;
+  initialCurrentColor: Color;
 };
 
 export function LightsPage({
   initialSchedule,
   initialOverride,
   initialColors,
+  initialCurrentColor,
 }: LightsPageProps) {
   const [runningSchedule, setRunningSchedule] =
     useState<Schedule>(initialSchedule);
@@ -260,6 +266,7 @@ export function LightsPage({
   return (
     <LightsContext.Provider
       value={{
+        initialCurrentColor,
         runningSchedule,
         runningOverride,
         runningColors,

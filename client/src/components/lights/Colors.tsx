@@ -1,4 +1,4 @@
-import { type ColorSet } from '@aquarium/shared';
+import { type Color as HSVColor, type ColorSet } from '@aquarium/shared';
 import ColorPicker, { Color } from '@rc-component/color-picker';
 import convert from 'color-convert';
 import { ChevronDown } from 'lucide-react';
@@ -95,21 +95,25 @@ function EditColor({ name, savedColor, color, setColor }: EditColorProps) {
 }
 
 type ColorsProps = {
+  initialColor: HSVColor;
   colors: ColorSet;
   savedColors: ColorSet;
   setColors: (colors: ColorSet) => void;
 };
 
-export function Colors({ colors, setColors, savedColors }: ColorsProps) {
-  const [color, setColor] = useState<
-    { h: number; s: number; v: number } | undefined
-  >(undefined);
+export function Colors({
+  initialColor,
+  colors,
+  setColors,
+  savedColors,
+}: ColorsProps) {
+  const [color, setColor] = useState<HSVColor>(initialColor);
 
   useEffect(() => {
     const fetchColor = async () => {
       try {
         const result = await get('/current-color');
-        setColor(result as { h: number; s: number; v: number });
+        setColor(result as HSVColor);
       } catch (error) {
         console.error('Failed to fetch current color:', error);
       }
@@ -129,7 +133,6 @@ export function Colors({ colors, setColors, savedColors }: ColorsProps) {
   }, []);
 
   const displayColor = useMemo(() => {
-    if (!color) return null;
     const [r, g, b] = convert.hsv.rgb([color.h, color.s, color.v]);
     return new Color({ r, g, b });
   }, [color]);
@@ -140,14 +143,10 @@ export function Colors({ colors, setColors, savedColors }: ColorsProps) {
         <CardTitle>Current Color</CardTitle>
       </CardHeader>
       <CardContent>
-        {color && displayColor ? (
-          <div
-            style={{ backgroundColor: displayColor.toHexString() }}
-            className="w-full h-6 rounded-full"
-          ></div>
-        ) : (
-          <div className="text-muted-foreground">Loading...</div>
-        )}
+        <div
+          style={{ backgroundColor: displayColor.toHexString() }}
+          className="w-full h-6 rounded-full"
+        ></div>
       </CardContent>
       <CardHeader>
         <CardTitle>Colors</CardTitle>
