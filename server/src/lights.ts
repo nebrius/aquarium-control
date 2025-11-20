@@ -34,7 +34,6 @@ export function handleColorUpdate(newColorSet: ColorSet) {
   updatedColorSet = newColorSet;
 }
 
-// TODO: This is all wrong. Schedules represent transitions, not states
 function getCurrentScheduledColor() {
   const now = new Date();
   const hour = now.getHours();
@@ -58,7 +57,7 @@ function getCurrentScheduledColor() {
     hour < schedule.dayToNight.hour ||
     (hour === schedule.dayToNight.hour && minute < schedule.dayToNight.minute)
   ) {
-    return { type: 'day', fade: schedule.dayToNight.fade };
+    return { type: 'day', fade: schedule.nightToDay.fade };
   }
 
   if (
@@ -158,7 +157,7 @@ function updateState() {
     }
     transitionTime = !currentScheduleEntry
       ? OVERRIDE_TRANSITION_TIME
-      : nextScheduleEntry.fade;
+      : nextScheduleEntry.fade * 60_000;
     currentScheduleEntry = nextScheduleEntry;
   }
 
@@ -236,7 +235,7 @@ function updateAnimation() {
       currentHue = previousColor.h;
     }
 
-    currentColor = {
+    const nextColor = {
       h: Math.round(currentHue),
       s: Math.round(
         previousColor.s + (targetColor.s - previousColor.s) * progress
@@ -245,8 +244,11 @@ function updateAnimation() {
         previousColor.v + (targetColor.v - previousColor.v) * progress
       ),
     };
-    console.log(currentColor);
-    // TODO: send to strip, but only if we're on the raspberry pi
+    if (!equal(nextColor, currentColor)) {
+      currentColor = nextColor;
+      console.log(currentColor);
+      // TODO: send to strip, but only if we're on the raspberry pi
+    }
   }
 }
 
