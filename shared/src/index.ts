@@ -37,10 +37,10 @@ const ScheduleEntrySchema = Type.Object({
 export type ScheduleEntry = Static<typeof ScheduleEntrySchema>;
 
 export const ScheduleSchema = Type.Object({
-  offToBlue: ScheduleEntrySchema,
-  blueToWhite: ScheduleEntrySchema,
-  whiteToBlue: ScheduleEntrySchema,
-  blueToOff: ScheduleEntrySchema,
+  offToNight: ScheduleEntrySchema,
+  nightToDay: ScheduleEntrySchema,
+  dayToNight: ScheduleEntrySchema,
+  nightToOff: ScheduleEntrySchema,
 });
 
 export type Schedule = Static<typeof ScheduleSchema>;

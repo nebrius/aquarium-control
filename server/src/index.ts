@@ -15,6 +15,7 @@ import {
   setOverride,
   setSchedule,
 } from './db/db.ts';
+import { handleOverrideUpdate, handleScheduleUpdate } from './lights.ts';
 
 const fastify = Fastify({
   logger: {
@@ -69,6 +70,7 @@ fastify.put(
   },
   (request) => {
     setOverride(request.body);
+    handleOverrideUpdate(request.body);
     return { message: 'OK' };
   }
 );
@@ -88,6 +90,7 @@ fastify.put(
   },
   (request) => {
     setSchedule(request.body);
+    handleScheduleUpdate(request.body);
     return { message: 'OK' };
   }
 );

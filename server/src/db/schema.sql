@@ -10,10 +10,10 @@ CREATE TABLE schedule (
 );
 
 INSERT INTO schedule (name, hour, minute, fade, h, s, v) VALUES
-  ('offToBlue', 6, 0, 10, 240, 100, 100),
-  ('blueToWhite', 10, 0, 10, 240, 0, 100),
-  ('whiteToBlue', 18, 0, 10, 240, 100, 100),
-  ('blueToOff', 23, 0, 10, 240, 100, 0);
+  ('offToNight', 6, 0, 10, 240, 100, 100),
+  ('nightToDay', 10, 0, 10, 240, 0, 100),
+  ('dayToNight', 18, 0, 10, 240, 100, 100),
+  ('nightToOff', 23, 0, 10, 240, 100, 0);
 
 CREATE TABLE override (
   id INTEGER PRIMARY KEY CHECK (id = 1),

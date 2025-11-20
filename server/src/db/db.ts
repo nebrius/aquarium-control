@@ -51,10 +51,10 @@ export function getSchedule(): Schedule {
   }[];
 
   const expectedNames = [
-    'offToBlue',
-    'blueToWhite',
-    'whiteToBlue',
-    'blueToOff',
+    'offToNight',
+    'nightToDay',
+    'dayToNight',
+    'nightToOff',
   ] as const;
 
   if (rows.length !== expectedNames.length) {
@@ -72,38 +72,38 @@ export function getSchedule(): Schedule {
   }
 
   const schedule: Schedule = {
-    offToBlue: {
+    offToNight: {
       /* eslint-disable @typescript-eslint/no-non-null-assertion */
-      hour: byName.get('offToBlue')!.hour,
-      minute: byName.get('offToBlue')!.minute,
-      fade: byName.get('offToBlue')!.fade,
-      h: byName.get('offToBlue')!.h,
-      s: byName.get('offToBlue')!.s,
-      v: byName.get('offToBlue')!.v,
+      hour: byName.get('offToNight')!.hour,
+      minute: byName.get('offToNight')!.minute,
+      fade: byName.get('offToNight')!.fade,
+      h: byName.get('offToNight')!.h,
+      s: byName.get('offToNight')!.s,
+      v: byName.get('offToNight')!.v,
     },
-    blueToWhite: {
-      hour: byName.get('blueToWhite')!.hour,
-      minute: byName.get('blueToWhite')!.minute,
-      fade: byName.get('blueToWhite')!.fade,
-      h: byName.get('blueToWhite')!.h,
-      s: byName.get('blueToWhite')!.s,
-      v: byName.get('blueToWhite')!.v,
+    nightToDay: {
+      hour: byName.get('nightToDay')!.hour,
+      minute: byName.get('nightToDay')!.minute,
+      fade: byName.get('nightToDay')!.fade,
+      h: byName.get('nightToDay')!.h,
+      s: byName.get('nightToDay')!.s,
+      v: byName.get('nightToDay')!.v,
     },
-    whiteToBlue: {
-      hour: byName.get('whiteToBlue')!.hour,
-      minute: byName.get('whiteToBlue')!.minute,
-      fade: byName.get('whiteToBlue')!.fade,
-      h: byName.get('whiteToBlue')!.h,
-      s: byName.get('whiteToBlue')!.s,
-      v: byName.get('whiteToBlue')!.v,
+    dayToNight: {
+      hour: byName.get('dayToNight')!.hour,
+      minute: byName.get('dayToNight')!.minute,
+      fade: byName.get('dayToNight')!.fade,
+      h: byName.get('dayToNight')!.h,
+      s: byName.get('dayToNight')!.s,
+      v: byName.get('dayToNight')!.v,
     },
-    blueToOff: {
-      hour: byName.get('blueToOff')!.hour,
-      minute: byName.get('blueToOff')!.minute,
-      fade: byName.get('blueToOff')!.fade,
-      h: byName.get('blueToOff')!.h,
-      s: byName.get('blueToOff')!.s,
-      v: byName.get('blueToOff')!.v,
+    nightToOff: {
+      hour: byName.get('nightToOff')!.hour,
+      minute: byName.get('nightToOff')!.minute,
+      fade: byName.get('nightToOff')!.fade,
+      h: byName.get('nightToOff')!.h,
+      s: byName.get('nightToOff')!.s,
+      v: byName.get('nightToOff')!.v,
     },
     /* eslint-enable @typescript-eslint/no-non-null-assertion */
   };
@@ -117,40 +117,40 @@ export function setSchedule(schedule: Schedule) {
   );
 
   stmt.run(
-    schedule.offToBlue.hour,
-    schedule.offToBlue.minute,
-    schedule.offToBlue.fade,
-    schedule.offToBlue.h,
-    schedule.offToBlue.s,
-    schedule.offToBlue.v,
-    'offToBlue'
+    schedule.offToNight.hour,
+    schedule.offToNight.minute,
+    schedule.offToNight.fade,
+    schedule.offToNight.h,
+    schedule.offToNight.s,
+    schedule.offToNight.v,
+    'offToNight'
   );
   stmt.run(
-    schedule.blueToWhite.hour,
-    schedule.blueToWhite.minute,
-    schedule.blueToWhite.fade,
-    schedule.blueToWhite.h,
-    schedule.blueToWhite.s,
-    schedule.blueToWhite.v,
-    'blueToWhite'
+    schedule.nightToDay.hour,
+    schedule.nightToDay.minute,
+    schedule.nightToDay.fade,
+    schedule.nightToDay.h,
+    schedule.nightToDay.s,
+    schedule.nightToDay.v,
+    'nightToDay'
   );
   stmt.run(
-    schedule.whiteToBlue.hour,
-    schedule.whiteToBlue.minute,
-    schedule.whiteToBlue.fade,
-    schedule.whiteToBlue.h,
-    schedule.whiteToBlue.s,
-    schedule.whiteToBlue.v,
-    'whiteToBlue'
+    schedule.dayToNight.hour,
+    schedule.dayToNight.minute,
+    schedule.dayToNight.fade,
+    schedule.dayToNight.h,
+    schedule.dayToNight.s,
+    schedule.dayToNight.v,
+    'dayToNight'
   );
   stmt.run(
-    schedule.blueToOff.hour,
-    schedule.blueToOff.minute,
-    schedule.blueToOff.fade,
-    schedule.blueToOff.h,
-    schedule.blueToOff.s,
-    schedule.blueToOff.v,
-    'blueToOff'
+    schedule.nightToOff.hour,
+    schedule.nightToOff.minute,
+    schedule.nightToOff.fade,
+    schedule.nightToOff.h,
+    schedule.nightToOff.s,
+    schedule.nightToOff.v,
+    'nightToOff'
   );
 }
 

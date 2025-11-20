@@ -45,17 +45,17 @@ function LightsContent() {
     setRunningSchedule,
     setRunningOverride,
   } = useLightsContext();
-  const [offToBlue, setOffToBlue] = useState<ScheduleEntry>(
-    runningSchedule.offToBlue
+  const [offToNight, setOffToNight] = useState<ScheduleEntry>(
+    runningSchedule.offToNight
   );
-  const [blueToWhite, setBlueToWhite] = useState<ScheduleEntry>(
-    runningSchedule.blueToWhite
+  const [nightToDay, setNightToDay] = useState<ScheduleEntry>(
+    runningSchedule.nightToDay
   );
-  const [whiteToBlue, setWhiteToBlue] = useState<ScheduleEntry>(
-    runningSchedule.whiteToBlue
+  const [dayToNight, setDayToNight] = useState<ScheduleEntry>(
+    runningSchedule.dayToNight
   );
-  const [blueToOff, setBlueToOff] = useState<ScheduleEntry>(
-    runningSchedule.blueToOff
+  const [nightToOff, setNightToOff] = useState<ScheduleEntry>(
+    runningSchedule.nightToOff
   );
   const [override, setOverride] = useState<Override>({
     enabled: runningOverride.enabled,
@@ -65,18 +65,18 @@ function LightsContent() {
   const [errorMessage, setErrorMessage] = useState('');
 
   const hasUnsavedChanges =
-    !equal(offToBlue, runningSchedule.offToBlue) ||
-    !equal(blueToWhite, runningSchedule.blueToWhite) ||
-    !equal(whiteToBlue, runningSchedule.whiteToBlue) ||
-    !equal(blueToOff, runningSchedule.blueToOff) ||
+    !equal(offToNight, runningSchedule.offToNight) ||
+    !equal(nightToDay, runningSchedule.nightToDay) ||
+    !equal(dayToNight, runningSchedule.dayToNight) ||
+    !equal(nightToOff, runningSchedule.nightToOff) ||
     !equal(override, runningOverride);
 
   const onSave = useCallback(() => {
     const scheduleChanged =
-      !equal(offToBlue, runningSchedule.offToBlue) ||
-      !equal(blueToWhite, runningSchedule.blueToWhite) ||
-      !equal(whiteToBlue, runningSchedule.whiteToBlue) ||
-      !equal(blueToOff, runningSchedule.blueToOff);
+      !equal(offToNight, runningSchedule.offToNight) ||
+      !equal(nightToDay, runningSchedule.nightToDay) ||
+      !equal(dayToNight, runningSchedule.dayToNight) ||
+      !equal(nightToOff, runningSchedule.nightToOff);
 
     const overrideChanged = !equal(override, runningOverride);
 
@@ -90,10 +90,10 @@ function LightsContent() {
           const response = await put({
             endpoint: '/schedule',
             body: {
-              offToBlue,
-              blueToWhite,
-              whiteToBlue,
-              blueToOff,
+              offToNight,
+              nightToDay,
+              dayToNight,
+              nightToOff,
             },
           });
 
@@ -104,10 +104,10 @@ function LightsContent() {
           }
 
           setRunningSchedule({
-            offToBlue,
-            blueToWhite,
-            whiteToBlue,
-            blueToOff,
+            offToNight,
+            nightToDay,
+            dayToNight,
+            nightToOff,
           });
         }
 
@@ -135,18 +135,18 @@ function LightsContent() {
       }
     })();
   }, [
-    blueToOff,
-    blueToWhite,
-    offToBlue,
+    dayToNight,
+    nightToDay,
+    nightToOff,
+    offToNight,
     override,
     runningOverride,
-    runningSchedule.blueToOff,
-    runningSchedule.blueToWhite,
-    runningSchedule.offToBlue,
-    runningSchedule.whiteToBlue,
+    runningSchedule.dayToNight,
+    runningSchedule.nightToDay,
+    runningSchedule.nightToOff,
+    runningSchedule.offToNight,
     setRunningOverride,
     setRunningSchedule,
-    whiteToBlue,
   ]);
 
   return (
@@ -160,34 +160,34 @@ function LightsContent() {
         />
         <Entry
           name="Off → Night"
-          schedule={offToBlue}
-          savedSchedule={runningSchedule.offToBlue}
+          schedule={offToNight}
+          savedSchedule={runningSchedule.offToNight}
           setSchedule={(schedule) => {
-            setOffToBlue(schedule);
+            setOffToNight(schedule);
           }}
         />
         <Entry
           name="Night → Day"
-          schedule={blueToWhite}
-          savedSchedule={runningSchedule.blueToWhite}
+          schedule={nightToDay}
+          savedSchedule={runningSchedule.nightToDay}
           setSchedule={(schedule) => {
-            setBlueToWhite(schedule);
+            setNightToDay(schedule);
           }}
         />
         <Entry
           name="Day → Night"
-          schedule={whiteToBlue}
-          savedSchedule={runningSchedule.whiteToBlue}
+          schedule={dayToNight}
+          savedSchedule={runningSchedule.dayToNight}
           setSchedule={(schedule) => {
-            setWhiteToBlue(schedule);
+            setDayToNight(schedule);
           }}
         />
         <Entry
           name="Night → Off"
-          schedule={blueToOff}
-          savedSchedule={runningSchedule.blueToOff}
+          schedule={nightToOff}
+          savedSchedule={runningSchedule.nightToOff}
           setSchedule={(schedule) => {
-            setBlueToOff(schedule);
+            setNightToOff(schedule);
           }}
           hideColorPicker
         />
