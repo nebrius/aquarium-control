@@ -8,7 +8,7 @@ import equal from 'fast-deep-equal';
 
 import { getColorSet, getOverride, getSchedule } from './db/db.ts';
 
-const UPDATE_INTERVAL = 1_000;
+const UPDATE_INTERVAL = 100;
 const OVERRIDE_TRANSITION_TIME = 5_000;
 
 const OFF_COLOR: Color = {
@@ -72,8 +72,8 @@ function getCurrentScheduledColor() {
 }
 
 // Schedule state
-const currentOverride = override.enabled ? override : undefined;
-const currentScheduleEntry:
+let currentOverride: Override | undefined = undefined;
+let currentScheduleEntry:
   | ReturnType<typeof getCurrentScheduledColor>
   | undefined = undefined;
 
@@ -126,6 +126,7 @@ function updateState() {
     if (equal(override, currentOverride)) {
       return;
     }
+    currentOverride = override;
     nextRawColor =
       override.state === 'off' ? OFF_COLOR : colorSet[override.state];
     transitionTime = OVERRIDE_TRANSITION_TIME;
@@ -158,6 +159,7 @@ function updateState() {
     transitionTime = !currentScheduleEntry
       ? OVERRIDE_TRANSITION_TIME
       : nextScheduleEntry.fade;
+    currentScheduleEntry = nextScheduleEntry;
   }
 
   if (
@@ -184,6 +186,7 @@ function updateState() {
     };
     targetColor = nextRawColor;
   } else if (nextRawColor.v === 0) {
+    previousColor = currentColor;
     // If we're going to off, override the target color with the previous color
     // except for it's value so we don't mix colors on the fade (e.g. day -> off
     // -> night would do a weird red-> blue fade in)
@@ -193,6 +196,7 @@ function updateState() {
       v: 0,
     };
   } else {
+    previousColor = currentColor;
     // Otherwise, we do a standard fade between colors
     targetColor = nextRawColor;
   }
@@ -209,10 +213,17 @@ function updateAnimation() {
     const progress =
       (now - transitionStartTime) / (transitionEndTime - transitionStartTime);
     currentColor = {
-      h: previousColor.h + (targetColor.h - previousColor.h) * progress,
-      s: previousColor.s + (targetColor.s - previousColor.s) * progress,
-      v: previousColor.v + (targetColor.v - previousColor.v) * progress,
+      h: Math.round(
+        previousColor.h + (targetColor.h - previousColor.h) * progress
+      ),
+      s: Math.round(
+        previousColor.s + (targetColor.s - previousColor.s) * progress
+      ),
+      v: Math.round(
+        previousColor.v + (targetColor.v - previousColor.v) * progress
+      ),
     };
+    console.log(currentColor);
   }
   // TODO: send to strip, but only if we're on the raspberry pi
 }

@@ -182,17 +182,17 @@ function LightsContent() {
   return (
     <div className="grow h-full flex flex-col">
       <div className="flex flex-col gap-4 overflow-scroll grow basis-0 px-2 py-4">
-        <Colors
-          initialColor={initialCurrentColor}
-          colors={colors}
-          setColors={setColors}
-          savedColors={runningColors}
-        />
         <OverrideCard
           override={override}
           setOverride={(override) => {
             setOverride(override);
           }}
+        />
+        <Colors
+          initialColor={initialCurrentColor}
+          colors={colors}
+          setColors={setColors}
+          savedColors={runningColors}
         />
         <Entry
           name="Off → Night"

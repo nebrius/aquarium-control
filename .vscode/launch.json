@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch Program",
+      "name": "Server",
       "program": "${workspaceFolder}/server/src/index.ts",
       "request": "launch",
       "runtimeArgs": ["--experimental-strip-types"],
