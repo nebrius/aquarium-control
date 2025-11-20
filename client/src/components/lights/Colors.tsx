@@ -138,37 +138,41 @@ export function Colors({
   }, [color]);
 
   return (
-    <Card className="w-full max-w-sm mb-4">
-      <CardHeader>
-        <CardTitle>Current Color</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div
-          style={{ backgroundColor: displayColor.toHexString() }}
-          className="w-full h-6 rounded-full"
-        ></div>
-      </CardContent>
-      <CardHeader>
-        <CardTitle>Colors</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <EditColor
-          name="Day"
-          color={colors.day}
-          savedColor={savedColors.day}
-          setColor={(color) => {
-            setColors({ ...colors, day: color });
-          }}
-        />
-        <EditColor
-          name="Night"
-          color={colors.night}
-          savedColor={savedColors.night}
-          setColor={(color) => {
-            setColors({ ...colors, night: color });
-          }}
-        />
-      </CardContent>
-    </Card>
+    <>
+      <Card className="w-full max-w-sm mb-4">
+        <CardHeader>
+          <CardTitle>Current Color</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div
+            style={{ backgroundColor: displayColor.toHexString() }}
+            className="w-full h-6 rounded-full"
+          ></div>
+        </CardContent>
+      </Card>
+      <Card className="w-full max-w-sm mb-4">
+        <CardHeader>
+          <CardTitle>Color Definitions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <EditColor
+            name="Day"
+            color={colors.day}
+            savedColor={savedColors.day}
+            setColor={(color) => {
+              setColors({ ...colors, day: color });
+            }}
+          />
+          <EditColor
+            name="Night"
+            color={colors.night}
+            savedColor={savedColors.night}
+            setColor={(color) => {
+              setColors({ ...colors, night: color });
+            }}
+          />
+        </CardContent>
+      </Card>
+    </>
   );
 }

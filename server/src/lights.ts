@@ -212,10 +212,32 @@ function updateAnimation() {
   } else {
     const progress =
       (now - transitionStartTime) / (transitionEndTime - transitionStartTime);
+
+    // Always wrap through 360:
+    // If previous < target: go backwards (decrease through 0)
+    // If previous > target: go forwards (increase through 360)
+    let currentHue: number;
+    if (previousColor.h < targetColor.h) {
+      // Go backwards: previous -> 0 -> 360 -> target
+      const distance = previousColor.h + (360 - targetColor.h);
+      currentHue = previousColor.h - distance * progress;
+      if (currentHue < 0) {
+        currentHue += 360;
+      }
+    } else if (previousColor.h > targetColor.h) {
+      // Go forwards: previous -> 360 -> 0 -> target
+      const distance = 360 - previousColor.h + targetColor.h;
+      currentHue = previousColor.h + distance * progress;
+      if (currentHue >= 360) {
+        currentHue -= 360;
+      }
+    } else {
+      // Same hue, no transition needed
+      currentHue = previousColor.h;
+    }
+
     currentColor = {
-      h: Math.round(
-        previousColor.h + (targetColor.h - previousColor.h) * progress
-      ),
+      h: Math.round(currentHue),
       s: Math.round(
         previousColor.s + (targetColor.s - previousColor.s) * progress
       ),
@@ -224,8 +246,8 @@ function updateAnimation() {
       ),
     };
     console.log(currentColor);
+    // TODO: send to strip, but only if we're on the raspberry pi
   }
-  // TODO: send to strip, but only if we're on the raspberry pi
 }
 
 function loop() {
