@@ -1,6 +1,8 @@
 import { getDirname } from 'cross-dirname';
 import { defineConfig } from 'eslint/config';
 import { all } from 'eslint-plugin-fast-import';
+import reactPlugin from 'eslint-plugin-react';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 import commonConfig from '../eslint.config.common.mjs';
 
@@ -25,4 +27,7 @@ export default defineConfig([
       'fast-import/no-unused-exports': 'off',
     },
   },
+  reactPlugin.configs.flat.recommended,
+  reactPlugin.configs.flat['jsx-runtime'],
+  reactHooks.configs.flat.recommended,
 ]);

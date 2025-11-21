@@ -174,6 +174,7 @@ function LightsContent() {
     setRunningOverride,
     setRunningSchedule,
     setRunningColors,
+    runningColors,
   ]);
 
   return (
