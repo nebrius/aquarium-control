@@ -1,6 +1,7 @@
 import {
   type Color,
   type ColorSet,
+  type LightState,
   type Override,
   type Schedule,
 } from '@aquarium/shared';
@@ -19,62 +20,9 @@ const OFF_COLOR: Color = {
 
 let schedule = getSchedule();
 let override = getOverride();
-let colorSet = getColorSet();
-let updatedColorSet: ColorSet | undefined = undefined;
+let colorSet = { ...getColorSet(), off: OFF_COLOR };
 
-export function handleScheduleUpdate(newSchedule: Schedule) {
-  schedule = newSchedule;
-}
-
-export function handleOverrideUpdate(newOverride: Override) {
-  override = newOverride;
-}
-
-export function handleColorUpdate(newColorSet: ColorSet) {
-  updatedColorSet = newColorSet;
-}
-
-function getCurrentScheduledColor() {
-  const now = new Date();
-  const hour = now.getHours();
-  const minute = now.getMinutes();
-
-  if (
-    hour < schedule.offToNight.hour ||
-    (hour === schedule.offToNight.hour && minute < schedule.offToNight.minute)
-  ) {
-    return { type: 'off', fade: schedule.nightToOff.fade };
-  }
-
-  if (
-    hour < schedule.nightToDay.hour ||
-    (hour === schedule.nightToDay.hour && minute < schedule.nightToDay.minute)
-  ) {
-    return { type: 'night', fade: schedule.offToNight.fade };
-  }
-
-  if (
-    hour < schedule.dayToNight.hour ||
-    (hour === schedule.dayToNight.hour && minute < schedule.dayToNight.minute)
-  ) {
-    return { type: 'day', fade: schedule.nightToDay.fade };
-  }
-
-  if (
-    hour < schedule.nightToOff.hour ||
-    (hour === schedule.nightToOff.hour && minute < schedule.nightToOff.minute)
-  ) {
-    return { type: 'night', fade: schedule.dayToNight.fade };
-  }
-
-  return { type: 'off', fade: schedule.nightToOff.fade };
-}
-
-// Schedule state
-let currentOverride: Override | undefined = undefined;
-let currentScheduleEntry:
-  | ReturnType<typeof getCurrentScheduledColor>
-  | undefined = undefined;
+/* ---- Animation ---- */
 
 // Animation state
 let previousColor: Color = OFF_COLOR;
@@ -82,132 +30,59 @@ let currentColor: Color = OFF_COLOR;
 let targetColor: Color = OFF_COLOR;
 let transitionStartTime: number = 0;
 let transitionEndTime: number = 0;
+let scheduleTimeout: NodeJS.Timeout | undefined;
 
-export function getCurrentColor() {
-  return currentColor;
-}
-
-function updateState() {
-  const nextScheduleEntry = getCurrentScheduledColor();
-
-  const previousRawColor = currentColor;
-  let nextRawColor: Color | undefined = undefined;
-  let transitionTime: number | undefined = undefined;
-
-  // First check if colors have changed and short circuit. If anything else
-  // changed at the same time, it'll be picked up on the next tick
-  if (updatedColorSet) {
-    // Figure out what type of color we were previously on
-    const previousColorSetType = equal(currentColor, colorSet.day)
-      ? 'day'
-      : equal(currentColor, colorSet.night)
-        ? 'night'
-        : 'off';
-
-    // Get the next version of that color
-    nextRawColor =
-      previousColorSetType === 'off'
-        ? OFF_COLOR
-        : updatedColorSet[previousColorSetType];
-
-    // Mark the color as updated
-    colorSet = updatedColorSet;
-    updatedColorSet = undefined;
-
-    // Animation like this was an override, since we want to see it quickly
-    transitionTime = OVERRIDE_TRANSITION_TIME;
-  }
-
-  // Then check if the override has been enabled or the previously enabled
-  // color has changed, which requires a transition
-  else if (override.enabled) {
-    // If we're the same override state as before, do nothing
-    if (equal(override, currentOverride)) {
-      return;
-    }
-    currentOverride = override;
-    nextRawColor =
-      override.state === 'off' ? OFF_COLOR : colorSet[override.state];
-    transitionTime = OVERRIDE_TRANSITION_TIME;
-  }
-
-  // Next, check if:
-  // 1. we previously were in override mode and are transitioning
-  // to schedule mode
-  // 2. this is the first time we're running
-  // 3. check if the schedule has changed
-  else if (
-    currentOverride ||
-    !currentScheduleEntry ||
-    !equal(currentScheduleEntry, nextScheduleEntry)
-  ) {
-    switch (nextScheduleEntry.type) {
-      case 'off': {
-        nextRawColor = OFF_COLOR;
-        break;
-      }
-      case 'day': {
-        nextRawColor = colorSet.day;
-        break;
-      }
-      case 'night': {
-        nextRawColor = colorSet.night;
-        break;
-      }
-    }
-    transitionTime = !currentScheduleEntry
-      ? OVERRIDE_TRANSITION_TIME
-      : nextScheduleEntry.fade * 60_000;
-    currentScheduleEntry = nextScheduleEntry;
-  }
-
-  if (
-    // Bail if there was no color or transition time
-    !nextRawColor ||
-    !transitionTime ||
-    // Bail of the colors are the same
-    equal(nextRawColor, currentColor) ||
-    // Bail if the color is off, regardless of the color we faded from
-    (nextRawColor.v === 0 && currentColor.v === 0)
-  ) {
-    return;
-  }
-
+// This function computes the target color from the previous color, taking into
+// account when lights are off.
+function setTargetColor(nextColor: Color) {
   // Compute the actual next color
-  if (previousRawColor.v === 0) {
+  if (currentColor.v === 0) {
     // If we're currently off, override the previous color with the next color
-    // except for it's value so we don't mix colors on the fade (e.g. day -> off
-    // -> night would do a weird red-> blue fade in)
+    // except for it's value so we don't mix colors on the fade in. For example,
+    // if we do the sequence day -> off -> night, we'd get a weird black -> red
+    // -> blue fade in, but we want just a black -> blue -> blue fade in
     previousColor = {
-      h: nextRawColor.h,
-      s: nextRawColor.s,
+      h: nextColor.h,
+      s: nextColor.s,
       v: 0,
     };
-    targetColor = nextRawColor;
-  } else if (nextRawColor.v === 0) {
+    targetColor = nextColor;
+  } else if (nextColor.v === 0) {
     previousColor = currentColor;
     // If we're going to off, override the target color with the previous color
-    // except for it's value so we don't mix colors on the fade (e.g. day -> off
-    // -> night would do a weird red-> blue fade in)
+    // except for it's value so we don't mix colors on the fade out, similar to
+    // the fade in case
     targetColor = {
       h: previousColor.h,
       s: previousColor.s,
       v: 0,
     };
   } else {
+    // Otherwise, we do a standard transition between colors
     previousColor = currentColor;
-    // Otherwise, we do a standard fade between colors
-    targetColor = nextRawColor;
+    targetColor = nextColor;
   }
-
-  transitionStartTime = Date.now();
-  transitionEndTime = transitionStartTime + transitionTime;
 }
 
-function updateAnimation() {
+// This sets the current color, aka updating the actual color of the LED strip
+function setCurrentColor(color: Color) {
+  currentColor = color;
+
+  // TODO: send to strip, but only if we're on the raspberry pi
+}
+
+export function getCurrentColor() {
+  return currentColor;
+}
+
+function loop() {
   const now = Date.now();
   if (now > transitionEndTime) {
-    currentColor = targetColor;
+    // Handle edge case where we don't _quite_ reach the target color by the end
+    // of the transition.
+    if (!equal(currentColor, targetColor)) {
+      setCurrentColor(targetColor);
+    }
   } else {
     const progress =
       (now - transitionStartTime) / (transitionEndTime - transitionStartTime);
@@ -244,16 +119,190 @@ function updateAnimation() {
         previousColor.v + (targetColor.v - previousColor.v) * progress
       ),
     };
+
+    // Make sure there was enough of a change in color that it's worth updating
+    // everyone. Given the slow transition times, we'll often end up with the
+    // same color value each tick several times in a row
     if (!equal(nextColor, currentColor)) {
-      currentColor = nextColor;
-      console.log(currentColor);
-      // TODO: send to strip, but only if we're on the raspberry pi
+      setCurrentColor(nextColor);
     }
   }
 }
 
-function loop() {
-  updateState();
-  updateAnimation();
+/* ---- State Change ---- */
+
+// These handlers take in the different types of updates and makes the change
+export function handleScheduleUpdate(newSchedule: Schedule) {
+  schedule = newSchedule;
+  handleChange();
 }
+
+export function handleOverrideUpdate(newOverride: Override) {
+  override = newOverride;
+  handleChange();
+}
+
+export function handleColorUpdate(newColorSet: ColorSet) {
+  colorSet = { ...newColorSet, off: OFF_COLOR };
+  handleChange();
+}
+
+function handleChange() {
+  // Stop the currently running schedule, if there is one running. We'll restart
+  // the schedule if we still need to be in scheduled mode in a later step
+  clearTimeout(scheduleTimeout);
+
+  // If we're in override mode, set the color to the override color
+  if (override.enabled) {
+    setTargetColor(colorSet[override.state]);
+    transitionStartTime = Date.now();
+    transitionEndTime = transitionStartTime + OVERRIDE_TRANSITION_TIME;
+    return;
+  }
+
+  // Otherwise, kick start the scheduler with a fast transition
+  scheduleNextTransition({ currentTransitionTime: OVERRIDE_TRANSITION_TIME });
+}
+
+/* ---- Scheduling ---- */
+
+function getScheduledColors():
+  | {
+      currentLightState: LightState;
+      nextTransitionDuration: number;
+      nextStartTime: { hour: number; minute: number };
+    }
+  | undefined {
+  const now = new Date();
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+
+  if (
+    hour < schedule.offToNight.hour ||
+    (hour === schedule.offToNight.hour && minute < schedule.offToNight.minute)
+  ) {
+    return {
+      currentLightState: 'off',
+      nextTransitionDuration: schedule.offToNight.fade,
+      nextStartTime: {
+        hour: schedule.offToNight.hour,
+        minute: schedule.offToNight.minute,
+      },
+    };
+  }
+
+  if (
+    hour < schedule.nightToDay.hour ||
+    (hour === schedule.nightToDay.hour && minute < schedule.nightToDay.minute)
+  ) {
+    return {
+      currentLightState: 'night',
+      nextTransitionDuration: schedule.nightToDay.fade,
+      nextStartTime: {
+        hour: schedule.nightToDay.hour,
+        minute: schedule.nightToDay.minute,
+      },
+    };
+  }
+
+  if (
+    hour < schedule.dayToNight.hour ||
+    (hour === schedule.dayToNight.hour && minute < schedule.dayToNight.minute)
+  ) {
+    return {
+      currentLightState: 'day',
+      nextTransitionDuration: schedule.dayToNight.fade,
+      nextStartTime: {
+        hour: schedule.dayToNight.hour,
+        minute: schedule.dayToNight.minute,
+      },
+    };
+  }
+
+  if (
+    hour < schedule.nightToOff.hour ||
+    (hour === schedule.nightToOff.hour && minute < schedule.nightToOff.minute)
+  ) {
+    return {
+      currentLightState: 'night',
+      nextTransitionDuration: schedule.nightToOff.fade,
+      nextStartTime: {
+        hour: schedule.nightToOff.hour,
+        minute: schedule.nightToOff.minute,
+      },
+    };
+  }
+
+  return undefined;
+}
+
+function scheduleNextTransition({
+  currentTransitionTime,
+}: {
+  currentTransitionTime: number;
+}) {
+  // Get the current schedule
+  const currentScheduledColors = getScheduledColors();
+  const now = new Date();
+
+  // Get the target color.
+  const targetLightState = currentScheduledColors
+    ? currentScheduledColors.currentLightState
+    : 'off';
+
+  // Get the target transition time.
+  const nextTransitionTime = currentScheduledColors
+    ? currentScheduledColors.nextTransitionDuration
+    : // If we're in the off->midnight transition, then we _most likely_ are
+      // going from off->off at this time. I _think_ this is guaranteed to be
+      // true, but just in case let's add a fallback to the override transition
+      // time so we don't flash lights
+      OVERRIDE_TRANSITION_TIME;
+
+  // Get the start of the next transition
+  const nextStartTime = currentScheduledColors
+    ? new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        currentScheduledColors.nextStartTime.hour,
+        currentScheduledColors.nextStartTime.minute + 1, // Add 1 minute to avoid edge conditions
+        0, // second
+        0 // millisecond
+      )
+    : // If we're in the off -> midnight transition, then we just schedule for
+      // 00:01 the following day where we'll then schedule the first transition
+      // of the day (off -> night)
+      new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 1,
+        0, // hour
+        1, // Add 1 minute to avoid edge conditions
+        0, // second
+        0 // millisecond
+      );
+
+  // Set the target color and transition time
+  console.log(`Setting target color to ${targetLightState}`);
+  setTargetColor(colorSet[targetLightState]);
+  transitionStartTime = now.getTime();
+  transitionEndTime = transitionStartTime + currentTransitionTime;
+
+  // Schedule the next transition
+  scheduleTimeout = setTimeout(() => {
+    scheduleNextTransition({ currentTransitionTime: nextTransitionTime });
+  }, nextStartTime.getTime() - now.getTime());
+
+  console.log(
+    `Scheduled next transition at ${nextStartTime.toLocaleTimeString()}`
+  );
+}
+
+/* ---- Lighting startup ---- */
+
+// Set up initial state
+handleChange();
+
+// Start the animation loop
 setInterval(loop, UPDATE_INTERVAL);
