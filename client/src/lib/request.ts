@@ -1,4 +1,5 @@
-const BASE_URL = 'http://localhost:3001';
+export const HOST = 'localhost:3001';
+const BASE_URL = `http://${HOST}`;
 
 export async function get<T>(endpoint: string) {
   const response = await fetch(`${BASE_URL}${endpoint}`, {

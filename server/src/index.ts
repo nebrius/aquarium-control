@@ -6,7 +6,9 @@ import {
 } from '@aquarium/shared';
 import cors from '@fastify/cors';
 import { type TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
+import websocket from '@fastify/websocket';
 import Fastify from 'fastify';
+import { type WebSocket } from 'ws';
 
 import {
   addCleaningRecord,
@@ -23,6 +25,7 @@ import {
   handleColorUpdate,
   handleOverrideUpdate,
   handleScheduleUpdate,
+  onLightColorChanged,
 } from './lights.ts';
 
 const fastify = Fastify({
@@ -58,6 +61,9 @@ await fastify.register(cors, {
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 });
+
+// Configure WebSocket
+await fastify.register(websocket);
 
 // GET /cleaning - Get all cleaning records
 fastify.get('/cleaning', () => {
@@ -138,9 +144,27 @@ fastify.put(
   }
 );
 
-// GET /currentColor - Get the current color
-fastify.get('/current-color', () => {
-  return getCurrentColor();
+// WebSocket endpoint for real-time color updates
+const clients = new Set<WebSocket>();
+
+fastify.get('/current-color', { websocket: true }, (socket) => {
+  clients.add(socket);
+  socket.on('close', () => {
+    clients.delete(socket);
+  });
+
+  // Send the initial color to kick start their display
+  socket.send(JSON.stringify(getCurrentColor()));
+});
+
+// Subscribe to color changes and broadcast to all connected clients
+onLightColorChanged((color) => {
+  const message = JSON.stringify(color);
+  clients.forEach((client) => {
+    if (client.readyState === 1) {
+      client.send(message);
+    }
+  });
 });
 
 // Run the server!

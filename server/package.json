@@ -13,6 +13,7 @@
     "@eslint/js": "^9.39.1",
     "@fastify/cors": "^11.1.0",
     "@fastify/type-provider-typebox": "^6.1.0",
+    "@fastify/websocket": "^11.2.0",
     "better-sqlite3": "^12.4.1",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
@@ -29,6 +30,7 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@types/ws": "^8.18.1",
     "cross-dirname": "^0.1.0",
     "typescript-eslint": "^8.47.0"
   }

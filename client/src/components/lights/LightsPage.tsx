@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  type Color,
   type ColorSet,
   type Override,
   type Schedule,
@@ -25,7 +24,6 @@ import { Entry } from './Entry.tsx';
 import { OverrideCard } from './OverrideCard.tsx';
 
 type LightsContextValue = {
-  initialCurrentColor: Color;
   runningSchedule: Schedule;
   runningOverride: Override;
   runningColors: ColorSet;
@@ -46,7 +44,6 @@ function useLightsContext() {
 
 function LightsContent() {
   const {
-    initialCurrentColor,
     runningSchedule,
     runningOverride,
     runningColors,
@@ -189,7 +186,6 @@ function LightsContent() {
           }}
         />
         <Colors
-          initialColor={initialCurrentColor}
           colors={colors}
           setColors={setColors}
           savedColors={runningColors}
@@ -248,14 +244,12 @@ type LightsPageProps = {
   initialSchedule: Schedule;
   initialOverride: Override;
   initialColors: ColorSet;
-  initialCurrentColor: Color;
 };
 
 export function LightsPage({
   initialSchedule,
   initialOverride,
   initialColors,
-  initialCurrentColor,
 }: LightsPageProps) {
   const [runningSchedule, setRunningSchedule] =
     useState<Schedule>(initialSchedule);
@@ -266,7 +260,6 @@ export function LightsPage({
   return (
     <LightsContext.Provider
       value={{
-        initialCurrentColor,
         runningSchedule,
         runningOverride,
         runningColors,

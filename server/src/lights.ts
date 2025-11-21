@@ -64,11 +64,21 @@ function setTargetColor(nextColor: Color) {
   }
 }
 
+const lightColorChangedCallbacks: ((color: Color) => void)[] = [];
+export function onLightColorChanged(cb: (color: Color) => void) {
+  lightColorChangedCallbacks.push(cb);
+}
+
 // This sets the current color, aka updating the actual color of the LED strip
 function setCurrentColor(color: Color) {
   currentColor = color;
 
   // TODO: send to strip, but only if we're on the raspberry pi
+
+  // Notify listeners
+  lightColorChangedCallbacks.forEach((cb) => {
+    cb(color);
+  });
 }
 
 export function getCurrentColor() {

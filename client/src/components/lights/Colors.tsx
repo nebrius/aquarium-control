@@ -4,7 +4,7 @@ import convert from 'color-convert';
 import { ChevronDown } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { get } from '@/lib/request.ts';
+import { HOST } from '@/lib/request.ts';
 
 import { Button } from '../ui/Button.tsx';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card.tsx';
@@ -95,40 +95,43 @@ function EditColor({ name, savedColor, color, setColor }: EditColorProps) {
 }
 
 type ColorsProps = {
-  initialColor: HSVColor;
   colors: ColorSet;
   savedColors: ColorSet;
   setColors: (colors: ColorSet) => void;
 };
 
-export function Colors({
-  initialColor,
-  colors,
-  setColors,
-  savedColors,
-}: ColorsProps) {
-  const [color, setColor] = useState<HSVColor>(initialColor);
+export function Colors({ colors, setColors, savedColors }: ColorsProps) {
+  // Initialize to the card background color, so we have something to show. It
+  // won't be there long before the web socket overwrites it
+  const [color, setColor] = useState<HSVColor>({ h: 233, s: 13, v: 11 });
 
   useEffect(() => {
-    const fetchColor = async () => {
+    // Connect to WebSocket for real-time color updates
+    const ws = new WebSocket(`ws://${HOST}/current-color`);
+
+    ws.onopen = () => {
+      console.log('WebSocket connected');
+    };
+
+    ws.onmessage = (event) => {
       try {
-        const result = await get('/current-color');
-        setColor(result as HSVColor);
+        const colorData = JSON.parse(event.data as string) as HSVColor;
+        setColor(colorData);
       } catch (error) {
-        console.error('Failed to fetch current color:', error);
+        console.error('Failed to parse color data:', error);
       }
     };
 
-    // Fetch immediately
-    void fetchColor();
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
 
-    // Then poll every second
-    const interval = setInterval(() => {
-      void fetchColor();
-    }, 1000);
+    ws.onclose = () => {
+      console.log('WebSocket disconnected');
+    };
 
     return () => {
-      clearInterval(interval);
+      ws.close();
     };
   }, []);
 
