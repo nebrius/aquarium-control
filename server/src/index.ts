@@ -27,31 +27,10 @@ import {
   handleScheduleUpdate,
   onLightColorChanged,
 } from './lights.ts';
+import { logger } from './logging.ts';
 
 const fastify = Fastify({
-  logger: {
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        translateTime: 'HH:MM:ss Z',
-        ignore: 'pid,hostname',
-      },
-    },
-    level: 'info',
-    serializers: {
-      req(request) {
-        return {
-          method: request.method,
-          url: request.url,
-        };
-      },
-      res(reply) {
-        return {
-          statusCode: reply.statusCode,
-        };
-      },
-    },
-  },
+  loggerInstance: logger,
   disableRequestLogging: true,
 }).withTypeProvider<TypeBoxTypeProvider>();
 
@@ -148,8 +127,10 @@ fastify.put(
 const clients = new Set<WebSocket>();
 
 fastify.get('/current-color', { websocket: true }, (socket) => {
+  fastify.log.info(`Client connected`);
   clients.add(socket);
   socket.on('close', () => {
+    fastify.log.info(`Client disconnected`);
     clients.delete(socket);
   });
 

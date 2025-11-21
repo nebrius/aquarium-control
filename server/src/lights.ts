@@ -8,6 +8,7 @@ import {
 import equal from 'fast-deep-equal';
 
 import { getColorSet, getOverride, getSchedule } from './db/db.ts';
+import { logger } from './logging.ts';
 
 const UPDATE_INTERVAL = 100;
 const OVERRIDE_TRANSITION_TIME = 5_000;
@@ -34,7 +35,10 @@ let scheduleTimeout: NodeJS.Timeout | undefined;
 
 // This function computes the target color from the previous color, taking into
 // account when lights are off.
-function setTargetColor(nextColor: Color) {
+function setTargetColor(nextLightState: LightState) {
+  logger.debug(`Setting target color to ${nextLightState}`);
+  const nextColor = colorSet[nextLightState];
+
   // Compute the actual next color
   if (currentColor.v === 0) {
     // If we're currently off, override the previous color with the next color
@@ -62,6 +66,14 @@ function setTargetColor(nextColor: Color) {
     previousColor = currentColor;
     targetColor = nextColor;
   }
+}
+
+function setTransitionTimes(startTime: number, duration: number) {
+  logger.debug(
+    `Setting transition times: start=${new Date(startTime).toLocaleTimeString()}, duration=${duration}ms`
+  );
+  transitionStartTime = startTime;
+  transitionEndTime = startTime + duration;
 }
 
 const lightColorChangedCallbacks: ((color: Color) => void)[] = [];
@@ -158,15 +170,15 @@ export function handleColorUpdate(newColorSet: ColorSet) {
 }
 
 function handleChange() {
+  logger.debug(`Handling state change`);
   // Stop the currently running schedule, if there is one running. We'll restart
   // the schedule if we still need to be in scheduled mode in a later step
   clearTimeout(scheduleTimeout);
 
   // If we're in override mode, set the color to the override color
   if (override.enabled) {
-    setTargetColor(colorSet[override.state]);
-    transitionStartTime = Date.now();
-    transitionEndTime = transitionStartTime + OVERRIDE_TRANSITION_TIME;
+    setTargetColor(override.state);
+    setTransitionTimes(Date.now(), OVERRIDE_TRANSITION_TIME);
     return;
   }
 
@@ -251,6 +263,8 @@ function scheduleNextTransition({
 }: {
   currentTransitionTime: number;
 }) {
+  logger.debug(`Scheduling next transition`);
+
   // Get the current schedule
   const currentScheduledColors = getScheduledColors();
   const now = new Date();
@@ -262,7 +276,8 @@ function scheduleNextTransition({
 
   // Get the target transition time.
   const nextTransitionTime = currentScheduledColors
-    ? currentScheduledColors.nextTransitionDuration
+    ? // Convert minutes to ms
+      currentScheduledColors.nextTransitionDuration * 60_000
     : // If we're in the off->midnight transition, then we _most likely_ are
       // going from off->off at this time. I _think_ this is guaranteed to be
       // true, but just in case let's add a fallback to the override transition
@@ -294,18 +309,16 @@ function scheduleNextTransition({
       );
 
   // Set the target color and transition time
-  console.log(`Setting target color to ${targetLightState}`);
-  setTargetColor(colorSet[targetLightState]);
-  transitionStartTime = now.getTime();
-  transitionEndTime = transitionStartTime + currentTransitionTime;
+  setTargetColor(targetLightState);
+  setTransitionTimes(now.getTime(), currentTransitionTime);
 
   // Schedule the next transition
   scheduleTimeout = setTimeout(() => {
     scheduleNextTransition({ currentTransitionTime: nextTransitionTime });
   }, nextStartTime.getTime() - now.getTime());
 
-  console.log(
-    `Scheduled next transition at ${nextStartTime.toLocaleTimeString()}`
+  logger.info(
+    `Scheduled next transition at ${nextStartTime.toLocaleTimeString()} with transition time ${Math.round(nextTransitionTime / 1000)}s`
   );
 }
 
