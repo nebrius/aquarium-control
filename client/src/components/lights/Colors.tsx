@@ -100,39 +100,44 @@ type ColorsProps = {
   setColors: (colors: ColorSet) => void;
 };
 
+const RETRY_TIMEOUT = 250;
+function connect(onMessage: (color: HSVColor) => void) {
+  const ws = new WebSocket(`ws://${HOST}/current-color`);
+
+  ws.addEventListener('open', () => {
+    console.log('WebSocket connected');
+  });
+
+  ws.addEventListener('message', (event) => {
+    try {
+      const colorData = JSON.parse(event.data as string) as HSVColor;
+      onMessage(colorData);
+    } catch (error) {
+      console.error('Failed to parse color data:', error);
+    }
+  });
+
+  ws.addEventListener('error', (error) => {
+    console.error('WebSocket error:', error);
+  });
+
+  ws.addEventListener('close', () => {
+    console.log('WebSocket disconnected, retrying...');
+    setTimeout(() => connect(onMessage), RETRY_TIMEOUT);
+  });
+
+  return () => {
+    ws.close();
+  };
+}
+
 export function Colors({ colors, setColors, savedColors }: ColorsProps) {
   // Initialize to the card background color, so we have something to show. It
   // won't be there long before the web socket overwrites it
   const [color, setColor] = useState<HSVColor>({ h: 233, s: 13, v: 11 });
 
   useEffect(() => {
-    // Connect to WebSocket for real-time color updates
-    const ws = new WebSocket(`ws://${HOST}/current-color`);
-
-    ws.onopen = () => {
-      console.log('WebSocket connected');
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        const colorData = JSON.parse(event.data as string) as HSVColor;
-        setColor(colorData);
-      } catch (error) {
-        console.error('Failed to parse color data:', error);
-      }
-    };
-
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-
-    ws.onclose = () => {
-      console.log('WebSocket disconnected');
-    };
-
-    return () => {
-      ws.close();
-    };
+    return connect(setColor);
   }, []);
 
   const displayColor = useMemo(() => {
