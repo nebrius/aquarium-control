@@ -3,7 +3,7 @@ import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { type CleaningRecordEntry, type ColorSet } from '@aquarium/shared';
+import { type CleaningRecordEntry, type Color } from '@aquarium/shared';
 import { type Override, type ScheduleEntry } from '@aquarium/shared';
 import Database from 'better-sqlite3';
 
@@ -35,58 +35,27 @@ function getDb() {
   return db;
 }
 
-export function getColorSet(): ColorSet {
-  const rows = getDb()
-    .prepare('SELECT name, h, s, v FROM colors ORDER BY id ASC')
-    .all() as {
-    id: number;
-    name: string;
-    h: number;
-    s: number;
-    v: number;
-  }[];
-
-  const expectedNames = ['night', 'day'] as const;
-
-  if (rows.length !== expectedNames.length) {
-    throw new Error(
-      `colors table must contain exactly ${String(expectedNames.length)} rows`
-    );
-  }
-
-  const byName = new Map(rows.map((row) => [row.name, row] as const));
-
-  for (const name of expectedNames) {
-    if (!byName.has(name)) {
-      throw new Error(`missing colors row: ${name}`);
-    }
-  }
-
-  /* eslint-disable @typescript-eslint/no-non-null-assertion */
-  const night = byName.get('night')!;
-  const day = byName.get('day')!;
-  return {
-    night: {
-      h: night.h,
-      s: night.s,
-      v: night.v,
-    },
-    day: {
-      h: day.h,
-      s: day.s,
-      v: day.v,
-    },
-  };
-  /* eslint-enable @typescript-eslint/no-non-null-assertion */
+export function getColors(): Color[] {
+  return getDb()
+    .prepare('SELECT id, name, h, s, v FROM colors ORDER BY id ASC')
+    .all() as Color[];
 }
 
-export function setColorSet(colorSet: ColorSet) {
-  const stmt = getDb().prepare(
-    'UPDATE colors SET h = ?, s = ?, v = ? WHERE name = ?'
+export function setColors(colors: Color[]) {
+  const database = getDb();
+  const deleteStmt = database.prepare('DELETE FROM colors');
+  const insertStmt = database.prepare(
+    'INSERT INTO colors (id, name, h, s, v) VALUES (?, ?, ?, ?, ?)'
   );
 
-  stmt.run(colorSet.night.h, colorSet.night.s, colorSet.night.v, 'night');
-  stmt.run(colorSet.day.h, colorSet.day.s, colorSet.day.v, 'day');
+  const transaction = database.transaction(() => {
+    deleteStmt.run();
+    for (const color of colors) {
+      insertStmt.run(color.id, color.name, color.h, color.s, color.v);
+    }
+  });
+
+  transaction();
 }
 
 export function getSchedule() {

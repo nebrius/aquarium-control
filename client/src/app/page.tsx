@@ -1,8 +1,8 @@
 import {
   type CleaningRecordEntry,
-  type ColorSet,
+  type Color,
   type Override,
-  type Schedule,
+  type ScheduleEntry,
 } from '@aquarium/shared';
 
 import { CleaningPage } from '@/components/cleaning/CleaningPage.tsx';
@@ -16,10 +16,10 @@ import {
 import { get } from '@/lib/request.ts';
 
 export default async function Home() {
-  const schedule = await get<Schedule>('/schedule');
+  const schedule = await get<ScheduleEntry[]>('/schedule');
   const override = await get<Override>('/override');
   const cleaningRecords = await get<CleaningRecordEntry[]>('/cleaning');
-  const colors = await get<ColorSet>('/color-set');
+  const colors = await get<Color[]>('/colors');
   return (
     <Tabs className="absolute inset-[0]" defaultValue="lights">
       <header className="container flex items-center justify-center w-full bg-color border-b border-zinc-700 py-2">

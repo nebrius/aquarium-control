@@ -1,19 +1,20 @@
 import {
   type Color,
-  type ColorSet,
   type LightState,
   type Override,
   type ScheduleEntry,
 } from '@aquarium/shared';
 import equal from 'fast-deep-equal';
 
-import { getColorSet, getOverride, getSchedule } from './db/db.ts';
+import { getColors, getOverride, getSchedule } from './db/db.ts';
 import { logger } from './logging.ts';
 
 const UPDATE_INTERVAL = 100;
 const OVERRIDE_TRANSITION_TIME = 5_000;
 
 const OFF_COLOR: Color = {
+  id: -1,
+  name: '$_off',
   h: 0,
   s: 0,
   v: 0,
@@ -22,13 +23,16 @@ const OFF_COLOR: Color = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 let schedule = getSchedule();
 let override = getOverride();
-let colorSet = { ...getColorSet(), off: OFF_COLOR };
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+let colors: Color[] = getColors();
 
 /* ---- Animation ---- */
 
 // Animation state
+// eslint-disable-next-line prefer-const
 let previousColor: Color = OFF_COLOR;
 let currentColor: Color = OFF_COLOR;
+// eslint-disable-next-line prefer-const
 let targetColor: Color = OFF_COLOR;
 let transitionStartTime: number = 0;
 let transitionEndTime: number = 0;
@@ -38,35 +42,35 @@ let scheduleTimeout: NodeJS.Timeout | undefined;
 // account when lights are off.
 function setTargetColor(nextLightState: LightState) {
   logger.debug(`Setting target color to ${nextLightState}`);
-  const nextColor = colorSet[nextLightState];
+  // const nextColor = colorSet[nextLightState];
 
-  // Compute the actual next color
-  if (currentColor.v === 0) {
-    // If we're currently off, override the previous color with the next color
-    // except for it's value so we don't mix colors on the fade in. For example,
-    // if we do the sequence day -> off -> night, we'd get a weird black -> red
-    // -> blue fade in, but we want just a black -> blue -> blue fade in
-    previousColor = {
-      h: nextColor.h,
-      s: nextColor.s,
-      v: 0,
-    };
-    targetColor = nextColor;
-  } else if (nextColor.v === 0) {
-    previousColor = currentColor;
-    // If we're going to off, override the target color with the previous color
-    // except for it's value so we don't mix colors on the fade out, similar to
-    // the fade in case
-    targetColor = {
-      h: previousColor.h,
-      s: previousColor.s,
-      v: 0,
-    };
-  } else {
-    // Otherwise, we do a standard transition between colors
-    previousColor = currentColor;
-    targetColor = nextColor;
-  }
+  // // Compute the actual next color
+  // if (currentColor.v === 0) {
+  //   // If we're currently off, override the previous color with the next color
+  //   // except for it's value so we don't mix colors on the fade in. For example,
+  //   // if we do the sequence day -> off -> night, we'd get a weird black -> red
+  //   // -> blue fade in, but we want just a black -> blue -> blue fade in
+  //   previousColor = {
+  //     h: nextColor.h,
+  //     s: nextColor.s,
+  //     v: 0,
+  //   };
+  //   targetColor = nextColor;
+  // } else if (nextColor.v === 0) {
+  //   previousColor = currentColor;
+  //   // If we're going to off, override the target color with the previous color
+  //   // except for it's value so we don't mix colors on the fade out, similar to
+  //   // the fade in case
+  //   targetColor = {
+  //     h: previousColor.h,
+  //     s: previousColor.s,
+  //     v: 0,
+  //   };
+  // } else {
+  //   // Otherwise, we do a standard transition between colors
+  //   previousColor = currentColor;
+  //   targetColor = nextColor;
+  // }
 }
 
 function setTransitionTimes(startTime: number, duration: number) {
@@ -133,7 +137,9 @@ function loop() {
       currentHue = previousColor.h;
     }
 
-    const nextColor = {
+    const nextColor: Color = {
+      id: targetColor.id,
+      name: targetColor.name,
       h: Math.round(currentHue),
       s: Math.round(
         previousColor.s + (targetColor.s - previousColor.s) * progress
@@ -165,8 +171,8 @@ export function handleOverrideUpdate(newOverride: Override) {
   handleChange();
 }
 
-export function handleColorUpdate(newColorSet: ColorSet) {
-  colorSet = { ...newColorSet, off: OFF_COLOR };
+export function handleColorUpdate(newColors: Color[]) {
+  colors = newColors;
   handleChange();
 }
 

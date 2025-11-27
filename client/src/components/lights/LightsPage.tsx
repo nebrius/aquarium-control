@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  type ColorSet,
+  type Color,
   type Override,
   type ScheduleEntry,
 } from '@aquarium/shared';
@@ -25,10 +25,10 @@ import { OverrideCard } from './OverrideCard.tsx';
 type LightsContextValue = {
   runningSchedule: ScheduleEntry[];
   runningOverride: Override;
-  runningColors: ColorSet;
+  runningColors: Color[];
   setRunningSchedule: (schedule: ScheduleEntry[]) => void;
   setRunningOverride: (override: Override) => void;
-  setRunningColors: (colors: ColorSet) => void;
+  setRunningColors: (colors: Color[]) => void;
 };
 
 const LightsContext = createContext<LightsContextValue | undefined>(undefined);
@@ -55,7 +55,7 @@ function LightsContent() {
     enabled: runningOverride.enabled,
     state: runningOverride.state,
   });
-  const [colors, setColors] = useState<ColorSet>(runningColors);
+  const [colors, setColors] = useState<Color[]>(runningColors);
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -109,7 +109,7 @@ function LightsContent() {
 
         if (colorsChanged) {
           const response = await put({
-            endpoint: '/color-set',
+            endpoint: '/colors',
             body: colors,
           });
 
@@ -193,7 +193,7 @@ function LightsContent() {
 type LightsPageProps = {
   initialSchedule: ScheduleEntry[];
   initialOverride: Override;
-  initialColors: ColorSet;
+  initialColors: Color[];
 };
 
 export function LightsPage({
@@ -205,7 +205,7 @@ export function LightsPage({
     useState<ScheduleEntry[]>(initialSchedule);
   const [runningOverride, setRunningOverride] =
     useState<Override>(initialOverride);
-  const [runningColors, setRunningColors] = useState<ColorSet>(initialColors);
+  const [runningColors, setRunningColors] = useState<Color[]>(initialColors);
 
   return (
     <LightsContext.Provider

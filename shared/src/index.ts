@@ -36,19 +36,14 @@ export const ScheduleEntrySchema = Type.Object({
 export type ScheduleEntry = Static<typeof ScheduleEntrySchema>;
 
 export const ColorSchema = Type.Object({
+  id: Type.Number(),
+  name: Type.String(),
   h: Type.Integer({ minimum: 0, maximum: 360 }),
   s: Type.Integer({ minimum: 0, maximum: 100 }),
   v: Type.Integer({ minimum: 0, maximum: 100 }),
 });
 
 export type Color = Static<typeof ColorSchema>;
-
-export const ColorSetSchema = Type.Object({
-  night: ColorSchema,
-  day: ColorSchema,
-});
-
-export type ColorSet = Static<typeof ColorSetSchema>;
 
 export const OverrideSchema = Type.Object({
   enabled: Type.Boolean(),

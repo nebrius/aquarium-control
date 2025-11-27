@@ -1,4 +1,4 @@
-import { type Color as HSVColor, type ColorSet } from '@aquarium/shared';
+import { type Color as HSVColor } from '@aquarium/shared';
 import ColorPicker, { Color } from '@rc-component/color-picker';
 import convert from 'color-convert';
 import { ChevronDown } from 'lucide-react';
@@ -15,13 +15,12 @@ import {
 } from '../ui/Collapsible.tsx';
 
 type EditColorProps = {
-  name: string;
-  savedColor: { h: number; s: number; v: number };
-  color: { h: number; s: number; v: number };
-  setColor: (color: { h: number; s: number; v: number }) => void;
+  color: HSVColor;
+  savedColor: HSVColor;
+  setColor: (color: HSVColor) => void;
 };
 
-function EditColor({ name, savedColor, color, setColor }: EditColorProps) {
+function EditColor({ savedColor, color, setColor }: EditColorProps) {
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -41,14 +40,14 @@ function EditColor({ name, savedColor, color, setColor }: EditColorProps) {
     return new Color({ r, g, b });
   }, [savedColor.h, savedColor.s, savedColor.v]);
 
-  // Update schedule when color changes
+  // Update color when picker changes
   const handleColorChange = (newColor: Color) => {
     const hex = newColor.toHexString();
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
     const b = parseInt(hex.slice(5, 7), 16);
     const [h, s, v] = convert.rgb.hsv([r, g, b]);
-    setColor({ h, s, v });
+    setColor({ ...color, h, s, v });
   };
 
   useEffect(() => {
@@ -71,7 +70,7 @@ function EditColor({ name, savedColor, color, setColor }: EditColorProps) {
           </div>
           <div>
             <Button variant="outline">
-              Edit {name}
+              Edit {color.name}
               <ChevronDown
                 className={`transition-transform duration-200 ${
                   isColorPickerOpen ? 'rotate-180' : ''
@@ -95,9 +94,9 @@ function EditColor({ name, savedColor, color, setColor }: EditColorProps) {
 }
 
 type ColorsProps = {
-  colors: ColorSet;
-  savedColors: ColorSet;
-  setColors: (colors: ColorSet) => void;
+  colors: HSVColor[];
+  savedColors: HSVColor[];
+  setColors: (colors: HSVColor[]) => void;
 };
 
 const RETRY_TIMEOUT = 250;
@@ -134,16 +133,24 @@ function connect(onMessage: (color: HSVColor) => void) {
 export function Colors({ colors, setColors, savedColors }: ColorsProps) {
   // Initialize to the card background color, so we have something to show. It
   // won't be there long before the web socket overwrites it
-  const [color, setColor] = useState<HSVColor>({ h: 233, s: 13, v: 11 });
+  const [currentColor, setCurrentColor] = useState<{
+    h: number;
+    s: number;
+    v: number;
+  }>({ h: 233, s: 13, v: 11 });
 
   useEffect(() => {
-    return connect(setColor);
+    return connect(setCurrentColor);
   }, []);
 
   const displayColor = useMemo(() => {
-    const [r, g, b] = convert.hsv.rgb([color.h, color.s, color.v]);
+    const [r, g, b] = convert.hsv.rgb([
+      currentColor.h,
+      currentColor.s,
+      currentColor.v,
+    ]);
     return new Color({ r, g, b });
-  }, [color]);
+  }, [currentColor]);
 
   return (
     <>
@@ -163,22 +170,18 @@ export function Colors({ colors, setColors, savedColors }: ColorsProps) {
           <CardTitle>Color Definitions</CardTitle>
         </CardHeader>
         <CardContent>
-          <EditColor
-            name="Day"
-            color={colors.day}
-            savedColor={savedColors.day}
-            setColor={(color) => {
-              setColors({ ...colors, day: color });
-            }}
-          />
-          <EditColor
-            name="Night"
-            color={colors.night}
-            savedColor={savedColors.night}
-            setColor={(color) => {
-              setColors({ ...colors, night: color });
-            }}
-          />
+          {colors.map((color, index) => (
+            <EditColor
+              key={color.id}
+              color={color}
+              savedColor={savedColors[index]}
+              setColor={(updatedColor) => {
+                const newColors = [...colors];
+                newColors[index] = updatedColor;
+                setColors(newColors);
+              }}
+            />
+          ))}
         </CardContent>
       </Card>
     </>

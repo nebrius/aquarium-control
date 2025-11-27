@@ -1,6 +1,6 @@
 import {
   CleaningRecordSchema,
-  ColorSetSchema,
+  ColorSchema,
   OverrideSchema,
   ScheduleEntrySchema,
 } from '@aquarium/shared';
@@ -14,10 +14,10 @@ import { type WebSocket } from 'ws';
 import {
   addCleaningRecord,
   getCleaningRecords,
-  getColorSet,
+  getColors,
   getOverride,
   getSchedule,
-  setColorSet,
+  setColors,
   setOverride,
   setSchedule,
 } from './db/db.ts';
@@ -104,21 +104,21 @@ fastify.put(
   }
 );
 
-// GET /color-set - Get the current color set
-fastify.get('/color-set', () => {
-  return getColorSet();
+// GET /colors - Get the current color set
+fastify.get('/colors', () => {
+  return getColors();
 });
 
-// PUT /color-set - Set the color set
+// PUT /colors - Set the color set
 fastify.put(
-  '/color-set',
+  '/colors',
   {
     schema: {
-      body: ColorSetSchema,
+      body: Type.Array(ColorSchema),
     },
   },
   (request) => {
-    setColorSet(request.body);
+    setColors(request.body);
     handleColorUpdate(request.body);
     return { message: 'OK' };
   }
