@@ -6,11 +6,11 @@ CREATE TABLE schedule (
   fade INTEGER NOT NULL CHECK (fade BETWEEN 0 AND 255)
 );
 
-INSERT INTO schedule (name, hour, minute, fade) VALUES
-  ('offToNight', 6, 0, 10),
-  ('nightToDay', 10, 0, 10),
-  ('dayToNight', 18, 0, 10),
-  ('nightToOff', 23, 0, 10);
+INSERT INTO schedule (id, name, hour, minute, fade) VALUES
+  (0, 'Off → Night', 6, 0, 10),
+  (1, 'Night → Day', 10, 0, 10),
+  (2, 'Day → Night', 18, 0, 10),
+  (3, 'Night → Off', 23, 0, 10);
 
 CREATE TABLE colors (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

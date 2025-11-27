@@ -19,7 +19,7 @@ export function put({
   body,
 }: {
   endpoint: string;
-  body: Record<string, unknown>;
+  body: Record<string, unknown> | unknown[];
 }) {
   return fetch(`${BASE_URL}${endpoint}`, {
     method: 'PUT',

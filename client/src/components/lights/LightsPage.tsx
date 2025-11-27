@@ -3,7 +3,6 @@
 import {
   type ColorSet,
   type Override,
-  type Schedule,
   type ScheduleEntry,
 } from '@aquarium/shared';
 import equal from 'fast-deep-equal';
@@ -24,10 +23,10 @@ import { Entry } from './Entry.tsx';
 import { OverrideCard } from './OverrideCard.tsx';
 
 type LightsContextValue = {
-  runningSchedule: Schedule;
+  runningSchedule: ScheduleEntry[];
   runningOverride: Override;
   runningColors: ColorSet;
-  setRunningSchedule: (schedule: Schedule) => void;
+  setRunningSchedule: (schedule: ScheduleEntry[]) => void;
   setRunningOverride: (override: Override) => void;
   setRunningColors: (colors: ColorSet) => void;
 };
@@ -51,18 +50,7 @@ function LightsContent() {
     setRunningOverride,
     setRunningColors,
   } = useLightsContext();
-  const [offToNight, setOffToNight] = useState<ScheduleEntry>(
-    runningSchedule.offToNight
-  );
-  const [nightToDay, setNightToDay] = useState<ScheduleEntry>(
-    runningSchedule.nightToDay
-  );
-  const [dayToNight, setDayToNight] = useState<ScheduleEntry>(
-    runningSchedule.dayToNight
-  );
-  const [nightToOff, setNightToOff] = useState<ScheduleEntry>(
-    runningSchedule.nightToOff
-  );
+  const [schedule, setSchedule] = useState<ScheduleEntry[]>(runningSchedule);
   const [override, setOverride] = useState<Override>({
     enabled: runningOverride.enabled,
     state: runningOverride.state,
@@ -72,19 +60,12 @@ function LightsContent() {
   const [errorMessage, setErrorMessage] = useState('');
 
   const hasUnsavedChanges =
-    !equal(offToNight, runningSchedule.offToNight) ||
-    !equal(nightToDay, runningSchedule.nightToDay) ||
-    !equal(dayToNight, runningSchedule.dayToNight) ||
-    !equal(nightToOff, runningSchedule.nightToOff) ||
+    !equal(schedule, runningSchedule) ||
     !equal(override, runningOverride) ||
     !equal(colors, runningColors);
 
   const onSave = useCallback(() => {
-    const scheduleChanged =
-      !equal(offToNight, runningSchedule.offToNight) ||
-      !equal(nightToDay, runningSchedule.nightToDay) ||
-      !equal(dayToNight, runningSchedule.dayToNight) ||
-      !equal(nightToOff, runningSchedule.nightToOff);
+    const scheduleChanged = !equal(schedule, runningSchedule);
 
     const overrideChanged = !equal(override, runningOverride);
 
@@ -99,12 +80,7 @@ function LightsContent() {
         if (scheduleChanged) {
           const response = await put({
             endpoint: '/schedule',
-            body: {
-              offToNight,
-              nightToDay,
-              dayToNight,
-              nightToOff,
-            },
+            body: schedule,
           });
 
           if (!response.ok) {
@@ -113,12 +89,7 @@ function LightsContent() {
             return;
           }
 
-          setRunningSchedule({
-            offToNight,
-            nightToDay,
-            dayToNight,
-            nightToOff,
-          });
+          setRunningSchedule(schedule);
         }
 
         if (overrideChanged) {
@@ -160,16 +131,10 @@ function LightsContent() {
       }
     })();
   }, [
-    dayToNight,
-    nightToDay,
-    nightToOff,
-    offToNight,
+    schedule,
     override,
     runningOverride,
-    runningSchedule.dayToNight,
-    runningSchedule.nightToDay,
-    runningSchedule.nightToOff,
-    runningSchedule.offToNight,
+    runningSchedule,
     colors,
     setRunningOverride,
     setRunningSchedule,
@@ -191,34 +156,18 @@ function LightsContent() {
           setColors={setColors}
           savedColors={runningColors}
         />
-        <Entry
-          name="Off → Night"
-          schedule={offToNight}
-          setSchedule={(schedule) => {
-            setOffToNight(schedule);
-          }}
-        />
-        <Entry
-          name="Night → Day"
-          schedule={nightToDay}
-          setSchedule={(schedule) => {
-            setNightToDay(schedule);
-          }}
-        />
-        <Entry
-          name="Day → Night"
-          schedule={dayToNight}
-          setSchedule={(schedule) => {
-            setDayToNight(schedule);
-          }}
-        />
-        <Entry
-          name="Night → Off"
-          schedule={nightToOff}
-          setSchedule={(schedule) => {
-            setNightToOff(schedule);
-          }}
-        />
+        {schedule.map((entry, index) => (
+          <Entry
+            key={entry.id}
+            name={entry.name}
+            schedule={entry}
+            setSchedule={(updated) => {
+              setSchedule((prev) =>
+                prev.map((e, i) => (i === index ? updated : e))
+              );
+            }}
+          />
+        ))}
       </div>
       <div className="w-full p-4 bg-color border-t border-zinc-700">
         <Button
@@ -242,7 +191,7 @@ function LightsContent() {
 }
 
 type LightsPageProps = {
-  initialSchedule: Schedule;
+  initialSchedule: ScheduleEntry[];
   initialOverride: Override;
   initialColors: ColorSet;
 };
@@ -253,7 +202,7 @@ export function LightsPage({
   initialColors,
 }: LightsPageProps) {
   const [runningSchedule, setRunningSchedule] =
-    useState<Schedule>(initialSchedule);
+    useState<ScheduleEntry[]>(initialSchedule);
   const [runningOverride, setRunningOverride] =
     useState<Override>(initialOverride);
   const [runningColors, setRunningColors] = useState<ColorSet>(initialColors);

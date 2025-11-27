@@ -25,22 +25,15 @@ const LightStateSchema = Type.Union([
 
 export type LightState = Static<typeof LightStateSchema>;
 
-const ScheduleEntrySchema = Type.Object({
+export const ScheduleEntrySchema = Type.Object({
+  id: Type.Integer(),
+  name: Type.String(),
   hour: Type.Integer({ minimum: 0, maximum: 255 }),
   minute: Type.Integer({ minimum: 0, maximum: 255 }),
   fade: Type.Integer({ minimum: 0, maximum: 255 }),
 });
 
 export type ScheduleEntry = Static<typeof ScheduleEntrySchema>;
-
-export const ScheduleSchema = Type.Object({
-  offToNight: ScheduleEntrySchema,
-  nightToDay: ScheduleEntrySchema,
-  dayToNight: ScheduleEntrySchema,
-  nightToOff: ScheduleEntrySchema,
-});
-
-export type Schedule = Static<typeof ScheduleSchema>;
 
 export const ColorSchema = Type.Object({
   h: Type.Integer({ minimum: 0, maximum: 360 }),

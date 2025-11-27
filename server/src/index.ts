@@ -2,12 +2,13 @@ import {
   CleaningRecordSchema,
   ColorSetSchema,
   OverrideSchema,
-  ScheduleSchema,
+  ScheduleEntrySchema,
 } from '@aquarium/shared';
 import cors from '@fastify/cors';
 import { type TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import websocket from '@fastify/websocket';
 import Fastify from 'fastify';
+import { Type } from 'typebox';
 import { type WebSocket } from 'ws';
 
 import {
@@ -93,7 +94,7 @@ fastify.put(
   '/schedule',
   {
     schema: {
-      body: ScheduleSchema,
+      body: Type.Array(ScheduleEntrySchema),
     },
   },
   (request) => {

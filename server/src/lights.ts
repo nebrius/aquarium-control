@@ -3,7 +3,7 @@ import {
   type ColorSet,
   type LightState,
   type Override,
-  type Schedule,
+  type ScheduleEntry,
 } from '@aquarium/shared';
 import equal from 'fast-deep-equal';
 
@@ -19,6 +19,7 @@ const OFF_COLOR: Color = {
   v: 0,
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let schedule = getSchedule();
 let override = getOverride();
 let colorSet = { ...getColorSet(), off: OFF_COLOR };
@@ -154,7 +155,7 @@ function loop() {
 /* ---- State Change ---- */
 
 // These handlers take in the different types of updates and makes the change
-export function handleScheduleUpdate(newSchedule: Schedule) {
+export function handleScheduleUpdate(newSchedule: ScheduleEntry[]) {
   schedule = newSchedule;
   handleChange();
 }
@@ -195,65 +196,65 @@ function getScheduledColors():
       nextStartTime: { hour: number; minute: number };
     }
   | undefined {
-  const now = new Date();
-  const hour = now.getHours();
-  const minute = now.getMinutes();
+  // const now = new Date();
+  // const hour = now.getHours();
+  // const minute = now.getMinutes();
 
-  if (
-    hour < schedule.offToNight.hour ||
-    (hour === schedule.offToNight.hour && minute < schedule.offToNight.minute)
-  ) {
-    return {
-      currentLightState: 'off',
-      nextTransitionDuration: schedule.offToNight.fade,
-      nextStartTime: {
-        hour: schedule.offToNight.hour,
-        minute: schedule.offToNight.minute,
-      },
-    };
-  }
+  // if (
+  //   hour < schedule.offToNight.hour ||
+  //   (hour === schedule.offToNight.hour && minute < schedule.offToNight.minute)
+  // ) {
+  //   return {
+  //     currentLightState: 'off',
+  //     nextTransitionDuration: schedule.offToNight.fade,
+  //     nextStartTime: {
+  //       hour: schedule.offToNight.hour,
+  //       minute: schedule.offToNight.minute,
+  //     },
+  //   };
+  // }
 
-  if (
-    hour < schedule.nightToDay.hour ||
-    (hour === schedule.nightToDay.hour && minute < schedule.nightToDay.minute)
-  ) {
-    return {
-      currentLightState: 'night',
-      nextTransitionDuration: schedule.nightToDay.fade,
-      nextStartTime: {
-        hour: schedule.nightToDay.hour,
-        minute: schedule.nightToDay.minute,
-      },
-    };
-  }
+  // if (
+  //   hour < schedule.nightToDay.hour ||
+  //   (hour === schedule.nightToDay.hour && minute < schedule.nightToDay.minute)
+  // ) {
+  //   return {
+  //     currentLightState: 'night',
+  //     nextTransitionDuration: schedule.nightToDay.fade,
+  //     nextStartTime: {
+  //       hour: schedule.nightToDay.hour,
+  //       minute: schedule.nightToDay.minute,
+  //     },
+  //   };
+  // }
 
-  if (
-    hour < schedule.dayToNight.hour ||
-    (hour === schedule.dayToNight.hour && minute < schedule.dayToNight.minute)
-  ) {
-    return {
-      currentLightState: 'day',
-      nextTransitionDuration: schedule.dayToNight.fade,
-      nextStartTime: {
-        hour: schedule.dayToNight.hour,
-        minute: schedule.dayToNight.minute,
-      },
-    };
-  }
+  // if (
+  //   hour < schedule.dayToNight.hour ||
+  //   (hour === schedule.dayToNight.hour && minute < schedule.dayToNight.minute)
+  // ) {
+  //   return {
+  //     currentLightState: 'day',
+  //     nextTransitionDuration: schedule.dayToNight.fade,
+  //     nextStartTime: {
+  //       hour: schedule.dayToNight.hour,
+  //       minute: schedule.dayToNight.minute,
+  //     },
+  //   };
+  // }
 
-  if (
-    hour < schedule.nightToOff.hour ||
-    (hour === schedule.nightToOff.hour && minute < schedule.nightToOff.minute)
-  ) {
-    return {
-      currentLightState: 'night',
-      nextTransitionDuration: schedule.nightToOff.fade,
-      nextStartTime: {
-        hour: schedule.nightToOff.hour,
-        minute: schedule.nightToOff.minute,
-      },
-    };
-  }
+  // if (
+  //   hour < schedule.nightToOff.hour ||
+  //   (hour === schedule.nightToOff.hour && minute < schedule.nightToOff.minute)
+  // ) {
+  //   return {
+  //     currentLightState: 'night',
+  //     nextTransitionDuration: schedule.nightToOff.fade,
+  //     nextStartTime: {
+  //       hour: schedule.nightToOff.hour,
+  //       minute: schedule.nightToOff.minute,
+  //     },
+  //   };
+  // }
 
   return undefined;
 }

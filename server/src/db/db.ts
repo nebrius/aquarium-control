@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { type CleaningRecordEntry, type ColorSet } from '@aquarium/shared';
-import { type Override, type Schedule } from '@aquarium/shared';
+import { type Override, type ScheduleEntry } from '@aquarium/shared';
 import Database from 'better-sqlite3';
 
 const DB_DIR = join(homedir(), '.aquarium-control');
@@ -37,8 +37,9 @@ function getDb() {
 
 export function getColorSet(): ColorSet {
   const rows = getDb()
-    .prepare('SELECT name, h, s, v FROM colors ORDER BY name ASC')
+    .prepare('SELECT name, h, s, v FROM colors ORDER BY id ASC')
     .all() as {
+    id: number;
     name: string;
     h: number;
     s: number;
@@ -88,94 +89,29 @@ export function setColorSet(colorSet: ColorSet) {
   stmt.run(colorSet.day.h, colorSet.day.s, colorSet.day.v, 'day');
 }
 
-export function getSchedule(): Schedule {
-  const rows = getDb()
-    .prepare('SELECT name, hour, minute, fade FROM schedule ORDER BY name ASC')
-    .all() as {
-    name: string;
-    hour: number;
-    minute: number;
-    fade: number;
-  }[];
-
-  const expectedNames = [
-    'offToNight',
-    'nightToDay',
-    'dayToNight',
-    'nightToOff',
-  ] as const;
-
-  if (rows.length !== expectedNames.length) {
-    throw new Error(
-      `schedule table must contain exactly ${String(expectedNames.length)} rows`
-    );
-  }
-
-  const byName = new Map(rows.map((row) => [row.name, row] as const));
-
-  for (const name of expectedNames) {
-    if (!byName.has(name)) {
-      throw new Error(`missing schedule row: ${name}`);
-    }
-  }
-
-  const schedule: Schedule = {
-    offToNight: {
-      /* eslint-disable @typescript-eslint/no-non-null-assertion */
-      hour: byName.get('offToNight')!.hour,
-      minute: byName.get('offToNight')!.minute,
-      fade: byName.get('offToNight')!.fade,
-    },
-    nightToDay: {
-      hour: byName.get('nightToDay')!.hour,
-      minute: byName.get('nightToDay')!.minute,
-      fade: byName.get('nightToDay')!.fade,
-    },
-    dayToNight: {
-      hour: byName.get('dayToNight')!.hour,
-      minute: byName.get('dayToNight')!.minute,
-      fade: byName.get('dayToNight')!.fade,
-    },
-    nightToOff: {
-      hour: byName.get('nightToOff')!.hour,
-      minute: byName.get('nightToOff')!.minute,
-      fade: byName.get('nightToOff')!.fade,
-    },
-    /* eslint-enable @typescript-eslint/no-non-null-assertion */
-  };
-
-  return schedule;
+export function getSchedule() {
+  return getDb()
+    .prepare(
+      'SELECT id, name, hour, minute, fade FROM schedule ORDER BY id ASC'
+    )
+    .all() as ScheduleEntry[];
 }
 
-export function setSchedule(schedule: Schedule) {
-  const stmt = getDb().prepare(
-    'UPDATE schedule SET hour = ?, minute = ?, fade = ? WHERE name = ?'
+export function setSchedule(schedule: ScheduleEntry[]) {
+  const database = getDb();
+  const deleteStmt = database.prepare('DELETE FROM schedule');
+  const insertStmt = database.prepare(
+    'INSERT INTO schedule (name, hour, minute, fade) VALUES (?, ?, ?, ?)'
   );
 
-  stmt.run(
-    schedule.offToNight.hour,
-    schedule.offToNight.minute,
-    schedule.offToNight.fade,
-    'offToNight'
-  );
-  stmt.run(
-    schedule.nightToDay.hour,
-    schedule.nightToDay.minute,
-    schedule.nightToDay.fade,
-    'nightToDay'
-  );
-  stmt.run(
-    schedule.dayToNight.hour,
-    schedule.dayToNight.minute,
-    schedule.dayToNight.fade,
-    'dayToNight'
-  );
-  stmt.run(
-    schedule.nightToOff.hour,
-    schedule.nightToOff.minute,
-    schedule.nightToOff.fade,
-    'nightToOff'
-  );
+  const transaction = database.transaction(() => {
+    deleteStmt.run();
+    for (const entry of schedule) {
+      insertStmt.run(entry.name, entry.hour, entry.minute, entry.fade);
+    }
+  });
+
+  transaction();
 }
 
 export function getOverride(): Override {
