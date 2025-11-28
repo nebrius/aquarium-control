@@ -1,10 +1,13 @@
+'use client';
+
 import { type Color as HSVColor } from '@aquarium/shared';
 import ColorPicker, { Color } from '@rc-component/color-picker';
 import convert from 'color-convert';
+import equal from 'fast-deep-equal';
 import { ChevronDown } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { HOST } from '@/lib/request.ts';
+import { put } from '@/lib/request.ts';
 
 import { Button } from '../ui/Button.tsx';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card.tsx';
@@ -13,6 +16,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '../ui/Collapsible.tsx';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '../ui/Dialog.tsx';
 
 type EditColorProps = {
   color: HSVColor;
@@ -94,96 +104,88 @@ function EditColor({ savedColor, color, setColor }: EditColorProps) {
 }
 
 type ColorsProps = {
-  colors: HSVColor[];
-  savedColors: HSVColor[];
-  setColors: (colors: HSVColor[]) => void;
+  initialColors: HSVColor[];
 };
 
-const RETRY_TIMEOUT = 250;
-function connect(onMessage: (color: HSVColor) => void) {
-  const ws = new WebSocket(`ws://${HOST}/current-color`);
+export function ColorsPage({ initialColors }: ColorsProps) {
+  const [runningColors, setRunningColors] = useState<HSVColor[]>(initialColors);
+  const [colors, setColors] = useState<HSVColor[]>(initialColors);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
 
-  ws.addEventListener('open', () => {
-    console.log('WebSocket connected');
-  });
+  const hasUnsavedChanges = !equal(colors, runningColors);
+  const onSave = useCallback(() => {
+    const colorsChanged = !equal(colors, runningColors);
 
-  ws.addEventListener('message', (event) => {
-    try {
-      const colorData = JSON.parse(event.data as string) as HSVColor;
-      onMessage(colorData);
-    } catch (error) {
-      console.error('Failed to parse color data:', error);
+    if (!colorsChanged) {
+      return;
     }
-  });
 
-  ws.addEventListener('error', (error) => {
-    console.error('WebSocket error:', error);
-  });
+    void (async () => {
+      try {
+        const response = await put({
+          endpoint: '/colors',
+          body: colors,
+        });
 
-  ws.addEventListener('close', () => {
-    console.log('WebSocket disconnected, retrying...');
-    setTimeout(() => connect(onMessage), RETRY_TIMEOUT);
-  });
+        if (!response.ok) {
+          setErrorMessage('Failed to update colors');
+          setErrorDialogOpen(true);
+          return;
+        }
 
-  return () => {
-    ws.close();
-  };
-}
-
-export function Colors({ colors, setColors, savedColors }: ColorsProps) {
-  // Initialize to the card background color, so we have something to show. It
-  // won't be there long before the web socket overwrites it
-  const [currentColor, setCurrentColor] = useState<{
-    h: number;
-    s: number;
-    v: number;
-  }>({ h: 233, s: 13, v: 11 });
-
-  useEffect(() => {
-    return connect(setCurrentColor);
-  }, []);
-
-  const displayColor = useMemo(() => {
-    const [r, g, b] = convert.hsv.rgb([
-      currentColor.h,
-      currentColor.s,
-      currentColor.v,
-    ]);
-    return new Color({ r, g, b });
-  }, [currentColor]);
+        setRunningColors(colors);
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : 'Error saving lights configuration'
+        );
+        setErrorDialogOpen(true);
+      }
+    })();
+  }, [colors, setRunningColors, runningColors]);
 
   return (
-    <>
-      <Card className="w-full max-w-sm mb-4">
-        <CardHeader>
-          <CardTitle>Current Color</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div
-            style={{ backgroundColor: displayColor.toHexString() }}
-            className="w-full h-6 rounded-full"
-          ></div>
-        </CardContent>
-      </Card>
-      <Card className="w-full max-w-sm mb-4">
-        <CardHeader>
-          <CardTitle>Color Definitions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {colors.map((color, index) => (
-            <EditColor
-              key={color.id}
-              color={color}
-              savedColor={savedColors[index]}
-              setColor={(updatedColor) => {
-                const newColors = [...colors];
-                newColors[index] = updatedColor;
-                setColors(newColors);
-              }}
-            />
-          ))}
-        </CardContent>
-      </Card>
-    </>
+    <div className="grow h-full flex flex-col">
+      <div className="flex flex-col gap-4 overflow-scroll grow basis-0 px-2 py-4">
+        <Card className="w-full max-w-sm mb-4">
+          <CardHeader>
+            <CardTitle>Color Definitions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {colors.map((color, index) => (
+              <EditColor
+                key={color.id}
+                color={color}
+                savedColor={runningColors[index]}
+                setColor={(updatedColor) => {
+                  const newColors = [...colors];
+                  newColors[index] = updatedColor;
+                  setColors(newColors);
+                }}
+              />
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+      <div className="w-full p-4 bg-color border-t border-zinc-700">
+        <Button
+          className="text-xl py-6 w-full"
+          disabled={!hasUnsavedChanges}
+          onClick={onSave}
+        >
+          Save
+        </Button>
+      </div>
+      <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Error saving colors</DialogTitle>
+            <DialogDescription>{errorMessage}</DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

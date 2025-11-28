@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  type Color,
-  type Override,
-  type ScheduleEntry,
-} from '@aquarium/shared';
+import { type Override, type ScheduleEntry } from '@aquarium/shared';
 import equal from 'fast-deep-equal';
 import { createContext, useCallback, useContext, useState } from 'react';
 
@@ -18,17 +14,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../ui/Dialog.tsx';
-import { Colors } from './Colors.tsx';
+import { CurrentColor } from './CurrentColor.tsx';
 import { Entry } from './Entry.tsx';
 import { OverrideCard } from './OverrideCard.tsx';
 
 type LightsContextValue = {
   runningSchedule: ScheduleEntry[];
   runningOverride: Override;
-  runningColors: Color[];
   setRunningSchedule: (schedule: ScheduleEntry[]) => void;
   setRunningOverride: (override: Override) => void;
-  setRunningColors: (colors: Color[]) => void;
 };
 
 const LightsContext = createContext<LightsContextValue | undefined>(undefined);
@@ -45,33 +39,26 @@ function LightsContent() {
   const {
     runningSchedule,
     runningOverride,
-    runningColors,
     setRunningSchedule,
     setRunningOverride,
-    setRunningColors,
   } = useLightsContext();
   const [schedule, setSchedule] = useState<ScheduleEntry[]>(runningSchedule);
   const [override, setOverride] = useState<Override>({
     enabled: runningOverride.enabled,
     state: runningOverride.state,
   });
-  const [colors, setColors] = useState<Color[]>(runningColors);
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   const hasUnsavedChanges =
-    !equal(schedule, runningSchedule) ||
-    !equal(override, runningOverride) ||
-    !equal(colors, runningColors);
+    !equal(schedule, runningSchedule) || !equal(override, runningOverride);
 
   const onSave = useCallback(() => {
     const scheduleChanged = !equal(schedule, runningSchedule);
 
     const overrideChanged = !equal(override, runningOverride);
 
-    const colorsChanged = !equal(colors, runningColors);
-
-    if (!scheduleChanged && !overrideChanged && !colorsChanged) {
+    if (!scheduleChanged && !overrideChanged) {
       return;
     }
 
@@ -106,21 +93,6 @@ function LightsContent() {
 
           setRunningOverride(override);
         }
-
-        if (colorsChanged) {
-          const response = await put({
-            endpoint: '/colors',
-            body: colors,
-          });
-
-          if (!response.ok) {
-            setErrorMessage('Failed to update colors');
-            setErrorDialogOpen(true);
-            return;
-          }
-
-          setRunningColors(colors);
-        }
       } catch (error) {
         setErrorMessage(
           error instanceof Error
@@ -135,11 +107,8 @@ function LightsContent() {
     override,
     runningOverride,
     runningSchedule,
-    colors,
     setRunningOverride,
     setRunningSchedule,
-    setRunningColors,
-    runningColors,
   ]);
 
   return (
@@ -151,11 +120,7 @@ function LightsContent() {
             setOverride(override);
           }}
         />
-        <Colors
-          colors={colors}
-          setColors={setColors}
-          savedColors={runningColors}
-        />
+        <CurrentColor />
         {schedule.map((entry, index) => (
           <Entry
             key={entry.id}
@@ -193,29 +158,24 @@ function LightsContent() {
 type LightsPageProps = {
   initialSchedule: ScheduleEntry[];
   initialOverride: Override;
-  initialColors: Color[];
 };
 
 export function LightsPage({
   initialSchedule,
   initialOverride,
-  initialColors,
 }: LightsPageProps) {
   const [runningSchedule, setRunningSchedule] =
     useState<ScheduleEntry[]>(initialSchedule);
   const [runningOverride, setRunningOverride] =
     useState<Override>(initialOverride);
-  const [runningColors, setRunningColors] = useState<Color[]>(initialColors);
 
   return (
     <LightsContext.Provider
       value={{
         runningSchedule,
         runningOverride,
-        runningColors,
         setRunningSchedule,
         setRunningOverride,
-        setRunningColors,
       }}
     >
       <LightsContent />

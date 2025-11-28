@@ -6,6 +6,7 @@ import {
 } from '@aquarium/shared';
 
 import { CleaningPage } from '@/components/cleaning/CleaningPage.tsx';
+import { ColorsPage } from '@/components/colors/ColorsPage.tsx';
 import { LightsPage } from '@/components/lights/LightsPage.tsx';
 import {
   Tabs,
@@ -27,17 +28,19 @@ export default async function Home() {
           <TabsTrigger className="text-xl px-4 py-2" value="lights">
             Lights
           </TabsTrigger>
+          <TabsTrigger className="text-xl px-4 py-2" value="colors">
+            Colors
+          </TabsTrigger>
           <TabsTrigger className="text-xl px-4 py-2" value="cleaning">
             Cleaning
           </TabsTrigger>
         </TabsList>
       </header>
       <TabsContent className="grow" value="lights">
-        <LightsPage
-          initialSchedule={schedule}
-          initialOverride={override}
-          initialColors={colors}
-        />
+        <LightsPage initialSchedule={schedule} initialOverride={override} />
+      </TabsContent>
+      <TabsContent className="grow" value="colors">
+        <ColorsPage initialColors={colors} />
       </TabsContent>
       <TabsContent className="grow" value="cleaning">
         <CleaningPage initialCleaningRecords={cleaningRecords} />
