@@ -4,7 +4,7 @@ import { type Color as HSVColor } from '@aquarium/shared';
 import ColorPicker, { Color } from '@rc-component/color-picker';
 import convert from 'color-convert';
 import equal from 'fast-deep-equal';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Pencil, Trash } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { put } from '@/lib/request.ts';
@@ -18,11 +18,15 @@ import {
 } from '../ui/Collapsible.tsx';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '../ui/Dialog.tsx';
+import { Input } from '../ui/Input.tsx';
 
 type EditColorProps = {
   color: HSVColor;
@@ -32,6 +36,8 @@ type EditColorProps = {
 
 function EditColor({ color, setColor, onDelete }: EditColorProps) {
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [newName, setNewName] = useState(color.name);
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Convert HSV from schedule to RGB for color picker
@@ -89,6 +95,42 @@ function EditColor({ color, setColor, onDelete }: EditColorProps) {
               disabledAlpha
             />
           </div>
+          <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="w-full">
+                <Pencil className="mr-2 h-4 w-4" />
+                Rename Color
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Rename Color</DialogTitle>
+                <DialogDescription>
+                  Enter a new name for this color.
+                </DialogDescription>
+              </DialogHeader>
+              <Input
+                value={newName}
+                onChange={(e) => {
+                  setNewName(e.target.value);
+                }}
+                placeholder="Color name"
+              />
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button
+                  onClick={() => {
+                    setColor({ ...color, name: newName });
+                    setRenameDialogOpen(false);
+                  }}
+                >
+                  Rename
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
           <Button
             variant="destructive"
             className="w-full"
@@ -96,6 +138,7 @@ function EditColor({ color, setColor, onDelete }: EditColorProps) {
               onDelete();
             }}
           >
+            <Trash className="mr-2 h-4 w-4" />
             Delete Color
           </Button>
         </div>
