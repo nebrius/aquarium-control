@@ -26,11 +26,11 @@ import {
 
 type EditColorProps = {
   color: HSVColor;
-  savedColor: HSVColor;
   setColor: (color: HSVColor) => void;
+  onDelete: () => void;
 };
 
-function EditColor({ savedColor, color, setColor }: EditColorProps) {
+function EditColor({ color, setColor, onDelete }: EditColorProps) {
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -39,16 +39,6 @@ function EditColor({ savedColor, color, setColor }: EditColorProps) {
     const [r, g, b] = convert.hsv.rgb([color.h, color.s, color.v]);
     return new Color({ r, g, b });
   }, [color.h, color.s, color.v]);
-
-  // Convert saved HSV to RGB for color indicator
-  const savedRgbColor = useMemo(() => {
-    const [r, g, b] = convert.hsv.rgb([
-      savedColor.h,
-      savedColor.s,
-      savedColor.v,
-    ]);
-    return new Color({ r, g, b });
-  }, [savedColor.h, savedColor.s, savedColor.v]);
 
   // Update color when picker changes
   const handleColorChange = (newColor: Color) => {
@@ -72,15 +62,15 @@ function EditColor({ savedColor, color, setColor }: EditColorProps) {
     <Collapsible open={isColorPickerOpen} onOpenChange={setIsColorPickerOpen}>
       <CollapsibleTrigger asChild className="mt-4 w-full">
         <div className="flex items-center gap-2">
-          <div className="grow">
+          <div>
             <div
-              style={{ backgroundColor: savedRgbColor.toHexString() }}
-              className="size-6 w-[124px] rounded-full"
+              style={{ backgroundColor: rgbColor.toHexString() }}
+              className="size-6 w-[64px] rounded-full"
             ></div>
           </div>
+          <div className="grow">{color.name}</div>
           <div>
             <Button variant="outline">
-              Edit {color.name}
               <ChevronDown
                 className={`transition-transform duration-200 ${
                   isColorPickerOpen ? 'rotate-180' : ''
@@ -91,12 +81,23 @@ function EditColor({ savedColor, color, setColor }: EditColorProps) {
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="mt-4">
-        <div className="flex justify-center touch-none">
-          <ColorPicker
-            value={rgbColor}
-            onChange={handleColorChange}
-            disabledAlpha
-          />
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-center touch-none">
+            <ColorPicker
+              value={rgbColor}
+              onChange={handleColorChange}
+              disabledAlpha
+            />
+          </div>
+          <Button
+            variant="destructive"
+            className="w-full"
+            onClick={() => {
+              onDelete();
+            }}
+          >
+            Delete Color
+          </Button>
         </div>
       </CollapsibleContent>
     </Collapsible>
@@ -158,10 +159,13 @@ export function ColorsPage({ initialColors }: ColorsProps) {
               <EditColor
                 key={color.id}
                 color={color}
-                savedColor={runningColors[index]}
                 setColor={(updatedColor) => {
                   const newColors = [...colors];
                   newColors[index] = updatedColor;
+                  setColors(newColors);
+                }}
+                onDelete={() => {
+                  const newColors = colors.filter((c) => c.id !== color.id);
                   setColors(newColors);
                 }}
               />
