@@ -1,6 +1,10 @@
 'use client';
 
-import { type Override, type ScheduleEntry } from '@aquarium/shared';
+import {
+  type Color,
+  type Override,
+  type ScheduleEntry,
+} from '@aquarium/shared';
 import equal from 'fast-deep-equal';
 import { createContext, useCallback, useContext, useState } from 'react';
 
@@ -21,6 +25,7 @@ import { OverrideCard } from './OverrideCard.tsx';
 type LightsContextValue = {
   runningSchedule: ScheduleEntry[];
   runningOverride: Override;
+  colors: Color[];
   setRunningSchedule: (schedule: ScheduleEntry[]) => void;
   setRunningOverride: (override: Override) => void;
 };
@@ -39,6 +44,7 @@ function LightsContent() {
   const {
     runningSchedule,
     runningOverride,
+    colors,
     setRunningSchedule,
     setRunningOverride,
   } = useLightsContext();
@@ -116,6 +122,7 @@ function LightsContent() {
       <div className="flex flex-col gap-4 overflow-scroll grow basis-0 px-2 py-4">
         <OverrideCard
           override={override}
+          colors={colors}
           setOverride={(override) => {
             setOverride(override);
           }}
@@ -158,11 +165,13 @@ function LightsContent() {
 type LightsPageProps = {
   initialSchedule: ScheduleEntry[];
   initialOverride: Override;
+  colors: Color[];
 };
 
 export function LightsPage({
   initialSchedule,
   initialOverride,
+  colors,
 }: LightsPageProps) {
   const [runningSchedule, setRunningSchedule] =
     useState<ScheduleEntry[]>(initialSchedule);
@@ -174,6 +183,7 @@ export function LightsPage({
       value={{
         runningSchedule,
         runningOverride,
+        colors,
         setRunningSchedule,
         setRunningOverride,
       }}

@@ -1,4 +1,4 @@
-import { type LightState, type Override } from '@aquarium/shared';
+import { type Color, type LightState, type Override } from '@aquarium/shared';
 
 import {
   Card,
@@ -12,10 +12,15 @@ import { Switch } from '../ui/Switch.tsx';
 
 type OverrideCardProps = {
   override: Override;
+  colors: Color[];
   setOverride: (override: Override) => void;
 };
 
-export function OverrideCard({ override, setOverride }: OverrideCardProps) {
+export function OverrideCard({
+  override,
+  colors,
+  setOverride,
+}: OverrideCardProps) {
   return (
     <Card className="w-full max-w-sm mb-4">
       <CardHeader>
@@ -36,15 +41,11 @@ export function OverrideCard({ override, setOverride }: OverrideCardProps) {
             setOverride({ ...override, state: e.target.value as LightState });
           }}
         >
-          <NativeSelectOption value={'off' satisfies LightState}>
-            Off
-          </NativeSelectOption>
-          <NativeSelectOption value={'day' satisfies LightState}>
-            Day
-          </NativeSelectOption>
-          <NativeSelectOption value={'night' satisfies LightState}>
-            Night
-          </NativeSelectOption>
+          {colors.map((color) => (
+            <NativeSelectOption key={color.id} value={color.name}>
+              {color.name}
+            </NativeSelectOption>
+          ))}
         </NativeSelect>
       </CardContent>
     </Card>
