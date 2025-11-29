@@ -4,7 +4,7 @@ import { type Color as HSVColor } from '@aquarium/shared';
 import ColorPicker, { Color } from '@rc-component/color-picker';
 import convert from 'color-convert';
 import equal from 'fast-deep-equal';
-import { ChevronDown, Pencil, Trash } from 'lucide-react';
+import { ChevronDown, Pencil, Plus, Trash } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { put } from '@/lib/request.ts';
@@ -18,7 +18,6 @@ import {
 } from '../ui/Collapsible.tsx';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -66,83 +65,78 @@ function EditColor({ color, setColor, onDelete }: EditColorProps) {
   }, [isColorPickerOpen]);
   return (
     <Collapsible open={isColorPickerOpen} onOpenChange={setIsColorPickerOpen}>
-      <CollapsibleTrigger asChild className="mt-4 w-full">
-        <div className="flex items-center gap-2">
-          <div>
-            <div
-              style={{ backgroundColor: rgbColor.toHexString() }}
-              className="size-6 w-[64px] rounded-full"
-            ></div>
-          </div>
-          <div className="grow">{color.name}</div>
-          <div>
-            <Button variant="outline">
+      <Card ref={cardRef}>
+        <CollapsibleTrigger asChild>
+          <CardHeader className="cursor-pointer">
+            <div className="flex items-center gap-2">
+              <div
+                style={{ backgroundColor: rgbColor.toHexString() }}
+                className="size-6 w-[64px] rounded-full"
+              />
+              <CardTitle className="grow">{color.name}</CardTitle>
               <ChevronDown
                 className={`transition-transform duration-200 ${
                   isColorPickerOpen ? 'rotate-180' : ''
                 }`}
               />
-            </Button>
-          </div>
-        </div>
-      </CollapsibleTrigger>
-      <CollapsibleContent className="mt-4">
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-center touch-none">
-            <ColorPicker
-              value={rgbColor}
-              onChange={handleColorChange}
-              disabledAlpha
-            />
-          </div>
-          <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="w-full">
-                <Pencil className="mr-2 h-4 w-4" />
-                Rename Color
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Rename Color</DialogTitle>
-                <DialogDescription>
-                  Enter a new name for this color.
-                </DialogDescription>
-              </DialogHeader>
-              <Input
-                value={newName}
-                onChange={(e) => {
-                  setNewName(e.target.value);
-                }}
-                placeholder="Color name"
+            </div>
+          </CardHeader>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent className="flex flex-col gap-4">
+            <div className="flex justify-center touch-none">
+              <ColorPicker
+                value={rgbColor}
+                onChange={handleColorChange}
+                disabledAlpha
               />
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <Button
-                  onClick={() => {
-                    setColor({ ...color, name: newName });
-                    setRenameDialogOpen(false);
-                  }}
-                >
-                  Rename
+            </div>
+            <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full">
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Rename Color
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          <Button
-            variant="destructive"
-            className="w-full"
-            onClick={() => {
-              onDelete();
-            }}
-          >
-            <Trash className="mr-2 h-4 w-4" />
-            Delete Color
-          </Button>
-        </div>
-      </CollapsibleContent>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Rename Color</DialogTitle>
+                  <DialogDescription>
+                    Enter a new name for this color.
+                  </DialogDescription>
+                </DialogHeader>
+                <Input
+                  value={newName}
+                  onChange={(e) => {
+                    setNewName(e.target.value);
+                  }}
+                  placeholder="Color name"
+                />
+                <DialogFooter>
+                  <Button
+                    onClick={() => {
+                      setColor({ ...color, name: newName });
+                      setRenameDialogOpen(false);
+                    }}
+                  >
+                    Rename
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={() => {
+                onDelete();
+              }}
+            >
+              <Trash className="mr-2 h-4 w-4" />
+              Delete Color
+            </Button>
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
     </Collapsible>
   );
 }
@@ -156,6 +150,8 @@ export function ColorsPage({ initialColors }: ColorsProps) {
   const [colors, setColors] = useState<HSVColor[]>(initialColors);
   const [errorMessage, setErrorMessage] = useState('');
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [newColorName, setNewColorName] = useState('');
 
   const hasUnsavedChanges = !equal(colors, runningColors);
   const onSave = useCallback(() => {
@@ -193,28 +189,63 @@ export function ColorsPage({ initialColors }: ColorsProps) {
   return (
     <div className="grow h-full flex flex-col">
       <div className="flex flex-col gap-4 overflow-scroll grow basis-0 px-2 py-4">
-        <Card className="w-full max-w-sm mb-4">
-          <CardHeader>
-            <CardTitle>Color Definitions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {colors.map((color, index) => (
-              <EditColor
-                key={color.id}
-                color={color}
-                setColor={(updatedColor) => {
-                  const newColors = [...colors];
-                  newColors[index] = updatedColor;
-                  setColors(newColors);
+        <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="w-full">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Color
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Color</DialogTitle>
+              <DialogDescription>
+                Enter a name for the new color.
+              </DialogDescription>
+            </DialogHeader>
+            <Input
+              value={newColorName}
+              onChange={(e) => {
+                setNewColorName(e.target.value);
+              }}
+              placeholder="Color name"
+            />
+            <DialogFooter>
+              <Button
+                onClick={() => {
+                  const usedIds = new Set(colors.map((c) => c.id));
+                  let newId = 1;
+                  while (usedIds.has(newId)) {
+                    newId++;
+                  }
+                  setColors([
+                    ...colors,
+                    { id: newId, name: newColorName, h: 0, s: 0, v: 0 },
+                  ]);
+                  setNewColorName('');
+                  setAddDialogOpen(false);
                 }}
-                onDelete={() => {
-                  const newColors = colors.filter((c) => c.id !== color.id);
-                  setColors(newColors);
-                }}
-              />
-            ))}
-          </CardContent>
-        </Card>
+              >
+                Add
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        {colors.map((color, index) => (
+          <EditColor
+            key={color.id}
+            color={color}
+            setColor={(updatedColor) => {
+              const newColors = [...colors];
+              newColors[index] = updatedColor;
+              setColors(newColors);
+            }}
+            onDelete={() => {
+              const newColors = colors.filter((c) => c.id !== color.id);
+              setColors(newColors);
+            }}
+          />
+        ))}
       </div>
       <div className="w-full p-4 bg-color border-t border-zinc-700">
         <Button
