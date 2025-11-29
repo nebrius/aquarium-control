@@ -4,6 +4,7 @@ import { type Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 
 import { ThemeProvider } from '@/components/ThemeProvider.tsx';
+import { NavTabLink, NavTabs } from '@/components/ui/NavTabs.tsx';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -36,7 +37,22 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <div className="absolute inset-[0] flex flex-col">
+            <header className="container flex items-center justify-center w-full bg-color border-b border-zinc-700 py-2">
+              <NavTabs>
+                <NavTabLink className="text-xl px-4 py-2" href="/">
+                  Lights
+                </NavTabLink>
+                <NavTabLink className="text-xl px-4 py-2" href="/colors">
+                  Colors
+                </NavTabLink>
+                <NavTabLink className="text-xl px-4 py-2" href="/cleaning">
+                  Cleaning
+                </NavTabLink>
+              </NavTabs>
+            </header>
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>
