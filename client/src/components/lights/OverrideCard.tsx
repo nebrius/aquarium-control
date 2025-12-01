@@ -1,4 +1,4 @@
-import { type Color, type LightState, type Override } from '@aquarium/shared';
+import { type Color, type Override } from '@aquarium/shared';
 
 import {
   Card,
@@ -36,13 +36,13 @@ export function OverrideCard({
       </CardHeader>
       <CardContent>
         <NativeSelect
-          defaultValue={override.state}
+          defaultValue={override.colorId}
           onChange={(e) => {
-            setOverride({ ...override, state: e.target.value as LightState });
+            setOverride({ ...override, colorId: Number(e.target.value) });
           }}
         >
           {colors.map((color) => (
-            <NativeSelectOption key={color.id} value={color.name}>
+            <NativeSelectOption key={color.id} value={color.id}>
               {color.name}
             </NativeSelectOption>
           ))}

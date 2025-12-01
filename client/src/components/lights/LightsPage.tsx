@@ -51,7 +51,7 @@ function LightsContent() {
   const [schedule, setSchedule] = useState<ScheduleEntry[]>(runningSchedule);
   const [override, setOverride] = useState<Override>({
     enabled: runningOverride.enabled,
-    state: runningOverride.state,
+    colorId: runningOverride.colorId,
   });
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
