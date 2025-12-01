@@ -1,10 +1,10 @@
 'use client';
 
 import { type Color as HSVColor } from '@aquarium/shared';
-import ColorPicker, { Color } from '@rc-component/color-picker';
 import convert from 'color-convert';
 import { ChevronDown, Pencil, Trash } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { HsvColorPicker } from 'react-colorful';
 
 import { Button } from '../ui/Button.tsx';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card.tsx';
@@ -36,20 +36,15 @@ export function EditColor({ color, setColor, onDelete }: EditColorProps) {
   const [newName, setNewName] = useState(color.name);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Convert HSV from schedule to RGB for color picker
-  const rgbColor = useMemo(() => {
+  // Convert HSV to hex for display
+  const hexColor = useMemo(() => {
     const [r, g, b] = convert.hsv.rgb([color.h, color.s, color.v]);
-    return new Color({ r, g, b });
+    return convert.rgb.hex([r, g, b]);
   }, [color.h, color.s, color.v]);
 
   // Update color when picker changes
-  const handleColorChange = (newColor: Color) => {
-    const hex = newColor.toHexString();
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    const [h, s, v] = convert.rgb.hsv([r, g, b]);
-    setColor({ ...color, h, s, v });
+  const handleColorChange = (newHsv: { h: number; s: number; v: number }) => {
+    setColor({ ...color, h: newHsv.h, s: newHsv.s, v: newHsv.v });
   };
 
   useEffect(() => {
@@ -67,7 +62,7 @@ export function EditColor({ color, setColor, onDelete }: EditColorProps) {
           <CardHeader className="cursor-pointer">
             <div className="flex items-center gap-2">
               <div
-                style={{ backgroundColor: rgbColor.toHexString() }}
+                style={{ backgroundColor: `#${hexColor}` }}
                 className="size-6 w-[64px] rounded-full"
               />
               <CardTitle className="grow">{color.name}</CardTitle>
@@ -82,10 +77,9 @@ export function EditColor({ color, setColor, onDelete }: EditColorProps) {
         <CollapsibleContent>
           <CardContent className="flex flex-col gap-4">
             <div className="flex justify-center touch-none">
-              <ColorPicker
-                value={rgbColor}
+              <HsvColorPicker
+                color={{ h: color.h, s: color.s, v: color.v }}
                 onChange={handleColorChange}
-                disabledAlpha
               />
             </div>
             <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
