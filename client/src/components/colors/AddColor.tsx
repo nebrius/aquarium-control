@@ -1,4 +1,4 @@
-import { type Color as HSVColor } from '@aquarium/shared';
+import { type Color as HSVColor, type CreateColor } from '@aquarium/shared';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
@@ -17,9 +17,10 @@ import { Input } from '../ui/Input.tsx';
 type AddColorProps = {
   colors: HSVColor[];
   setColors: React.Dispatch<React.SetStateAction<HSVColor[]>>;
+  setColorsToAdd: React.Dispatch<React.SetStateAction<CreateColor[]>>;
 };
 
-export function AddColor({ colors, setColors }: AddColorProps) {
+export function AddColor({ colors, setColors, setColorsToAdd }: AddColorProps) {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [newColorName, setNewColorName] = useState('');
 
@@ -46,15 +47,16 @@ export function AddColor({ colors, setColors }: AddColorProps) {
         <DialogFooter>
           <Button
             onClick={() => {
-              const usedIds = new Set(colors.map((c) => c.id));
-              let newId = 1;
-              while (usedIds.has(newId)) {
-                newId++;
-              }
-              setColors([
-                ...colors,
-                { id: newId, name: newColorName, h: 0, s: 0, v: 0 },
-              ]);
+              const newColor: CreateColor = {
+                name: newColorName,
+                h: 0,
+                s: 0,
+                v: 0,
+              };
+              // Use negative IDs for unsaved colors to distinguish them
+              const minId = Math.min(0, ...colors.map((c) => c.id));
+              setColors([...colors, { id: minId - 1, ...newColor }]);
+              setColorsToAdd((prev) => [...prev, newColor]);
               setNewColorName('');
               setAddDialogOpen(false);
             }}

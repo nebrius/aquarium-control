@@ -1,8 +1,8 @@
 import {
   CleaningRecordSchema,
-  ColorSchema,
   OverrideSchema,
   ScheduleEntrySchema,
+  UpdateColorsSchema,
 } from '@aquarium/shared';
 import cors from '@fastify/cors';
 import { type TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
@@ -13,11 +13,11 @@ import { type WebSocket } from 'ws';
 
 import {
   addCleaningRecord,
+  batchColorUpdates,
   getCleaningRecords,
   getColors,
   getOverride,
   getSchedule,
-  setColors,
   setOverride,
   setSchedule,
 } from './db/db.ts';
@@ -104,23 +104,23 @@ fastify.put(
   }
 );
 
-// GET /colors - Get the current color set
+// GET /colors - Get all colors
 fastify.get('/colors', () => {
   return getColors();
 });
 
-// PUT /colors - Set the color set
-fastify.put(
+// POST /colors - Batch update colors (add, edit, delete)
+fastify.post(
   '/colors',
   {
     schema: {
-      body: Type.Array(ColorSchema),
+      body: UpdateColorsSchema,
     },
   },
   (request) => {
-    setColors(request.body);
-    handleColorUpdate(request.body);
-    return { message: 'OK' };
+    const colors = batchColorUpdates(request.body);
+    handleColorUpdate(colors);
+    return colors;
   }
 );
 

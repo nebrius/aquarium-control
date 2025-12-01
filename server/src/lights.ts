@@ -1,6 +1,5 @@
 import {
   type Color,
-  type LightState,
   type Override,
   type ScheduleEntry,
 } from '@aquarium/shared';
@@ -40,8 +39,9 @@ let scheduleTimeout: NodeJS.Timeout | undefined;
 
 // This function computes the target color from the previous color, taking into
 // account when lights are off.
-function setTargetColor(nextLightState: LightState) {
-  logger.debug(`Setting target color to ${nextLightState}`);
+function setTargetColor(colorId: number) {
+  const color = colors.find((c) => c.id === colorId) ?? OFF_COLOR;
+  logger.debug(`Setting target color to ${color.name} (id=${colorId})`);
   // const nextColor = colorSet[nextLightState];
 
   // // Compute the actual next color
@@ -184,7 +184,7 @@ function handleChange() {
 
   // If we're in override mode, set the color to the override color
   if (override.enabled) {
-    setTargetColor(override.state);
+    setTargetColor(override.colorId);
     setTransitionTimes(Date.now(), OVERRIDE_TRANSITION_TIME);
     return;
   }
@@ -197,7 +197,7 @@ function handleChange() {
 
 function getScheduledColors():
   | {
-      currentLightState: LightState;
+      currentColorId: number;
       nextTransitionDuration: number;
       nextStartTime: { hour: number; minute: number };
     }
@@ -277,9 +277,10 @@ function scheduleNextTransition({
   const now = new Date();
 
   // Get the target color.
-  const targetLightState = currentScheduledColors
-    ? currentScheduledColors.currentLightState
-    : 'off';
+  const offColorId = colors.find((c) => c.name === 'off')?.id ?? 0;
+  const targetColorId = currentScheduledColors
+    ? currentScheduledColors.currentColorId
+    : offColorId;
 
   // Get the target transition time.
   const nextTransitionTime = currentScheduledColors
@@ -316,7 +317,7 @@ function scheduleNextTransition({
       );
 
   // Set the target color and transition time
-  setTargetColor(targetLightState);
+  setTargetColor(targetColorId);
   setTransitionTimes(now.getTime(), currentTransitionTime);
 
   // Schedule the next transition

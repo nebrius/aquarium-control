@@ -17,20 +17,13 @@ export const CleaningRecordSchema = Type.Object({
 
 export type CleaningRecordEntry = Static<typeof CleaningRecordSchema>;
 
-const LightStateSchema = Type.Union([
-  Type.Literal('off'),
-  Type.Literal('night'),
-  Type.Literal('day'),
-]);
-
-export type LightState = Static<typeof LightStateSchema>;
-
 export const ScheduleEntrySchema = Type.Object({
   id: Type.Integer(),
   name: Type.String(),
   hour: Type.Integer({ minimum: 0, maximum: 255 }),
   minute: Type.Integer({ minimum: 0, maximum: 255 }),
   fade: Type.Integer({ minimum: 0, maximum: 255 }),
+  colorId: Type.Number(),
 });
 
 export type ScheduleEntry = Static<typeof ScheduleEntrySchema>;
@@ -45,9 +38,26 @@ export const ColorSchema = Type.Object({
 
 export type Color = Static<typeof ColorSchema>;
 
+export const CreateColorSchema = Type.Object({
+  name: Type.String(),
+  h: Type.Integer({ minimum: 0, maximum: 360 }),
+  s: Type.Integer({ minimum: 0, maximum: 100 }),
+  v: Type.Integer({ minimum: 0, maximum: 100 }),
+});
+
+export type CreateColor = Static<typeof CreateColorSchema>;
+
+export const UpdateColorsSchema = Type.Object({
+  add: Type.Array(CreateColorSchema),
+  edit: Type.Array(ColorSchema),
+  delete: Type.Array(Type.Number()),
+});
+
+export type UpdateColors = Static<typeof UpdateColorsSchema>;
+
 export const OverrideSchema = Type.Object({
   enabled: Type.Boolean(),
-  state: LightStateSchema,
+  colorId: Type.Number(),
 });
 
 export type Override = Static<typeof OverrideSchema>;
