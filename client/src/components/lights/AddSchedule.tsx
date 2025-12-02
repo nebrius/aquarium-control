@@ -32,7 +32,7 @@ export function AddSchedule({
   setScheduleToAdd,
 }: AddScheduleProps) {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [newScheduleName, setNewScheduleName] = useState('');
+  const [newScheduleName, setNewScheduleName] = useState('A → B');
 
   return (
     <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
