@@ -1,13 +1,24 @@
 import { type Color, type ScheduleEntry } from '@aquarium/shared';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Pencil, Trash } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
+import { Button } from '../ui/Button.tsx';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card.tsx';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '../ui/Collapsible.tsx';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../ui/Dialog.tsx';
+import { Input } from '../ui/Input.tsx';
 import { Label } from '../ui/Label.tsx';
 import { NativeSelect, NativeSelectOption } from '../ui/NativeSelect.tsx';
 
@@ -44,15 +55,24 @@ function IntegerSelect({
   );
 }
 
-type EntryProps = {
+type ScheduleProps = {
   name: string;
   schedule: ScheduleEntry;
   setSchedule: (schedule: ScheduleEntry) => void;
+  onDelete: () => void;
   colors: Color[];
 };
 
-export function Entry({ name, schedule, setSchedule, colors }: EntryProps) {
+export function Schedule({
+  name,
+  schedule,
+  setSchedule,
+  onDelete,
+  colors,
+}: ScheduleProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [newName, setNewName] = useState(schedule.name);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -128,6 +148,49 @@ export function Entry({ name, schedule, setSchedule, colors }: EntryProps) {
                 ))}
               </NativeSelect>
             </div>
+            <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full mt-4">
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Rename Schedule
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Rename Schedule</DialogTitle>
+                  <DialogDescription>
+                    Enter a new name for this schedule entry.
+                  </DialogDescription>
+                </DialogHeader>
+                <Input
+                  value={newName}
+                  onChange={(e) => {
+                    setNewName(e.target.value);
+                  }}
+                  placeholder="Schedule name"
+                />
+                <DialogFooter>
+                  <Button
+                    onClick={() => {
+                      setSchedule({ ...schedule, name: newName });
+                      setRenameDialogOpen(false);
+                    }}
+                  >
+                    Rename
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Button
+              variant="destructive"
+              className="w-full mt-2"
+              onClick={() => {
+                onDelete();
+              }}
+            >
+              <Trash className="mr-2 h-4 w-4" />
+              Delete Schedule
+            </Button>
           </CardContent>
         </CollapsibleContent>
       </Card>

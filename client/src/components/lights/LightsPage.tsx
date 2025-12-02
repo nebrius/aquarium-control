@@ -2,6 +2,7 @@
 
 import {
   type Color,
+  type CreateScheduleEntry,
   type Override,
   type ScheduleEntry,
 } from '@aquarium/shared';
@@ -17,9 +18,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../ui/Dialog.tsx';
+import { AddSchedule } from './AddSchedule.tsx';
 import { CurrentColor } from './CurrentColor.tsx';
-import { Entry } from './Entry.tsx';
 import { OverrideCard } from './OverrideCard.tsx';
+import { Schedule } from './Schedule.tsx';
 
 type LightsContextValue = {
   runningSchedule: ScheduleEntry[];
@@ -48,7 +50,9 @@ function LightsContent() {
     setRunningOverride,
   } = useLightsContext();
   const [schedule, setSchedule] = useState<ScheduleEntry[]>(runningSchedule);
+  const [scheduleToAdd, setScheduleToAdd] = useState<CreateScheduleEntry[]>([]);
   const [scheduleToEdit, setScheduleToEdit] = useState<ScheduleEntry[]>([]);
+  const [scheduleToDelete, setScheduleToDelete] = useState<number[]>([]);
   const [override, setOverride] = useState<Override>({
     enabled: runningOverride.enabled,
     colorId: runningOverride.colorId,
@@ -57,7 +61,11 @@ function LightsContent() {
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const hasUnsavedChanges = scheduleToEdit.length > 0 || overrideChanged;
+  const hasUnsavedChanges =
+    scheduleToAdd.length > 0 ||
+    scheduleToEdit.length > 0 ||
+    scheduleToDelete.length > 0 ||
+    overrideChanged;
 
   const onSave = useCallback(() => {
     if (!hasUnsavedChanges) {
@@ -66,13 +74,17 @@ function LightsContent() {
 
     void (async () => {
       try {
-        if (scheduleToEdit.length > 0) {
+        if (
+          scheduleToAdd.length > 0 ||
+          scheduleToEdit.length > 0 ||
+          scheduleToDelete.length > 0
+        ) {
           const response = await post({
             endpoint: '/schedule',
             body: {
-              add: [],
+              add: scheduleToAdd,
               edit: scheduleToEdit,
-              delete: [],
+              delete: scheduleToDelete,
             },
           });
 
@@ -85,7 +97,9 @@ function LightsContent() {
           const updatedSchedule = (await response.json()) as ScheduleEntry[];
           setSchedule(updatedSchedule);
           setRunningSchedule(updatedSchedule);
+          setScheduleToAdd([]);
           setScheduleToEdit([]);
+          setScheduleToDelete([]);
         }
 
         if (overrideChanged) {
@@ -114,7 +128,9 @@ function LightsContent() {
     })();
   }, [
     hasUnsavedChanges,
+    scheduleToAdd,
     scheduleToEdit,
+    scheduleToDelete,
     override,
     overrideChanged,
     setRunningOverride,
@@ -133,8 +149,14 @@ function LightsContent() {
           }}
         />
         <CurrentColor />
+        <AddSchedule
+          schedule={schedule}
+          colors={colors}
+          setSchedule={setSchedule}
+          setScheduleToAdd={setScheduleToAdd}
+        />
         {schedule.map((entry, index) => (
-          <Entry
+          <Schedule
             key={entry.id}
             name={entry.name}
             schedule={entry}
@@ -152,6 +174,13 @@ function LightsContent() {
                 }
                 return [...prev, updated];
               });
+            }}
+            onDelete={() => {
+              setSchedule((prev) => prev.filter((e) => e.id !== entry.id));
+              setScheduleToDelete((prev) => [...prev, entry.id]);
+              setScheduleToEdit((prev) =>
+                prev.filter((e) => e.id !== entry.id)
+              );
             }}
           />
         ))}
