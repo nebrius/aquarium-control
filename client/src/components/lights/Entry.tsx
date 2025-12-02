@@ -1,5 +1,3 @@
-import '@rc-component/color-picker/assets/index.css';
-
 import { type ScheduleEntry } from '@aquarium/shared';
 
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card.tsx';

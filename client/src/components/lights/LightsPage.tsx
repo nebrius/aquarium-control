@@ -5,10 +5,9 @@ import {
   type Override,
   type ScheduleEntry,
 } from '@aquarium/shared';
-import equal from 'fast-deep-equal';
 import { createContext, useCallback, useContext, useState } from 'react';
 
-import { put } from '@/lib/request.ts';
+import { post, put } from '@/lib/request.ts';
 
 import { Button } from '../ui/Button.tsx';
 import {
@@ -49,31 +48,32 @@ function LightsContent() {
     setRunningOverride,
   } = useLightsContext();
   const [schedule, setSchedule] = useState<ScheduleEntry[]>(runningSchedule);
+  const [scheduleToEdit, setScheduleToEdit] = useState<ScheduleEntry[]>([]);
   const [override, setOverride] = useState<Override>({
     enabled: runningOverride.enabled,
     colorId: runningOverride.colorId,
   });
+  const [overrideChanged, setOverrideChanged] = useState(false);
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const hasUnsavedChanges =
-    !equal(schedule, runningSchedule) || !equal(override, runningOverride);
+  const hasUnsavedChanges = scheduleToEdit.length > 0 || overrideChanged;
 
   const onSave = useCallback(() => {
-    const scheduleChanged = !equal(schedule, runningSchedule);
-
-    const overrideChanged = !equal(override, runningOverride);
-
-    if (!scheduleChanged && !overrideChanged) {
+    if (!hasUnsavedChanges) {
       return;
     }
 
     void (async () => {
       try {
-        if (scheduleChanged) {
-          const response = await put({
+        if (scheduleToEdit.length > 0) {
+          const response = await post({
             endpoint: '/schedule',
-            body: schedule,
+            body: {
+              add: [],
+              edit: scheduleToEdit,
+              delete: [],
+            },
           });
 
           if (!response.ok) {
@@ -82,7 +82,10 @@ function LightsContent() {
             return;
           }
 
-          setRunningSchedule(schedule);
+          const updatedSchedule = (await response.json()) as ScheduleEntry[];
+          setSchedule(updatedSchedule);
+          setRunningSchedule(updatedSchedule);
+          setScheduleToEdit([]);
         }
 
         if (overrideChanged) {
@@ -98,6 +101,7 @@ function LightsContent() {
           }
 
           setRunningOverride(override);
+          setOverrideChanged(false);
         }
       } catch (error) {
         setErrorMessage(
@@ -109,10 +113,10 @@ function LightsContent() {
       }
     })();
   }, [
-    schedule,
+    hasUnsavedChanges,
+    scheduleToEdit,
     override,
-    runningOverride,
-    runningSchedule,
+    overrideChanged,
     setRunningOverride,
     setRunningSchedule,
   ]);
@@ -123,8 +127,9 @@ function LightsContent() {
         <OverrideCard
           override={override}
           colors={colors}
-          setOverride={(override) => {
-            setOverride(override);
+          setOverride={(newOverride) => {
+            setOverride(newOverride);
+            setOverrideChanged(true);
           }}
         />
         <CurrentColor />
@@ -137,6 +142,15 @@ function LightsContent() {
               setSchedule((prev) =>
                 prev.map((e, i) => (i === index ? updated : e))
               );
+              setScheduleToEdit((prev) => {
+                const existing = prev.findIndex((e) => e.id === updated.id);
+                if (existing >= 0) {
+                  const newList = [...prev];
+                  newList[existing] = updated;
+                  return newList;
+                }
+                return [...prev, updated];
+              });
             }}
           />
         ))}

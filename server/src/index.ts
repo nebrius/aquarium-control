@@ -1,25 +1,24 @@
 import {
   CleaningRecordSchema,
   OverrideSchema,
-  ScheduleEntrySchema,
   UpdateColorsSchema,
+  UpdateScheduleSchema,
 } from '@aquarium/shared';
 import cors from '@fastify/cors';
 import { type TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import websocket from '@fastify/websocket';
 import Fastify from 'fastify';
-import { Type } from 'typebox';
 import { type WebSocket } from 'ws';
 
 import {
   addCleaningRecord,
   batchColorUpdates,
+  batchScheduleUpdates,
   getCleaningRecords,
   getColors,
   getOverride,
   getSchedule,
   setOverride,
-  setSchedule,
 } from './db/db.ts';
 import {
   getCurrentColor,
@@ -89,18 +88,18 @@ fastify.get('/schedule', () => {
   return getSchedule();
 });
 
-// PUT /schedule - Set the schedule
-fastify.put(
+// POST /schedule - Batch update schedule (add, edit, delete)
+fastify.post(
   '/schedule',
   {
     schema: {
-      body: Type.Array(ScheduleEntrySchema),
+      body: UpdateScheduleSchema,
     },
   },
   (request) => {
-    setSchedule(request.body);
-    handleScheduleUpdate(request.body);
-    return { message: 'OK' };
+    const schedule = batchScheduleUpdates(request.body);
+    handleScheduleUpdate(schedule);
+    return schedule;
   }
 );
 

@@ -1,5 +1,4 @@
 import { type Color as HSVColor } from '@aquarium/shared';
-import { Color } from '@rc-component/color-picker';
 import convert from 'color-convert';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -57,7 +56,7 @@ export function CurrentColor() {
       currentColor.s,
       currentColor.v,
     ]);
-    return new Color({ r, g, b });
+    return `rgb(${r}, ${g}, ${b})`;
   }, [currentColor]);
 
   return (
@@ -68,7 +67,7 @@ export function CurrentColor() {
         </CardHeader>
         <CardContent>
           <div
-            style={{ backgroundColor: displayColor.toHexString() }}
+            style={{ backgroundColor: displayColor }}
             className="w-full h-6 rounded-full"
           ></div>
         </CardContent>

@@ -7,9 +7,12 @@ import {
   type CleaningRecordEntry,
   type Color,
   type CreateColor,
+  type CreateScheduleEntry,
+  type Override,
+  type ScheduleEntry,
   type UpdateColors,
+  type UpdateSchedule,
 } from '@aquarium/shared';
-import { type Override, type ScheduleEntry } from '@aquarium/shared';
 import Database from 'better-sqlite3';
 
 const DB_DIR = join(homedir(), '.aquarium-control');
@@ -119,27 +122,74 @@ export function getSchedule(): ScheduleEntry[] {
   }));
 }
 
-export function setSchedule(schedule: ScheduleEntry[]) {
-  const database = getDb();
-  const deleteStmt = database.prepare('DELETE FROM schedule');
-  const insertStmt = database.prepare(
-    'INSERT INTO schedule (name, hour, minute, fade, color_id) VALUES (?, ?, ?, ?, ?)'
+function createScheduleEntries(
+  database: Database.Database,
+  entries: CreateScheduleEntry[]
+): void {
+  if (entries.length === 0) return;
+
+  const placeholders = entries.map(() => '(?, ?, ?, ?, ?)').join(', ');
+  const values = entries.flatMap((e) => [
+    e.name,
+    e.hour,
+    e.minute,
+    e.fade,
+    e.colorId,
+  ]);
+
+  database
+    .prepare(
+      `INSERT INTO schedule (name, hour, minute, fade, color_id) VALUES ${placeholders}`
+    )
+    .run(...values);
+}
+
+function updateScheduleEntries(
+  database: Database.Database,
+  entries: ScheduleEntry[]
+): void {
+  if (entries.length === 0) return;
+
+  const stmt = database.prepare(
+    'UPDATE schedule SET name = ?, hour = ?, minute = ?, fade = ?, color_id = ? WHERE id = ?'
   );
 
+  for (const entry of entries) {
+    stmt.run(
+      entry.name,
+      entry.hour,
+      entry.minute,
+      entry.fade,
+      entry.colorId,
+      entry.id
+    );
+  }
+}
+
+function deleteScheduleEntries(
+  database: Database.Database,
+  ids: number[]
+): void {
+  if (ids.length === 0) return;
+
+  const placeholders = ids.map(() => '?').join(', ');
+
+  database
+    .prepare(`DELETE FROM schedule WHERE id IN (${placeholders})`)
+    .run(...ids);
+}
+
+export function batchScheduleUpdates(updates: UpdateSchedule): ScheduleEntry[] {
+  const database = getDb();
+
   const transaction = database.transaction(() => {
-    deleteStmt.run();
-    for (const entry of schedule) {
-      insertStmt.run(
-        entry.name,
-        entry.hour,
-        entry.minute,
-        entry.fade,
-        entry.colorId
-      );
-    }
+    deleteScheduleEntries(database, updates.delete);
+    updateScheduleEntries(database, updates.edit);
+    createScheduleEntries(database, updates.add);
   });
 
   transaction();
+  return getSchedule();
 }
 
 export function getOverride(): Override {

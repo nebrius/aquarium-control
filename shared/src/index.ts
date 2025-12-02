@@ -28,6 +28,24 @@ export const ScheduleEntrySchema = Type.Object({
 
 export type ScheduleEntry = Static<typeof ScheduleEntrySchema>;
 
+export const CreateScheduleEntrySchema = Type.Object({
+  name: Type.String(),
+  hour: Type.Integer({ minimum: 0, maximum: 255 }),
+  minute: Type.Integer({ minimum: 0, maximum: 255 }),
+  fade: Type.Integer({ minimum: 0, maximum: 255 }),
+  colorId: Type.Number(),
+});
+
+export type CreateScheduleEntry = Static<typeof CreateScheduleEntrySchema>;
+
+export const UpdateScheduleSchema = Type.Object({
+  add: Type.Array(CreateScheduleEntrySchema),
+  edit: Type.Array(ScheduleEntrySchema),
+  delete: Type.Array(Type.Number()),
+});
+
+export type UpdateSchedule = Static<typeof UpdateScheduleSchema>;
+
 export const ColorSchema = Type.Object({
   id: Type.Number(),
   name: Type.String(),
