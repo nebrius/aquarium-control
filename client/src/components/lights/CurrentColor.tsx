@@ -7,7 +7,14 @@ import { HOST } from '@/lib/request.ts';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card.tsx';
 
 const RETRY_TIMEOUT = 250;
-function connect(onMessage: (color: HSVColor) => void) {
+function connect(
+  onMessage: (color: HSVColor) => void,
+  abortSignal: AbortSignal
+) {
+  if (abortSignal.aborted) {
+    return;
+  }
+
   const ws = new WebSocket(`ws://${HOST}/current-color`);
 
   ws.addEventListener('open', () => {
@@ -24,17 +31,25 @@ function connect(onMessage: (color: HSVColor) => void) {
   });
 
   ws.addEventListener('error', (error) => {
+    if (abortSignal.aborted) {
+      return;
+    }
     console.error('WebSocket error:', error);
   });
 
   ws.addEventListener('close', () => {
+    if (abortSignal.aborted) {
+      return;
+    }
     console.log('WebSocket disconnected, retrying...');
-    setTimeout(() => connect(onMessage), RETRY_TIMEOUT);
+    setTimeout(() => {
+      connect(onMessage, abortSignal);
+    }, RETRY_TIMEOUT);
   });
 
-  return () => {
+  abortSignal.addEventListener('abort', () => {
     ws.close();
-  };
+  });
 }
 
 export function CurrentColor() {
@@ -47,7 +62,11 @@ export function CurrentColor() {
   }>({ h: 233, s: 13, v: 11 });
 
   useEffect(() => {
-    return connect(setCurrentColor);
+    const abortController = new AbortController();
+    connect(setCurrentColor, abortController.signal);
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
   const displayColor = useMemo(() => {
