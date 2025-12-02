@@ -1,4 +1,4 @@
-export const HOST = 'localhost:3001';
+export const HOST = `${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:3001`;
 const BASE_URL = `http://${HOST}`;
 
 export async function get<T>(endpoint: string) {
