@@ -138,6 +138,7 @@ function LightsContent() {
             key={entry.id}
             name={entry.name}
             schedule={entry}
+            colors={colors}
             setSchedule={(updated) => {
               setSchedule((prev) =>
                 prev.map((e, i) => (i === index ? updated : e))

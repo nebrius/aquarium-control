@@ -1,4 +1,4 @@
-import { type ScheduleEntry } from '@aquarium/shared';
+import { type Color, type ScheduleEntry } from '@aquarium/shared';
 import { ChevronDown } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -48,9 +48,10 @@ type EntryProps = {
   name: string;
   schedule: ScheduleEntry;
   setSchedule: (schedule: ScheduleEntry) => void;
+  colors: Color[];
 };
 
-export function Entry({ name, schedule, setSchedule }: EntryProps) {
+export function Entry({ name, schedule, setSchedule, colors }: EntryProps) {
   const [isOpen, setIsOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -99,7 +100,8 @@ export function Entry({ name, schedule, setSchedule }: EntryProps) {
                   setSchedule({ ...schedule, minute });
                 }}
               />
-              <div className="grow"></div>
+            </div>
+            <div className="mt-4">
               <IntegerSelect
                 id="fade"
                 value={schedule.fade}
@@ -109,6 +111,22 @@ export function Entry({ name, schedule, setSchedule }: EntryProps) {
                   setSchedule({ ...schedule, fade });
                 }}
               />
+            </div>
+            <div className="flex flex-col gap-2 mt-4">
+              <Label htmlFor="color">Color</Label>
+              <NativeSelect
+                id="color"
+                value={schedule.colorId}
+                onChange={(e) => {
+                  setSchedule({ ...schedule, colorId: Number(e.target.value) });
+                }}
+              >
+                {colors.map((color) => (
+                  <NativeSelectOption key={color.id} value={color.id}>
+                    {color.name}
+                  </NativeSelectOption>
+                ))}
+              </NativeSelect>
             </div>
           </CardContent>
         </CollapsibleContent>
