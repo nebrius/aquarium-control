@@ -9,7 +9,7 @@ import { RecordList } from './RecordList.tsx';
 
 function CleaningContent() {
   return (
-    <div className="flex flex-col gap-4 px-2 pt-4">
+    <div className="flex flex-col gap-4 px-2">
       <CreateRecord />
       <RecordList />
     </div>
@@ -27,7 +27,9 @@ export function CleaningPage({
 
   return (
     <CleaningContext.Provider value={{ cleaningRecords, setCleaningRecords }}>
-      <CleaningContent />
+      <div className="flex flex-col gap-4 overflow-scroll grow basis-0 px-2 py-4">
+        <CleaningContent />
+      </div>
     </CleaningContext.Provider>
   );
 }
