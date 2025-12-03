@@ -11,6 +11,7 @@ import { logger } from './logging.ts';
 
 const UPDATE_INTERVAL = 100;
 const OVERRIDE_TRANSITION_TIME = 5_000;
+const GREEN_HUE = 110;
 
 const DEFAULT_COLOR: RawColor = {
   h: 0,
@@ -107,27 +108,61 @@ function loop() {
     const progress =
       (now - transitionStartTime) / (transitionEndTime - transitionStartTime);
 
-    // Always wrap through 360:
-    // If previous < target: go backwards (decrease through 0)
-    // If previous > target: go forwards (increase through 360)
+    // We always want to avoid green, if possible. To do so, we need to consider
+    // four possibilities:
+    // - both are less than:
+    //   - previous < next: increase
+    //   - previous > next: decrease
+    // - previous < green (red), next > green (blue)
+    //   - decrease, wraparound 360 degrees
+    // - previous > green (blue), next < green (red)
+    //   - increase, wraparound 360 degrees
+    // - both are > green
+    //   - previous < next: increase
+    //   - previous > next: decrease
+
     let currentHue: number;
-    if (previousColor.h < targetColor.h) {
-      // Go backwards: previous -> 0 -> 360 -> target
-      const distance = previousColor.h + (360 - targetColor.h);
-      currentHue = previousColor.h - distance * progress;
-      if (currentHue < 0) {
-        currentHue += 360;
-      }
-    } else if (previousColor.h > targetColor.h) {
-      // Go forwards: previous -> 360 -> 0 -> target
-      const distance = 360 - previousColor.h + targetColor.h;
-      currentHue = previousColor.h + distance * progress;
-      if (currentHue >= 360) {
-        currentHue -= 360;
-      }
-    } else {
+    if (previousColor.h === targetColor.h) {
       // Same hue, no transition needed
       currentHue = previousColor.h;
+    } else {
+      // Determine direction based on avoiding green
+      let shouldIncrease: boolean;
+      if (previousColor.h < GREEN_HUE && targetColor.h < GREEN_HUE) {
+        // Both less than green: direct path
+        shouldIncrease = previousColor.h < targetColor.h;
+      } else if (previousColor.h > GREEN_HUE && targetColor.h > GREEN_HUE) {
+        // Both greater than green: direct path
+        shouldIncrease = previousColor.h < targetColor.h;
+      } else if (previousColor.h < GREEN_HUE && targetColor.h > GREEN_HUE) {
+        // Previous is red side, target is blue side: decrease through 0/360
+        shouldIncrease = false;
+      } else {
+        // Previous is blue side, target is red side: increase through 360/0
+        shouldIncrease = true;
+      }
+
+      if (shouldIncrease) {
+        // Increase hue (possibly wrapping through 360)
+        const distance =
+          targetColor.h > previousColor.h
+            ? targetColor.h - previousColor.h
+            : 360 - previousColor.h + targetColor.h;
+        currentHue = previousColor.h + distance * progress;
+        if (currentHue >= 360) {
+          currentHue -= 360;
+        }
+      } else {
+        // Decrease hue (possibly wrapping through 0)
+        const distance =
+          previousColor.h > targetColor.h
+            ? previousColor.h - targetColor.h
+            : previousColor.h + (360 - targetColor.h);
+        currentHue = previousColor.h - distance * progress;
+        if (currentHue < 0) {
+          currentHue += 360;
+        }
+      }
     }
 
     const nextColor: RawColor = {
