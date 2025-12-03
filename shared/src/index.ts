@@ -56,6 +56,8 @@ export const ColorSchema = Type.Object({
 
 export type Color = Static<typeof ColorSchema>;
 
+export type RawColor = Pick<Color, 'h' | 's' | 'v'>;
+
 export const CreateColorSchema = Type.Object({
   name: Type.String(),
   h: Type.Integer({ minimum: 0, maximum: 360 }),

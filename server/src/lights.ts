@@ -1,6 +1,7 @@
 import {
   type Color,
   type Override,
+  type RawColor,
   type ScheduleEntry,
 } from '@aquarium/shared';
 import equal from 'fast-deep-equal';
@@ -11,66 +12,58 @@ import { logger } from './logging.ts';
 const UPDATE_INTERVAL = 100;
 const OVERRIDE_TRANSITION_TIME = 5_000;
 
-const OFF_COLOR: Color = {
-  id: -1,
-  name: '$_off',
+const DEFAULT_COLOR: RawColor = {
   h: 0,
   s: 0,
   v: 0,
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let schedule = getSchedule();
 let override = getOverride();
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let colors: Color[] = getColors();
 
 /* ---- Animation ---- */
 
 // Animation state
-// eslint-disable-next-line prefer-const
-let previousColor: Color = OFF_COLOR;
-let currentColor: Color = OFF_COLOR;
-// eslint-disable-next-line prefer-const
-let targetColor: Color = OFF_COLOR;
+let previousColor: RawColor = DEFAULT_COLOR;
+let currentColor: RawColor = DEFAULT_COLOR;
+let targetColor: RawColor = DEFAULT_COLOR;
 let transitionStartTime: number = 0;
 let transitionEndTime: number = 0;
 let scheduleTimeout: NodeJS.Timeout | undefined;
 
 // This function computes the target color from the previous color, taking into
 // account when lights are off.
-function setTargetColor(colorId: number) {
-  const color = colors.find((c) => c.id === colorId) ?? OFF_COLOR;
-  logger.debug(`Setting target color to ${color.name} (id=${colorId})`);
-  // const nextColor = colorSet[nextLightState];
+function setTargetColor(nextColor: Color) {
+  logger.debug(`Setting target color to ${nextColor.name}`);
 
-  // // Compute the actual next color
-  // if (currentColor.v === 0) {
-  //   // If we're currently off, override the previous color with the next color
-  //   // except for it's value so we don't mix colors on the fade in. For example,
-  //   // if we do the sequence day -> off -> night, we'd get a weird black -> red
-  //   // -> blue fade in, but we want just a black -> blue -> blue fade in
-  //   previousColor = {
-  //     h: nextColor.h,
-  //     s: nextColor.s,
-  //     v: 0,
-  //   };
-  //   targetColor = nextColor;
-  // } else if (nextColor.v === 0) {
-  //   previousColor = currentColor;
-  //   // If we're going to off, override the target color with the previous color
-  //   // except for it's value so we don't mix colors on the fade out, similar to
-  //   // the fade in case
-  //   targetColor = {
-  //     h: previousColor.h,
-  //     s: previousColor.s,
-  //     v: 0,
-  //   };
-  // } else {
-  //   // Otherwise, we do a standard transition between colors
-  //   previousColor = currentColor;
-  //   targetColor = nextColor;
-  // }
+  // Compute the actual next color
+  if (currentColor.v === 0) {
+    // If we're currently off, override the previous color with the next color
+    // except for it's value so we don't mix colors on the fade in. For example,
+    // if we do the sequence day -> off -> night, we'd get a weird black -> red
+    // -> blue fade in, but we want just a black -> blue -> blue fade in
+    previousColor = {
+      h: nextColor.h,
+      s: nextColor.s,
+      v: 0,
+    };
+    targetColor = nextColor;
+  } else if (nextColor.v === 0) {
+    previousColor = currentColor;
+    // If we're going to off, override the target color with the previous color
+    // except for it's value so we don't mix colors on the fade out, similar to
+    // the fade in case
+    targetColor = {
+      h: previousColor.h,
+      s: previousColor.s,
+      v: 0,
+    };
+  } else {
+    // Otherwise, we do a standard transition between colors
+    previousColor = currentColor;
+    targetColor = nextColor;
+  }
 }
 
 function setTransitionTimes(startTime: number, duration: number) {
@@ -81,13 +74,13 @@ function setTransitionTimes(startTime: number, duration: number) {
   transitionEndTime = startTime + duration;
 }
 
-const lightColorChangedCallbacks: ((color: Color) => void)[] = [];
-export function onLightColorChanged(cb: (color: Color) => void) {
+const lightColorChangedCallbacks: ((color: RawColor) => void)[] = [];
+export function onLightColorChanged(cb: (color: RawColor) => void) {
   lightColorChangedCallbacks.push(cb);
 }
 
 // This sets the current color, aka updating the actual color of the LED strip
-function setCurrentColor(color: Color) {
+function setCurrentColor(color: RawColor) {
   currentColor = color;
 
   // TODO: send to strip, but only if we're on the raspberry pi
@@ -137,9 +130,7 @@ function loop() {
       currentHue = previousColor.h;
     }
 
-    const nextColor: Color = {
-      id: targetColor.id,
-      name: targetColor.name,
+    const nextColor: RawColor = {
       h: Math.round(currentHue),
       s: Math.round(
         previousColor.s + (targetColor.s - previousColor.s) * progress
@@ -184,7 +175,11 @@ function handleChange() {
 
   // If we're in override mode, set the color to the override color
   if (override.enabled) {
-    setTargetColor(override.colorId);
+    const overrideColor = colors.find((c) => c.id === override.colorId);
+    if (!overrideColor) {
+      throw new Error(`No color found with id ${override.colorId}`);
+    }
+    setTargetColor(overrideColor);
     setTransitionTimes(Date.now(), OVERRIDE_TRANSITION_TIME);
     return;
   }
@@ -195,74 +190,92 @@ function handleChange() {
 
 /* ---- Scheduling ---- */
 
-function getScheduledColors():
-  | {
-      currentColorId: number;
-      nextTransitionDuration: number;
-      nextStartTime: { hour: number; minute: number };
+function getScheduledColors(): {
+  color: Color;
+  nextTransitionDuration: number;
+  nextStartTime: { hour: number; minute: number };
+} {
+  const now = new Date();
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+  let colorId: number | undefined;
+  let nextTransitionDuration: number | undefined;
+  let nextStartTime: { hour: number; minute: number } | undefined;
+
+  // Sanity check in case all schedules are deleted
+  if (!schedule.length) {
+    return {
+      color: {
+        id: -1,
+        name: 'default',
+        h: 0,
+        s: 0,
+        v: 0,
+      },
+      nextTransitionDuration: OVERRIDE_TRANSITION_TIME,
+      nextStartTime: { hour: 23, minute: 59 },
+    };
+  }
+
+  // First, check if we're before the first scheduled entry, aka we're after
+  // midnight but before the first scheduled entry
+  if (
+    hour < schedule[0].hour ||
+    (hour === schedule[0].hour && minute < schedule[0].minute)
+  ) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const currentSchedule = schedule.at(-1)!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const nextSchedule = schedule.at(0)!;
+
+    colorId = currentSchedule.colorId;
+    nextTransitionDuration = nextSchedule.fade;
+    nextStartTime = {
+      hour: nextSchedule.hour,
+      minute: nextSchedule.minute,
+    };
+  }
+
+  // Otherwise, find the schedule that occured closest to, but before, the
+  // current time. This represents the currently running schedule
+  else {
+    for (let i = schedule.length - 1; i >= 0; i--) {
+      const scheduleEntry = schedule[i];
+      if (
+        hour > scheduleEntry.hour ||
+        (hour === scheduleEntry.hour && minute >= scheduleEntry.minute)
+      ) {
+        const nextSchedule =
+          i === schedule.length - 1 ? schedule[0] : schedule[i + 1];
+        colorId = scheduleEntry.colorId;
+        nextTransitionDuration = nextSchedule.fade;
+        nextStartTime = {
+          hour: nextSchedule.hour,
+          minute: nextSchedule.minute,
+        };
+        break;
+      }
     }
-  | undefined {
-  // const now = new Date();
-  // const hour = now.getHours();
-  // const minute = now.getMinutes();
+  }
 
-  // if (
-  //   hour < schedule.offToNight.hour ||
-  //   (hour === schedule.offToNight.hour && minute < schedule.offToNight.minute)
-  // ) {
-  //   return {
-  //     currentLightState: 'off',
-  //     nextTransitionDuration: schedule.offToNight.fade,
-  //     nextStartTime: {
-  //       hour: schedule.offToNight.hour,
-  //       minute: schedule.offToNight.minute,
-  //     },
-  //   };
-  // }
+  if (
+    colorId === undefined ||
+    nextTransitionDuration === undefined ||
+    nextStartTime === undefined
+  ) {
+    throw new Error('schedule info is unexpectedly undefined');
+  }
 
-  // if (
-  //   hour < schedule.nightToDay.hour ||
-  //   (hour === schedule.nightToDay.hour && minute < schedule.nightToDay.minute)
-  // ) {
-  //   return {
-  //     currentLightState: 'night',
-  //     nextTransitionDuration: schedule.nightToDay.fade,
-  //     nextStartTime: {
-  //       hour: schedule.nightToDay.hour,
-  //       minute: schedule.nightToDay.minute,
-  //     },
-  //   };
-  // }
+  const color = colors.find((c) => c.id === colorId);
+  if (!color) {
+    throw new Error(`No color found with id ${colorId}`);
+  }
 
-  // if (
-  //   hour < schedule.dayToNight.hour ||
-  //   (hour === schedule.dayToNight.hour && minute < schedule.dayToNight.minute)
-  // ) {
-  //   return {
-  //     currentLightState: 'day',
-  //     nextTransitionDuration: schedule.dayToNight.fade,
-  //     nextStartTime: {
-  //       hour: schedule.dayToNight.hour,
-  //       minute: schedule.dayToNight.minute,
-  //     },
-  //   };
-  // }
-
-  // if (
-  //   hour < schedule.nightToOff.hour ||
-  //   (hour === schedule.nightToOff.hour && minute < schedule.nightToOff.minute)
-  // ) {
-  //   return {
-  //     currentLightState: 'night',
-  //     nextTransitionDuration: schedule.nightToOff.fade,
-  //     nextStartTime: {
-  //       hour: schedule.nightToOff.hour,
-  //       minute: schedule.nightToOff.minute,
-  //     },
-  //   };
-  // }
-
-  return undefined;
+  return {
+    color,
+    nextTransitionDuration,
+    nextStartTime,
+  };
 }
 
 function scheduleNextTransition({
@@ -275,46 +288,30 @@ function scheduleNextTransition({
   // Get the current schedule
   const currentScheduledColors = getScheduledColors();
   const now = new Date();
+  const hour = now.getHours();
+  const minute = now.getMinutes();
 
   // Get the target color.
-  const offColorId = colors.find((c) => c.name === 'off')?.id ?? 0;
-  const targetColorId = currentScheduledColors
-    ? currentScheduledColors.currentColorId
-    : offColorId;
+  const targetColorId = currentScheduledColors.color;
 
   // Get the target transition time.
-  const nextTransitionTime = currentScheduledColors
-    ? // Convert minutes to ms
-      currentScheduledColors.nextTransitionDuration * 60_000
-    : // If we're in the off->midnight transition, then we _most likely_ are
-      // going from off->off at this time. I _think_ this is guaranteed to be
-      // true, but just in case let's add a fallback to the override transition
-      // time so we don't flash lights
-      OVERRIDE_TRANSITION_TIME;
+  const nextTransitionDuration =
+    currentScheduledColors.nextTransitionDuration * 60_000;
 
   // Get the start of the next transition
-  const nextStartTime = currentScheduledColors
-    ? new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        currentScheduledColors.nextStartTime.hour,
-        currentScheduledColors.nextStartTime.minute + 1, // Add 1 minute to avoid edge conditions
-        0, // second
-        0 // millisecond
-      )
-    : // If we're in the off -> midnight transition, then we just schedule for
-      // 00:01 the following day where we'll then schedule the first transition
-      // of the day (off -> night)
-      new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() + 1,
-        0, // hour
-        1, // Add 1 minute to avoid edge conditions
-        0, // second
-        0 // millisecond
-      );
+  const isTomorrow =
+    hour > currentScheduledColors.nextStartTime.hour ||
+    (hour === currentScheduledColors.nextStartTime.hour &&
+      minute > currentScheduledColors.nextStartTime.minute);
+  const nextStartTime = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + (isTomorrow ? 1 : 0),
+    currentScheduledColors.nextStartTime.hour,
+    currentScheduledColors.nextStartTime.minute + 1, // Add 1 minute to avoid edge conditions
+    0, // second
+    0 // millisecond
+  );
 
   // Set the target color and transition time
   setTargetColor(targetColorId);
@@ -322,11 +319,11 @@ function scheduleNextTransition({
 
   // Schedule the next transition
   scheduleTimeout = setTimeout(() => {
-    scheduleNextTransition({ currentTransitionTime: nextTransitionTime });
+    scheduleNextTransition({ currentTransitionTime: nextTransitionDuration });
   }, nextStartTime.getTime() - now.getTime());
 
   logger.info(
-    `Scheduled next transition at ${nextStartTime.toLocaleTimeString()} with transition time ${Math.round(nextTransitionTime / 1000)}s`
+    `Scheduled next transition at ${nextStartTime.toLocaleTimeString()} with transition time ${Math.round(nextTransitionDuration / 1000)}s`
   );
 }
 
