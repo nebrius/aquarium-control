@@ -14,6 +14,7 @@ import {
   addCleaningRecord,
   batchColorUpdates,
   batchScheduleUpdates,
+  ConstraintError,
   getCleaningRecords,
   getColors,
   getOverride,
@@ -116,10 +117,17 @@ fastify.post(
       body: UpdateColorsSchema,
     },
   },
-  (request) => {
-    const colors = batchColorUpdates(request.body);
-    handleColorUpdate(colors);
-    return colors;
+  (request, reply) => {
+    try {
+      const colors = batchColorUpdates(request.body);
+      handleColorUpdate(colors);
+      return colors;
+    } catch (error) {
+      if (error instanceof ConstraintError) {
+        return reply.status(400).send({ error: error.message });
+      }
+      throw error;
+    }
   }
 );
 

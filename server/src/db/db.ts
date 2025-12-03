@@ -22,6 +22,13 @@ const SCHEMA_FILE = join(dirname(fileURLToPath(import.meta.url)), 'schema.sql');
 
 let db: Database.Database | undefined;
 
+export class ConstraintError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ConstraintError';
+  }
+}
+
 function getDb() {
   if (db) {
     return db;
@@ -79,6 +86,50 @@ function deleteColors(database: Database.Database, ids: number[]): void {
   if (ids.length === 0) return;
 
   const placeholders = ids.map(() => '?').join(', ');
+
+  // Check if any colors are referenced by schedules
+  const referencedColors = database
+    .prepare(
+      `SELECT c.name AS colorName, s.name AS scheduleName
+       FROM colors c
+       INNER JOIN schedule s ON s.color_id = c.id
+       WHERE c.id IN (${placeholders})`
+    )
+    .all(...ids) as { colorName: string; scheduleName: string }[];
+
+  if (referencedColors.length > 0) {
+    // Group schedule names by color name
+    const colorToSchedules = new Map<string, string[]>();
+    for (const { colorName, scheduleName } of referencedColors) {
+      const schedules = colorToSchedules.get(colorName) ?? [];
+      schedules.push(scheduleName);
+      colorToSchedules.set(colorName, schedules);
+    }
+
+    const lines = Array.from(colorToSchedules.entries()).map(
+      ([colorName, scheduleNames]) =>
+        `  - ${colorName}: ${scheduleNames.join(', ')}`
+    );
+    throw new ConstraintError(
+      `Cannot delete colors while they are referenced by a schedule:\n${lines.join('\n')}`
+    );
+  }
+
+  // Check if any colors are referenced by the override
+  const overrideColor = database
+    .prepare(
+      `SELECT c.name AS colorName
+       FROM colors c
+       INNER JOIN override o ON o.color_id = c.id
+       WHERE c.id IN (${placeholders})`
+    )
+    .get(...ids) as { colorName: string } | undefined;
+
+  if (overrideColor) {
+    throw new ConstraintError(
+      `Cannot delete colors while they are referenced by override:\n  - ${overrideColor.colorName}`
+    );
+  }
 
   database
     .prepare(`DELETE FROM colors WHERE id IN (${placeholders})`)

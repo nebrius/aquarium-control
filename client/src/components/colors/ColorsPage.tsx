@@ -50,7 +50,14 @@ export function ColorsPage({ initialColors }: ColorsProps) {
         });
 
         if (!response.ok) {
-          setErrorMessage('Failed to update colors');
+          if (response.status === 400) {
+            const { error: errorText } = (await response.json()) as {
+              error: string;
+            };
+            setErrorMessage(errorText);
+          } else {
+            setErrorMessage(`Failed to update colors$`);
+          }
           setErrorDialogOpen(true);
           return;
         }
@@ -120,7 +127,9 @@ export function ColorsPage({ initialColors }: ColorsProps) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Error saving colors</DialogTitle>
-            <DialogDescription>{errorMessage}</DialogDescription>
+            <DialogDescription className="text-left whitespace-pre-wrap">
+              {errorMessage}
+            </DialogDescription>
           </DialogHeader>
         </DialogContent>
       </Dialog>
