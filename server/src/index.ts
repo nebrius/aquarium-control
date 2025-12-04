@@ -135,10 +135,10 @@ fastify.post(
 const clients = new Set<WebSocket>();
 
 fastify.get('/current-color', { websocket: true }, (socket) => {
-  fastify.log.info(`Client connected`);
+  fastify.log.debug(`Client connected`);
   clients.add(socket);
   socket.on('close', () => {
-    fastify.log.info(`Client disconnected`);
+    fastify.log.debug(`Client disconnected`);
     clients.delete(socket);
   });
 

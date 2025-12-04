@@ -318,8 +318,6 @@ function scheduleNextTransition({
 }: {
   currentTransitionTime: number;
 }) {
-  logger.debug(`Scheduling next transition`);
-
   // Get the current schedule
   const currentScheduledColors = getScheduledColors();
   const now = new Date();
