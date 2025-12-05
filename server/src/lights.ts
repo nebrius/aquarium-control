@@ -1,9 +1,13 @@
+import { existsSync, readFileSync } from 'node:fs';
+
 import {
   type Color,
   type Override,
   type RawColor,
   type ScheduleEntry,
 } from '@aquarium/shared';
+import Apa102spi from 'apa102-spi';
+import convert from 'color-convert';
 import equal from 'fast-deep-equal';
 
 import { getColors, getOverride, getSchedule } from './db/db.ts';
@@ -22,6 +26,20 @@ const DEFAULT_COLOR: RawColor = {
 let schedule = getSchedule();
 let override = getOverride();
 let colors: Color[] = getColors();
+
+const NUM_LEDS = 100;
+const CLOCK_DIVIDER = 10;
+
+// Detect if running on a Raspberry Pi
+const IS_RASPBERRY_PI =
+  existsSync('/sys/firmware/devicetree/base/model') &&
+  readFileSync('/sys/firmware/devicetree/base/model', 'utf-8').includes(
+    'Raspberry Pi'
+  );
+
+const LedDriver = IS_RASPBERRY_PI
+  ? new Apa102spi(NUM_LEDS, CLOCK_DIVIDER)
+  : null;
 
 /* ---- Animation ---- */
 
@@ -84,7 +102,18 @@ export function onLightColorChanged(cb: (color: RawColor) => void) {
 function setCurrentColor(color: RawColor) {
   currentColor = color;
 
-  // TODO: send to strip, but only if we're on the raspberry pi
+  // Set the LED strip, if we're on a Raspberry Pi
+  if (LedDriver) {
+    const [r, g, b] = convert.hsv.rgb([
+      currentColor.h,
+      currentColor.s,
+      currentColor.v,
+    ]);
+    for (let i = 0; i < NUM_LEDS; i++) {
+      LedDriver.setLedColor(i, 31, r, g, b);
+    }
+    LedDriver.sendLeds();
+  }
 
   // Notify listeners
   lightColorChangedCallbacks.forEach((cb) => {
