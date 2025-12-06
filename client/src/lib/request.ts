@@ -1,5 +1,5 @@
-export const HOST = `${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:3001`;
-const BASE_URL = `http://${HOST}`;
+export const HOST = `${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:80`;
+const BASE_URL = `http://${HOST}/api`;
 
 export async function get<T>(endpoint: string) {
   const response = await fetch(`${BASE_URL}${endpoint}`, {

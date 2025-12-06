@@ -15,7 +15,7 @@ function connect(
     return;
   }
 
-  const ws = new WebSocket(`ws://${HOST}/current-color`);
+  const ws = new WebSocket(`ws://${HOST}/api/current-color`);
 
   ws.addEventListener('open', () => {
     console.log('WebSocket connected');
