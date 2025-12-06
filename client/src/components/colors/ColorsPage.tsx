@@ -1,9 +1,9 @@
 'use client';
 
 import { type Color as HSVColor, type CreateColor } from '@aquarium/shared';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import { post } from '@/lib/request.ts';
+import { get, post } from '@/lib/request.ts';
 
 import { Button } from '../ui/Button.tsx';
 import {
@@ -16,12 +16,19 @@ import {
 import { AddColor } from './AddColor.tsx';
 import { EditColor } from './EditColor.tsx';
 
-type ColorsProps = {
-  initialColors: HSVColor[];
-};
+export function ColorsPage() {
+  const [colors, setColors] = useState<HSVColor[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-export function ColorsPage({ initialColors }: ColorsProps) {
-  const [colors, setColors] = useState<HSVColor[]>(initialColors);
+  useEffect(() => {
+    get<HSVColor[]>('/colors')
+      .then(setColors)
+      .catch((err: unknown) => {
+        setLoadError(
+          err instanceof Error ? err.message : 'Failed to load data'
+        );
+      });
+  }, []);
   const [colorsToAdd, setColorsToAdd] = useState<CreateColor[]>([]);
   const [colorsToEdit, setColorsToEdit] = useState<HSVColor[]>([]);
   const [colorsToDelete, setColorsToDelete] = useState<number[]>([]);
@@ -76,12 +83,28 @@ export function ColorsPage({ initialColors }: ColorsProps) {
     })();
   }, [hasUnsavedChanges, colorsToAdd, colorsToEdit, colorsToDelete]);
 
+  if (loadError) {
+    return (
+      <div className="flex items-center justify-center h-full text-red-500">
+        {loadError}
+      </div>
+    );
+  }
+
+  if (!colors) {
+    return (
+      <div className="flex items-center justify-center h-full">Loading...</div>
+    );
+  }
+
   return (
     <div className="grow h-full flex flex-col">
       <div className="flex flex-col gap-4 overflow-scroll grow basis-0 px-2 py-4">
         <AddColor
           colors={colors}
-          setColors={setColors}
+          setColors={
+            setColors as React.Dispatch<React.SetStateAction<HSVColor[]>>
+          }
           setColorsToAdd={setColorsToAdd}
         />
         {colors.map((color, index) => (

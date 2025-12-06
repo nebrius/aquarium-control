@@ -6,9 +6,15 @@ import {
   type Override,
   type ScheduleEntry,
 } from '@aquarium/shared';
-import { createContext, useCallback, useContext, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 
-import { post, put } from '@/lib/request.ts';
+import { get, post, put } from '@/lib/request.ts';
 
 import { Button } from '../ui/Button.tsx';
 import {
@@ -206,21 +212,43 @@ function LightsContent() {
   );
 }
 
-type LightsPageProps = {
-  initialSchedule: ScheduleEntry[];
-  initialOverride: Override;
-  colors: Color[];
-};
+export function LightsPage() {
+  const [runningSchedule, setRunningSchedule] = useState<
+    ScheduleEntry[] | null
+  >(null);
+  const [runningOverride, setRunningOverride] = useState<Override | null>(null);
+  const [colors, setColors] = useState<Color[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-export function LightsPage({
-  initialSchedule,
-  initialOverride,
-  colors,
-}: LightsPageProps) {
-  const [runningSchedule, setRunningSchedule] =
-    useState<ScheduleEntry[]>(initialSchedule);
-  const [runningOverride, setRunningOverride] =
-    useState<Override>(initialOverride);
+  useEffect(() => {
+    Promise.all([
+      get<ScheduleEntry[]>('/schedule'),
+      get<Override>('/override'),
+      get<Color[]>('/colors'),
+    ])
+      .then(([schedule, override, colorsData]) => {
+        setRunningSchedule(schedule);
+        setRunningOverride(override);
+        setColors(colorsData);
+      })
+      .catch((err: unknown) => {
+        setError(err instanceof Error ? err.message : 'Failed to load data');
+      });
+  }, []);
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full text-red-500">
+        {error}
+      </div>
+    );
+  }
+
+  if (!runningSchedule || !runningOverride || !colors) {
+    return (
+      <div className="flex items-center justify-center h-full">Loading...</div>
+    );
+  }
 
   return (
     <LightsContext.Provider
