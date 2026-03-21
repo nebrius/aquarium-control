@@ -13,6 +13,19 @@
     "server"
   ],
   "devDependencies": {
-    "turbo": "^2.0.0"
+    "@eslint/compat": "^2.0.0",
+    "@eslint/js": "^9.39.1",
+    "cross-dirname": "^0.1.0",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-fast-import": "^2.1.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "globals": "^16.5.0",
+    "prettier": "^3.6.2",
+    "turbo": "^2.0.0",
+    "typescript-eslint": "^8.47.0",
+    "typescript": "^5.9.3"
   }
 }
