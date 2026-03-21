@@ -1,11 +1,18 @@
 {
   "private": true,
+  "packageManager": "npm@11.6.2",
   "scripts": {
-    "sync": "rsync -avz --delete --exclude .next --exclude client/node_modules --exclude server/node_modules/better-sqlite3 --exclude server/node_modules/rpio * pi@aquarium.local:/home/pi/aquarium-control/"
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "sync": "rsync -avz --delete --exclude .next --exclude client/node_modules --exclude server/node_modules/better-sqlite3 --exclude server/node_modules/rpio * pi@aquarium.local:/home/pi/aquarium-control/",
+    "type-check": "turbo run type-check"
   },
   "workspaces": [
     "client",
     "shared",
     "server"
-  ]
+  ],
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  }
 }

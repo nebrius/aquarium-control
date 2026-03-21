@@ -5,6 +5,7 @@
   "types": "src/index.ts",
   "type": "module",
   "scripts": {
+    "build": "tsc --noEmit",
     "type-check": "tsc --noEmit",
     "lint": "eslint --report-unused-disable-directives \"**/*.{ts,tsx,mts,js,jsx,mjs}\""
   },
