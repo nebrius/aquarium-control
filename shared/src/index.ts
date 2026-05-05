@@ -17,7 +17,7 @@ export const CleaningRecordSchema = Type.Object({
 
 export type CleaningRecordEntry = Static<typeof CleaningRecordSchema>;
 
-export const ScheduleEntrySchema = Type.Object({
+const ScheduleEntrySchema = Type.Object({
   id: Type.Integer(),
   name: Type.String(),
   hour: Type.Integer({ minimum: 0, maximum: 255 }),
@@ -28,7 +28,7 @@ export const ScheduleEntrySchema = Type.Object({
 
 export type ScheduleEntry = Static<typeof ScheduleEntrySchema>;
 
-export const CreateScheduleEntrySchema = Type.Object({
+const CreateScheduleEntrySchema = Type.Object({
   name: Type.String(),
   hour: Type.Integer({ minimum: 0, maximum: 255 }),
   minute: Type.Integer({ minimum: 0, maximum: 255 }),
@@ -46,7 +46,7 @@ export const UpdateScheduleSchema = Type.Object({
 
 export type UpdateSchedule = Static<typeof UpdateScheduleSchema>;
 
-export const ColorSchema = Type.Object({
+const ColorSchema = Type.Object({
   id: Type.Number(),
   name: Type.String(),
   h: Type.Integer({ minimum: 0, maximum: 360 }),
@@ -58,7 +58,7 @@ export type Color = Static<typeof ColorSchema>;
 
 export type RawColor = Pick<Color, 'h' | 's' | 'v'>;
 
-export const CreateColorSchema = Type.Object({
+const CreateColorSchema = Type.Object({
   name: Type.String(),
   h: Type.Integer({ minimum: 0, maximum: 360 }),
   s: Type.Integer({ minimum: 0, maximum: 100 }),

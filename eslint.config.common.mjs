@@ -2,7 +2,7 @@ import { join } from 'node:path';
 
 import { includeIgnoreFile } from '@eslint/compat';
 import js from '@eslint/js';
-import { getDirname } from 'cross-dirname';
+import fastImportPlugin from 'eslint-plugin-fast-import';
 import importPlugin from 'eslint-plugin-import';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
@@ -10,7 +10,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default [
-  includeIgnoreFile(join(getDirname(), '.gitignore')),
+  includeIgnoreFile(join(import.meta.dirname, '.gitignore')),
   {
     files: ['**/*.{js,mjs,jsx,ts,tsx,mts}'],
     languageOptions: {
@@ -37,7 +37,7 @@ export default [
     languageOptions: {
       parserOptions: {
         projectService: true,
-        tsconfigRootDir: getDirname(),
+        tsconfigRootDir: import.meta.dirname,
       },
     },
     rules: {
@@ -57,4 +57,5 @@ export default [
     files: ['**/*.{jsx,mjs}'],
     extends: [tseslint.configs.disableTypeChecked],
   },
+  fastImportPlugin.configs.recommended,
 ];

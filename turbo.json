@@ -3,6 +3,7 @@
   "globalDependencies": [
     "tsconfig.base.json",
     "eslint.config.common.mjs",
+    "eslint.config.mjs",
     "**/tsconfig.json",
     "**/eslint.config.mjs"
   ],
