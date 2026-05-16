@@ -5,7 +5,7 @@ import commonConfig from '../eslint.config.common.mjs';
 export default defineConfig([
   {
     settings: {
-      'fast-import': {
+      'import-integrity': {
         packageRootDir: import.meta.dirname,
       },
     },

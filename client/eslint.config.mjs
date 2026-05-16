@@ -7,7 +7,7 @@ import commonConfig from '../eslint.config.common.mjs';
 export default defineConfig([
   {
     settings: {
-      'fast-import': {
+      'import-integrity': {
         packageRootDir: import.meta.dirname,
       },
     },
@@ -18,7 +18,7 @@ export default defineConfig([
     // exports are intentionally unused until a consumer pulls them in.
     files: ['src/components/ui/**/*.{ts,tsx,mts}'],
     rules: {
-      'fast-import/no-unused-exports': 'off',
+      'import-integrity/no-unused-exports': 'off',
     },
   },
   reactPlugin.configs.flat.recommended,

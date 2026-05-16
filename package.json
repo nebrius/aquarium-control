@@ -3,7 +3,7 @@
   "packageManager": "npm@11.6.2",
   "scripts": {
     "build": "turbo run build",
-    "lint": "turbo run lint && eslint .",
+    "lint": "turbo run lint && eslint --quiet .",
     "sync": "rsync -avz --delete --exclude .next --exclude client/node_modules --exclude server/node_modules/better-sqlite3 --exclude server/node_modules/rpio * pi@aquarium.local:/home/pi/aquarium-control/",
     "type-check": "turbo run type-check"
   },
@@ -17,7 +17,7 @@
     "@eslint/js": "^9.39.1",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-fast-import": "file:///Users/bryan/Projects/eslint-plugin-fast-import",
+    "import-integrity-lint": "^1.0.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-simple-import-sort": "^12.1.1",
