@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { includeIgnoreFile } from '@eslint/compat';
 import js from '@eslint/js';
 import fastImportPlugin from 'import-integrity-lint';
-import importPlugin from 'eslint-plugin-import';
+import importPlugin from 'eslint-plugin-import-x';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
